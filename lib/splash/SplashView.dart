@@ -151,7 +151,7 @@ class _SplashScreenState extends State<SplashScreen>
                   child: CircleAvatar(
                     radius: 80,
                     child: Image.asset(
-                      'assets/roulette.png',
+                      'assets/images/logo.png',
                       width: 100,
                       height: 80,
                     ),
