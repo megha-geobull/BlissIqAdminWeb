@@ -79,6 +79,7 @@ dependencies:
   cached_network_image:
   translator:
   characters: ^1.2.1
+  image_picker: ^0.8.7+3
 
 dev_dependencies:
   flutter_test:
