@@ -1,9 +1,8 @@
 import 'package:blissiqadmin/Global/constants/AppColor.dart';
+import 'package:blissiqadmin/Home/Controller/MainCategoryController.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../controller/CategoryController.dart';
 
 class MainCategoriesPage extends StatefulWidget {
   const MainCategoriesPage({super.key});
@@ -13,32 +12,19 @@ class MainCategoriesPage extends StatefulWidget {
 }
 
 class _MainCategoriesPageState extends State<MainCategoriesPage> {
-  String profileImage = "assets/icons/icon_white.png";
-  final categoryController = Get.find<CategoryController>();
-  //List<Map<String, dynamic>> mainCategories = [];
+  final MainCategoryController _controller = Get.put(MainCategoryController());
 
-  // Remove Main Category
-  void _removeCategory(int index) {
-    setState(() {
-      categoryController.categories[index]['controller']?.dispose();
-      categoryController.categories.removeAt(index);
-    });
-  }
-
-  // Edit Main Category
-  void _editCategory(int index) {
-    TextEditingController categoryNameController =
-    TextEditingController(text: categoryController.categories[index]['category_name']);
-
+  void _showAddCategoryDialog() {
+    TextEditingController categoryController = TextEditingController();
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Edit Main Category'),
+          title: const Text('Add Main Category'),
           content: TextField(
-            controller: categoryNameController,
+            controller: categoryController,
             decoration: const InputDecoration(
-              labelText: 'Main Category Name',
+              labelText: 'Category Name',
               border: OutlineInputBorder(),
             ),
           ),
@@ -49,70 +35,18 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
             ),
             ElevatedButton(
               onPressed: () {
-                if (categoryNameController.text.isNotEmpty) {
-                  setState(() {
-                    categoryController.categories[index]['name'] = categoryNameController.text;
-                  });
+                if (categoryController.text.isNotEmpty) {
+                  _controller.addCategory(categoryController.text);
                   Navigator.of(context).pop();
                 }
               },
-              child: const Text('Save Changes'),
+              child: const Text('Add Category'),
             ),
           ],
         );
       },
     );
   }
-
-  void _showSubCategories(int mainIndex) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Subcategories for ${categoryController.categories[mainIndex]['name']}'),
-          content: SizedBox(
-            width: 300,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: categoryController.categories[mainIndex]['subCategories'].length,
-              itemBuilder: (context, subIndex) {
-                return ListTile(
-                  title: Text(categoryController.categories[mainIndex]['subCategories'][subIndex]),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () {
-                      setState(() {
-                        categoryController.categories[mainIndex]['subCategories']
-                            .removeAt(subIndex);
-                      });
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    getData();
-  }
-
-  getData() async{
-    await categoryController.getCategory();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -134,9 +68,9 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                   appBar: isWideScreen
                       ? null
                       : AppBar(
-                    title: const Text('Dashboard'),
-                    backgroundColor: Colors.blue.shade100,
-                  ),
+                          title: const Text('Dashboard'),
+                          backgroundColor: Colors.blue.shade100,
+                        ),
                   drawer: isWideScreen ? null : Drawer(child: MyDrawer()),
                   body: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -155,195 +89,388 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Add the Main Category:",
-            style: TextStyle(
-                fontSize: 18,
-                color: Colors.black,
-                fontWeight: FontWeight.bold)),
+        const Text(
+          "Add the Main Category:",
+          style: TextStyle(
+              fontSize: 18, color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         Expanded(
           child: SingleChildScrollView(
-            child: Table(
-              border: TableBorder.all(color: Colors.grey),
-              columnWidths: const {
-                0: FlexColumnWidth(2),
-                1: FlexColumnWidth(1),
-                2: FlexColumnWidth(1),
-                3: FlexColumnWidth(1),
-                4: FlexColumnWidth(1),
-                5: FlexColumnWidth(1),
-              },
-              children: [
-                TableRow(
-                  decoration: BoxDecoration(color: Colors.grey[300]),
-                  children: [
-                    // Main Category Header with Add Button
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          const Text(
-                            'Main Category Name',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+            child: Obx(() {
+              return Table(
+                border: TableBorder.all(color: Colors.grey),
+                columnWidths: const {
+                  0: FlexColumnWidth(2),
+                  1: FlexColumnWidth(1),
+                  2: FlexColumnWidth(1),
+                  3: FlexColumnWidth(1),
+                  4: FlexColumnWidth(1),
+                  5: FlexColumnWidth(1),
+                },
+                children: [
+                  TableRow(
+                    decoration: BoxDecoration(color: Colors.orange[100]),
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            const Text(
+                              'Main Category Name',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              onPressed: _showAddCategoryDialog,
+                              icon: CircleAvatar(
+                                radius: 10,
+                                backgroundColor: Colors.deepOrange.shade200,
+                                child: const Icon(
+                                  Icons.add,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                              tooltip: 'Add Main Category',
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            const Text(
+                              'Subcategory',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              onPressed: () => _showAddDialog(context,'subCategory', 0),
+                              icon: CircleAvatar(
+                                radius: 10,
+                                backgroundColor: Colors.deepOrange.shade200,
+                                child: const Icon(
+                                  Icons.add,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                              tooltip: 'Add Subcategory',
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            const Text(
+                              'Topics',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              onPressed: () => _showAddDialog(context,'topic', 0),
+                              icon: CircleAvatar(
+                                radius: 10,
+                                backgroundColor: Colors.deepOrange.shade200,
+                                child: const Icon(
+                                  Icons.add,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                              tooltip: 'Add Topics',
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            const Text(
+                              'Subtopics',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              onPressed: () => _showAddDialog(context,'subTopic', 0),
+                              icon: CircleAvatar(
+                                radius: 10,
+                                backgroundColor: Colors.deepOrange.shade200,
+                                child: const Icon(
+                                  Icons.add,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                              padding: const EdgeInsets.all(0),
+                              tooltip: 'Add Subtopics',
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Center(
+                          child: Row(
+                            children: [
+                              const Text('Question Type',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black)),
+                              const Spacer(),
+                              IconButton(
+                                onPressed: () => _showAddDialog(context,'queType', 0),
+                                icon:  CircleAvatar(
+                                  radius: 10,
+                                  backgroundColor: Colors.deepOrange.shade200,
+                                  child: const Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                                padding: const EdgeInsets.all(0),
+                                tooltip: 'Add Question Type',
+                              ),
+                            ],
                           ),
-                          const Spacer(),
-                          IconButton(
-                            onPressed: _showAddCategoryDialog, // Existing function
-                            icon: const Icon(Icons.add, color: Colors.black),
-                            tooltip: 'Add Main Category',
+                        ),
+                      ),
+                      // const Padding(
+                      //   padding: EdgeInsets.all(8.0),
+                      //   child: Center(
+                      //     child: Text('Actions',
+                      //         style: TextStyle(
+                      //             fontWeight: FontWeight.bold,
+                      //             color: Colors.black)),
+                      //   ),
+                      // ),
+                    ],
+                  ),
+                  ..._controller.mainCategories.map(
+                    (category) {
+                      int index = _controller.mainCategories.indexOf(category);
+                      return TableRow(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(category['name'] ?? 'No Name',
+                                style: const TextStyle(fontSize: 16)),
+                          ),
+                          TextButton(
+                            child: const Text("View",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold)),
+                            onPressed: () => _showItems(context,index, 'subCategories'),
+                          ),
+                          TextButton(
+                            child: const Text("View",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold)),
+                            onPressed: () => _showItems(context,index, 'topics'),
+                          ),
+                          TextButton(
+                            child: const Text(
+                              "View",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () => _showItems(context,index, 'subTopics'),
+                          ),
+                          TextButton(
+                            child: const Text(
+                              "View",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () => _showItems(context,index, 'QueType'),
                           ),
                         ],
-                      ),
-                    ),
-                    // Subcategory Header with Add Button
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          const Text(
-                            'Subcategory',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          const Spacer(),
-                          IconButton(
-                            onPressed: () {
-                              // Function to handle adding subcategory
-                              print("Add Subcategory Pressed");
-                            },
-                            icon: const Icon(Icons.add, color: Colors.black),
-                            tooltip: 'Add Subcategory',
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Topics Header with Add Button
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          const Text(
-                            'Topics',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          const Spacer(),
-                          IconButton(
-                            onPressed: () {
-                              // Function to handle adding topics
-                              print("Add Topics Pressed");
-                            },
-                            icon: const Icon(Icons.add, color: Colors.black),
-                            tooltip: 'Add Topics',
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Subtopics Header with Add Button
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          const Text(
-                            'Subtopics',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          const Spacer(),
-                          IconButton(
-                            onPressed: () {
-                              // Function to handle adding subtopics
-                              print("Add Subtopics Pressed");
-                            },
-                            icon: const Icon(Icons.add, color: Colors.black),
-                            tooltip: 'Add Subtopics',
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text('Edit',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text('Actions',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                  ],
-                ),
-                ...categoryController.categories.map(
-                      (category) {
-                    int index = categoryController.categories.indexOf(category);
-                    return TableRow(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(category['name'] ?? 'No Name',
-                              style: const TextStyle(fontSize: 16)),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.add, color: Colors.blue),
-                          onPressed: () => _showSubCategories(index),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.add, color: Colors.blue),
-                          onPressed: () => _showSubCategories(index),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.add, color: Colors.blue),
-                          onPressed: () => _showSubCategories(index),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.black),
-                          onPressed: () => _editCategory(index),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _removeCategory(index),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ],
-            ),
+                      );
+                    },
+                  ),
+                ],
+              );
+            }),
           ),
         ),
       ],
     );
   }
 
-  void _showAddCategoryDialog() {
-    TextEditingController categoryController = TextEditingController();
+
+  void _showAddDialog(BuildContext context, String type, int? categoryIndex) {
+    TextEditingController controller = TextEditingController();
+    String? selectedCategory;
+    String? selectedSubCategory;
+    String? selectedTopic;
 
     showDialog(
       context: context,
       builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Add $type'),
+              content: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (type != 'category') ...[
+                      const Text('Main Category:'),
+                      DropdownButton<String>(
+                        hint: const Text('Choose Main Category'),
+                        value: selectedCategory,
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedCategory = newValue;
+                            selectedSubCategory = null;
+                            selectedTopic = null;
+                          });
+                        },
+                        items: _controller.mainCategories
+                            .map((category) => DropdownMenuItem<String>(
+                          value: category['name'],
+                          child: Text(category['name']),
+                        ))
+                            .toList(),
+                      ),
+                    ],
+                    if (type == 'topic' || type == 'subTopic') ...[
+                      const Text('Subcategory:'),
+                      DropdownButton<String>(
+                        hint: const Text('Choose Subcategory'),
+                        value: selectedSubCategory,
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedSubCategory = newValue;
+                            selectedTopic = null;
+                          });
+                        },
+                        items: _controller.mainCategories
+                            .firstWhere(
+                              (category) => category['name'] == selectedCategory,
+                          orElse: () => {},
+                        )['subCategories']
+                            ?.map<DropdownMenuItem<String>>(
+                              (subCategory) => DropdownMenuItem<String>(
+                            value: subCategory['name'],
+                            child: Text(subCategory['name']),
+                          ),
+                        )
+                            ?.toList() ??
+                            [],
+                      ),
+                    ],
+                    if (type == 'subTopic') ...[
+                      const Text('Topic:'),
+                      DropdownButton<String>(
+                        hint: const Text('Choose Topic'),
+                        value: selectedTopic,
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedTopic = newValue;
+                          });
+                        },
+                        items: _controller.mainCategories
+                            .firstWhere(
+                              (category) => category['name'] == selectedCategory,
+                          orElse: () => {},
+                        )['topics']
+                            ?.map<DropdownMenuItem<String>>(
+                              (topic) => DropdownMenuItem<String>(
+                            value: topic['name'],
+                            child: Text(topic['name']),
+                          ),
+                        )
+                            ?.toList() ??
+                            [],
+                      ),
+                    ],
+                    TextField(
+                      controller: controller,
+                      decoration: InputDecoration(
+                        labelText: 'Enter ${type.capitalizeFirst}',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (controller.text.isNotEmpty) {
+                      _controller.addItem(
+                        type,
+                        controller.text,
+                        selectedCategory,
+                        selectedSubCategory,
+                        selectedTopic,
+                      );
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  child: const Text('Add'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showItems(BuildContext context, int mainIndex, String type) {
+    showDialog(
+      context: context,
+      builder: (context) {
         return AlertDialog(
-          title: const Text('Add Main Category'),
-          content: TextField(
-            controller: categoryController,
-            decoration: const InputDecoration(
-              labelText: 'Main Category Name',
-              border: OutlineInputBorder(),
-            ),
+          title: Text('$type for ${_controller.mainCategories[mainIndex]['name']}'),
+          content: SizedBox(
+            width: 300,
+            child: Obx(() {
+              var items = _controller.mainCategories[mainIndex][type] ?? [];
+              return ListView.builder(
+                shrinkWrap: true,
+                itemCount: items.length,
+                itemBuilder: (context, itemIndex) {
+                  return ListTile(
+                    title: Text(items[itemIndex]['name']),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () {
+                        _controller.removeItem(mainIndex, type, itemIndex);
+                      },
+                    ),
+                  );
+                },
+              );
+            }),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (categoryController.text.isNotEmpty) {
-                  setState(() {
-                    // categoryController.categories.add({
-                    //   'name': categoryController.text,
-                    //   'subCategories': [],
-                    // });
-                  });
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Add Main Category'),
+              child: const Text('Close'),
             ),
           ],
         );
@@ -351,3 +478,5 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
     );
   }
 }
+
+
