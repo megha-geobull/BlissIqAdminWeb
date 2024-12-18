@@ -1,10 +1,10 @@
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../Global/Widgets/common_snackbar.dart';
 import '../Global/constants/ApiString.dart';
+import '../Global/constants/common_snackbar.dart';
 
-class SignupController extends GetxController {
+class CategoryController extends GetxController {
   RxBool isLoading = false.obs;
   RxList categories = [].obs;
   RxList sub_categories = [].obs;

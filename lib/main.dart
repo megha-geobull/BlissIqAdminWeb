@@ -2,7 +2,11 @@ import 'package:blissiqadmin/Home/HomePage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'controller/CategoryController.dart';
+
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  Get.put(CategoryController());
   runApp(const MyApp());
 }
 

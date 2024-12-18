@@ -1,6 +1,9 @@
 import 'package:blissiqadmin/Global/constants/AppColor.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../../controller/CategoryController.dart';
 
 class MainCategoriesPage extends StatefulWidget {
   const MainCategoriesPage({super.key});
@@ -11,21 +14,21 @@ class MainCategoriesPage extends StatefulWidget {
 
 class _MainCategoriesPageState extends State<MainCategoriesPage> {
   String profileImage = "assets/icons/icon_white.png";
-
-  List<Map<String, dynamic>> mainCategories = [];
+  final categoryController = Get.find<CategoryController>();
+  //List<Map<String, dynamic>> mainCategories = [];
 
   // Remove Main Category
   void _removeCategory(int index) {
     setState(() {
-      mainCategories[index]['controller']?.dispose();
-      mainCategories.removeAt(index);
+      categoryController.categories[index]['controller']?.dispose();
+      categoryController.categories.removeAt(index);
     });
   }
 
   // Edit Main Category
   void _editCategory(int index) {
-    TextEditingController categoryController =
-    TextEditingController(text: mainCategories[index]['name']);
+    TextEditingController categoryNameController =
+    TextEditingController(text: categoryController.categories[index]['category_name']);
 
     showDialog(
       context: context,
@@ -33,7 +36,7 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
         return AlertDialog(
           title: const Text('Edit Main Category'),
           content: TextField(
-            controller: categoryController,
+            controller: categoryNameController,
             decoration: const InputDecoration(
               labelText: 'Main Category Name',
               border: OutlineInputBorder(),
@@ -46,9 +49,9 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
             ),
             ElevatedButton(
               onPressed: () {
-                if (categoryController.text.isNotEmpty) {
+                if (categoryNameController.text.isNotEmpty) {
                   setState(() {
-                    mainCategories[index]['name'] = categoryController.text;
+                    categoryController.categories[index]['name'] = categoryNameController.text;
                   });
                   Navigator.of(context).pop();
                 }
@@ -66,20 +69,20 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Subcategories for ${mainCategories[mainIndex]['name']}'),
+          title: Text('Subcategories for ${categoryController.categories[mainIndex]['name']}'),
           content: SizedBox(
             width: 300,
             child: ListView.builder(
               shrinkWrap: true,
-              itemCount: mainCategories[mainIndex]['subCategories'].length,
+              itemCount: categoryController.categories[mainIndex]['subCategories'].length,
               itemBuilder: (context, subIndex) {
                 return ListTile(
-                  title: Text(mainCategories[mainIndex]['subCategories'][subIndex]),
+                  title: Text(categoryController.categories[mainIndex]['subCategories'][subIndex]),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
                     onPressed: () {
                       setState(() {
-                        mainCategories[mainIndex]['subCategories']
+                        categoryController.categories[mainIndex]['subCategories']
                             .removeAt(subIndex);
                       });
                     },
@@ -97,6 +100,17 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
         );
       },
     );
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getData();
+  }
+
+  getData() async{
+    await categoryController.getCategory();
   }
 
   @override
@@ -255,9 +269,9 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                     ),
                   ],
                 ),
-                ...mainCategories.map(
+                ...categoryController.categories.map(
                       (category) {
-                    int index = mainCategories.indexOf(category);
+                    int index = categoryController.categories.indexOf(category);
                     return TableRow(
                       children: [
                         Padding(
@@ -321,10 +335,10 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
               onPressed: () {
                 if (categoryController.text.isNotEmpty) {
                   setState(() {
-                    mainCategories.add({
-                      'name': categoryController.text,
-                      'subCategories': [],
-                    });
+                    // categoryController.categories.add({
+                    //   'name': categoryController.text,
+                    //   'subCategories': [],
+                    // });
                   });
                   Navigator.of(context).pop();
                 }
