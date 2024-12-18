@@ -1,62 +1,120 @@
 import 'package:flutter/material.dart';
 
+import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
+import 'package:flutter/material.dart';
+
 class AttendanceHistoryScreen extends StatefulWidget {
-  const AttendanceHistoryScreen({super.key});
+  const AttendanceHistoryScreen({Key? key}) : super(key: key);
 
   @override
-  State<AttendanceHistoryScreen> createState() => _AttendanceHistoryScreenState();
+  _AttendanceHistoryScreenState createState() =>
+      _AttendanceHistoryScreenState();
 }
 
 class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
-  // Example attendance data (you can replace this with real data from a database or API)
-  final List<Map<String, String>> attendanceData = [
-    {"date": "2024-12-01", "status": "Present"},
-    {"date": "2024-12-02", "status": "Absent"},
-    {"date": "2024-12-03", "status": "Present"},
-    {"date": "2024-12-04", "status": "Late"},
-    {"date": "2024-12-05", "status": "Present"},
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Attendance History'),
-        backgroundColor: Colors.blue.shade100,
+      backgroundColor: Colors.grey.shade50,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          bool isWideScreen = constraints.maxWidth > 800;
+
+          return Row(
+            children: [
+              // Always visible drawer for wide screens
+              if (isWideScreen)
+                Container(
+                  width: 250,
+                  color: Colors.orange.shade100,
+                  child: MyDrawer(),
+                ),
+              Expanded(
+                child: Scaffold(
+                  appBar: isWideScreen
+                      ? null
+                      : AppBar(
+                          title: const Text('Dashboard'),
+                          scrolledUnderElevation: 0,
+                          backgroundColor: Colors.blue.shade100,
+                          actions: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.person,
+                                color: Colors.grey,
+                              ),
+                              onPressed: () {
+                                // Handle notifications
+                              },
+                            ),
+                          ],
+                        ),
+                  drawer: isWideScreen ? null : Drawer(child: MyDrawer()),
+                  body: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0, vertical: 16),
+                    child: Center(child: _buildTopPerformersTable(constraints)),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Student Attendance History',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: attendanceData.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(16.0),
-                      title: Text('Date: ${attendanceData[index]["date"]}'),
-                      subtitle: Text('Status: ${attendanceData[index]["status"]}'),
-                      leading: const Icon(Icons.calendar_today),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
+    );
+  }
+
+  Widget _buildTopPerformersTable(BoxConstraints constraints) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Student Attendance Records",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
-      ),
+        const SizedBox(height: 10),
+        Expanded(
+          child: Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: DataTable(
+                border: TableBorder.all(color: Colors.grey.shade300),
+                columns: const [
+                  DataColumn(label: Text('Rank')),
+                  DataColumn(label: Text('Name')),
+                  DataColumn(label: Text('Date')),
+                  DataColumn(label: Text('Status')),
+                ],
+                rows: List<DataRow>.generate(
+                  10,
+                  (index) => DataRow(cells: [
+                    DataCell(Text('#${index + 1}')),
+                    DataCell(Text('Student ${index + 1}')),
+                    DataCell(Text('2024-12-${index + 1}')),
+                    DataCell(
+                      Text(
+                        index % 2 == 0 ? 'Present' : 'Absent',
+                        style: TextStyle(
+                          color: index % 2 == 0 ? Colors.green : Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ]),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
