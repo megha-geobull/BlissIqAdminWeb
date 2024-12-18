@@ -5,8 +5,8 @@ class ApiString {
 
    /// Auth Endpoints
    static const String signUp = "${baseUrl}student_registration";
-   static const String generateOtp = "${baseUrl}generate-otp";
-   static const String verifyOtp = "${baseUrl}verify-otp";
+   // static const String generateOtp = "${baseUrl}generate-otp";
+   // static const String verifyOtp = "${baseUrl}verify-otp";
    static const String login = "${baseUrl}login";
    static const String forgotPassword = "${baseUrl}forgot_password";
    static const String changePassword = "${baseUrl}change_password";
@@ -16,14 +16,6 @@ class ApiString {
    static const String getProfile = "${baseUrl}get_profile";
    static const String edit_profile = "${baseUrl}edit_profile";
 
-   /// Dictionary words
-   static const String add_save_word = "${baseUrl}add_save_word";
-   static const String get_save_words = "${baseUrl}get_save_words";
-   static const String delete_save_word = "${baseUrl}delete_save_word";
-
-   /// Notifications
-   static const String getNotifications = "${baseUrl}get_notifications";
-
    /// Leaderboard
    static const String getLeaderboard = "${baseUrl}get_leaderboard";
 
@@ -32,4 +24,22 @@ class ApiString {
 
    /// Vocabulary
    static const String getVocabularyCategories = "${baseUrl}get_vocabulary_categories";
+   static const String add_vocabulary_categories = "${baseUrl}add_vocabulary_categories";
+   static const String delete_vocabulary_categories = "${baseUrl}delete_vocabulary_categories";
+
+   static const String add_notifications = "${baseUrl}add_notifications";
+
+   static const String add_main_category = "${baseUrl}add_main_category";
+   static const String get_main_category = "${baseUrl}get_main_category";
+   static const String delete_main_category = "${baseUrl}delete_main_category";
+   static const String add_sub_category = "${baseUrl}add_sub_category";
+   static const String get_sub_category = "${baseUrl}get_sub_category";
+   static const String delete_sub_category = "${baseUrl}delete_sub_category";
+   static const String add_topics = "${baseUrl}add_topics";
+   static const String get_topics = "${baseUrl}get_topics";
+   static const String delete_topic = "${baseUrl}delete_topic";
+   static const String add_subtopics = "${baseUrl}add_subtopics";
+   static const String get_subtopics = "${baseUrl}get_subtopics";
+   static const String delete_subtopics = "${baseUrl}delete_subtopics";
+
 }
