@@ -46,7 +46,10 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
             ),
           ),
           actions: [
-            TextButton(
+            boxH30(),
+            CustomButton(
+              label: "Cancel",
+              color: Colors.red,
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Cancel'),
             ),
@@ -358,6 +361,91 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
           builder: (context, setState) {
             return AlertDialog(
               title: Text('Add $type'),
+
+              content: SizedBox(
+                width: 300,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (type != 'category') ...[
+                        const Text('Main Category:'),
+                        DropdownButton<String>(
+                          hint: const Text('Choose Main Category'),
+                          value: selectedCategory,
+                          onChanged: (newValue) {
+                            setState(() {
+                              selectedCategory = newValue;
+                              selectedSubCategory = null;
+                              selectedTopic = null;
+                            });
+                          },
+                          items: _controller.mainCategories
+                              .map((category) => DropdownMenuItem<String>(
+                                    value: category['name'],
+                                    child: Text(category['name']),
+                                  ))
+                              .toList(),
+                        ),
+                      ],
+                      if (type == 'topic' || type == 'subTopic') ...[
+                        const Text('Subcategory:'),
+
+                        DropdownButton<String>(
+                          hint: const Text('Choose Subcategory'),
+                          value: selectedSubCategory,
+                          onChanged: (newValue) {
+                            setState(() {
+                              selectedSubCategory = newValue;
+                              selectedTopic = null;
+                            });
+                          },
+                          items: _controller.mainCategories
+                                  .firstWhere(
+                                    (category) =>
+                                        category['name'] == selectedCategory,
+                                    orElse: () => {},
+                                  )['subCategories']
+                                  ?.map<DropdownMenuItem<String>>(
+                                    (subCategory) => DropdownMenuItem<String>(
+                                      value: subCategory['name'],
+                                      child: Text(subCategory['name']),
+                                    ),
+                                  )
+                                  ?.toList() ??
+                              [],
+                        ),
+                      ],
+                      if (type == 'subTopic') ...[
+                        const Text('Topic:'),
+                        DropdownButton<String>(
+                          hint: const Text('Choose Topic'),
+                          value: selectedTopic,
+                          onChanged: (newValue) {
+                            setState(() {
+                              selectedTopic = newValue;
+                            });
+                          },
+                          items: _controller.mainCategories
+                                  .firstWhere(
+                                    (category) =>
+                                        category['name'] == selectedCategory,
+                                    orElse: () => {},
+                                  )['topics']
+                                  ?.map<DropdownMenuItem<String>>(
+                                    (topic) => DropdownMenuItem<String>(
+                                      value: topic['name'],
+                                      child: Text(topic['name']),
+                                    ),
+                                  )
+                                  ?.toList() ??
+                              [],
+                        ),
+                      ],
+                      boxH20(),
+                      CustomTextField(
+                          controller: controller,
+                          labelText: 'Enter ${type.capitalizeFirst}')
               content: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
