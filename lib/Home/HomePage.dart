@@ -9,8 +9,8 @@ import 'package:blissiqadmin/Home/Grammer/GrammarScreen.dart';
 import 'package:blissiqadmin/Home/Mentor/MentorScreen.dart';
 import 'package:blissiqadmin/Home/School/SchoolScreen.dart';
 import 'package:blissiqadmin/Home/Students/StudentScreen.dart';
+import 'package:blissiqadmin/Home/Students/TopPerformer/TopPerformerStudents.dart';
 import 'package:blissiqadmin/Home/Toddler/ToddlerEnglishScreen.dart';
-import 'package:blissiqadmin/Home/TopPerformer/AttendanceHistoryScreen.dart';
 import 'package:blissiqadmin/Home/Vocabulary/VocabularyScreen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -20,13 +20,10 @@ import 'package:get/get.dart' as getx;
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
-  String selectedOption = "Student Attendance History";
 }
 
 class _HomePageState extends State<HomePage> {
   String profileImage = "assets/icons/icon_white.png";
-
-  String selectedOption = "Student Attendance History";
 
   final List<Map<String, dynamic>> mainCategoryItems = [
     {
@@ -192,7 +189,7 @@ class _HomePageState extends State<HomePage> {
                         const Text(
                           "Recent Accounts",
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
@@ -208,7 +205,7 @@ class _HomePageState extends State<HomePage> {
                               crossAxisCount: crossAxisCount,
                               crossAxisSpacing: 12,
                               mainAxisSpacing: 12,
-                              childAspectRatio: 3,
+                              childAspectRatio: 2.8,
                             ),
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
@@ -272,7 +269,7 @@ class _HomePageState extends State<HomePage> {
                                             height: MediaQuery.of(context)
                                                     .size
                                                     .height *
-                                                0.1,
+                                                0.060,
                                           ),
                                           Text(
                                             userList[index]["title"],
@@ -288,7 +285,7 @@ class _HomePageState extends State<HomePage> {
                                                           ? 16
                                                           : 14,
                                               fontWeight: FontWeight.w600,
-                                              color: Colors.black,
+                                              color: Colors.black.withOpacity(0.7),
                                             ),
                                           ),
                                         ],
@@ -314,7 +311,7 @@ class _HomePageState extends State<HomePage> {
                         const Text(
                           "Main Categories",
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
@@ -330,7 +327,7 @@ class _HomePageState extends State<HomePage> {
                               crossAxisCount: crossAxisCount,
                               crossAxisSpacing: 12,
                               mainAxisSpacing: 12,
-                              childAspectRatio: 3,
+                              childAspectRatio: 2.8,
                             ),
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
@@ -396,7 +393,7 @@ class _HomePageState extends State<HomePage> {
                                             height: MediaQuery.of(context)
                                                     .size
                                                     .height *
-                                                0.1,
+                                                0.060,
                                           ),
                                           Text(
                                             mainCategoryItems[index]["title"],
@@ -412,7 +409,7 @@ class _HomePageState extends State<HomePage> {
                                                           ? 16
                                                           : 14,
                                               fontWeight: FontWeight.w600,
-                                              color: Colors.black,
+                                              color: Colors.black.withOpacity(0.7),
                                             ),
                                           ),
                                         ],
@@ -451,9 +448,12 @@ class _HomePageState extends State<HomePage> {
                         Colors.orange.shade100,
                         Colors.orangeAccent,
                         () {
-                          setState(() {
-                            selectedOption = "Student Attendance History";
-                          });
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AttendanceHistoryScreen(),
+                            ),
+                          );
                         },
                       ),
                       _buildCard(
@@ -461,26 +461,15 @@ class _HomePageState extends State<HomePage> {
                         Colors.orange.shade100,
                         Colors.orangeAccent,
                         () {
-                          setState(() {
-                            selectedOption = "Top Performing Students";
-                          });
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const TopPerformerStudents(),
+                            ),
+                          );
                         },
                       ),
                     ],
-                  ),
-                  boxH20(),
-                  Container(
-                    height: MediaQuery.of(context).size.width * 0.3,
-                    width: MediaQuery.of(context).size.width * 0.8,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.orangeAccent, width: 1),
-                    ),
-                    padding: const EdgeInsets.all(16.0),
-                    child: selectedOption == "Student Attendance History"
-                        ? _buildAttendanceTable()
-                        : _buildTopPerformersTable(),
                   ),
                 ],
               ),
@@ -527,81 +516,5 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildAttendanceTable() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Student Attendance History",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Expanded(
-          child: SingleChildScrollView(
-            child: DataTable(
-              border: TableBorder.all(color: Colors.grey.shade300),
-              columns: const [
-                DataColumn(label: Text('ID')),
-                DataColumn(label: Text('Name')),
-                DataColumn(label: Text('Date')),
-                DataColumn(label: Text('Attendance')),
-              ],
-              rows: List<DataRow>.generate(
-                10,
-                (index) => DataRow(cells: [
-                  DataCell(Text('STU-${index + 1}')),
-                  DataCell(Text('Student ${index + 1}')),
-                  DataCell(Text('2024-12-${index + 1}')),
-                  DataCell(Text(index % 2 == 0 ? 'Present' : 'Absent')),
-                ]),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildTopPerformersTable() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Top Performing Students",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Expanded(
-          child: SingleChildScrollView(
-            child: DataTable(
-              border: TableBorder.all(color: Colors.grey.shade300),
-              columns: const [
-                DataColumn(label: Text('Rank')),
-                DataColumn(label: Text('Name')),
-                DataColumn(label: Text('Score')),
-                DataColumn(label: Text('Grade')),
-              ],
-              rows: List<DataRow>.generate(
-                10,
-                (index) => DataRow(cells: [
-                  DataCell(Text('#${index + 1}')),
-                  DataCell(Text('Student ${index + 1}')),
-                  DataCell(Text('${90 + index}')),
-                  DataCell(Text('A')),
-                ]),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 }
