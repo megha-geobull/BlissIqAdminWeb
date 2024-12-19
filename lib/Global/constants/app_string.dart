@@ -6,7 +6,6 @@ class AppString {
 
   static const String rupeeSign = "₹";
 
-
   static const String delete = "delete";
 
 
