@@ -39,7 +39,8 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
           actions: [
             boxH30(),
             CustomButton(
-              label: "Cancel",color: Colors.red,
+              label: "Cancel",
+              color: Colors.red,
               onPressed: () => Navigator.of(context).pop(),
             ),
             boxH20(),
@@ -373,6 +374,7 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                       ],
                       if (type == 'topic' || type == 'subTopic') ...[
                         const Text('Subcategory:'),
+
                         DropdownButton<String>(
                           hint: const Text('Choose Subcategory'),
                           value: selectedSubCategory,
@@ -459,6 +461,7 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
       },
     );
   }
+
 
   void _showItems(BuildContext context, int mainIndex, String type) {
     showDialog(
