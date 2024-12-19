@@ -1,6 +1,6 @@
 class ApiString {
    /// Base URL
-   static const String baseUrl = "http://65.0.211.122:4444/cust_api/";
+   static const String baseUrl = "http://65.0.211.122:4444/";
    static const String ImgBaseUrl = "http://65.0.211.122:4444/";
 
    /// Auth Endpoints

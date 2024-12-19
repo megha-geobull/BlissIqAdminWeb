@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -8,6 +10,8 @@ class CategoryController extends GetxController {
   RxBool isLoading = false.obs;
   RxList categories = [].obs;
   RxList sub_categories = [].obs;
+  RxList topics = [].obs;
+  RxList sub_topics = [].obs;
 
   addCategory({
     required String categoryname,
@@ -31,6 +35,7 @@ class CategoryController extends GetxController {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
+          getCategory();
           showSnackbar(message: "Category added successfully");
         } else {
           showSnackbar(message: "Failed to add category");
@@ -65,6 +70,7 @@ class CategoryController extends GetxController {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
+          getCategory();
           showSnackbar(message: "Category deleted successfully");
         } else {
           showSnackbar(message: "Failed to delete category");
@@ -79,7 +85,7 @@ class CategoryController extends GetxController {
 
   getCategory() async {
     isLoading.value = true;
-
+    categories.clear();
     try {
 
       final response = await http.get(
@@ -91,15 +97,16 @@ class CategoryController extends GetxController {
       print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        var responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
-          categories.value = responseData['body']["data"];
+          categories.value = responseData["data"];
         } else {
           showSnackbar(message: "Failed to fetch category");
         }
       }
     } catch (e) {
-      showSnackbar(message: "Error while delete $e");
+      showSnackbar(message: "Error while fetch category $e");
+      log(e.toString());
     } finally {
       isLoading.value = false;
     }
@@ -165,6 +172,7 @@ class CategoryController extends GetxController {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
+          getSubCategory(categoryId: categoryId);
           showSnackbar(message: "Subcategory deleted successfully");
         } else {
           showSnackbar(message: "Failed to delete Subcategory");
@@ -196,9 +204,9 @@ class CategoryController extends GetxController {
       print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        var responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
-          sub_categories.value = responseData['body']["data"];
+          sub_categories.value = responseData["data"];
         } else {
           showSnackbar(message: "Failed to fetch category");
         }
@@ -238,6 +246,7 @@ class CategoryController extends GetxController {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
+          get_topic(categoryId: maincategory_id,sub_categoryId: sub_categoryId);
           showSnackbar(message: "Subcategory added successfully");
         } else {
           showSnackbar(message: "Failed to add Subcategory");
@@ -290,15 +299,57 @@ class CategoryController extends GetxController {
 
   get_topic({
     required String categoryId,
+    required String sub_categoryId,
   }) async {
     isLoading.value = true;
 
     try {
       final Map<String, dynamic> body = {
         "main_category_id": categoryId,
+        "sub_category_id": sub_categoryId,
       };
       final response = await http.post(
-        Uri.parse(ApiString.get_sub_category),
+        Uri.parse(ApiString.get_topics),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          topics.value = responseData["data"];
+        } else {
+          showSnackbar(message: "Failed to fetch topic");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetch $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  addSubTopic({
+    required String subtopic_name,
+    required String maincategory_id,
+    required String sub_categoryId,
+    required String topicId,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final Map<String, dynamic> body = {
+        "main_category_id": maincategory_id,
+        "sub_category_id": sub_categoryId,
+        "topic_id": topicId,
+        "sub_topic_name": subtopic_name,
+      };
+
+      final response = await http.post(
+        Uri.parse(ApiString.add_subtopics),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(body),
       );
@@ -309,9 +360,87 @@ class CategoryController extends GetxController {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
-          sub_categories.value = responseData['body']["data"];
+          //get_topic(categoryId: maincategory_id,sub_categoryId: sub_categoryId);
+          showSnackbar(message: "Subtopic added successfully");
         } else {
-          showSnackbar(message: "Failed to fetch category");
+          showSnackbar(message: "Failed to add Subtopic");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while add $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  get_SubTopic({
+    required String categoryId,
+    required String sub_categoryId,
+    required String topicId,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final Map<String, dynamic> body = {
+        "main_category_id": categoryId,
+        "sub_category_id": sub_categoryId,
+        "topic_id": topicId,
+      };
+      final response = await http.post(
+        Uri.parse(ApiString.get_subtopics),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          sub_topics.value = responseData["data"];
+        } else {
+          showSnackbar(message: "Failed to fetch topic");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetch $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  deleteSub_Topic({
+    required String categoryId,
+    required String sub_categoryId,
+    required String topicId,
+    required String sub_topicId,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final Map<String, dynamic> body = {
+        "main_category_id": categoryId,
+        "sub_category_id": sub_categoryId,
+        "topic_id": topicId,
+        "sub_topic_id": sub_topicId,
+      };
+
+      final response = await http.post(
+        Uri.parse(ApiString.delete_subtopics),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          showSnackbar(message: "SubTopic deleted successfully");
+        } else {
+          showSnackbar(message: "Failed to delete SubTopic");
         }
       }
     } catch (e) {

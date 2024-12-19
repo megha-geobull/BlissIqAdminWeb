@@ -7,6 +7,7 @@ import 'controller/CategoryController.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   Get.put(CategoryController());
+  Get.put(CategoryController());
   runApp(const MyApp());
 }
 
