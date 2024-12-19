@@ -508,5 +508,3 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
     );
   }
 }
-
-

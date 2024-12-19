@@ -1,607 +1,232 @@
-import 'package:blissiqadmin/Global/constants/AppColor.dart';
-import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
-import 'package:blissiqadmin/Home/Attendance/AttendanceHistoryScreen.dart';
-import 'package:blissiqadmin/Home/Company/CompanyScreen.dart';
-import 'package:blissiqadmin/Home/Conversational/ConversationalScreen.dart';
-import 'package:blissiqadmin/Home/Drawer/MainCategoriesPage.dart';
-import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
-import 'package:blissiqadmin/Home/Grammer/GrammarScreen.dart';
-import 'package:blissiqadmin/Home/Mentor/MentorScreen.dart';
-import 'package:blissiqadmin/Home/School/SchoolScreen.dart';
-import 'package:blissiqadmin/Home/Students/StudentScreen.dart';
-import 'package:blissiqadmin/Home/Toddler/ToddlerEnglishScreen.dart';
-import 'package:blissiqadmin/Home/TopPerformer/AttendanceHistoryScreen.dart';
-import 'package:blissiqadmin/Home/Vocabulary/VocabularyScreen.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
+import 'package:blissiqadmin/Home/HomePage.dart';
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:get/get.dart' as getx;
+import '../Global/constants/ApiString.dart';
+import '../Global/constants/CommonSizedBox.dart';
+import '../Global/utils/shared_preference/shared_preference_services.dart';
 
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-  String selectedOption = "Student Attendance History";
-}
+class SignupController extends GetxController {
+  // Observables for managing loading state
+  var isLoading = false.obs;
+  String country_code = "+91";
 
-class _HomePageState extends State<HomePage> {
-  String profileImage = "assets/icons/icon_white.png";
 
-  String selectedOption = "Student Attendance History";
+  loginApi({
+    required String email,
+    required String password,
+  }) async {
+    isLoading.value = true;
 
-  final List<Map<String, dynamic>> mainCategoryItems = [
-    {
-      "title": "Vocabulary",
-      "imagePath": "assets/images/vocabulary.png",
-      "gradient": LinearGradient(
-        colors: [Colors.blue.shade200, Colors.blue.shade400],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-    },
-    {
-      "title": "Toddler English",
-      "imagePath": "assets/images/toddler-abc.png",
-      "gradient": LinearGradient(
-        colors: [Colors.green.shade200, Colors.green.shade400],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-    },
-    {
-      "title": "Conversational",
-      "imagePath": "assets/images/conversational.png",
-      "gradient": LinearGradient(
-        colors: [Colors.orange.shade200, Colors.orange.shade400],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-    },
-    {
-      "title": "Grammar",
-      "imagePath": "assets/images/grammer.png",
-      "gradient": LinearGradient(
-        colors: [Colors.purple.shade200, Colors.purple.shade400],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-    },
-  ];
+    String? token='';
+    print("Token: $token");
 
-  final List<Map<String, dynamic>> userList = [
-    {
-      "title": "Mentors",
-      "imagePath": "assets/icons/mentor.png",
-      "gradient": LinearGradient(
-        colors: [Colors.red.shade200, Colors.redAccent.shade200],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-    },
-    {
-      "title": "Companies",
-      "imagePath": "assets/icons/Company.png",
-      "gradient": LinearGradient(
-        colors: [Colors.blueAccent.shade100, Colors.blue.shade200],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-    },
-    {
-      "title": "Schools",
-      "imagePath": "assets/icons/School.png",
-      "gradient": LinearGradient(
-        colors: [Colors.deepOrange.shade200, Colors.deepOrange.shade400],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-    },
-    {
-      "title": "Students",
-      "imagePath": "assets/icons/students.png",
-      "gradient": LinearGradient(
-        colors: [Colors.pinkAccent.shade100, Colors.pinkAccent.shade200],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-    },
-  ];
+    if (token == null || token.isEmpty) {
+      _showBottomSheet(
+        title: "Error",
+        message: "Failed to generate token. Please try again.",
+        isSuccess: false,
+      );
+      isLoading.value = false;
+      return;
+    }
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
+    try {
+      final Map<String, dynamic> body = {
+        "email": email,
+        "password": password,
+        "token": token!,
+      };
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          // Check screen size for responsiveness
-          bool isWideScreen = constraints.maxWidth > 800;
+      final response = await http.post(
+        Uri.parse(ApiString.login),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
 
-          return Row(
-            children: [
-              // Always visible drawer for wide screens
-              if (isWideScreen)
-                Container(
-                  width: 250,
-                  color: Colors.orange.shade100,
-                  child: MyDrawer(),
-                ),
-              Expanded(
-                child: Scaffold(
-                  appBar: isWideScreen
-                      ? null // Remove AppBar if the drawer is always visible
-                      : AppBar(
-                          title: const Text('Dashboard'),
-                          scrolledUnderElevation: 0,
-                          backgroundColor: Colors.blue.shade100,
-                          actions: [
-                            IconButton(
-                              icon: const Icon(
-                                Icons.person,
-                                color: Colors.grey,
-                              ),
-                              onPressed: () {
-                                // Handle notifications
-                              },
-                            ),
-                          ],
-                        ),
-                  drawer:
-                      isWideScreen ? null : Drawer(child: MyDrawer()),
-                  body: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0, vertical: 16),
-                    child: _buildMainContent(constraints),
-                  ),
-                ),
-              ),
-            ],
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          debugPrint("fcm-token :-  $token");
+
+          // Correcting userId access
+          final userId = responseData['user']['_id'];
+          final userName = responseData['user']['user_name'];
+          final authToken = responseData['user']['token'];
+
+          print("User ID: $userId");
+          print("User Name: $userName");
+          print("Token: $authToken");
+
+          clearLocalStorage();
+          await setDataToLocalStorage(
+            dataType: "STRING",
+            prefKey: "user_id",
+            stringData: userId,
           );
-        },
-      ),
-    );
+          await setDataToLocalStorage(
+            dataType: "STRING",
+            prefKey: "user_name",
+            stringData: userName,
+          );
+          print("User ID after set data: $userId");
+          _showBottomSheet(
+            title: "Success",
+            message: responseData['message'],
+            isSuccess: true,
+          );
+
+          bool isLoginSuccess = true;
+          if (isLoginSuccess) {
+            await Future.delayed(const Duration(seconds: 1));
+            //Get.to(const Onboarding_Screen());
+            Get.to(HomePage());
+          }
+        } else {
+          _showBottomSheet(
+            title: "Error",
+            message: responseData['message'] ?? "Something went wrong!",
+            isSuccess: false,
+          );
+        }
+      }
+    } catch (e) {
+      _showBottomSheet(
+        title: "Error",
+        message: "An error occurred: $e",
+        isSuccess: false,
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  Widget _buildMainContent(BoxConstraints constraints) {
-    int crossAxisCount = constraints.maxWidth > 900
-        ? 2
-        : constraints.maxWidth > 600
-            ? 3
-            : 2;
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 12.0),
+
+  var timeLeft = 15.obs;
+  var countdownText = "01:00".obs;
+  void startTimer() {
+    Future.delayed(const Duration(seconds: 1), () {
+      if (timeLeft.value > 0) {
+        timeLeft.value--;
+        countdownText.value = '00:${timeLeft.value}'; // Update the countdown text
+        startTimer(); // Recursively call to create a countdown
+      } else {
+        countdownText.value = 'Resend Code';
+      }
+    });
+  }
+
+  _showBottomSheet({
+    required String title,
+    required String message,
+    required bool isSuccess,
+  }) {
+    Get.bottomSheet(
+      Container(
+        width:  Get.size.width,
+        height: Get.size.width * 0.52,
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
+          ),
+        ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(
-              height: constraints.maxHeight * 0.46,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Recent Accounts Section
-                  Expanded(
-                    flex: 1,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Recent Accounts",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        boxH10(),
-                        SizedBox(
-                          height: constraints.maxHeight * 0.4,
-                          child: GridView.builder(
-                            scrollDirection: Axis.vertical,
-                            itemCount: userList.length,
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: crossAxisCount,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
-                              childAspectRatio: 2,
-                            ),
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemBuilder: (context, index) {
-                              return GestureDetector(
-                                onTap: () {
-                                  // Handle navigation
-                                  switch (index) {
-                                    case 0:
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                MentorScreen()),
-                                      );
-                                      break;
-                                    case 1:
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                CompanyScreen()),
-                                      );
-                                      break;
-                                    case 2:
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                SchoolScreen()),
-                                      );
-                                      break;
-                                    case 3:
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                StudentScreen()),
-                                      );
-                                      break;
-                                  }
-                                },
-                                child: Card(
-                                  elevation: 0.8,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      gradient: userList[index]["gradient"],
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Center(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Image.asset(
-                                            userList[index]["imagePath"],
-                                            fit: BoxFit.cover,
-                                            height: MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                0.1,
-                                          ),
-                                          Text(
-                                            userList[index]["title"],
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: constraints.maxWidth >
-                                                      1200
-                                                  ? 18
-                                                  : constraints.maxWidth > 800
-                                                      ? 17
-                                                      : constraints.maxWidth >
-                                                              600
-                                                          ? 16
-                                                          : 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  boxW20(),
-
-                  Expanded(
-                    flex: 1,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Main Categories",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        boxH10(),
-                        SizedBox(
-                          height: constraints.maxHeight * 0.4,
-                          child: GridView.builder(
-                            scrollDirection: Axis.vertical,
-                            itemCount: mainCategoryItems.length,
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: crossAxisCount,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
-                              childAspectRatio: 2,
-                            ),
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemBuilder: (context, index) {
-                              return GestureDetector(
-                                onTap: () {
-                                  // Handle navigation
-                                  switch (index) {
-                                    case 0:
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                VocabularyScreen()),
-                                      );
-                                      break;
-                                    case 1:
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const MainCategoriesPage()),
-                                      );
-                                      break;
-                                    case 2:
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const ConversationalScreen()),
-                                      );
-                                      break;
-                                    case 3:
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const GrammarScreen()),
-                                      );
-                                      break;
-                                  }
-                                },
-                                child: Card(
-                                  elevation: 0.8,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      gradient: mainCategoryItems[index]
-                                          ["gradient"],
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Center(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Image.asset(
-                                            mainCategoryItems[index]
-                                                ["imagePath"],
-                                            fit: BoxFit.cover,
-                                            height: MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                0.1,
-                                          ),
-                                          Text(
-                                            mainCategoryItems[index]["title"],
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: constraints.maxWidth >
-                                                      1200
-                                                  ? 18
-                                                  : constraints.maxWidth > 800
-                                                      ? 17
-                                                      : constraints.maxWidth >
-                                                              600
-                                                          ? 16
-                                                          : 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+            // Icon with larger size
+            Icon(
+              isSuccess ? Icons.check_circle : Icons.error,
+              color: isSuccess ? Colors.green : Colors.red,
+              size: 34, // Increased size for better visibility
+            ),
+            boxH08(),
+            Flexible(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isSuccess ? Colors.green : Colors.red,
+                ),
+                textAlign: TextAlign.center, overflow: TextOverflow.ellipsis,maxLines: 1,
               ),
             ),
-            const Text(
-              "Student Data",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            boxH10(),
+            boxH08(),
             Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      _buildCard(
-                        "Student Attendance History",
-                        Colors.orange.shade100,
-                        Colors.orangeAccent,
-                        () {
-                          setState(() {
-                            selectedOption = "Student Attendance History";
-                          });
-                        },
-                      ),
-                      _buildCard(
-                        "Top Performing Students",
-                        Colors.orange.shade100,
-                        Colors.orangeAccent,
-                        () {
-                          setState(() {
-                            selectedOption = "Top Performing Students";
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  boxH20(),
-                  Container(
-                    height: MediaQuery.of(context).size.width * 0.3,
-                    width: MediaQuery.of(context).size.width * 0.8,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.orangeAccent, width: 1),
-                    ),
-                    padding: const EdgeInsets.all(16.0),
-                    child: selectedOption == "Student Attendance History"
-                        ? _buildAttendanceTable()
-                        : _buildTopPerformersTable(),
-                  ),
-                ],
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16, color: Colors.black87),
               ),
-            )
+            ),
           ],
         ),
       ),
     );
+    Future.delayed(const Duration(seconds: 1), () {
+      Get.back();
+    });
   }
 
-  Widget _buildCard(String title, Color backgroundColor, Color borderColor,
-      VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        elevation: 0.3,
-        color: backgroundColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Container(
-          width: 180,
-          height: 80,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: borderColor, width: 0.9),
-          ),
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+
+  String? validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Email is required';
+    }
+
+    // Regular expression for email validation
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
     );
+
+    if (!emailRegex.hasMatch(value)) {
+      return 'Enter a valid email address';
+    }
+
+    return null; // Return null if the email is valid
   }
 
-  Widget _buildAttendanceTable() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Student Attendance History",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Expanded(
-          child: SingleChildScrollView(
-            child: DataTable(
-              border: TableBorder.all(color: Colors.grey.shade300),
-              columns: const [
-                DataColumn(label: Text('ID')),
-                DataColumn(label: Text('Name')),
-                DataColumn(label: Text('Date')),
-                DataColumn(label: Text('Attendance')),
-              ],
-              rows: List<DataRow>.generate(
-                10,
-                (index) => DataRow(cells: [
-                  DataCell(Text('STU-${index + 1}')),
-                  DataCell(Text('Student ${index + 1}')),
-                  DataCell(Text('2024-12-${index + 1}')),
-                  DataCell(Text(index % 2 == 0 ? 'Present' : 'Absent')),
-                ]),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
+  String? validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password is required';
+    }
+    if (value.length < 8) {
+      return 'Password must be at least 8 characters long';
+    }
+    if (!RegExp(r'[A-Z]').hasMatch(value)) {
+      return 'Password must contain at least one uppercase letter';
+    }
+    if (!RegExp(r'[a-z]').hasMatch(value)) {
+      return 'Password must contain at least one lowercase letter';
+    }
+    if (!RegExp(r'[0-9]').hasMatch(value)) {
+      return 'Password must contain at least one digit';
+    }
+    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
+      return 'Password must contain at least one special character';
+    }
+    return null; // Return null if the password is valid
   }
 
-  Widget _buildTopPerformersTable() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Top Performing Students",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Expanded(
-          child: SingleChildScrollView(
-            child: DataTable(
-              border: TableBorder.all(color: Colors.grey.shade300),
-              columns: const [
-                DataColumn(label: Text('Rank')),
-                DataColumn(label: Text('Name')),
-                DataColumn(label: Text('Score')),
-                DataColumn(label: Text('Grade')),
-              ],
-              rows: List<DataRow>.generate(
-                10,
-                (index) => DataRow(cells: [
-                  DataCell(Text('#${index + 1}')),
-                  DataCell(Text('Student ${index + 1}')),
-                  DataCell(Text('${90 + index}')),
-                  DataCell(Text('A')),
-                ]),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
+  String? validateConfirmPassword(String? value, String password) {
+    if (value == null || value.isEmpty) {
+      return 'Please confirm your password';
+    }
+    if (value != password) {
+      return 'Passwords do not match';
+    }
+    return null; // Passwords match
   }
+
 }
+

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -89,219 +90,304 @@ class _MentorScreenState extends State<MentorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Student Information'),
-        backgroundColor: Colors.blue.shade100,
+      backgroundColor: Colors.grey.shade50,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Check screen size for responsiveness
+          bool isWideScreen = constraints.maxWidth > 800;
+
+          return Row(
+            children: [
+              // Always visible drawer for wide screens
+              if (isWideScreen)
+                Container(
+                  width: 250,
+                  color: Colors.orange.shade100,
+                  child: MyDrawer(),
+                ),
+              Expanded(
+                child: Scaffold(
+                  appBar: isWideScreen
+                      ? null
+                      : AppBar(
+                          title: const Text('Dashboard'),
+                          scrolledUnderElevation: 0,
+                          backgroundColor: Colors.blue.shade100,
+                          actions: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.person,
+                                color: Colors.grey,
+                              ),
+                              onPressed: () {
+                                // Handle notifications
+                              },
+                            ),
+                          ],
+                        ),
+                  drawer: isWideScreen ? null : Drawer(child: MyDrawer()),
+                  body: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0, vertical: 16),
+                    child: _buildMentorMainContent(constraints),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
+    );
+  }
+
+  Widget _buildMentorMainContent(BoxConstraints constraints) {
+    return Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+                color: Colors.orange.shade100,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: Colors.white,
+                )),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  const Text(
+                    'All Registered Mentors',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const Spacer(),
+                  Tooltip(
+                    message: 'Add a New Mentor',
+                    child: ElevatedButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      label: const Text(
+                        "Add Mentor",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepOrange,
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Card(
+                elevation: 3,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 child: Table(
-                  border: TableBorder.all(color: Colors.grey),
+                  border: const TableBorder.symmetric(
+                    inside: BorderSide(color: Colors.grey, width: 0.5),
+                    outside: BorderSide.none,
+                  ),
                   columnWidths: const {
                     0: FlexColumnWidth(2), // Profile
-                    1: FlexColumnWidth(3), // Name
+                    1: FlexColumnWidth(2), // Name
                     2: FlexColumnWidth(3), // Email
                     3: FlexColumnWidth(2), // Contact No
                     4: FlexColumnWidth(3), // School
                     5: FlexColumnWidth(2), // Class
-                    6: FlexColumnWidth(2), // Board Name
-                    7: FlexColumnWidth(2), // Language
-                    8: FlexColumnWidth(2), // Age Group
-                    9: FlexColumnWidth(2), // Purpose
-                    10: FlexColumnWidth(1), // Score
-                    11: FlexColumnWidth(1), // Actions
+                    6: FlexColumnWidth(1.4), // Score
+                    7: FlexColumnWidth(1.6), // Actions
+                    8: FlexColumnWidth(2), // Details
                   },
                   children: [
                     TableRow(
-                      decoration: BoxDecoration(color: Colors.grey[300]),
+                      decoration: BoxDecoration(
+                        color: Colors.blueGrey.shade50,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(8),
+                        ),
+                      ),
                       children: const [
                         Padding(
-                          padding: EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(12.0),
                           child: Text(
                             'Profile',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(12.0),
                           child: Text(
                             'Name',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(12.0),
                           child: Text(
                             'Email',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(12.0),
                           child: Text(
                             'Contact No',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(12.0),
                           child: Text(
                             'School',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(12.0),
                           child: Text(
                             'Class',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            'Board Name',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            'Language',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            'Age Group',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            'Purpose',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(12.0),
                           child: Text(
                             'Score',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(12.0),
                           child: Text(
                             'Actions',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(12.0),
+                          child: Text(
+                            'Details',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
                     ),
                     ...studentData.map(
-                          (student) {
+                      (student) {
                         int index = studentData.indexOf(student);
                         return TableRow(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                          ),
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: const Icon(Icons.account_circle),
+                            const Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Icon(Icons.account_circle, size: 20),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(12.0),
                               child: Text(
                                 student["user_name"] ?? 'No Name',
-                                style: const TextStyle(fontSize: 16),
+                                style: const TextStyle(fontSize: 14),
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(12.0),
                               child: Text(
                                 student["email"] ?? 'No Email',
-                                style: const TextStyle(fontSize: 16),
+                                style: const TextStyle(fontSize: 14),
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(12.0),
                               child: Text(
                                 student["contact_no"] ?? 'No Contact No',
-                                style: const TextStyle(fontSize: 16),
+                                style: const TextStyle(fontSize: 14),
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(12.0),
                               child: Text(
                                 student["school"] ?? 'No School',
-                                style: const TextStyle(fontSize: 16),
+                                style: const TextStyle(fontSize: 14),
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(12.0),
                               child: Text(
                                 student["std_class"] ?? 'No Class',
-                                style: const TextStyle(fontSize: 16),
+                                style: const TextStyle(fontSize: 14),
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                student["board_name"] ?? 'No Board',
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                student["language"] ?? 'No Language',
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                student["age_group"] ?? 'No Age Group',
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                student["purpose"] ?? 'No Purpose',
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(12.0),
                               child: Text(
                                 student["score"] ?? 'No Score',
-                                style: const TextStyle(fontSize: 16),
+                                style: const TextStyle(fontSize: 14),
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(12.0),
                               child: IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
+                                icon:
+                                    const Icon(Icons.delete, color: Colors.red),
                                 onPressed: () => _removeStudent(index),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.orange,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: TextButton(
+                                  onPressed: () {},
+                                  child: const Text(
+                                    "View",
+                                    style: TextStyle(
+                                      letterSpacing: 1,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ],
                         );
                       },
-                    ).toList(),
+                    ),
                   ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
