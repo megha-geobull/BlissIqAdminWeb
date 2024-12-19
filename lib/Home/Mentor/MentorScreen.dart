@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
+import 'package:blissiqadmin/Home/Mentor/MentorRegistration.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -169,7 +170,14 @@ class _MentorScreenState extends State<MentorScreen> {
                   Tooltip(
                     message: 'Add a New Mentor',
                     child: ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MentorRegistration(),
+                          ),
+                        );
+                      },
                       icon: const Icon(
                         Icons.add,
                         color: Colors.white,
