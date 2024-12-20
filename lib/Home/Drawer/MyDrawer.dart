@@ -2,9 +2,11 @@
 
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Home/Drawer/MainCategoriesPage.dart';
+import 'package:blissiqadmin/Home/Drawer/QuestionWidgets.dart';
 import 'package:blissiqadmin/Home/Drawer/SettingsPage.dart';
 import 'package:blissiqadmin/Home/Drawer/UsersPage.dart';
 import 'package:blissiqadmin/Home/HomePage.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/AddQuetionsWidgets.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -31,6 +33,7 @@ class _MyDrawerState extends State<MyDrawer> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      backgroundColor: Colors.white,
       child: MyDrawer(),
     );
   }
@@ -81,7 +84,8 @@ class _MyDrawerState extends State<MyDrawer> {
               isSelected: controller.selectedPage.value == 'Dashboard',
               onTap: () {
                 controller.changePage('Dashboard');
-                Get.to(HomePage());
+                Get.to(() => HomePage());
+
               },
             )),
         // Users
@@ -91,7 +95,8 @@ class _MyDrawerState extends State<MyDrawer> {
               isSelected: controller.selectedPage.value == 'Users',
               onTap: () {
                 controller.changePage('Users');
-                Get.to(UsersPage());
+                Get.to(() => UsersPage());
+
               },
             )),
         // Categories
@@ -101,9 +106,21 @@ class _MyDrawerState extends State<MyDrawer> {
               isSelected: controller.selectedPage.value == 'Categories',
               onTap: () {
                 controller.changePage('Categories');
-                Get.to(const MainCategoriesPage());
+                Get.to(() => const MainCategoriesPage());
+
               },
             )),
+        Obx(() => buildDrawerTile(
+          title: 'Question Widgets',
+          icon: Icons.question_answer,
+          isSelected: controller.selectedPage.value == 'Question Widgets',
+          onTap: () {
+            controller.changePage('Question Widgets');
+            Get.to(() =>  AddQuestionsWidgets());
+          },
+        )),
+
+
         // Settings
         Obx(() => buildDrawerTile(
               title: 'Settings',
@@ -111,7 +128,8 @@ class _MyDrawerState extends State<MyDrawer> {
               isSelected: controller.selectedPage.value == 'Settings',
               onTap: () {
                 controller.changePage('Settings');
-                Get.to(SettingsPage());
+                Get.to(() => const SettingsPage());
+
               },
             )),
         // Logout

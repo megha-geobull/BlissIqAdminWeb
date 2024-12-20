@@ -12,6 +12,8 @@ class CategoryController extends GetxController {
   RxList sub_categories = [].obs;
   RxList topics = [].obs;
   RxList sub_topics = [].obs;
+  RxList mainCategories = [].obs;
+
 
   addCategory({
     required String categoryname,
