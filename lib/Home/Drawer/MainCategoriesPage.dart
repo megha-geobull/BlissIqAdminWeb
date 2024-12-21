@@ -4,7 +4,9 @@ import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../Global/constants/CustomAlertDialogue.dart';
 import '../../controller/CategoryController.dart';
+import 'Topics_screen.dart';
 
 class MainCategoriesPage extends StatefulWidget {
   const MainCategoriesPage({super.key});
@@ -191,89 +193,89 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
             ],
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              const Text(
-                'Topics',
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
-              ),
-              const Spacer(),
-              IconButton(
-                onPressed: () => _showAddDialog(context,'topic', 0),
-                icon: CircleAvatar(
-                  radius: 10,
-                  backgroundColor: Colors.deepOrange.shade200,
-                  child: const Icon(
-                    Icons.add,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-                tooltip: 'Add Topics',
-              ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              const Text(
-                'Subtopics',
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
-              ),
-              const Spacer(),
-              IconButton(
-                onPressed: () => _showAddDialog(context,'subTopic', 0),
-                icon: CircleAvatar(
-                  radius: 10,
-                  backgroundColor: Colors.deepOrange.shade200,
-                  child: const Icon(
-                    Icons.add,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-                padding: const EdgeInsets.all(0),
-                tooltip: 'Add Subtopics',
-              ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Center(
-            child: Row(
-              children: [
-                const Text('Question Type',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black)),
-                const Spacer(),
-                IconButton(
-                  onPressed: () => _showAddDialog(context,'queType', 0),
-                  icon:  CircleAvatar(
-                    radius: 10,
-                    backgroundColor: Colors.deepOrange.shade200,
-                    child: const Icon(
-                      Icons.add,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
-                  padding: const EdgeInsets.all(0),
-                  tooltip: 'Add Question Type',
-                ),
-              ],
-            ),
-          ),
-        ),
+        // Padding(
+        //   padding: const EdgeInsets.all(8.0),
+        //   child: Row(
+        //     children: [
+        //       const Text(
+        //         'Topics',
+        //         style: TextStyle(
+        //             fontWeight: FontWeight.bold,
+        //             color: Colors.black),
+        //       ),
+        //       const Spacer(),
+        //       IconButton(
+        //         onPressed: () => _showAddDialog(context,'topic', 0),
+        //         icon: CircleAvatar(
+        //           radius: 10,
+        //           backgroundColor: Colors.deepOrange.shade200,
+        //           child: const Icon(
+        //             Icons.add,
+        //             color: Colors.white,
+        //             size: 20,
+        //           ),
+        //         ),
+        //         tooltip: 'Add Topics',
+        //       ),
+        //     ],
+        //   ),
+        // ),
+        // Padding(
+        //   padding: const EdgeInsets.all(8.0),
+        //   child: Row(
+        //     children: [
+        //       const Text(
+        //         'Subtopics',
+        //         style: TextStyle(
+        //             fontWeight: FontWeight.bold,
+        //             color: Colors.black),
+        //       ),
+        //       const Spacer(),
+        //       IconButton(
+        //         onPressed: () => _showAddDialog(context,'subTopic', 0),
+        //         icon: CircleAvatar(
+        //           radius: 10,
+        //           backgroundColor: Colors.deepOrange.shade200,
+        //           child: const Icon(
+        //             Icons.add,
+        //             color: Colors.white,
+        //             size: 20,
+        //           ),
+        //         ),
+        //         padding: const EdgeInsets.all(0),
+        //         tooltip: 'Add Subtopics',
+        //       ),
+        //     ],
+        //   ),
+        // ),
+        // Padding(
+        //   padding: const EdgeInsets.all(8.0),
+        //   child: Center(
+        //     child: Row(
+        //       children: [
+        //         const Text('Question Type',
+        //             style: TextStyle(
+        //                 fontWeight: FontWeight.bold,
+        //                 color: Colors.black)),
+        //         const Spacer(),
+        //         IconButton(
+        //           onPressed: () => _showAddDialog(context,'queType', 0),
+        //           icon:  CircleAvatar(
+        //             radius: 10,
+        //             backgroundColor: Colors.deepOrange.shade200,
+        //             child: const Icon(
+        //               Icons.add,
+        //               color: Colors.white,
+        //               size: 20,
+        //             ),
+        //           ),
+        //           padding: const EdgeInsets.all(0),
+        //           tooltip: 'Add Question Type',
+        //         ),
+        //       ],
+        //     ),
+        //   ),
+        // ),
         // const Padding(
         //   padding: EdgeInsets.all(8.0),
         //   child: Center(
@@ -293,10 +295,19 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
               children: [
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    category['category_name'] ?? 'No Name',
-                    style: const TextStyle(fontSize: 16),
-                  ),
+                  child:Row(children: [
+                    Text(
+                      category['category_name'] ?? 'No Name',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () {
+                        onDelete(_controller.categories[index]['_id'],index,"you want to delete this category?","category");
+                      },
+                    ),
+                  ],)
                 ),
                 TextButton(
                   child: const Text(
@@ -308,29 +319,29 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                     _showItems(context, index, 'subCategories',_controller.sub_categories);
                     },
                 ),
-                TextButton(
-                  child: const Text(
-                    "View",
-                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-                  ),
-                  onPressed: () async{
-                    await _controller.get_topic(categoryId:_controller.categories[index]['_id'],sub_categoryId:_controller.sub_categories[index]['_id'] );
-                    _showItems(context, index, 'topics',_controller.topics);},
-                ),
-                TextButton(
-                  child: const Text(
-                    "View",
-                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-                  ),
-                  onPressed: () => _showItems(context, index, 'subTopics',_controller.sub_categories),
-                ),
-                TextButton(
-                  child: const Text(
-                    "View",
-                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-                  ),
-                  onPressed: () => _showItems(context, index, 'QueType',_controller.sub_categories),
-                ),
+                // TextButton(
+                //   child: const Text(
+                //     "View",
+                //     style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                //   ),
+                //   onPressed: () async{
+                //     await _controller.get_topic(categoryId:_controller.categories[index]['_id'],sub_categoryId:_controller.sub_categories[index]['_id'] );
+                //     _showItems(context, index, 'topics',_controller.topics);},
+                // ),
+                // TextButton(
+                //   child: const Text(
+                //     "View",
+                //     style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                //   ),
+                //   onPressed: () => _showItems(context, index, 'subTopics',_controller.sub_categories),
+                // ),
+                // TextButton(
+                //   child: const Text(
+                //     "View",
+                //     style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                //   ),
+                //   onPressed: () => _showItems(context, index, 'QueType',_controller.sub_categories),
+                // ),
               ],
             ),
           );
@@ -341,6 +352,28 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
       });
   }
 
+  void onDelete(String productId,int index,String title,String type) {
+    showDialog(
+      context: context,
+      builder: (context) => CustomAlertDialog(
+        title: 'Are you sure',
+        content: title,
+        yesText: 'Yes',
+        noText: 'No', onYesPressed: () {
+        if(type=="category") {
+          Navigator.pop(context);
+          _controller.deleteCategory(
+              categoryId: _controller.categories[index]['_id']);
+          _controller.categories.removeAt(index);
+          tableRows.removeAt(index + 1);
+        }else{
+          _controller.deleteSubCategory(categoryId:_controller.sub_categories[index]['main_category_id'],sub_categoryId: _controller.sub_categories[index]['_id'],);
+          _controller.sub_categories.removeAt(index);
+          }
+        },
+      ),
+    );
+  }
 
   void _showAddDialog(BuildContext context, String type, int? categoryIndex) {
     TextEditingController controller = TextEditingController();
@@ -377,7 +410,6 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                             _controller.getSubCategory(categoryId: selectedCategoryId!);
                           });
                           _controller.sub_categories.refresh();
-                          //await _controller.getSubCategory(categoryId: selectedCategoryId!);
                         },
                         items: _controller.categories
                             .map((category) => DropdownMenuItem<String>(
@@ -479,18 +511,36 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
           content: SizedBox(
             width: 300,
             child: Obx(() {
-              var items = _controller.categories[mainIndex][type] ?? [];
               return ListView.builder(
                 shrinkWrap: true,
-                itemCount: items.length,
+                itemCount: _controller.sub_categories.length,
                 itemBuilder: (context, itemIndex) {
+                  var items = _controller.sub_categories[itemIndex];
                   return ListTile(
-                    title: Text(items[itemIndex]['category_name']),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        //_controller.removeItem(mainIndex, type, itemIndex);
-                      },
+                    title: Text(items['sub_category']),
+                    trailing: SizedBox(
+                      width: 200,
+                      child: Row(
+                        children:[
+                          InkWell(
+                              onTap: (){
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          TopicsScreen( subcategory: items,)),
+                                );
+                                //Navigator.pop(context);
+                              },
+                              child: Text('Topics')),
+                          IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            onDelete(_controller.sub_categories[itemIndex]['main_category_id'],itemIndex,"you want to delete this subcategory?","subcategory");
+                          },
+                        ),
+                        ]
+                      ),
                     ),
                   );
                 },

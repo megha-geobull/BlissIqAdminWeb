@@ -58,7 +58,7 @@ class CategoryController extends GetxController {
         "main_category_id": categoryId,
       };
 
-      final response = await http.post(
+      final response = await http.delete(
         Uri.parse(ApiString.delete_main_category),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(body),
@@ -160,7 +160,7 @@ class CategoryController extends GetxController {
         "sub_category_id": sub_categoryId,
       };
 
-      final response = await http.post(
+      final response = await http.delete(
         Uri.parse(ApiString.delete_sub_category),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(body),
@@ -189,7 +189,7 @@ class CategoryController extends GetxController {
     required String categoryId,
   }) async {
     isLoading.value = true;
-
+    sub_categories.clear();
     try {
       final Map<String, dynamic> body = {
         "main_category_id": categoryId,
@@ -273,7 +273,7 @@ class CategoryController extends GetxController {
         "topic_id": topicId,
       };
 
-      final response = await http.post(
+      final response = await http.delete(
         Uri.parse(ApiString.delete_topic),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(body),
@@ -302,7 +302,7 @@ class CategoryController extends GetxController {
     required String sub_categoryId,
   }) async {
     isLoading.value = true;
-
+    topics.clear();
     try {
       final Map<String, dynamic> body = {
         "main_category_id": categoryId,
@@ -379,7 +379,7 @@ class CategoryController extends GetxController {
     required String topicId,
   }) async {
     isLoading.value = true;
-
+    sub_topics.clear();
     try {
       final Map<String, dynamic> body = {
         "main_category_id": categoryId,
@@ -402,6 +402,9 @@ class CategoryController extends GetxController {
         } else {
           showSnackbar(message: "Failed to fetch topic");
         }
+      }else
+      if (response.statusCode == 204) {
+        showSnackbar(message: "No Topics available");
       }
     } catch (e) {
       showSnackbar(message: "Error while fetch $e");
@@ -415,7 +418,7 @@ class CategoryController extends GetxController {
     required String sub_categoryId,
     required String topicId,
     required String sub_topicId,
-  }) async {
+    }) async {
     isLoading.value = true;
 
     try {
@@ -426,7 +429,7 @@ class CategoryController extends GetxController {
         "sub_topic_id": sub_topicId,
       };
 
-      final response = await http.post(
+      final response = await http.delete(
         Uri.parse(ApiString.delete_subtopics),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(body),
