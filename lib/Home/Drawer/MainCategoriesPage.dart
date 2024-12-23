@@ -193,98 +193,6 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
             ],
           ),
         ),
-        // Padding(
-        //   padding: const EdgeInsets.all(8.0),
-        //   child: Row(
-        //     children: [
-        //       const Text(
-        //         'Topics',
-        //         style: TextStyle(
-        //             fontWeight: FontWeight.bold,
-        //             color: Colors.black),
-        //       ),
-        //       const Spacer(),
-        //       IconButton(
-        //         onPressed: () => _showAddDialog(context,'topic', 0),
-        //         icon: CircleAvatar(
-        //           radius: 10,
-        //           backgroundColor: Colors.deepOrange.shade200,
-        //           child: const Icon(
-        //             Icons.add,
-        //             color: Colors.white,
-        //             size: 20,
-        //           ),
-        //         ),
-        //         tooltip: 'Add Topics',
-        //       ),
-        //     ],
-        //   ),
-        // ),
-        // Padding(
-        //   padding: const EdgeInsets.all(8.0),
-        //   child: Row(
-        //     children: [
-        //       const Text(
-        //         'Subtopics',
-        //         style: TextStyle(
-        //             fontWeight: FontWeight.bold,
-        //             color: Colors.black),
-        //       ),
-        //       const Spacer(),
-        //       IconButton(
-        //         onPressed: () => _showAddDialog(context,'subTopic', 0),
-        //         icon: CircleAvatar(
-        //           radius: 10,
-        //           backgroundColor: Colors.deepOrange.shade200,
-        //           child: const Icon(
-        //             Icons.add,
-        //             color: Colors.white,
-        //             size: 20,
-        //           ),
-        //         ),
-        //         padding: const EdgeInsets.all(0),
-        //         tooltip: 'Add Subtopics',
-        //       ),
-        //     ],
-        //   ),
-        // ),
-        // Padding(
-        //   padding: const EdgeInsets.all(8.0),
-        //   child: Center(
-        //     child: Row(
-        //       children: [
-        //         const Text('Question Type',
-        //             style: TextStyle(
-        //                 fontWeight: FontWeight.bold,
-        //                 color: Colors.black)),
-        //         const Spacer(),
-        //         IconButton(
-        //           onPressed: () => _showAddDialog(context,'queType', 0),
-        //           icon:  CircleAvatar(
-        //             radius: 10,
-        //             backgroundColor: Colors.deepOrange.shade200,
-        //             child: const Icon(
-        //               Icons.add,
-        //               color: Colors.white,
-        //               size: 20,
-        //             ),
-        //           ),
-        //           padding: const EdgeInsets.all(0),
-        //           tooltip: 'Add Question Type',
-        //         ),
-        //       ],
-        //     ),
-        //   ),
-        // ),
-        // const Padding(
-        //   padding: EdgeInsets.all(8.0),
-        //   child: Center(
-        //     child: Text('Actions',
-        //         style: TextStyle(
-        //             fontWeight: FontWeight.bold,
-        //             color: Colors.black)),
-        //   ),
-        // ),
       ],
     ));
       if (_controller.categories.isNotEmpty) {
@@ -319,29 +227,6 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                     _showItems(context, index, 'subCategories',_controller.sub_categories);
                     },
                 ),
-                // TextButton(
-                //   child: const Text(
-                //     "View",
-                //     style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-                //   ),
-                //   onPressed: () async{
-                //     await _controller.get_topic(categoryId:_controller.categories[index]['_id'],sub_categoryId:_controller.sub_categories[index]['_id'] );
-                //     _showItems(context, index, 'topics',_controller.topics);},
-                // ),
-                // TextButton(
-                //   child: const Text(
-                //     "View",
-                //     style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-                //   ),
-                //   onPressed: () => _showItems(context, index, 'subTopics',_controller.sub_categories),
-                // ),
-                // TextButton(
-                //   child: const Text(
-                //     "View",
-                //     style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-                //   ),
-                //   onPressed: () => _showItems(context, index, 'QueType',_controller.sub_categories),
-                // ),
               ],
             ),
           );
@@ -530,7 +415,6 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                                       builder: (context) =>
                                           TopicsScreen( subcategory: items,)),
                                 );
-                                //Navigator.pop(context);
                               },
                               child: Text('Topics')),
                           IconButton(
