@@ -104,12 +104,6 @@ class _HomePageState extends State<HomePage> {
     },
   ];
 
-  // final List<Map<String, dynamic>> userList = [
-  //   {"title": "Mentors", "count": 50},
-  //   {"title": "Companies", "count": 30},
-  //   {"title": "Schools", "count": 15},
-  //   {"title": "Students", "count": 100},
-  // ];
   Color _getColor(String title) {
     switch (title) {
       case "Mentors":
@@ -169,7 +163,8 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                   drawer:
-                      isWideScreen ? null : const Drawer(child: MyDrawer()),
+
+                  isWideScreen ? null : const Drawer(child: MyDrawer()),
                   body: Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8.0, vertical: 16),
@@ -216,28 +211,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         boxH10(),
-                        // SizedBox(
-                        //   width: 300,
-                        //   height: 300,
-                        //   child: PieChart(
-                        //     PieChartData(
-                        //       sections: userList.map((data) {
-                        //         return PieChartSectionData(
-                        //           color: _getColor(data["title"]),
-                        //           value: data["count"].toDouble(),
-                        //           title: '${data["count"]}',
-                        //           titleStyle: const TextStyle(
-                        //             fontSize: 14,
-                        //             fontWeight: FontWeight.bold,
-                        //             color: Colors.white,
-                        //           ),
-                        //         );
-                        //       }).toList(),
-                        //       sectionsSpace: 2,
-                        //       centerSpaceRadius: 50,
-                        //     ),
-                        //   ),
-                        // ),
+
                         SizedBox(
                           height: constraints.maxHeight * 0.4,
                           child: GridView.builder(
@@ -561,4 +535,3 @@ class _HomePageState extends State<HomePage> {
 
 
 }
-
