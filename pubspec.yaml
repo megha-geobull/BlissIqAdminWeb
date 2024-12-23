@@ -80,6 +80,8 @@ dependencies:
   translator:
   characters: ^1.2.1
   image_picker: ^0.8.7+3
+  csc_picker: ^0.2.7
+  country_code_picker: ^3.0.0
 
 dev_dependencies:
   flutter_test:
