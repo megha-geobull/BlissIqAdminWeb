@@ -1,5 +1,5 @@
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
-import 'package:blissiqadmin/Home/Mentor/MentorRegistration.dart';
+import 'package:blissiqadmin/Home/Users/Mentor/MentorRegistration.dart';
 import 'package:flutter/material.dart';
 
 class MentorScreen extends StatefulWidget {

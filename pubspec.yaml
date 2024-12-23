@@ -83,6 +83,7 @@ dependencies:
   csc_picker: ^0.2.7
   country_code_picker: ^3.0.0
   file_picker: ^8.1.0
+  image_picker_web:
   #excel: ^4.0.3
 
 dev_dependencies:

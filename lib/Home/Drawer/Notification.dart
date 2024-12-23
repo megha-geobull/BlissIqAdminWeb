@@ -1,4 +1,5 @@
 import 'package:blissiqadmin/Global/Widgets/Button/CustomButton.dart';
+import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:flutter/material.dart';
@@ -98,51 +99,78 @@ class _NotificationPageState extends State<NotificationPage> {
     );
   }
 
-  _buildMainContent(BoxConstraints constraints) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Select User',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  Widget _buildMainContent(BoxConstraints constraints) {
+    return Center(
+      child: Container(
+        width: constraints.maxWidth * 0.5,
+        constraints: const BoxConstraints(
+          maxWidth: 600,
         ),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
-          value: selectedUser,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              spreadRadius: 2,
+              offset: const Offset(0, 4),
             ),
-            filled: true,
-            fillColor: Colors.grey.shade200,
-          ),
-          hint: const Text('Choose a user'),
-          items: users
-              .map((user) => DropdownMenuItem(
-                    value: user,
-                    child: Text(user),
-                  ))
-              .toList(),
-          onChanged: (value) {
-            setState(() {
-              selectedUser = value;
-            });
-          },
+          ],
         ),
-        const SizedBox(height: 20),
-        const Text(
-          'Notification Message',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Select User',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            DropdownButtonFormField<String>(
+              value: selectedUser,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                filled: true,
+                fillColor: Colors.grey.shade50,
+              ),
+              hint: const Text('Choose a user'),
+              items: users
+                  .map((user) => DropdownMenuItem(
+                value: user,
+                child: Text(user),
+              ))
+                  .toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedUser = value;
+                });
+              },
+            ),
+            boxH20(),
+            const Text(
+              'Notification Message',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: notificationController,
+              labelText: "Enter notification message",
+              maxLines: 3,
+            ),
+            boxH20(),
+            Align(
+              alignment: Alignment.centerRight,
+              child: CustomButton(
+                label: "Send Notification",
+                onPressed: _sendNotification,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
-        CustomTextField(
-          controller: notificationController,
-          labelText: "Enter notification message",
-          maxLines: 3,
-        ),
-        const SizedBox(height: 20),
-        CustomButton(label: "Send Notification", onPressed: _sendNotification)
-      ],
+      ),
     );
   }
 }

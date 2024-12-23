@@ -1,7 +1,7 @@
-import 'package:blissiqadmin/Home/Company/CompanyScreen.dart';
-import 'package:blissiqadmin/Home/Mentor/MentorScreen.dart';
-import 'package:blissiqadmin/Home/School/SchoolScreen.dart';
-import 'package:blissiqadmin/Home/Students/StudentScreen.dart';
+import 'package:blissiqadmin/Home/Users/Company/CompanyScreen.dart';
+import 'package:blissiqadmin/Home/Users/Mentor/MentorScreen.dart';
+import 'package:blissiqadmin/Home/Users/School/SchoolScreen.dart';
+import 'package:blissiqadmin/Home/Users/Students/StudentScreen.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -63,25 +63,25 @@ class _UserPieChartState extends State<UserPieChart> {
       case 0:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MentorScreen()),
+          MaterialPageRoute(builder: (context) => const MentorScreen()),
         );
         break;
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => CompanyScreen()),
+          MaterialPageRoute(builder: (context) => const CompanyScreen()),
         );
         break;
       case 2:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => SchoolScreen()),
+          MaterialPageRoute(builder: (context) => const SchoolScreen()),
         );
         break;
       case 3:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => StudentScreen()),
+          MaterialPageRoute(builder: (context) => const StudentScreen()),
         );
         break;
     }

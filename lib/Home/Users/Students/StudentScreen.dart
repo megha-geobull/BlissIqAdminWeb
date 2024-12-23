@@ -4,14 +4,14 @@ import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-class SchoolScreen extends StatefulWidget {
-  const SchoolScreen({super.key});
+class StudentScreen extends StatefulWidget {
+  const StudentScreen({super.key});
 
   @override
-  _SchoolScreenState createState() => _SchoolScreenState();
+  _StudentScreenState createState() => _StudentScreenState();
 }
 
-class _SchoolScreenState extends State<SchoolScreen> {
+class _StudentScreenState extends State<StudentScreen> {
   // Sample data for 5 students
   final List<Map<String, String>> studentData = [
     {
@@ -153,46 +153,46 @@ class _SchoolScreenState extends State<SchoolScreen> {
                 border: Border.all(
                   color: Colors.white,
                 )),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
+            child: const Padding(
+              padding: EdgeInsets.all(8.0),
               child: Row(
                 children: [
-                  const Text(
-                    'All Registered Mentors',
+                  Text(
+                    'All Registered Students',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
                       color: Colors.black,
                     ),
                   ),
-                  const Spacer(),
-                  Tooltip(
-                    message: 'Add a New Mentor',
-                    child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.add,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      label: const Text(
-                        "Add Mentor",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepOrange,
-                        elevation: 3,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                      ),
-                    ),
-                  ),
+                  // const Spacer(),
+                  // Tooltip(
+                  //   message: 'Add a New',
+                  //   child: ElevatedButton.icon(
+                  //     onPressed: () {},
+                  //     icon: const Icon(
+                  //       Icons.add,
+                  //       color: Colors.white,
+                  //       size: 20,
+                  //     ),
+                  //     label: const Text(
+                  //       "Add Mentor",
+                  //       style: TextStyle(
+                  //         color: Colors.white,
+                  //         fontSize: 16,
+                  //       ),
+                  //     ),
+                  //     style: ElevatedButton.styleFrom(
+                  //       backgroundColor: Colors.deepOrange,
+                  //       elevation: 3,
+                  //       shape: RoundedRectangleBorder(
+                  //         borderRadius: BorderRadius.circular(8),
+                  //       ),
+                  //       padding: const EdgeInsets.symmetric(
+                  //           horizontal: 16, vertical: 12),
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),

@@ -1,15 +1,10 @@
 import 'package:blissiqadmin/Global/constants/AppColor.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Home/Attendance/AttendanceHistoryScreen.dart';
-import 'package:blissiqadmin/Home/Company/CompanyScreen.dart';
 import 'package:blissiqadmin/Home/Conversational/ConversationalScreen.dart';
 import 'package:blissiqadmin/Home/Drawer/MainCategoriesPage.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/Home/Grammer/GrammarScreen.dart';
-import 'package:blissiqadmin/Home/Mentor/MentorScreen.dart';
-import 'package:blissiqadmin/Home/School/SchoolScreen.dart';
-import 'package:blissiqadmin/Home/Students/StudentScreen.dart';
-import 'package:blissiqadmin/Home/Students/TopPerformer/TopPerformerStudents.dart';
 import 'package:blissiqadmin/Home/StudentsGraphScreen.dart';
 import 'package:blissiqadmin/Home/Toddler/ToddlerEnglishScreen.dart';
 import 'package:blissiqadmin/Home/UserPieChart.dart';
@@ -68,44 +63,6 @@ class _HomePageState extends State<HomePage> {
     },
   ];
 
-  final List<Map<String, dynamic>> userList = [
-    {
-      "title": "Mentors",
-      "imagePath": "assets/icons/mentor.png",
-      "gradient": LinearGradient(
-        colors: [Colors.red.shade200, Colors.redAccent.shade200],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-    },
-    {
-      "title": "Companies",
-      "imagePath": "assets/icons/Company.png",
-      "gradient": LinearGradient(
-        colors: [Colors.blueAccent.shade100, Colors.blue.shade200],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-    },
-    {
-      "title": "Schools",
-      "imagePath": "assets/icons/School.png",
-      "gradient": LinearGradient(
-        colors: [Colors.deepOrange.shade200, Colors.deepOrange.shade400],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-    },
-    {
-      "title": "Students",
-      "imagePath": "assets/icons/students.png",
-      "gradient": LinearGradient(
-        colors: [Colors.pinkAccent.shade100, Colors.pinkAccent.shade200],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-    },
-  ];
   final List<Map<String, dynamic>> students = [
     {
       'rank': '1',
@@ -137,26 +94,6 @@ class _HomePageState extends State<HomePage> {
     },
   ];
 
-  // final List<Map<String, dynamic>> userList = [
-  //   {"title": "Mentors", "count": 50},
-  //   {"title": "Companies", "count": 30},
-  //   {"title": "Schools", "count": 15},
-  //   {"title": "Students", "count": 100},
-  // ];
-  Color _getColor(String title) {
-    switch (title) {
-      case "Mentors":
-        return Colors.blue;
-      case "Companies":
-        return Colors.orange;
-      case "Schools":
-        return Colors.green;
-      case "Students":
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
 
   @override
   void initState() {
@@ -255,109 +192,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             boxH10(),
-                            // SizedBox(
-                            //   height: constraints.maxHeight * 0.4,
-                            //   child: GridView.builder(
-                            //     scrollDirection: Axis.vertical,
-                            //     itemCount: userList.length,
-                            //     gridDelegate:
-                            //         SliverGridDelegateWithFixedCrossAxisCount(
-                            //       crossAxisCount: crossAxisCount,
-                            //       crossAxisSpacing: 12,
-                            //       mainAxisSpacing: 12,
-                            //       childAspectRatio: 2.8,
-                            //     ),
-                            //     shrinkWrap: true,
-                            //     physics: const NeverScrollableScrollPhysics(),
-                            //     itemBuilder: (context, index) {
-                            //       return GestureDetector(
-                            //         onTap: () {
-                            //           // Handle navigation
-                            //           switch (index) {
-                            //             case 0:
-                            //               Navigator.push(
-                            //                 context,
-                            //                 MaterialPageRoute(
-                            //                     builder: (context) =>
-                            //                         MentorScreen()),
-                            //               );
-                            //               break;
-                            //             case 1:
-                            //               Navigator.push(
-                            //                 context,
-                            //                 MaterialPageRoute(
-                            //                     builder: (context) =>
-                            //                         CompanyScreen()),
-                            //               );
-                            //               break;
-                            //             case 2:
-                            //               Navigator.push(
-                            //                 context,
-                            //                 MaterialPageRoute(
-                            //                     builder: (context) =>
-                            //                         SchoolScreen()),
-                            //               );
-                            //               break;
-                            //             case 3:
-                            //               Navigator.push(
-                            //                 context,
-                            //                 MaterialPageRoute(
-                            //                     builder: (context) =>
-                            //                         StudentScreen()),
-                            //               );
-                            //               break;
-                            //           }
-                            //         },
-                            //         child: Card(
-                            //           elevation: 0.8,
-                            //           shape: RoundedRectangleBorder(
-                            //             borderRadius: BorderRadius.circular(16),
-                            //           ),
-                            //           child: Container(
-                            //             decoration: BoxDecoration(
-                            //               gradient: userList[index]["gradient"],
-                            //               borderRadius: BorderRadius.circular(16),
-                            //             ),
-                            //             child: Center(
-                            //               child: Column(
-                            //                 mainAxisAlignment:
-                            //                     MainAxisAlignment.center,
-                            //                 children: [
-                            //                   Image.asset(
-                            //                     userList[index]["imagePath"],
-                            //                     fit: BoxFit.cover,
-                            //                     height: MediaQuery.of(context)
-                            //                             .size
-                            //                             .height *
-                            //                         0.060,
-                            //                   ),
-                            //                   Text(
-                            //                     userList[index]["title"],
-                            //                     textAlign: TextAlign.center,
-                            //                     style: TextStyle(
-                            //                       fontSize: constraints.maxWidth >
-                            //                               1200
-                            //                           ? 18
-                            //                           : constraints.maxWidth > 800
-                            //                               ? 17
-                            //                               : constraints.maxWidth >
-                            //                                       600
-                            //                                   ? 16
-                            //                                   : 14,
-                            //                       fontWeight: FontWeight.w600,
-                            //                       color: Colors.black.withOpacity(0.7),
-                            //                     ),
-                            //                   ),
-                            //                 ],
-                            //               ),
-                            //             ),
-                            //           ),
-                            //         ),
-                            //       );
-                            //     },
-                            //   ),
-                            // ),
-                            UserPieChart()
+                            const UserPieChart()
                           ],
                         ),
                       ),
@@ -498,44 +333,6 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             boxH10(),
-            // Padding(
-            //   padding: const EdgeInsets.all(16.0),
-            //   child: Column(
-            //     children: [
-            //       Row(
-            //         mainAxisAlignment: MainAxisAlignment.start,
-            //         children: [
-            //           _buildCard(
-            //             "Student Attendance History",
-            //             Colors.orange.shade100,
-            //             Colors.orangeAccent,
-            //             () {
-            //               Navigator.push(
-            //                 context,
-            //                 MaterialPageRoute(
-            //                   builder: (context) => const AttendanceHistoryScreen(),
-            //                 ),
-            //               );
-            //             },
-            //           ),
-            //           _buildCard(
-            //             "Top Performing Students",
-            //             Colors.orange.shade100,
-            //             Colors.orangeAccent,
-            //             () {
-            //               Navigator.push(
-            //                 context,
-            //                 MaterialPageRoute(
-            //                   builder: (context) => const TopPerformerStudents(),
-            //                 ),
-            //               );
-            //             },
-            //           ),
-            //         ],
-            //       ),
-            //     ],
-            //   ),
-            // )
             Row(
               children: [
                 Expanded(child: _leaderBoard()),
@@ -547,6 +344,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
   Widget _leaderBoard() {
     return Card(
       color: Colors.white,
@@ -674,44 +472,6 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
-
-  Widget _buildCard(String title, Color backgroundColor, Color borderColor,
-      VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        elevation: 0.3,
-        color: backgroundColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Container(
-          width: 180,
-          height: 80,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: borderColor, width: 0.9),
-          ),
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
 
 }
 

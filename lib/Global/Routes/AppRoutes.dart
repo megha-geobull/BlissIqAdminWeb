@@ -1,5 +1,5 @@
 import 'package:blissiqadmin/Home/HomePage.dart';
-import 'package:blissiqadmin/Home/Mentor/MentorRegistration.dart';
+import 'package:blissiqadmin/Home/Users/Mentor/MentorRegistration.dart';
 import 'package:blissiqadmin/profile/ProfilePage.dart';
 import 'package:blissiqadmin/splash/SplashView.dart';
 import 'package:get/get.dart';
