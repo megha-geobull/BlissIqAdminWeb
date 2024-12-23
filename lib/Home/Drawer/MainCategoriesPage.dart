@@ -394,7 +394,7 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
         return AlertDialog(
           title: Text('$type for ${_controller.categories[mainIndex]['category_name']}'),
           content: SizedBox(
-            width: 300,
+            width: 500,
             child: Obx(() {
               return ListView.builder(
                 shrinkWrap: true,
