@@ -1,5 +1,6 @@
 
 import 'package:blissiqadmin/Home/HomePage.dart';
+import 'package:blissiqadmin/auth/Signup/SignupScreen.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -85,7 +86,7 @@ class SignupController extends GetxController {
           if (isLoginSuccess) {
             await Future.delayed(const Duration(seconds: 1));
             //Get.to(const Onboarding_Screen());
-            Get.to(() => HomePage());
+            Get.to(() => SignUpScreen());
           }
         } else {
           _showBottomSheet(

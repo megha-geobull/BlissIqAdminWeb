@@ -1,4 +1,7 @@
+import 'package:blissiqadmin/Global/Widgets/Button/CustomButton.dart';
 import 'package:blissiqadmin/Global/constants/AppColor.dart';
+import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
+import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Controller/MainCategoryController.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:flutter/material.dart';
@@ -48,9 +51,11 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
             ),
           ),
           actions: [
-            TextButton(
+            boxH30(),
+            CustomButton(
+              label: "Cancel",
+              color: Colors.red,
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () {

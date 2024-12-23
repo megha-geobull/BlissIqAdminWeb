@@ -13,6 +13,7 @@ import 'package:blissiqadmin/Home/Students/TopPerformer/TopPerformerStudents.dar
 import 'package:blissiqadmin/Home/Toddler/ToddlerEnglishScreen.dart';
 import 'package:blissiqadmin/Home/Vocabulary/VocabularyScreen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:get/get.dart' as getx;
@@ -103,6 +104,21 @@ class _HomePageState extends State<HomePage> {
     },
   ];
 
+  Color _getColor(String title) {
+    switch (title) {
+      case "Mentors":
+        return Colors.blue;
+      case "Companies":
+        return Colors.orange;
+      case "Schools":
+        return Colors.green;
+      case "Students":
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -120,7 +136,6 @@ class _HomePageState extends State<HomePage> {
 
           return Row(
             children: [
-              // Always visible drawer for wide screens
               if (isWideScreen)
                 Container(
                   width: 250,
@@ -148,7 +163,8 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                   drawer:
-                      isWideScreen ? null : Drawer(child: MyDrawer()),
+
+                  isWideScreen ? null : const Drawer(child: MyDrawer()),
                   body: Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8.0, vertical: 16),
@@ -195,6 +211,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         boxH10(),
+
                         SizedBox(
                           height: constraints.maxHeight * 0.4,
                           child: GridView.builder(
