@@ -2,11 +2,15 @@ import 'package:blissiqadmin/Global/Widgets/Button/CustomButton.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
+import 'package:blissiqadmin/controller/CategoryController.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:csv/csv.dart';
+import 'package:share_extend/share_extend.dart';
 // import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 // import 'package:excel/excel.dart' as excel;
@@ -18,6 +22,7 @@ class AddQuestionsWidgets extends StatefulWidget {
 }
 
 class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
+
   final TextEditingController questionController = TextEditingController();
   final List<TextEditingController> optionControllers =
       List.generate(4, (_) => TextEditingController());
@@ -29,6 +34,11 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   Uint8List? selectedImage;
   List<TableRow> tableRows = [];
 
+  final List<String> mainCategories = [];
+  final List<String> subCategories = [];
+  final List<String> topics = [];
+  final List<String> subTopics = [];
+
   final List<String> tabs = [
     "Conversational English",
     "A1",
@@ -38,7 +48,15 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     "Quizes",
     "Conversation"
   ];
+
   int selectedIndex = 0;
+  String? selectedMainCategory;
+  String? selectedSubCategory;
+  String? selectedTopic;
+  String? selectedSubtopic;
+
+  String? mainCategoryId;
+  String? subCategoryId;
 
   String? selectedQuestionType = "Multiple Choice Question";
   List<String> questionTypes = [
@@ -50,6 +68,15 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     "Phrases",
     "Conversation"
   ];
+  final CategoryController _controller = Get.put(CategoryController());
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getData();
+  }
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
@@ -63,40 +90,227 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     }
   }
 
-  // Future<void> _importExcelData() async {
-  //   try {
-  //     FilePickerResult? result = await FilePicker.platform.pickFiles(
-  //       type: FileType.custom,
-  //       allowedExtensions: ['xlsx'],
-  //     );
-  //
-  //     if (result != null) {
-  //       Uint8List fileBytes = result.files.first.bytes!;
-  //       var excel = Excel.decodeBytes(fileBytes);
-  //
-  //       List<TableRow> rows = [];
-  //       for (var table in excel.tables.keys) {
-  //         for (var row in excel.tables[table]!.rows) {
-  //           rows.add(
-  //             TableRow(
-  //               children: row.map((cell) {
-  //                 return Padding(
-  //                   padding: const EdgeInsets.all(8.0),
-  //                   child: Text(cell?.value.toString() ?? ''),
-  //                 );
-  //               }).toList(),
-  //             ),
-  //           );
-  //         }
-  //       }
-  //       setState(() {
-  //         tableRows = rows;
-  //       });
-  //     }
-  //   } catch (e) {
-  //     print("Error importing Excel data: $e");
-  //   }
-  // }
+
+
+  void _exportTableToCSV() async {
+    List<List<dynamic>> rows = [];
+
+    // Header Row
+    List<String> headers = [
+      "Type",
+      "Question",
+      "Option 1",
+      "Option 2",
+      "Option 3",
+      "Option 4",
+      "Answer",
+      "Points",
+      "Main Category ID",
+      "Sub Category ID",
+      "Topic ID",
+      "Sub Topic ID",
+      "Question Type",
+      "Title",
+      "Question Image",
+    ];
+    rows.add(headers);
+
+    List<dynamic> sampleData = [
+      "add-mcq",
+      "",
+      "main_category_id",
+      "sub_category_id",
+      "topic_id",
+      "sub_topic_id",
+      "question_type",
+      "title",
+      "question",
+      "q_image",
+      "option_a",
+      "option_b",
+      "option_c",
+      "option_d",
+      "answer",
+      "points",
+    ];
+    rows.add(sampleData);
+
+    // Extract Data from Table Rows
+    for (var row in tableRows) {
+      List<dynamic> rowData = [];
+
+      for (var cell in row.children) {
+        // Extract text from each table cell
+        if (cell is Padding && cell.child is Text) {
+          rowData.add((cell.child as Text).data);
+        } else {
+          rowData.add("");  // Fallback if the data is not found
+        }
+      }
+
+      rows.add(rowData);
+    }
+
+    // Convert to CSV String
+    String csvString = const ListToCsvConverter().convert(rows);
+
+    // Save CSV to Temporary Directory
+    final directory = await Directory.systemTemp.createTemp();
+    final file = File('${directory.path}/questions_data.csv');
+    await file.writeAsString(csvString);
+
+    // Share the File
+    if (file.existsSync()) {
+      ShareExtend.share(file.path, "file");
+    }
+  }
+
+
+
+  getData() async {
+    await _controller.getCategory();
+    setState(() {});
+  }
+
+  Widget _buildTabs() {
+    return Column(
+      children: [
+        /// Select Main Category
+        Row(
+          children: [
+            // Main Category Dropdown
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                value: selectedMainCategory,
+                hint: Text("Select Main Category"),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(color: Colors.grey.shade400),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                ),
+                items: _controller.categories.map<DropdownMenuItem<String>>((category) {
+                  String categoryName = category['category_name'].toString();
+                  return DropdownMenuItem<String>(
+                    value: categoryName,
+                    child: Text(categoryName),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedMainCategory = value;
+                    selectedSubCategory = null;
+                    selectedTopic = null;
+                    selectedSubtopic = null; // Reset subtopic as well
+                    // Fetch subcategories based on the selected main category
+                    mainCategoryId = _controller.categories.firstWhere((cat) => cat['category_name'] == value)['_id'];
+                    _controller.getSubCategory(categoryId: mainCategoryId.toString()).then((_) {
+                      setState(() {}); // Update the state after fetching subcategories
+                    });
+                  });
+                },
+              ),
+            ),
+            boxW10(),
+            // Sub Category Dropdown
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                value: selectedSubCategory,
+                hint: Text("Select Sub Category"),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(color: Colors.grey.shade400),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                ),
+                items: _controller.sub_categories.map<DropdownMenuItem<String>>((subCategory) {
+                  String subCategoryName = subCategory['sub_category'].toString();
+                  return DropdownMenuItem<String>(
+                    value: subCategoryName,
+                    child: Text(subCategoryName),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedSubCategory = value;
+                    selectedTopic = null; // Reset topic when subcategory changes
+                    selectedSubtopic = null; // Reset subtopic as well
+                    subCategoryId = _controller.sub_categories.firstWhere((subcategory) => subcategory['sub_category'] == value)['_id'];
+                    print( mainCategoryId.toString());
+                    print(subCategoryId.toString());
+                    _controller.get_topic(categoryId: mainCategoryId.toString(), sub_categoryId: subCategoryId.toString()).then((_) {
+                      setState(() {}); // Update the state after fetching topics
+                    });
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+
+        boxH20(),
+        // Select Topic
+// Select Topic
+        SizedBox(
+          width: MediaQuery.of(context).size.width * 0.3,
+          child: DropdownButtonFormField<String>(
+            value: selectedTopic,
+            hint: Text("Select Topic"),
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: BorderSide(color: Colors.grey.shade400),
+              ),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            ),
+            items: _controller.topics.map<DropdownMenuItem<String>>((topic) {
+              return DropdownMenuItem<String>(
+                value: topic['topic_name'],
+                child: Text(topic['topic_name']),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                selectedTopic = value;
+                selectedSubtopic = null; // Reset subtopic when topic changes
+                // Fetch subtopics based on the selected topic
+                String topicId = _controller.topics.firstWhere((t) => t['topic_name'] == value)['_id'];
+                _controller.get_SubTopic(topicId: topicId, categoryId: mainCategoryId.toString(), sub_categoryId: subCategoryId.toString()).then((_) {
+                  setState(() {});
+                });
+              });
+            },
+          ),
+        ),
+
+        // // Select Subtopic
+        // DropdownButtonFormField<String>(
+        //   value: selectedSubtopic,
+        //   hint: Text("Select Subtopic"),
+        //   items: _controller.sub_topics.map<DropdownMenuItem<String>>((subtopic) {
+        //     return DropdownMenuItem<String>(
+        //       value: subtopic['name'],
+        //       child: Text(subtopic['name']),
+        //     );
+        //   }).toList(),
+        //   onChanged: (value) {
+        //     setState(() {
+        //       selectedSubtopic = value;
+        //     });
+        //   },
+        // ),
+
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -230,72 +444,176 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     );
   }
 
-  Widget _buildTabs() {
-    return SizedBox(
-      width: double.infinity,
-      child: Card(
-        color: Colors.white,
-        elevation: 1.0,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-          child: Wrap(
-            spacing: 8.0,
-            runSpacing: 8.0,
-            children: List.generate(tabs.length, (index) {
-              final bool isActive = index == selectedIndex;
-              return Container(
-                width: MediaQuery.of(context).size.width * 0.16,
-                height: MediaQuery.of(context).size.width * 0.04,
-                margin: const EdgeInsets.symmetric(vertical: 5),
-                decoration: BoxDecoration(
-                  color: isActive ? Colors.orange.shade100 : Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isActive ? Colors.orange : Colors.grey,
-                    width: 1,
-                  ),
-                  boxShadow: isActive
-                      ? [
-                          BoxShadow(
-                            color: Colors.orange.withOpacity(0.3),
-                            blurRadius: 5,
-                            offset: const Offset(0, 3),
-                          )
-                        ]
-                      : [],
-                ),
-                child: TextButton(
-                  onPressed: () {
-                    setState(() {
-                      selectedIndex = index;
-                    });
-                  },
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 12,
-                      horizontal: 20,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    tabs[index],
-                    style: TextStyle(
-                      color: isActive ? Colors.black : Colors.grey.shade700,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-        ),
-      ),
-    );
-  }
 
+
+  // Widget _buildTabs() {
+  //   return DropdownButtonFormField<String>(
+  //     value: selectedMainCategory,
+  //     hint: Text("Select Main Category"),
+  //     items: _controller.categories.map((category) => DropdownMenuItem<String>(
+  //       value: category.toString(),  // Explicitly cast to String
+  //       child: Text(  category['category_name'].toString()),
+  //     ))
+  //         .toList(),
+  //     onChanged: (value) {
+  //       setState(() {
+  //         selectedMainCategory = value;
+  //       });
+  //     },
+  //   );
+  // }
+
+
+  // Widget _buildTabs() {
+  //   return SizedBox(
+  //     width: double.infinity,
+  //     child: Card(
+  //       color: Colors.white,
+  //       elevation: 1.0,
+  //       child: Padding(
+  //         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+  //         child: Wrap(
+  //           spacing: 8.0,
+  //           runSpacing: 8.0,
+  //           children: List.generate(tabs.length, (index) {
+  //             final bool isActive = index == selectedIndex;
+  //             return Container(
+  //               width: MediaQuery.of(context).size.width * 0.16,
+  //               height: MediaQuery.of(context).size.width * 0.04,
+  //               margin: const EdgeInsets.symmetric(vertical: 5),
+  //               decoration: BoxDecoration(
+  //                 color: isActive ? Colors.orange.shade100 : Colors.white,
+  //                 borderRadius: BorderRadius.circular(8),
+  //                 border: Border.all(
+  //                   color: isActive ? Colors.orange : Colors.grey,
+  //                   width: 1,
+  //                 ),
+  //                 boxShadow: isActive
+  //                     ? [
+  //                         BoxShadow(
+  //                           color: Colors.orange.withOpacity(0.3),
+  //                           blurRadius: 5,
+  //                           offset: const Offset(0, 3),
+  //                         )
+  //                       ]
+  //                     : [],
+  //               ),
+  //               child: TextButton(
+  //                 onPressed: () {
+  //                   setState(() {
+  //                     selectedIndex = index;
+  //                   });
+  //                 },
+  //                 style: TextButton.styleFrom(
+  //                   padding: const EdgeInsets.symmetric(
+  //                     vertical: 12,
+  //                     horizontal: 20,
+  //                   ),
+  //                   shape: RoundedRectangleBorder(
+  //                     borderRadius: BorderRadius.circular(8),
+  //                   ),
+  //                 ),
+  //                 child: Text(
+  //                   tabs[index],
+  //                   style: TextStyle(
+  //                     color: isActive ? Colors.black : Colors.grey.shade700,
+  //                     fontWeight: FontWeight.bold,
+  //                     fontSize: 16,
+  //                   ),
+  //                 ),
+  //               ),
+  //             );
+  //           }),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  ///
+  // Widget _buildQuestionsTable() {
+  //   return Card(
+  //     elevation: 1.0,
+  //     color: Colors.white,
+  //     shape: RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.circular(8),
+  //     ),
+  //     child: Container(
+  //       padding: const EdgeInsets.all(16.0),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Row(
+  //             children: [
+  //               const Text(
+  //                 'Question Data',
+  //                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  //               ),
+  //               const Spacer(),
+  //
+  //               CircleAvatar(
+  //                 backgroundColor: Colors.orange.shade100,
+  //                 child: IconButton(
+  //                   icon: Image.asset('assets/excel.png', width: 24, height: 24),
+  //                   onPressed: _exportTableToCSV,
+  //                   tooltip: 'Import Excel Data',
+  //                 ),
+  //               )
+  //             ],
+  //           ),
+  //           SizedBox(height: 10),
+  //           Table(
+  //             border: TableBorder.all(
+  //               color: Colors.grey.shade300,
+  //               borderRadius: BorderRadius.circular(8),
+  //             ),
+  //             columnWidths: const {
+  //               0: FlexColumnWidth(1),
+  //               1: FlexColumnWidth(2),
+  //               2: FlexColumnWidth(1),
+  //               3: FlexColumnWidth(1),
+  //               4: FlexColumnWidth(1),
+  //               5: FlexColumnWidth(1),
+  //               6: FlexColumnWidth(1),
+  //             },
+  //             children: [
+  //               TableRow(
+  //                 decoration: BoxDecoration(
+  //                   color: Colors.orange.shade100,
+  //                   borderRadius: BorderRadius.circular(8),
+  //                 ),
+  //                 children: [
+  //                   _buildTableHeader("Type"),
+  //                   _buildTableHeader("Question"),
+  //                   _buildTableHeader("Option 1"),
+  //                   _buildTableHeader("Option 2"),
+  //                   _buildTableHeader("Option 3"),
+  //                   _buildTableHeader("Option 4"),
+  //                   _buildTableHeader("Answer"),
+  //                 ],
+  //               ),
+  //               ...tableRows,
+  //             ],
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+  //
+  // Widget _buildTableHeader(String title) {
+  //   return Padding(
+  //     padding: const EdgeInsets.all(8.0),
+  //     child: Text(
+  //       title,
+  //       style: const TextStyle(
+  //         fontWeight: FontWeight.bold,
+  //         fontSize: 16,
+  //       ),
+  //       textAlign: TextAlign.center,
+  //     ),
+  //   );
+  // }
   Widget _buildQuestionsTable() {
     return Card(
       elevation: 1.0,
@@ -315,15 +633,15 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
+
                 CircleAvatar(
                   backgroundColor: Colors.orange.shade100,
                   child: IconButton(
-                    icon: const Icon(Icons.file_upload),
-                    onPressed: (){},
-                    //_importExcelData,
-                    tooltip: 'Import Excel Data',
+                    icon: Image.asset('assets/excel.png', width: 24, height: 24),
+                    onPressed: _exportTableToCSV,
+                    tooltip: 'Export to Excel',
                   ),
-                ),
+                )
               ],
             ),
             SizedBox(height: 10),
@@ -333,13 +651,21 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 borderRadius: BorderRadius.circular(8),
               ),
               columnWidths: const {
-                0: FlexColumnWidth(1),
-                1: FlexColumnWidth(2),
-                2: FlexColumnWidth(1),
-                3: FlexColumnWidth(1),
-                4: FlexColumnWidth(1),
-                5: FlexColumnWidth(1),
-                6: FlexColumnWidth(1),
+                0: FlexColumnWidth(1),  // Type
+                1: FlexColumnWidth(2),  // Question
+                2: FlexColumnWidth(1),  // Option 1
+                3: FlexColumnWidth(1),  // Option 2
+                4: FlexColumnWidth(1),  // Option 3
+                5: FlexColumnWidth(1),  // Option 4
+                6: FlexColumnWidth(1),  // Answer
+                7: FlexColumnWidth(1),  // Points
+                8: FlexColumnWidth(1),  // Main Category ID
+                9: FlexColumnWidth(1),  // Sub Category ID
+                10: FlexColumnWidth(1), // Topic ID
+                11: FlexColumnWidth(1), // Sub Topic ID
+                12: FlexColumnWidth(1), // Question Type
+                13: FlexColumnWidth(1), // Title
+                14: FlexColumnWidth(1), // Question Image
               },
               children: [
                 TableRow(
@@ -355,6 +681,14 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                     _buildTableHeader("Option 3"),
                     _buildTableHeader("Option 4"),
                     _buildTableHeader("Answer"),
+                    _buildTableHeader("Points"),
+                    _buildTableHeader("Main Category ID"),
+                    _buildTableHeader("Sub Category ID"),
+                    _buildTableHeader("Topic ID"),
+                    _buildTableHeader("Sub Topic ID"),
+                    _buildTableHeader("Question Type"),
+                    _buildTableHeader("Title"),
+                    _buildTableHeader("Question Image"),
                   ],
                 ),
                 ...tableRows,
@@ -380,6 +714,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     );
   }
 
+
+  ///question type content
   Widget _buildQuestionTypeContent() {
     switch (selectedQuestionType) {
       case "Multiple Choice Question":

@@ -249,6 +249,7 @@ class _MentorScreenState extends State<MentorScreen> {
             4: FlexColumnWidth(3), // Address
             5: FlexColumnWidth(2), // Experience
             6: FlexColumnWidth(2), // Qualification
+
             7: FlexColumnWidth(1.6), // Actions
             8: FlexColumnWidth(2), // Details
           },
