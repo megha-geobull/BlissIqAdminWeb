@@ -1,7 +1,9 @@
 import 'dart:developer';
+import 'dart:io';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../Global/Widgets/ExampleModel.dart';
 import '../Global/constants/ApiString.dart';
 import '../Global/constants/common_snackbar.dart';
 
@@ -12,8 +14,7 @@ class CategoryController extends GetxController {
   RxList sub_categories = [].obs;
   RxList topics = [].obs;
   RxList sub_topics = [].obs;
-  RxList mainCategories = [].obs;
-
+  RxList<ImageWithText> tempList = <ImageWithText>[].obs;
 
   addCategory({
     required String categoryname,
@@ -224,23 +225,36 @@ class CategoryController extends GetxController {
     required String topic_name,
     required String maincategory_id,
     required String sub_categoryId,
-    //required List<File> images,
+    required RxList<ImageWithText> examples
   }) async {
     isLoading.value = true;
-
+    var uri =Uri.parse(ApiString.add_topics);
     try {
-      final Map<String, dynamic> body = {
-        "topic_name": topic_name,
-        "main_category_id": maincategory_id,
-        "sub_category_id": sub_categoryId,
-        //"image[]":image
-      };
 
-      final response = await http.post(
-        Uri.parse(ApiString.add_topics),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(body),
-      );
+      var request = http.MultipartRequest("POST", uri);
+      for (int index = 0; index < examples.length; index++) {
+        try {
+          request.files.add(
+            http.MultipartFile(
+              'image[]',
+              examples[index].file.readAsBytes().asStream(),
+              await examples[index].file.length(),
+              filename: examples[index].file.path
+                  .split('/')
+                  .last,),);
+        }
+        catch (exception) {
+          request.fields["image"] = '';
+        }
+      }
+      for (int index = 0; index < examples.length; index++) {
+        request.fields['exg_name[$index]'] = examples[index].name;
+      }
+      request.fields["topic_name"] = topic_name;
+      request.fields["main_category_id"] = maincategory_id;
+      request.fields["sub_category_id"] = sub_categoryId;
+      //request.fields["exg_name[]"] = examples;
+      http.Response response = await http.Response.fromStream(await request.send());
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -249,7 +263,7 @@ class CategoryController extends GetxController {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
           get_topic(categoryId: maincategory_id,sub_categoryId: sub_categoryId);
-          showSnackbar(message: "Subcategory added successfully");
+          showSnackbar(message: "Topic added successfully");
         } else {
           showSnackbar(message: "Failed to add Subcategory");
         }
