@@ -1,19 +1,16 @@
-import 'dart:io';
-
-import 'package:blissiqadmin/Global/constants/AppColor.dart';
-import 'package:blissiqadmin/Home/Controller/MainCategoryController.dart';
+import 'package:blissiqadmin/Global/Widgets/ExampleModel.dart';
+import 'package:blissiqadmin/Global/constants/CustomAlertDialogue.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
+import 'package:blissiqadmin/controller/CategoryController.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../Global/Widgets/ExampleModel.dart';
-import '../../Global/constants/CustomAlertDialogue.dart';
-import '../../controller/CategoryController.dart';
 
 class TopicsScreen extends StatefulWidget {
-   TopicsScreen({super.key,required this.subcategory});
-    var subcategory;
+  TopicsScreen({super.key,required this.subcategory});
+  var subcategory;
 
   @override
   State<TopicsScreen> createState() => _TopicsScreenState();
@@ -94,7 +91,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
           InkWell(
               onTap: (){
                 _showAddDialog(context,'topic',0,'');
-                },
+              },
               child: const Text('Add Topic')),
 
           IconButton(
@@ -127,11 +124,11 @@ class _TopicsScreenState extends State<TopicsScreen> {
                               icon: Icon(Icons.delete, color: Colors.red),
                               onPressed: () {
                                 onDelete(
-                                  _controller.topics[index],
-                                  index,
-                                  "You want to delete this Topic?",
-                                  'topic',
-                                  ''
+                                    _controller.topics[index],
+                                    index,
+                                    "You want to delete this Topic?",
+                                    'topic',
+                                    ''
                                 );
                               },
                             ),
@@ -155,10 +152,10 @@ class _TopicsScreenState extends State<TopicsScreen> {
                                   icon: Icon(Icons.delete,color: Colors.red,),
                                   onPressed: () {
                                     onDelete(
-                                      _controller.sub_topics[index],
-                                      index,
-                                      "You want to delete this Topic?",
-                                      'subtopic',
+                                        _controller.sub_topics[index],
+                                        index,
+                                        "You want to delete this Topic?",
+                                        'subtopic',
                                         topic['_id']
                                     );
                                   },
@@ -171,8 +168,8 @@ class _TopicsScreenState extends State<TopicsScreen> {
                     },
                   )
                 ,)
-              ),
-            )
+          ),
+        )
         ),
       ],
     );
@@ -194,9 +191,9 @@ class _TopicsScreenState extends State<TopicsScreen> {
         }else{
           _controller.deleteSub_Topic(
               categoryId: topic['main_category_id'], sub_categoryId: topic['sub_category_id'],topicId:topic['topic_id'],sub_topicId: subtopic_id );
-          _controller.topics.removeAt(index);
+          _controller.sub_topics.removeAt(index);
         }
-        },
+      },
       ),
     );
   }
@@ -207,9 +204,9 @@ class _TopicsScreenState extends State<TopicsScreen> {
     String? selectedSubCategoryId;
     String? selectedTopicId;
     if(type=="subtopic"){
-    selectedCategoryId =topicDetails['main_category_id'];
-    selectedSubCategoryId = topicDetails['sub_category_id'];
-    selectedTopicId = topicDetails['_id']??'';
+      selectedCategoryId =topicDetails['main_category_id'];
+      selectedSubCategoryId = topicDetails['sub_category_id'];
+      selectedTopicId = topicDetails['_id']??'';
     }
     else{
       selectedCategoryId =widget.subcategory['main_category_id'];
@@ -242,24 +239,26 @@ class _TopicsScreenState extends State<TopicsScreen> {
                     ElevatedButton(
                       onPressed: () async {
                         // Open image picker to select multiple images
-                        final List<XFile>? images = await ImagePicker().pickMultiImage();
-                        // if (images != null) {
-                        //   for (var image in images) {
-                        //     _controller.tempList.add(ImageWithText(file: image, path: image.path));
-                        //   }
-                        //   setState(() {}); // Update UI after selecting images
-                        // }
+                        //final List<XFile>? images = await ImagePicker().pickMultiImage();
+                        List<PlatformFile>? images = (await FilePicker.platform.pickFiles(
+                          type: FileType.custom,
+                          allowMultiple: false,
+                          onFileLoading: (FilePickerStatus status) =>
+                              print("status .... $status"),
+                          allowedExtensions: ['png', 'jpg', 'jpeg'],
+                        ))
+                            ?.files;
                         if (images != null) {
                           for (var image in images) {
                             // Preload bytes for the image
-                            final bytes = await image.readAsBytes();
+                            final bytes = await image.bytes;
 
                             // Add to tempList with bytes
                             _controller.tempList.add(
-                              ImageWithText(file: image, path: image.path, bytes: bytes),
+                              ImageWithText(file: image, path: '', bytes: bytes,imageName:image.name ),
                             );
                           }
-                          setState(() {}); // Update the UI after adding images
+                          setState(() {});
                         }
                       },
                       child: Text('Add Examples'),
@@ -272,37 +271,37 @@ class _TopicsScreenState extends State<TopicsScreen> {
                           itemBuilder: (context, index) {
                             final item = _controller.tempList[index];
                             return Card(
-                              margin: const EdgeInsets.symmetric(vertical: 5),
-                              child: Container(
-                                width:300,
-                            child:
-                            Row(
-                                children: [
-                                  //Image.file(File(item.path)),
-                                  SizedBox(
-                                    height:100,width: 100,
-                                    child:Image.memory(item.bytes!),),//Display selected image
-                                  SizedBox(
-                                      width:250,
-                                      child:TextField(
-                                    decoration: InputDecoration(
-                                      labelText: 'Enter Name for Example',
-                                    ),
-                                    onChanged: (value) {
-                                      item.name = value;
-                                    },
-                                  ))
-                                  ,
-                                  IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.red),
-                                    onPressed: () {
-                                      setState(() {
-                                        _controller.tempList.removeAt(index);
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),)
+                                margin: const EdgeInsets.symmetric(vertical: 5),
+                                child: Container(
+                                  width:300,
+                                  child:
+                                  Row(
+                                    children: [
+                                      //Image.file(File(item.path)),
+                                      SizedBox(
+                                        height:100,width: 100,
+                                        child:Image.memory(item.bytes!),),//Display selected image
+                                      SizedBox(
+                                          width:250,
+                                          child:TextField(
+                                            decoration: const InputDecoration(
+                                              labelText: 'Enter Name for Example',
+                                            ),
+                                            onChanged: (value) {
+                                              item.name = value;
+                                            },
+                                          ))
+                                      ,
+                                      IconButton(
+                                        icon: Icon(Icons.delete, color: Colors.red),
+                                        onPressed: () {
+                                          setState(() {
+                                            _controller.tempList.removeAt(index);
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),)
                             );
                           },
                         ),
@@ -352,7 +351,3 @@ class _TopicsScreenState extends State<TopicsScreen> {
   }
 
 }
-
-
-
-
