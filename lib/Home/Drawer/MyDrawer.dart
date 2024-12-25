@@ -8,9 +8,12 @@ import 'package:blissiqadmin/Home/Drawer/SettingsPage.dart';
 import 'package:blissiqadmin/Home/Drawer/UsersPage.dart';
 import 'package:blissiqadmin/Home/HomePage.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/AddQuetionsWidgets.dart';
+import 'package:blissiqadmin/auth/login/login.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../Global/utils/shared_preference/shared_preference_services.dart';
 
 class DrawerController extends GetxController {
   var selectedPage = 'Dashboard'.obs;
@@ -39,7 +42,13 @@ class _MyDrawerState extends State<MyDrawer> {
     );
   }
 
-  void onLogoutTap() {}
+  void onLogoutTap() {
+    clearLocalStorage();
+    //  isLogin = false;
+    setState(() {});
+    Get.offAll(LoginScreen());
+  }
+
   Widget MyDrawer() {
     return ListView(
       padding: EdgeInsets.zero,
