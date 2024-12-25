@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:country_code_picker/country_code_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -13,6 +15,12 @@ import '../Global/utils/shared_preference/shared_preference_services.dart';
 bool isLogin = false;
 
 class ProfileController extends GetxController {
+
+
+  var nameController = TextEditingController();
+  var emailController = TextEditingController();
+  var phNoController = TextEditingController();
+
   var isLoading = false.obs;
   var profile = {}.obs;
   String? getLangCode='';
@@ -20,7 +28,12 @@ class ProfileController extends GetxController {
   String? getAge = '';
   String? getPurpose = '';
 
+
+
+
   RxString userId = "".obs;
+  var formKey = GlobalKey<FormState>();
+  var currentCountryCode = "IN-91".obs;
 
   checkLogin() async {
     print("checkLogin   MyProfileController");
@@ -32,6 +45,32 @@ class ProfileController extends GetxController {
       getProfile();
     }
   }
+
+  List<PlatformFile>? _paths;
+  var pathsFile;
+  var pathsFileName;
+
+  // Handle country code change
+  void onCountryChange(CountryCode countryCode) {
+    currentCountryCode.value = '${countryCode.code}-${countryCode.dialCode}';
+  }
+
+  pickFile() async {
+    _paths = (await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: false,
+      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
+      allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
+    ))?.files;
+
+    if (_paths != null && _paths!.isNotEmpty) {
+      pathsFile = _paths!.first.bytes; // Store the bytes
+      pathsFileName = _paths!.first.name; // Store the file name
+    } else {
+      print('No file selected');
+    }
+  }
+
 
   setData() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
@@ -61,7 +100,7 @@ class ProfileController extends GetxController {
       };
 
       final response = await http.post(
-        Uri.parse(ApiString.getProfile),
+        Uri.parse(ApiString.get_profile),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(body),
       );
@@ -94,11 +133,9 @@ class ProfileController extends GetxController {
     required String user_name,
     required String contact_no,
     required String email,
-    required String school,
-    required String std_class,
     required String profile_image,
-    required String board_name,
-  }) async {
+     required BuildContext context,
+   }) async {
     isLoading.value = true;
     final String? userId = await getUserId();
 
@@ -120,13 +157,7 @@ class ProfileController extends GetxController {
         ..fields['user_id'] = userId
         ..fields['user_name'] = user_name
         ..fields['contact_no'] = contact_no
-        ..fields['email'] = email
-        ..fields['school'] = school
-        ..fields['language'] = language!
-        ..fields['age_group'] = ageGroup!
-        ..fields['purpose'] = purpose!
-        ..fields['std_class'] = std_class.isNotEmpty ? std_class : 'Not Provided'
-        ..fields['board_name'] = board_name.isNotEmpty ? board_name : '';
+        ..fields['email'] = email;
 
       // Handle profile image upload logic
       if (profile_image.isNotEmpty) {
