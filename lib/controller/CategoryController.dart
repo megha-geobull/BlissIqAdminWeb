@@ -232,24 +232,36 @@ class CategoryController extends GetxController {
     try {
 
       var request = http.MultipartRequest("POST", uri);
-      for (int index = 0; index < examples.length; index++) {
+      //for (int index = 0; index < examples.length; index++) {
+      if(examples.isNotEmpty) {
         try {
+          // request.files.add(
+          //   http.MultipartFile(
+          //     'image',
+          //     examples[0].file.readAsBytes().asStream(),
+          //     await examples[0].file.length(),
+          //     filename: examples[0].file.path
+          //         .split('/')
+          //         .last,),);
           request.files.add(
-            http.MultipartFile(
-              'image[]',
-              examples[index].file.readAsBytes().asStream(),
-              await examples[index].file.length(),
-              filename: examples[index].file.path
-                  .split('/')
-                  .last,),);
+            http.MultipartFile.fromBytes(
+              'image',
+              examples[0].bytes,
+              //contentType: MediaType('application', 'x-tar'),
+              filename: examples[0].imageName,
+            ),
+          );
+          print(examples[0].imageName);
         }
         catch (exception) {
           request.fields["image"] = '';
         }
+        //}
+        //for (int index = 0; index < examples.length; index++) {
+        request.fields['exg_name'] = examples[0].name;
+        print(request.fields['exg_name[]']);
       }
-      for (int index = 0; index < examples.length; index++) {
-        request.fields['exg_name[$index]'] = examples[index].name;
-      }
+      //}
       request.fields["topic_name"] = topic_name;
       request.fields["main_category_id"] = maincategory_id;
       request.fields["sub_category_id"] = sub_categoryId;
