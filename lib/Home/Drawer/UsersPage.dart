@@ -17,7 +17,7 @@ class _UsersPageState extends State<UsersPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Colors.grey.shade100,
       body: LayoutBuilder(
         builder: (context, constraints) {
           // Check screen size for responsiveness
@@ -34,6 +34,7 @@ class _UsersPageState extends State<UsersPage> {
                 ),
               Expanded(
                 child: Scaffold(
+                  backgroundColor: Colors.grey.shade100,
                   appBar: isWideScreen
                       ? null
                       : AppBar(

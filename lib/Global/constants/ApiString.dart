@@ -1,12 +1,17 @@
 class ApiString {
    /// Base URL
    static const String baseUrl = "http://65.0.211.122:4444/";
+   static const String mentorBaseUrl= "";
    static const String ImgBaseUrl = "http://65.0.211.122:4444/";
 
    /// Auth Endpoints
    static const String signUp = "${baseUrl}student_registration";
    // static const String generateOtp = "${baseUrl}generate-otp";
    // static const String verifyOtp = "${baseUrl}verify-otp";
+
+   static const String mentor_registration = "" ;
+
+
    static const String login = "${baseUrl}login";
    static const String forgotPassword = "${baseUrl}forgot_password";
    static const String changePassword = "${baseUrl}change_password";

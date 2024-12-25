@@ -15,7 +15,7 @@ class MentorRegistration extends StatefulWidget {
 }
 
 class _MentorRegistrationState extends State<MentorRegistration> {
-  final AuthController signUpController = Get.put(AuthController());
+  final AuthController mentorController = Get.put(AuthController());
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +34,7 @@ class _MentorRegistrationState extends State<MentorRegistration> {
                 ),
               Expanded(
                 child: Scaffold(
+                  backgroundColor: Colors.grey.shade50,
                   appBar: isWideScreen
                       ? null
                       : AppBar(
@@ -67,218 +68,429 @@ class _MentorRegistrationState extends State<MentorRegistration> {
 
   Widget _buildMentorMainContent(BoxConstraints constraints) {
     return SafeArea(
-        child: Center(
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width *
-            0.4, // Adjusted width for better sizing
-        child: Builder(builder: (context) {
-          return Form(
-            key: signUpController.formKey,
-            child: SingleChildScrollView(
-              // Added scroll view for better usability
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Center(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+            child: Center(
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.38,
+                child: Builder(builder: (context) {
+                  return Form(
+                    key: mentorController.formKey,
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Image.asset(
-                          'assets/icons/mentor.png',
-                          height: constraints.maxHeight * 0.15,
-                        ),
-                        SizedBox(
-                            height: constraints.maxHeight *
-                                0.02), // Reduced height for spacing
-                        const Text(
-                          'Add New Mentor',
-                          style: TextStyle(
-                            fontSize:
-                                22, // Increased font size for better visibility
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blueAccent,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20), // Reduced height for spacing
-                  buildDropdownField(
-                    label: 'Select User Type',
-                    value: signUpController.selectedUserType.value,
-                    items: ['Mentor', 'Teacher'],
-                    onChanged: (value) {
-                      signUpController.selectedUserType.value = value!;
-                    },
-                  ),
-                  const SizedBox(height: 15), // Reduced height for spacing
-                  CustomTextField(
-                    controller: signUpController.nameController,
-                    labelText: 'Full Name',
-                    hintText: 'Enter your full name',
-                    prefixIcon: const Icon(Icons.perm_identity),
-                  ),
-                  const SizedBox(height: 15), // Reduced height for spacing
-                  CustomTextField(
-                    controller: signUpController.emailController,
-                    labelText: 'Email',
-                    hintText: 'Enter your email',
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    validator: emailValidator,
-                  ),
-                  const SizedBox(height: 15), // Reduced height for spacing
-                  CustomTextField(
-                    controller: signUpController.addressController,
-                    labelText: 'Address',
-                    hintText: 'Enter your address',
-                    prefixIcon: const Icon(Icons.location_on_outlined),
-                    maxLines: 2,
-                  ),
-                  const SizedBox(height: 15), // Reduced height for spacing
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Container(
-                          margin: EdgeInsets.only(right: 10),
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(8.0)),
-                            border:
-                                Border.all(width: 1, color: Colors.blueAccent),
-                          ),
-                          height: 50,
-                          alignment: Alignment.centerLeft,
-                          child: CountryCodePicker(
-                            onChanged: signUpController.onCountryChange,
-                            initialSelection: 'IN',
-                            favorite: ['+91', 'IN'],
-                            showCountryOnly: false,
-                            showOnlyCountryWhenClosed: false,
-                            alignLeft: false,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 7,
-                        child: SizedBox(
-                          height: 50,
-                          child: TextFormField(
-                            inputFormatters: [
-                              LengthLimitingTextInputFormatter(10)
-                            ],
-                            keyboardType: TextInputType.phone,
-                            controller: signUpController.phNoController,
-                            maxLines: 1,
-                            cursorColor: Colors.black,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                              filled: true,
-                              fillColor: Colors.white.withOpacity(0.2),
-                              focusedBorder: const OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.grey),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(10)),
+                        // Logo
+                        Center(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              // Welcome Text
+                              const Text(
+                                'Mentor Registration',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
                               ),
-                              hintText: 'Enter mobile number',
+                              boxH10(),
+
+                              GestureDetector(
+                                  onTap: () {
+                                    mentorController.pickFile();
+                                  },
+                                  child: CircleAvatar(
+                                    radius: 50,
+                                    backgroundImage:
+                                        mentorController.pathsFile != null
+                                            ? MemoryImage(mentorController.pathsFile!)
+                                            : AssetImage("assets/business.png")
+                                                as ImageProvider,
+                                    child: const Align(
+                                      alignment: Alignment.bottomRight,
+                                      child: CircleAvatar(
+                                        backgroundColor: Colors.blue,
+                                        radius: 15,
+                                        child: Icon(Icons.add,
+                                            size: 20, color: Colors.white),
+                                      ),
+                                    ),
+                                  )),
+
+                              // GestureDetector(
+                              //   onTap: () {
+                              //     mentorController.pickFile();
+                              //   },
+                              //   child: Obx(() {
+                              //     return CircleAvatar(
+                              //       radius: 50,
+                              //       backgroundImage: mentorController.pathsFile != null
+                              //           ? MemoryImage(mentorController.pathsFile!)
+                              //           : AssetImage("assets/business.png")
+                              //               as ImageProvider,
+                              //       child: const Align(
+                              //         alignment: Alignment.bottomRight,
+                              //         child: CircleAvatar(
+                              //           backgroundColor: Colors.blue,
+                              //           radius: 15,
+                              //           child: Icon(Icons.add,
+                              //               size: 20, color: Colors.white),
+                              //         ),
+                              //       ),
+                              //     );
+                              //   }),
+                              // ),
+                            ],
+                          ),
+                        ),
+                        boxH30(),
+                        // User Type Dropdown
+                         DropdownButtonFormField<String>(
+                            value: mentorController.selectedUserType.value,
+                            decoration: InputDecoration(
+                              labelText: 'Select User Type',
+                              labelStyle: const TextStyle(
+                                color: Colors.blueGrey,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 18,
+                              ),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: MediaQuery.of(context).size.width * 0.01,
+                                vertical: MediaQuery.of(context).size.height * 0.01,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                                borderSide:
+                                    BorderSide(color: Colors.blueAccent, width: 1),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                                borderSide: BorderSide(
+                                    color: Colors.blueAccent.withOpacity(0.7),
+                                    width: 0.8),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                                borderSide:
+                                    BorderSide(color: Colors.blueAccent, width: 0.9),
+                              ),
+                              filled: true,
+                              fillColor: Colors.white,
+                            ),
+                            onChanged: (value) {
+                              mentorController.selectedUserType.value = value!;
+                            },
+                            items: ['Mentor', 'Teacher'].map((String userType) {
+                              return DropdownMenuItem<String>(
+                                value: userType,
+                                child: Text(
+                                  userType,
+                                  style:  TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black.withOpacity(0.8),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                            icon:   Icon(
+                              Icons.arrow_drop_down_circle,
+                              color: Colors.grey.shade600,
+                              size: 18,
                             ),
                           ),
+
+
+                        // User Type Dropdown
+                        // Obx(() {
+                        //   return DropdownButtonFormField<String>(
+                        //     value: mentorController.selectedUserType.value,
+                        //     decoration: InputDecoration(
+                        //       labelText: 'Select User Type',
+                        //       labelStyle: TextStyle(
+                        //         color: Colors.blueGrey,
+                        //         fontWeight: FontWeight.w500,
+                        //         fontSize: MediaQuery.of(context).size.width * 0.02,
+                        //       ),
+                        //       contentPadding: EdgeInsets.symmetric(
+                        //         horizontal: MediaQuery.of(context).size.width * 0.04,
+                        //         vertical: MediaQuery.of(context).size.height * 0.015,
+                        //       ),
+                        //       border: OutlineInputBorder(
+                        //         borderRadius: BorderRadius.circular(12.0),
+                        //         borderSide:
+                        //             BorderSide(color: Colors.blueAccent, width: 1),
+                        //       ),
+                        //       enabledBorder: OutlineInputBorder(
+                        //         borderRadius: BorderRadius.circular(12.0),
+                        //         borderSide: BorderSide(
+                        //             color: Colors.blueAccent.withOpacity(0.7),
+                        //             width: 0.8),
+                        //       ),
+                        //       focusedBorder: OutlineInputBorder(
+                        //         borderRadius: BorderRadius.circular(12.0),
+                        //         borderSide:
+                        //             BorderSide(color: Colors.blueAccent, width: 0.9),
+                        //       ),
+                        //       filled: true,
+                        //       fillColor: Colors.white,
+                        //     ),
+                        //     onChanged: (value) {
+                        //       mentorController.selectedUserType.value = value!;
+                        //     },
+                        //     items: ['Mentor', 'Teacher'].map((String userType) {
+                        //       return DropdownMenuItem<String>(
+                        //         value: userType,
+                        //         child: Text(
+                        //           userType,
+                        //           style: TextStyle(
+                        //             fontSize: MediaQuery.of(context).size.width * 0.04,
+                        //             fontWeight: FontWeight.w600,
+                        //             color: Colors.black87,
+                        //           ),
+                        //         ),
+                        //       );
+                        //     }).toList(),
+                        //     icon: Icon(
+                        //       Icons.arrow_drop_down_circle,
+                        //       color: Colors.blueAccent,
+                        //       size: MediaQuery.of(context).size.width * 0.06,
+                        //     ),
+                        //   );
+                        // }),
+                        boxH20(),
+                        // Name TextField
+                        CustomTextField(
+                          controller: mentorController.nameController,
+                          labelText: 'Full Name',
+                          keyboardType: TextInputType.text,
+                          prefixIcon: Icon(Icons.perm_identity),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please Enter your full name';
+                            }
+                            return null;
+                          },
                         ),
-                      ),
-                    ],
-                  ),
-                  boxH15(), // Reduced height for spacing
-                  CustomTextField(
-                    controller: signUpController.experienceController,
-                    labelText: 'Experience (in years)',
-                    hintText: 'Enter your experience',
-                    prefixIcon: const Icon(Icons.work_outline),
-                    keyboardType: TextInputType.number,
-                  ),
-                  boxH15(), // Reduced height for spacing
-                  CustomTextField(
-                    controller: signUpController.qualificationController,
-                    labelText: 'Qualification',
-                    hintText: 'Enter your qualification',
-                    prefixIcon: const Icon(Icons.school_outlined),
-                  ),
-                  boxH15(), // Reduced height for spacing
-                  CustomTextField(
-                    controller: signUpController.introBio,
-                    labelText: 'Introduction/Bio',
-                    hintText: 'Tell us about yourself',
-                    prefixIcon: const Icon(Icons.person_outline),
-                    maxLines: 4,
-                  ),
-                  boxH15(), // Reduced height for spacing
-                  CustomTextField(
-                    controller: signUpController.languagesController,
-                    labelText: 'Languages Proficient in Teaching (optional)',
-                    hintText: 'Enter languages you can teach in',
-                    prefixIcon: const Icon(Icons.language_outlined),
-                  ),
-                  boxH15(), // Reduced height for spacing
-                  CustomTextField(
-                    controller: signUpController.passwordController,
-                    labelText: 'Enter your password',
-                    hintText: 'Enter your password',
-                    prefixIcon: const Icon(Icons.password_outlined),
-                    obscureText: true,
-                  ),
-                  boxH15(), // Reduced height for spacing
-                  CustomTextField(
-                    controller: signUpController.confirmPasswordController,
-                    labelText: 'Confirm your password',
-                    hintText: 'Re-enter your password',
-                    prefixIcon: const Icon(Icons.password_rounded),
-                    obscureText: true,
-                  ),
-                  boxH20(), // Spacing before the button
-                  CustomButton(
-                    label: 'Register',
-                    onPressed: () => signUpController.handleSignUp(context),
-                  ),
-                ],
+                        boxH20(),
+
+                        // Email TextField
+                        CustomTextField(
+                          controller: mentorController.emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          labelText: 'Email',
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your email';
+                            }
+                            if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                              return 'Please enter a valid email address';
+                            }
+                            return null;
+                          },
+                          prefixIcon: Icon(Icons.email_outlined),
+                        ),
+
+                        boxH20(),
+
+                        // Address TextField
+                        CustomTextField(
+                          controller: mentorController.addressController,
+                          labelText: 'Address',
+                          maxLines: 2,
+                          keyboardType: TextInputType.text,
+                          prefixIcon: Icon(Icons.location_on_outlined),
+                        ),
+                        boxH20(),
+
+                        // Phone Number & Country Code
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: Container(
+                                margin: EdgeInsets.only(right: 10),
+                                decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(8.0)),
+                                  border:
+                                      Border.all(width: 1, color: Colors.blueAccent),
+                                ),
+                                height: 50,
+                                alignment: Alignment.centerLeft,
+                                child: CountryCodePicker(
+                                  onChanged: mentorController.onCountryChange,
+                                  initialSelection: 'IN',
+                                  favorite: ['+91', 'IN'],
+                                  showCountryOnly: false,
+                                  showOnlyCountryWhenClosed: false,
+                                  alignLeft: false,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 7,
+                              child: SizedBox(
+                                height: 50,
+                                child: TextFormField(
+                                  inputFormatters: [
+                                    LengthLimitingTextInputFormatter(10)
+                                  ],
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please Enter your mobile number';
+                                    }
+                                    return null;
+                                  },
+                                  keyboardType: TextInputType.phone,
+                                  controller: mentorController.phNoController,
+                                  cursorColor: Colors.black,
+                                  decoration: InputDecoration(
+                                    border: OutlineInputBorder(),
+                                    filled: true,
+                                    fillColor: Colors.white.withOpacity(0.2),
+                                    focusedBorder: const OutlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.grey),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(10)),
+                                    ),
+                                    hintText: 'Enter mobile number',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        boxH20(),
+
+                        // Experience TextField
+                        CustomTextField(
+                          controller: mentorController.experienceController,
+                          labelText: 'Experience (in years)',
+                          keyboardType: TextInputType.number,
+                          prefixIcon: const Icon(Icons.work_outline),
+                        ),
+                        boxH20(),
+
+                        // Qualification TextField
+                        CustomTextField(
+                          controller: mentorController.qualificationController,
+                          labelText: 'Qualification',
+                          keyboardType: TextInputType.text,
+                          prefixIcon: Icon(Icons.school_outlined),
+                        ),
+                        boxH20(),
+
+                        // Bio/Introduction TextField
+                        CustomTextField(
+                          controller: mentorController.introBioController,
+                          labelText: 'Introduction/Bio',
+                          maxLines: 3,
+                          prefixIcon: Icon(Icons.person_outline),
+                        ),
+                        boxH20(),
+                        CustomTextField(
+                          controller: mentorController.passwordController,
+                          labelText: 'Enter your password',
+                          keyboardType: TextInputType.visiblePassword,
+                          prefixIcon: const Icon(Icons.password_outlined),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please Enter your password';
+                            }
+                            return null;
+                          },
+                          obscureText: !mentorController.passwordVisible.value,
+                          sufixIcon: IconButton(
+                            icon: Icon(mentorController.passwordVisible.value
+                                ? Icons.visibility
+                                : Icons.visibility_off),
+                            onPressed: () {
+                              setState(() {
+                                mentorController.passwordVisible.value =
+                                    !mentorController.passwordVisible.value;
+                              });
+                            },
+                          ),
+                        ),
+                        boxH20(),
+                        CustomTextField(
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please Confirm your password';
+                            } else if (value !=
+                                mentorController.passwordController.text) {
+                              return 'Passwords do not match';
+                            }
+                            return null;
+                          },
+                          controller: mentorController.confirmPasswordController,
+                          labelText: 'Confirm your password',
+                          keyboardType: TextInputType.visiblePassword,
+                          prefixIcon: const Icon(Icons.password_rounded),
+                          obscureText: !mentorController.passwordVisible.value,
+                          sufixIcon: IconButton(
+                            icon: Icon(mentorController.passwordVisible.value
+                                ? Icons.visibility
+                                : Icons.visibility_off),
+                            onPressed: () {
+                              setState(() {
+                                mentorController.passwordVisible.value =
+                                    !mentorController.passwordVisible.value;
+                              });
+                            },
+                          ),
+                        ),
+                        boxH20(),
+                        // Sign Up Button
+                        Obx(() {
+                          return Center(
+                            child: mentorController.isLoading.value
+                                ? CircularProgressIndicator()
+                                : CustomButton(
+                                    label: "Register",
+                                    onPressed: () {
+                                      if (mentorController.formKey.currentState!
+                                          .validate()) {
+                                        mentorController.mentorRegistration(
+                                          userType:
+                                              mentorController.selectedUserType.value,
+                                          fullName:
+                                              mentorController.nameController.text,
+                                          email:
+                                              mentorController.emailController.text,
+                                          address:
+                                              mentorController.addressController.text,
+                                          contactNo:
+                                              mentorController.phNoController.text,
+                                          experience: mentorController
+                                              .experienceController.text,
+                                          qualification: mentorController
+                                              .qualificationController.text,
+                                          introBio: mentorController
+                                              .introBioController.text,
+                                          password: mentorController
+                                              .passwordController.text,
+                                          confirmPassword: mentorController
+                                              .confirmPasswordController.text,
+                                          context: context,
+                                        );
+                                      }
+                                    },
+                                  ),
+                          );
+                        }),
+                      ],
+                    ),
+                  );
+                }),
               ),
             ),
-          );
-        }),
-      ),
-    ));
-  }
-
-  Widget buildDropdownField({
-    required String label,
-    required String value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return DropdownButtonFormField<String>(
-      value: value,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.blueAccent, width: 1),
-        ),
-      ),
-      onChanged: onChanged,
-      items: items
-          .map((item) => DropdownMenuItem(
-                value: item,
-                child: Text(item),
-              ))
-          .toList(),
-    );
-  }
-
-  String? emailValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your email';
-    }
-    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-      return 'Please enter a valid email address';
-    }
-    return null;
+          ),
+        ));
   }
 }

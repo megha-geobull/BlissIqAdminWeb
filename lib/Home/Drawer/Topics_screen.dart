@@ -1,13 +1,9 @@
-import 'dart:io';
-
 import 'package:blissiqadmin/Global/constants/AppColor.dart';
 import 'package:blissiqadmin/Home/Controller/MainCategoryController.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 
-import '../../Global/Widgets/ExampleModel.dart';
 import '../../Global/constants/CustomAlertDialogue.dart';
 import '../../controller/CategoryController.dart';
 import '../Quetion type widgets/AddQuetionsWidgets/AddQuetionsWidgets.dart';
@@ -135,70 +131,22 @@ class _TopicsScreenState extends State<TopicsScreen> {
             ],
           ),
         ),
-// <<<<<<< narayan.dev
-//         Obx(
-//           () => _controller.isLoading == true
-//               ? const Center(
-//                   child: CircularProgressIndicator(
-//                     color:
-//                         Colors.deepOrange, // More professional loading spinner
-//                   ),
-//                 )
-//               : _controller.isLoading == false && _controller.topics.isEmpty
-//                   ? const Center(
-//                       child: Text(
-//                         'No Topics available',
-//                         style: TextStyle(
-//                           fontSize: 18,
-//                           fontWeight: FontWeight.w500,
-//                           color: Colors.grey,
-// =======
-          Spacer(),
-          InkWell(
-              onTap: (){
-                _showAddDialog(context,'topic',0,'');
-                },
-              child: const Text('Add Topic')),
-
-          IconButton(
-              icon: Icon(Icons.add_circle_outline),
-              onPressed: () {
-                _showAddDialog(context,'topic',0,'');
-              })
-        ]),
-        Obx(()=>_controller.isLoading==true?Container(child:Center(child: Text('Loading Topics...'),)):
-        _controller.isLoading==false && _controller.topics.isEmpty?
-        Container(child:Center(child:Text('No Topics available'))):
-        SingleChildScrollView(
-          child: SizedBox(
-              height:MediaQuery.of(context).size.height/1.5,
-              child:Obx(()=>
-                  ListView.builder(
-                    itemCount: _controller.topics.length,
-                    itemBuilder: (context, index) {
-                      return ExpansionTile(
-                        title: Row(
-                          children: [
-                            Text(_controller.topics[index]['topic_name']),
-                            IconButton(
-                              icon: Icon(Icons.add_circle_outline),
-                              onPressed: () {
-                                _showAddDialog(context, 'subtopic', index, _controller.topics[index]);
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                onDelete(
-                                  _controller.topics[index],
-                                  index,
-                                  "You want to delete this Topic?",
-                                  'topic',
-                                  ''
-                                );
-                              },
-                            ),
-                          ],
+        Obx(
+          () => _controller.isLoading == true
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    color:
+                        Colors.deepOrange, // More professional loading spinner
+                  ),
+                )
+              : _controller.isLoading == false && _controller.topics.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'No Topics available',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey,
                         ),
                       ),
                     )
@@ -494,124 +442,17 @@ class _TopicsScreenState extends State<TopicsScreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return Dialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              child: Container(
-                padding: const EdgeInsets.all(16.0),
-                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
+            return AlertDialog(
+              title: Text('Add $type'),
+              content: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Add $type', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 10),
                     TextField(
                       controller: controller,
                       decoration: InputDecoration(
                         labelText: 'Enter ${type.capitalizeFirst}',
                       ),
-                    ),
-                    SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: () async {
-                        // Open image picker to select multiple images
-                        final List<XFile>? images = await ImagePicker().pickMultiImage();
-                        // if (images != null) {
-                        //   for (var image in images) {
-                        //     _controller.tempList.add(ImageWithText(file: image, path: image.path));
-                        //   }
-                        //   setState(() {}); // Update UI after selecting images
-                        // }
-                        if (images != null) {
-                          for (var image in images) {
-                            // Preload bytes for the image
-                            final bytes = await image.readAsBytes();
-
-                            // Add to tempList with bytes
-                            _controller.tempList.add(
-                              ImageWithText(file: image, path: image.path, bytes: bytes),
-                            );
-                          }
-                          setState(() {}); // Update the UI after adding images
-                        }
-                      },
-                      child: Text('Add Examples'),
-                    ),
-                    SizedBox(height: 10),
-                    if (_controller.tempList.isNotEmpty)
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: _controller.tempList.length,
-                          itemBuilder: (context, index) {
-                            final item = _controller.tempList[index];
-                            return Card(
-                              margin: const EdgeInsets.symmetric(vertical: 5),
-                              child: Container(
-                                width:300,
-                            child:
-                            Row(
-                                children: [
-                                  //Image.file(File(item.path)),
-                                  SizedBox(
-                                    height:100,width: 100,
-                                    child:Image.memory(item.bytes!),),//Display selected image
-                                  SizedBox(
-                                      width:250,
-                                      child:TextField(
-                                    decoration: InputDecoration(
-                                      labelText: 'Enter Name for Example',
-                                    ),
-                                    onChanged: (value) {
-                                      item.name = value;
-                                    },
-                                  ))
-                                  ,
-                                  IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.red),
-                                    onPressed: () {
-                                      setState(() {
-                                        _controller.tempList.removeAt(index);
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),)
-                            );
-                          },
-                        ),
-                      ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: const Text('Cancel'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            if (controller.text.isNotEmpty) {
-                              if (type == "subtopic") {
-                                _controller.addSubTopic(
-                                  subtopic_name: controller.text,
-                                  sub_categoryId: selectedSubCategoryId!,
-                                  maincategory_id: selectedCategoryId!,
-                                  topicId: selectedTopicId!,
-                                );
-                                _controller.sub_topics.refresh();
-                              } else if (type == "topic") {
-                                _controller.addTopic(
-                                  topic_name: controller.text,
-                                  maincategory_id: widget.subcategory['main_category_id']!,
-                                  sub_categoryId: widget.subcategory['_id']!,
-                                  examples: _controller.tempList,
-                                );
-                                _controller.topics.refresh();
-                              }
-                              Navigator.of(context).pop();
-                            }
-                          },
-                          child: const Text('Add'),
-                        ),
-                      ],
                     ),
                   ],
                 ),
@@ -637,7 +478,9 @@ class _TopicsScreenState extends State<TopicsScreen> {
                             topic_name: controller.text,
                             maincategory_id:
                                 widget.subcategory['main_category_id']!,
-                            sub_categoryId: widget.subcategory['_id']!);
+                            sub_categoryId: widget.subcategory['_id']!,
+                          examples: _controller.tempList,
+                        );
                         _controller.topics.refresh();
                       }
                       Navigator.of(context).pop();
@@ -653,4 +496,3 @@ class _TopicsScreenState extends State<TopicsScreen> {
     );
   }
 }
-

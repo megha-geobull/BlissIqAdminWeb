@@ -10,7 +10,6 @@ class MentorScreen extends StatefulWidget {
 }
 
 class _MentorScreenState extends State<MentorScreen> {
-  // Sample data for mentors
   final List<Map<String, String>> mentorData = [
     {
       "profileImage": "",
@@ -22,6 +21,7 @@ class _MentorScreenState extends State<MentorScreen> {
       "Qualification": "M.Tech",
       "Introduction/Bio": "Passionate about teaching and technology.",
       "Languages": "English, Hindi",
+      "Status": "Approve"
     },
     {
       "profileImage": "",
@@ -33,6 +33,7 @@ class _MentorScreenState extends State<MentorScreen> {
       "Qualification": "B.E. in Computer Science",
       "Introduction/Bio": "Expert in software development and mentoring.",
       "Languages": "English, Gujarati",
+      "Status": "Disapprove"
     },
     {
       "profileImage": "",
@@ -44,6 +45,7 @@ class _MentorScreenState extends State<MentorScreen> {
       "Qualification": "MBA",
       "Introduction/Bio": "Specializes in business management.",
       "Languages": "English, Hindi",
+      "Status": "Approve"
     },
     {
       "profileImage": "",
@@ -55,7 +57,9 @@ class _MentorScreenState extends State<MentorScreen> {
       "Qualification": "B.Sc. in Mathematics",
       "Introduction/Bio": "Loves teaching mathematics and science.",
       "Languages": "English, Telugu",
+      "Status": "Approve"
     },
+
     {
       "profileImage": "",
       "Full Name": "Anaya Singh",
@@ -66,6 +70,8 @@ class _MentorScreenState extends State<MentorScreen> {
       "Qualification": "B.A. in English Literature",
       "Introduction/Bio": "Avid reader and literature enthusiast.",
       "Languages": "English, Kannada",
+      "Status": "Approve"
+
     },
     {
       "profileImage": "",
@@ -77,6 +83,8 @@ class _MentorScreenState extends State<MentorScreen> {
       "Qualification": "M.Sc. in Physics",
       "Introduction/Bio": "Passionate about physics and research.",
       "Languages": "English, Marathi",
+      "Status": "Disapprove"
+
     },
     {
       "profileImage": "",
@@ -88,6 +96,8 @@ class _MentorScreenState extends State<MentorScreen> {
       "Qualification": "B.Com",
       "Introduction/Bio": "Focused on finance and accounting.",
       "Languages": "English, Tamil",
+      "Status": "Approve"
+
     },
     {
       "profileImage": "",
@@ -99,6 +109,8 @@ class _MentorScreenState extends State<MentorScreen> {
       "Qualification": "M.A. in History",
       "Introduction/Bio": "History buff and passionate educator.",
       "Languages": "English, Hindi",
+      "Status": "Disapprove"
+
     },
     {
       "profileImage": "",
@@ -110,6 +122,8 @@ class _MentorScreenState extends State<MentorScreen> {
       "Qualification": "B.Tech in Information Technology",
       "Introduction/Bio": "Tech enthusiast and mentor.",
       "Languages": "English, Telugu",
+      "Status": "Approve"
+
     },
     {
       "profileImage": "",
@@ -121,8 +135,43 @@ class _MentorScreenState extends State<MentorScreen> {
       "Qualification": "B.Sc. in Chemistry",
       "Introduction/Bio": "Chemistry lover and educator.",
       "Languages": "English, Hindi",
+      "Status": "Disapprove"
+
     },
   ];
+
+  void _toggleStatus(int index) async {
+    bool? confirmation = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Confirm Action"),
+          content: const Text("Are you sure you want to change the status?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text("No", style: TextStyle(color: Colors.red)),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text("Yes", style: TextStyle(color: Colors.green)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmation == true) {
+      setState(() {
+        mentorData[index]["Status"] =
+        mentorData[index]["Status"] == "Approve" ? "Disapprove" : "Approve";
+      });
+    }
+  }
 
   void _removeMentor(int index) {
     setState(() {
@@ -156,15 +205,14 @@ class _MentorScreenState extends State<MentorScreen> {
                     actions: [
                       IconButton(
                         icon: const Icon(Icons.person, color: Colors.grey),
-                        onPressed: () {
-                          // Handle notifications
-                        },
+                        onPressed: () {},
                       ),
                     ],
                   ),
                   drawer: isWideScreen ? null : Drawer(child: const MyDrawer()),
                   body: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0, vertical: 16),
                     child: _buildMentorMainContent(),
                   ),
                 ),
@@ -203,7 +251,10 @@ class _MentorScreenState extends State<MentorScreen> {
           children: [
             const Text(
               'All Registered Mentors',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: Colors.black),
             ),
             const Spacer(),
             Tooltip(
@@ -212,16 +263,20 @@ class _MentorScreenState extends State<MentorScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) =>  MentorRegistration()),
+                    MaterialPageRoute(
+                        builder: (context) => MentorRegistration()),
                   );
                 },
                 icon: const Icon(Icons.add, color: Colors.white, size: 20),
-                label: const Text("Add Mentor", style: TextStyle(color: Colors.white, fontSize: 16)),
+                label: const Text("Add Mentor",
+                    style: TextStyle(color: Colors.white, fontSize: 16)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepOrange,
                   elevation: 3,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 12),
                 ),
               ),
             ),
@@ -242,16 +297,16 @@ class _MentorScreenState extends State<MentorScreen> {
             outside: BorderSide.none,
           ),
           columnWidths: const {
-            0: FlexColumnWidth(2), // Profile
-            1: FlexColumnWidth(2), // Name
-            2: FlexColumnWidth(3), // Email
-            3: FlexColumnWidth(2), // Contact No
-            4: FlexColumnWidth(3), // Address
-            5: FlexColumnWidth(2), // Experience
-            6: FlexColumnWidth(2), // Qualification
-
-            7: FlexColumnWidth(1.6), // Actions
-            8: FlexColumnWidth(2), // Details
+            0: FlexColumnWidth(2),
+            1: FlexColumnWidth(2),
+            2: FlexColumnWidth(3),
+            3: FlexColumnWidth(2),
+            4: FlexColumnWidth(3),
+            5: FlexColumnWidth(2),
+            6: FlexColumnWidth(2),
+            7: FlexColumnWidth(2),
+            8: FlexColumnWidth(1.6),
+            9: FlexColumnWidth(2),
           },
           children: [
             _buildTableHeader(),
@@ -273,15 +328,40 @@ class _MentorScreenState extends State<MentorScreen> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
       ),
       children: const [
-        Padding(padding: EdgeInsets.all(12.0), child: Text('Profile', style: TextStyle(fontWeight: FontWeight.bold))),
-        Padding(padding: EdgeInsets.all(12.0), child: Text('Name', style: TextStyle(fontWeight: FontWeight.bold))),
-        Padding(padding: EdgeInsets.all(12.0), child: Text('Email', style: TextStyle(fontWeight: FontWeight.bold))),
-        Padding(padding: EdgeInsets.all(12.0), child: Text('Contact No', style: TextStyle(fontWeight: FontWeight.bold))),
-        Padding(padding: EdgeInsets.all(12.0), child: Text('Address', style: TextStyle(fontWeight: FontWeight.bold))),
-        Padding(padding: EdgeInsets.all(12.0), child: Text('Experience', style: TextStyle(fontWeight: FontWeight.bold))),
-        Padding(padding: EdgeInsets.all(12.0), child: Text('Qualification', style: TextStyle(fontWeight: FontWeight.bold))),
-        Padding(padding: EdgeInsets.all(12.0), child: Text('Actions', style: TextStyle(fontWeight: FontWeight.bold))),
-        Padding(padding: EdgeInsets.all(12.0), child: Text('Details', style: TextStyle(fontWeight: FontWeight.bold))),
+        Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Text('Profile', style: TextStyle(fontWeight: FontWeight.bold))),
+        Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Text('Name', style: TextStyle(fontWeight: FontWeight.bold))),
+        Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Text('Email', style: TextStyle(fontWeight: FontWeight.bold))),
+        Padding(
+            padding: EdgeInsets.all(12.0),
+            child:
+            Text('Contact No', style: TextStyle(fontWeight: FontWeight.bold))),
+        Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Text('Address', style: TextStyle(fontWeight: FontWeight.bold))),
+        Padding(
+            padding: EdgeInsets.all(12.0),
+            child:
+            Text('Experience', style: TextStyle(fontWeight: FontWeight.bold))),
+        Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Text('Qualification',
+                style: TextStyle(fontWeight: FontWeight.bold))),
+        Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
+        Padding(
+            padding: EdgeInsets.all(12.0),
+            child:
+            Text('Actions', style: TextStyle(fontWeight: FontWeight.bold))),
+        Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Text('Details', style: TextStyle(fontWeight: FontWeight.bold))),
       ],
     );
   }
@@ -290,13 +370,53 @@ class _MentorScreenState extends State<MentorScreen> {
     return TableRow(
       decoration: const BoxDecoration(color: Colors.white),
       children: [
-        const Padding(padding: EdgeInsets.all(12.0), child: Icon(Icons.account_circle, size: 20)),
-        Padding(padding: const EdgeInsets.all(12.0), child: Text(mentor["Full Name"] ?? 'No Name', style: const TextStyle(fontSize: 14))),
-        Padding(padding: const EdgeInsets.all(12.0), child: Text(mentor["email"] ?? 'No Email', style: const TextStyle(fontSize: 14))),
-        Padding(padding: const EdgeInsets.all(12.0), child: Text(mentor["contact_no"] ?? 'No Contact No', style: const TextStyle(fontSize: 14))),
-        Padding(padding: const EdgeInsets.all(12.0), child: Text(mentor["Address"] ?? 'No Address', style: const TextStyle(fontSize: 14))),
-        Padding(padding: const EdgeInsets.all(12.0), child: Text(mentor["Experience"] ?? 'No Experience', style: const TextStyle(fontSize: 14))),
-        Padding(padding: const EdgeInsets.all(12.0), child: Text(mentor["Qualification"] ?? 'No Qualification', style: const TextStyle(fontSize: 14))),
+        const Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Icon(Icons.account_circle, size: 20)),
+        Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Text(mentor["Full Name"] ?? 'No Name',
+                style: const TextStyle(fontSize: 14))),
+        Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Text(mentor["email"] ?? 'No Email',
+                style: const TextStyle(fontSize: 14))),
+        Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Text(mentor["contact_no"] ?? 'No Contact No',
+                style: const TextStyle(fontSize: 14))),
+        Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Text(mentor["Address"] ?? 'No Address',
+                style: const TextStyle(fontSize: 14))),
+        Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Text(mentor["Experience"] ?? 'No Experience',
+                style: const TextStyle(fontSize: 14))),
+        Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Text(mentor["Qualification"] ?? 'No Qualification',
+                style: const TextStyle(fontSize: 14))),
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: ElevatedButton(
+            onPressed: () => _toggleStatus(index),
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              backgroundColor: mentor["Status"] == "Approve"
+                  ? Colors.green
+                  : Colors.red,
+              padding:
+              const EdgeInsets.symmetric(horizontal: 7, vertical: 9),
+            ),
+            child: Text(
+              mentor["Status"] ?? "Disapprove",
+              style: const TextStyle(color: Colors.white, fontSize: 10),
+            ),
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: IconButton(
@@ -307,12 +427,16 @@ class _MentorScreenState extends State<MentorScreen> {
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: Container(
-            decoration: BoxDecoration(color: Colors.orange, borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(
+                color: Colors.orange, borderRadius: BorderRadius.circular(8)),
             child: TextButton(
-              onPressed: () {
-                // Handle view action
-              },
-              child: const Text("View", style: TextStyle(letterSpacing: 1, fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black)),
+              onPressed: () {},
+              child: const Text("View",
+                  style: TextStyle(
+                      letterSpacing: 1,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black)),
             ),
           ),
         ),
@@ -320,3 +444,16 @@ class _MentorScreenState extends State<MentorScreen> {
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
