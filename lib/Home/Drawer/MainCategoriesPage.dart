@@ -144,6 +144,7 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
     tableRows.add(TableRow(
       decoration: BoxDecoration(color: Colors.orange[100]),
       children: [
+        // 1st column
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
@@ -171,6 +172,7 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
             ],
           ),
         ),
+        // 2nd column
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(

@@ -4,14 +4,14 @@ import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-class SchoolScreen extends StatefulWidget {
-  const SchoolScreen({super.key});
+class CompanyScreen extends StatefulWidget {
+  const CompanyScreen({super.key});
 
   @override
-  _SchoolScreenState createState() => _SchoolScreenState();
+  _CompanyScreenState createState() => _CompanyScreenState();
 }
 
-class _SchoolScreenState extends State<SchoolScreen> {
+class _CompanyScreenState extends State<CompanyScreen> {
   // Sample data for 5 students
   final List<Map<String, String>> studentData = [
     {
@@ -26,6 +26,7 @@ class _SchoolScreenState extends State<SchoolScreen> {
       "age_group": "19-25 years",
       "purpose": "Job",
       "score": "85",
+      "status": "Approve",
     },
     {
       "profileImage": "",
@@ -39,7 +40,9 @@ class _SchoolScreenState extends State<SchoolScreen> {
       "age_group": "19-25 years",
       "purpose": "Job",
       "score": "90",
+      "status": "Disapprove",
     },
+
     {
       "profileImage": "",
       "user_name": "Student 12",
@@ -79,7 +82,40 @@ class _SchoolScreenState extends State<SchoolScreen> {
       "purpose": "Job",
       "score": "80",
     },
+    // More student data here
   ];
+
+  void _toggleStatus(int index) async {
+    bool? confirmation = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Confirm Action"),
+          content: const Text("Are you sure you want to change the status?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text("No", style: TextStyle(color: Colors.red)),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text("Yes", style: TextStyle(color: Colors.green)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmation == true) {
+      setState(() {
+        studentData[index]["status"] = studentData[index]["status"] == "Approve" ? "Disapprove" : "Approve";
+      });
+    }
+  }
 
   void _removeStudent(int index) {
     setState(() {
@@ -90,7 +126,7 @@ class _SchoolScreenState extends State<SchoolScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Colors.grey.shade100,
       body: LayoutBuilder(
         builder: (context, constraints) {
           // Check screen size for responsiveness
@@ -158,7 +194,7 @@ class _SchoolScreenState extends State<SchoolScreen> {
               child: Row(
                 children: [
                   const Text(
-                    'All Registered Mentors',
+                    'All Registered Companies',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
@@ -167,7 +203,7 @@ class _SchoolScreenState extends State<SchoolScreen> {
                   ),
                   const Spacer(),
                   Tooltip(
-                    message: 'Add a New Mentor',
+                    message: 'Add a New Company',
                     child: ElevatedButton.icon(
                       onPressed: () {},
                       icon: const Icon(
@@ -176,7 +212,7 @@ class _SchoolScreenState extends State<SchoolScreen> {
                         size: 20,
                       ),
                       label: const Text(
-                        "Add Mentor",
+                        "Add Company",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -218,8 +254,9 @@ class _SchoolScreenState extends State<SchoolScreen> {
                     4: FlexColumnWidth(3), // School
                     5: FlexColumnWidth(2), // Class
                     6: FlexColumnWidth(1.4), // Score
-                    7: FlexColumnWidth(1.6), // Actions
-                    8: FlexColumnWidth(2), // Details
+                    7: FlexColumnWidth(2), // Status
+                    8: FlexColumnWidth(1.6), // Actions
+                    9: FlexColumnWidth(2), // Details
                   },
                   children: [
                     TableRow(
@@ -282,6 +319,13 @@ class _SchoolScreenState extends State<SchoolScreen> {
                         Padding(
                           padding: EdgeInsets.all(12.0),
                           child: Text(
+                            'Status',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(12.0),
+                          child: Text(
                             'Actions',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
@@ -299,7 +343,7 @@ class _SchoolScreenState extends State<SchoolScreen> {
                           (student) {
                         int index = studentData.indexOf(student);
                         return TableRow(
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: Colors.white,
                           ),
                           children: [
@@ -351,6 +395,27 @@ class _SchoolScreenState extends State<SchoolScreen> {
                             ),
                             Padding(
                               padding: const EdgeInsets.all(12.0),
+                              child: ElevatedButton(
+                                onPressed: () => _toggleStatus(index),
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  backgroundColor: student["status"] == "Approve"
+                                      ? Colors.green
+                                      : Colors.red,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 7, vertical: 9),
+                                ),
+                                child: Text(
+                                  student["status"] ?? "Disapprove",
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 10),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(12.0),
                               child: IconButton(
                                 icon:
                                 const Icon(Icons.delete, color: Colors.red),
@@ -392,3 +457,16 @@ class _SchoolScreenState extends State<SchoolScreen> {
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

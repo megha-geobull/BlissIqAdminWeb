@@ -2,6 +2,7 @@
 
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Home/Drawer/MainCategoriesPage.dart';
+import 'package:blissiqadmin/Home/Drawer/Notification.dart';
 import 'package:blissiqadmin/Home/Drawer/QuestionWidgets.dart';
 import 'package:blissiqadmin/Home/Drawer/SettingsPage.dart';
 import 'package:blissiqadmin/Home/Drawer/UsersPage.dart';
@@ -132,12 +133,12 @@ class _MyDrawerState extends State<MyDrawer> {
 
         // Settings
         Obx(() => buildDrawerTile(
-              title: 'Settings',
+              title: 'Notification',
               icon: Icons.settings,
-              isSelected: controller.selectedPage.value == 'Settings',
+              isSelected: controller.selectedPage.value == 'Notification',
               onTap: () {
-                controller.changePage('Settings');
-                Get.to(() => const SettingsPage());
+                controller.changePage('Notification');
+                Get.to(() => const NotificationPage());
 
               },
             )),
@@ -148,7 +149,7 @@ class _MyDrawerState extends State<MyDrawer> {
               isSelected: controller.selectedPage.value == 'Logout',
               onTap: () {
                 controller.changePage('Logout');
-                onLogoutTap();
+                _showLogoutDialog(context);
               },
             )),
       ],
@@ -174,5 +175,53 @@ class _MyDrawerState extends State<MyDrawer> {
       onTap: onTap,
     );
   }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          title: const Text(
+            'Logout Confirmation',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const Text(
+            'Are you sure you want to logout?',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel',style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Logout',style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 }
 
