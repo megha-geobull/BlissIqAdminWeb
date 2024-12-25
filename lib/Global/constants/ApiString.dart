@@ -6,11 +6,8 @@ class ApiString {
 
    /// Auth Endpoints
    static const String signUp = "${baseUrl}student_registration";
-   // static const String generateOtp = "${baseUrl}generate-otp";
-   // static const String verifyOtp = "${baseUrl}verify-otp";
 
    static const String mentor_registration = "" ;
-
 
    static const String login = "${baseUrl}login";
    static const String forgotPassword = "${baseUrl}forgot_password";

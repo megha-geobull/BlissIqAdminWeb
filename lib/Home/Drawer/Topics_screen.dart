@@ -1,9 +1,12 @@
+
 import 'package:blissiqadmin/Global/constants/AppColor.dart';
 import 'package:blissiqadmin/Home/Controller/MainCategoryController.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'package:image_picker/image_picker.dart';
+import '../../Global/Widgets/ExampleModel.dart';
 import '../../Global/constants/CustomAlertDialogue.dart';
 import '../../controller/CategoryController.dart';
 import '../Quetion type widgets/AddQuetionsWidgets/AddQuetionsWidgets.dart';
@@ -399,23 +402,17 @@ class _TopicsScreenState extends State<TopicsScreen> {
         title: 'Are you sure',
         content: title,
         yesText: 'Yes',
-        noText: 'No',
-        onYesPressed: () {
-          if (type == "topic") {
-            Navigator.pop(context);
-            _controller.deleteTopic(
-                categoryId: topic['main_category_id'],
-                sub_categoryId: topic['sub_category_id'],
-                topicId: topic['_id']);
-            _controller.topics.removeAt(index);
-          } else {
-            _controller.deleteSub_Topic(
-                categoryId: topic['main_category_id'],
-                sub_categoryId: topic['sub_category_id'],
-                topicId: topic['topic_id'],
-                sub_topicId: subtopic_id);
-            _controller.topics.removeAt(index);
-          }
+        noText: 'No', onYesPressed: () {
+        if(type=="topic") {
+          Navigator.pop(context);
+          _controller.deleteTopic(
+              categoryId: topic['main_category_id'], sub_categoryId: topic['sub_category_id'],topicId:topic['_id'] );
+          _controller.topics.removeAt(index);
+        }else{
+          _controller.deleteSub_Topic(
+              categoryId: topic['main_category_id'], sub_categoryId: topic['sub_category_id'],topicId:topic['topic_id'],sub_topicId: subtopic_id );
+          _controller.sub_topics.removeAt(index);
+        }
         },
       ),
     );
@@ -454,40 +451,112 @@ class _TopicsScreenState extends State<TopicsScreen> {
                         labelText: 'Enter ${type.capitalizeFirst}',
                       ),
                     ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (controller.text.isNotEmpty) {
-                      if (type == "subtopic") {
-                        _controller.addSubTopic(
-                          subtopic_name: controller.text,
-                          sub_categoryId: selectedSubCategoryId!,
-                          maincategory_id: selectedCategoryId!,
-                          topicId: selectedTopicId!,
-                        );
-                        _controller.sub_topics.refresh();
-                      } else if (type == "topic") {
-                        _controller.addTopic(
-                            topic_name: controller.text,
-                            maincategory_id:
-                                widget.subcategory['main_category_id']!,
-                            sub_categoryId: widget.subcategory['_id']!,
-                          examples: _controller.tempList,
-                        );
-                        _controller.topics.refresh();
-                      }
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  child: const Text('Add'),
-                ),
+
+                    SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: () async {
+                        // Open image picker to select multiple images
+                        //final List<XFile>? images = await ImagePicker().pickMultiImage();
+                        List<PlatformFile>? images = (await FilePicker.platform.pickFiles(
+                          type: FileType.custom,
+                          allowMultiple: false,
+                          onFileLoading: (FilePickerStatus status) =>
+                              print("status .... $status"),
+                          allowedExtensions: ['png', 'jpg', 'jpeg'],
+                        ))
+                            ?.files;
+                        if (images != null) {
+                          for (var image in images) {
+                            // Preload bytes for the image
+                            final bytes = await image.bytes;
+
+                            // Add to tempList with bytes
+                            _controller.tempList.add(
+                              ImageWithText(file: image, path: '', bytes: bytes,imageName:image.name ),
+                            );
+                          }
+                          setState(() {});
+                        }
+                      },
+                      child: Text('Add Examples'),
+                    ),
+                    SizedBox(height: 10),
+                    if (_controller.tempList.isNotEmpty)
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: _controller.tempList.length,
+                          itemBuilder: (context, index) {
+                            final item = _controller.tempList[index];
+                            return Card(
+                              margin: const EdgeInsets.symmetric(vertical: 5),
+                              child: Container(
+                                width:300,
+                            child:
+                            Row(
+                                children: [
+                                  //Image.file(File(item.path)),
+                                  SizedBox(
+                                    height:100,width: 100,
+                                    child:Image.memory(item.bytes!),),//Display selected image
+                                  SizedBox(
+                                      width:250,
+                                      child:TextField(
+                                    decoration: const InputDecoration(
+                                      labelText: 'Enter Name for Example',
+                                    ),
+                                    onChanged: (value) {
+                                      item.name = value;
+                                    },
+                                  ))
+                                  ,
+                                  IconButton(
+                                    icon: Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () {
+                                      setState(() {
+                                        _controller.tempList.removeAt(index);
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),)
+                            );
+                          },
+                        ),
+                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Cancel'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (controller.text.isNotEmpty) {
+                              if (type == "subtopic") {
+                                _controller.addSubTopic(
+                                  subtopic_name: controller.text,
+                                  sub_categoryId: selectedSubCategoryId!,
+                                  maincategory_id: selectedCategoryId!,
+                                  topicId: selectedTopicId!,
+                                );
+                                _controller.sub_topics.refresh();
+                              } else if (type == "topic") {
+                                _controller.addTopic(
+                                  topic_name: controller.text,
+                                  maincategory_id: widget.subcategory['main_category_id']!,
+                                  sub_categoryId: widget.subcategory['_id']!,
+                                  examples: _controller.tempList,
+                                );
+                                _controller.topics.refresh();
+                              }
+                              Navigator.of(context).pop();
+                            }
+                          },
+                          child: const Text('Add'),
+                        ),
+                      ],
+                    ),
               ],
             );
           },
