@@ -6,6 +6,7 @@ import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/common_snackbar.dart';
 import 'package:blissiqadmin/Global/utils/shared_preference/shared_preference_services.dart';
 import 'package:blissiqadmin/Home/HomePage.dart';
+import 'package:blissiqadmin/Home/Users/Models/GetAllMentorModel.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
@@ -36,7 +37,8 @@ class AuthController extends GetxController{
   var currentCountryCode = "IN-91".obs;
   var selectedUserType = 'Mentor'.obs;
 
-  RxList allMentorData = [].obs;
+  RxList<Data> allMentorData = <Data>[].obs;
+
 
 
 
@@ -247,7 +249,6 @@ class AuthController extends GetxController{
     isLoading.value = true;
     allMentorData.clear();
     try {
-
       final response = await http.post(
         Uri.parse(ApiString.get_all_mentors),
         headers: {"Content-Type": "application/json"},
@@ -258,14 +259,18 @@ class AuthController extends GetxController{
 
       if (response.statusCode == 200) {
         var responseData = jsonDecode(response.body);
+
         if (responseData['status'] == 1) {
-          allMentorData.value = responseData["data"];
+          // Parse each JSON object into a Data model
+          allMentorData.value = (responseData["data"] as List)
+              .map((mentorJson) => Data.fromJson(mentorJson))
+              .toList();
         } else {
           showSnackbar(message: "Failed to fetch category");
         }
       }
     } catch (e) {
-      showSnackbar(message: "Error while fetch category $e");
+      showSnackbar(message: "Error while fetching category $e");
       log(e.toString());
     } finally {
       isLoading.value = false;

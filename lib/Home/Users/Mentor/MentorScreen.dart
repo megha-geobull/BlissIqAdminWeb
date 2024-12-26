@@ -166,12 +166,20 @@ class _MentorScreenState extends State<MentorScreen> {
         ),
         Padding(
           padding: const EdgeInsets.all(12.0),
-          child: Text(mentor.contactNo.toString()),
+          child: Text(mentor.contactNo?.toString() ?? '-'),
         ),
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: Text(mentor.address ?? 'No Address'),
         ),
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(mentor.experience ?? 'No experience'),
+        ), // Placeholder if experience is missing
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(mentor.qualification ?? 'not mention'),
+        ), // Placeholder if qualification is missing
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: ElevatedButton(
@@ -251,39 +259,41 @@ class _MentorScreenState extends State<MentorScreen> {
       ),
       children: const [
         Padding(
-            padding: EdgeInsets.all(12.0),
-            child: Text('Profile', style: TextStyle(fontWeight: FontWeight.bold))),
+          padding: EdgeInsets.all(12.0),
+          child: Text('Profile', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
         Padding(
-            padding: EdgeInsets.all(12.0),
-            child: Text('Name', style: TextStyle(fontWeight: FontWeight.bold))),
+          padding: EdgeInsets.all(12.0),
+          child: Text('Name', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
         Padding(
-            padding: EdgeInsets.all(12.0),
-            child: Text('Email', style: TextStyle(fontWeight: FontWeight.bold))),
+          padding: EdgeInsets.all(12.0),
+          child: Text('Email', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
         Padding(
-            padding: EdgeInsets.all(12.0),
-            child:
-            Text('Contact No', style: TextStyle(fontWeight: FontWeight.bold))),
+          padding: EdgeInsets.all(12.0),
+          child: Text('Contact No', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
         Padding(
-            padding: EdgeInsets.all(12.0),
-            child: Text('Address', style: TextStyle(fontWeight: FontWeight.bold))),
+          padding: EdgeInsets.all(12.0),
+          child: Text('Address', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
         Padding(
-            padding: EdgeInsets.all(12.0),
-            child:
-            Text('Experience', style: TextStyle(fontWeight: FontWeight.bold))),
+          padding: EdgeInsets.all(12.0),
+          child: Text('Experience', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
         Padding(
-            padding: EdgeInsets.all(12.0),
-            child: Text('Qualification',
-                style: TextStyle(fontWeight: FontWeight.bold))),
+          padding: EdgeInsets.all(12.0),
+          child: Text('Qualification', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
         Padding(
-            padding: EdgeInsets.all(12.0),
-            child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
+          padding: EdgeInsets.all(12.0),
+          child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
         Padding(
-            padding: EdgeInsets.all(12.0),
-            child:
-            Text('Actions', style: TextStyle(fontWeight: FontWeight.bold))),
-        Padding(
-            padding: EdgeInsets.all(12.0),
-            child: Text('Details', style: TextStyle(fontWeight: FontWeight.bold))),
+          padding: EdgeInsets.all(12.0),
+          child: Text('Actions', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
       ],
     );
   }
