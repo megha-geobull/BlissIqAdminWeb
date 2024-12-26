@@ -1,6 +1,9 @@
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/Home/Users/Mentor/MentorRegistration.dart';
+import 'package:blissiqadmin/Home/Users/Models/GetAllMentorModel.dart';
+import 'package:blissiqadmin/auth/Controller/AuthController.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class MentorScreen extends StatefulWidget {
   const MentorScreen({super.key});
@@ -10,135 +13,16 @@ class MentorScreen extends StatefulWidget {
 }
 
 class _MentorScreenState extends State<MentorScreen> {
-  final List<Map<String, String>> mentorData = [
-    {
-      "profileImage": "",
-      "Full Name": "Aarav Sharma",
-      "contact_no": "9876543210",
-      "email": "aarav.sharma@gmail.com",
-      "Address": "Mumbai, Maharashtra",
-      "Experience": "6 years",
-      "Qualification": "M.Tech",
-      "Introduction/Bio": "Passionate about teaching and technology.",
-      "Languages": "English, Hindi",
-      "Status": "Approve"
-    },
-    {
-      "profileImage": "",
-      "Full Name": "Vivaan Patel",
-      "contact_no": "8765432109",
-      "email": "vivaan.patel@gmail.com",
-      "Address": "Ahmedabad, Gujarat",
-      "Experience": "4 years",
-      "Qualification": "B.E. in Computer Science",
-      "Introduction/Bio": "Expert in software development and mentoring.",
-      "Languages": "English, Gujarati",
-      "Status": "Disapprove"
-    },
-    {
-      "profileImage": "",
-      "Full Name": "Aditya Verma",
-      "contact_no": "7654321098",
-      "email": "aditya.verma@gmail.com",
-      "Address": "Delhi",
-      "Experience": "8 years",
-      "Qualification": "MBA",
-      "Introduction/Bio": "Specializes in business management.",
-      "Languages": "English, Hindi",
-      "Status": "Approve"
-    },
-    {
-      "profileImage": "",
-      "Full Name": "Sai Kiran",
-      "contact_no": "6543210987",
-      "email": "sai.kiran@gmail.com",
-      "Address": "Hyderabad, Telangana",
-      "Experience": "5 years",
-      "Qualification": "B.Sc. in Mathematics",
-      "Introduction/Bio": "Loves teaching mathematics and science.",
-      "Languages": "English, Telugu",
-      "Status": "Approve"
-    },
+  final AuthController mentorController = Get.put(AuthController());
 
-    {
-      "profileImage": "",
-      "Full Name": "Anaya Singh",
-      "contact_no": "5432109876",
-      "email": "anaya.singh@gmail.com",
-      "Address": "Bangalore, Karnataka",
-      "Experience": "3 years",
-      "Qualification": "B.A. in English Literature",
-      "Introduction/Bio": "Avid reader and literature enthusiast.",
-      "Languages": "English, Kannada",
-      "Status": "Approve"
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      mentorController.getAllMentors();
+    });
 
-    },
-    {
-      "profileImage": "",
-      "Full Name": "Rohan Mehta",
-      "contact_no": "4321098765",
-      "email": "rohan.mehta@gmail.com",
-      "Address": "Pune, Maharashtra",
-      "Experience": "7 years",
-      "Qualification": "M.Sc. in Physics",
-      "Introduction/Bio": "Passionate about physics and research.",
-      "Languages": "English, Marathi",
-      "Status": "Disapprove"
-
-    },
-    {
-      "profileImage": "",
-      "Full Name": "Isha Gupta",
-      "contact_no": "3210987654",
-      "email": "isha.gupta@gmail.com",
-      "Address": "Chennai, Tamil Nadu",
-      "Experience": "2 years",
-      "Qualification": "B.Com",
-      "Introduction/Bio": "Focused on finance and accounting.",
-      "Languages": "English, Tamil",
-      "Status": "Approve"
-
-    },
-    {
-      "profileImage": "",
-      "Full Name": "Kabir Khan",
-      "contact_no": "2109876543",
-      "email": "kabir.khan@gmail.com",
-      "Address": "Lucknow, Uttar Pradesh",
-      "Experience": "9 years",
-      "Qualification": "M.A. in History",
-      "Introduction/Bio": "History buff and passionate educator.",
-      "Languages": "English, Hindi",
-      "Status": "Disapprove"
-
-    },
-    {
-      "profileImage": "",
-      "Full Name": "Nisha Reddy",
-      "contact_no": "1098765432",
-      "email": "nisha.reddy@gmail.com",
-      "Address": "Visakhapatnam, Andhra Pradesh",
-      "Experience": "4 years",
-      "Qualification": "B.Tech in Information Technology",
-      "Introduction/Bio": "Tech enthusiast and mentor.",
-      "Languages": "English, Telugu",
-      "Status": "Approve"
-
-    },
-    {
-      "profileImage": "",
-      "Full Name": "Karan Joshi",
-      "contact_no": "0987654321",
-      "email": "karan.joshi@gmail.com",
-      "Address": "Jaipur, Rajasthan",
-      "Experience": "5 years",
-      "Qualification": "B.Sc. in Chemistry",
-      "Introduction/Bio": "Chemistry lover and educator.",
-      "Languages": "English, Hindi",
-      "Status": "Disapprove"
-
-    },
-  ];
+  }
 
   void _toggleStatus(int index) async {
     bool? confirmation = await showDialog(
@@ -149,15 +33,11 @@ class _MentorScreenState extends State<MentorScreen> {
           content: const Text("Are you sure you want to change the status?"),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
+              onPressed: () => Navigator.of(context).pop(false),
               child: const Text("No", style: TextStyle(color: Colors.red)),
             ),
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
+              onPressed: () => Navigator.of(context).pop(true),
               child: const Text("Yes", style: TextStyle(color: Colors.green)),
             ),
           ],
@@ -167,15 +47,15 @@ class _MentorScreenState extends State<MentorScreen> {
 
     if (confirmation == true) {
       setState(() {
-        mentorData[index]["Status"] =
-        mentorData[index]["Status"] == "Approve" ? "Disapprove" : "Approve";
+        var mentor = mentorController.allMentorData[index];
+        mentor.status = (mentor.status == "Approve") ? "Disapprove" : "Approve";
       });
     }
   }
 
   void _removeMentor(int index) {
     setState(() {
-      mentorData.removeAt(index);
+      mentorController.allMentorData.removeAt(index);
     });
   }
 
@@ -183,44 +63,42 @@ class _MentorScreenState extends State<MentorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          bool isWideScreen = constraints.maxWidth > 800;
-
-          return Row(
-            children: [
-              if (isWideScreen)
-                Container(
-                  width: 250,
-                  color: Colors.orange.shade100,
-                  child: const MyDrawer(),
-                ),
-              Expanded(
-                child: Scaffold(
-                  appBar: isWideScreen
-                      ? null
-                      : AppBar(
-                    title: const Text('Dashboard'),
-                    backgroundColor: Colors.blue.shade100,
-                    actions: [
-                      IconButton(
-                        icon: const Icon(Icons.person, color: Colors.grey),
-                        onPressed: () {},
+      body: Obx(() {
+        if (mentorController.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        } else {
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              bool isWideScreen = constraints.maxWidth > 800;
+              return Row(
+                children: [
+                  if (isWideScreen)
+                    Container(
+                      width: 250,
+                      color: Colors.orange.shade100,
+                      child: const MyDrawer(),
+                    ),
+                  Expanded(
+                    child: Scaffold(
+                      appBar: isWideScreen
+                          ? null
+                          : AppBar(
+                        title: const Text('Dashboard'),
+                        backgroundColor: Colors.blue.shade100,
                       ),
-                    ],
+                      body: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0, vertical: 16),
+                        child: _buildMentorMainContent(),
+                      ),
+                    ),
                   ),
-                  drawer: isWideScreen ? null : Drawer(child: const MyDrawer()),
-                  body: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0, vertical: 16),
-                    child: _buildMentorMainContent(),
-                  ),
-                ),
-              ),
-            ],
+                ],
+              );
+            },
           );
-        },
-      ),
+        }
+      }),
     );
   }
 
@@ -235,6 +113,85 @@ class _MentorScreenState extends State<MentorScreen> {
           Expanded(child: _buildMentorTable()),
         ],
       ),
+    );
+  }
+
+  Widget _buildMentorTable() {
+    return SingleChildScrollView(
+      child: Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        child: Table(
+          border: const TableBorder.symmetric(
+            inside: BorderSide(color: Colors.grey, width: 0.5),
+          ),
+          columnWidths: const {
+            0: FlexColumnWidth(2),
+            1: FlexColumnWidth(2),
+            2: FlexColumnWidth(3),
+            3: FlexColumnWidth(2),
+            4: FlexColumnWidth(2),
+            5: FlexColumnWidth(2),
+            6: FlexColumnWidth(2),
+          },
+          children: [
+            _buildTableHeader(),
+            ...mentorController.allMentorData.asMap().entries.map((entry) {
+              int index = entry.key;
+              Data mentor = entry.value;
+              return _buildTableRow(mentor, index);
+            }).toList(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  TableRow _buildTableRow(Data mentor, int index) {
+    return TableRow(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: CircleAvatar(
+            backgroundImage: NetworkImage(mentor.profileImage ?? ''),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(mentor.fullName ?? 'No Name'),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(mentor.email ?? 'No Email'),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(mentor.contactNo.toString()),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(mentor.address ?? 'No Address'),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: ElevatedButton(
+            onPressed: () => _toggleStatus(index),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: mentor.status == "Approve"
+                  ? Colors.green
+                  : Colors.red,
+            ),
+            child: Text(mentor.status ?? 'Disapprove'),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () => _removeMentor(index),
+          ),
+        ),
+      ],
     );
   }
 
@@ -286,41 +243,6 @@ class _MentorScreenState extends State<MentorScreen> {
     );
   }
 
-  Widget _buildMentorTable() {
-    return SingleChildScrollView(
-      child: Card(
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        child: Table(
-          border: const TableBorder.symmetric(
-            inside: BorderSide(color: Colors.grey, width: 0.5),
-            outside: BorderSide.none,
-          ),
-          columnWidths: const {
-            0: FlexColumnWidth(2),
-            1: FlexColumnWidth(2),
-            2: FlexColumnWidth(3),
-            3: FlexColumnWidth(2),
-            4: FlexColumnWidth(3),
-            5: FlexColumnWidth(2),
-            6: FlexColumnWidth(2),
-            7: FlexColumnWidth(2),
-            8: FlexColumnWidth(1.6),
-            9: FlexColumnWidth(2),
-          },
-          children: [
-            _buildTableHeader(),
-            ...mentorData.asMap().entries.map((entry) {
-              int index = entry.key;
-              Map<String, String> mentor = entry.value;
-              return _buildTableRow(mentor, index);
-            }).toList(),
-          ],
-        ),
-      ),
-    );
-  }
-
   TableRow _buildTableHeader() {
     return TableRow(
       decoration: BoxDecoration(
@@ -366,84 +288,455 @@ class _MentorScreenState extends State<MentorScreen> {
     );
   }
 
-  TableRow _buildTableRow(Map<String, String> mentor, int index) {
-    return TableRow(
-      decoration: const BoxDecoration(color: Colors.white),
-      children: [
-        const Padding(
-            padding: EdgeInsets.all(12.0),
-            child: Icon(Icons.account_circle, size: 20)),
-        Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Text(mentor["Full Name"] ?? 'No Name',
-                style: const TextStyle(fontSize: 14))),
-        Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Text(mentor["email"] ?? 'No Email',
-                style: const TextStyle(fontSize: 14))),
-        Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Text(mentor["contact_no"] ?? 'No Contact No',
-                style: const TextStyle(fontSize: 14))),
-        Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Text(mentor["Address"] ?? 'No Address',
-                style: const TextStyle(fontSize: 14))),
-        Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Text(mentor["Experience"] ?? 'No Experience',
-                style: const TextStyle(fontSize: 14))),
-        Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Text(mentor["Qualification"] ?? 'No Qualification',
-                style: const TextStyle(fontSize: 14))),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: ElevatedButton(
-            onPressed: () => _toggleStatus(index),
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              backgroundColor: mentor["Status"] == "Approve"
-                  ? Colors.green
-                  : Colors.red,
-              padding:
-              const EdgeInsets.symmetric(horizontal: 7, vertical: 9),
-            ),
-            child: Text(
-              mentor["Status"] ?? "Disapprove",
-              style: const TextStyle(color: Colors.white, fontSize: 10),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () => _removeMentor(index),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Container(
-            decoration: BoxDecoration(
-                color: Colors.orange, borderRadius: BorderRadius.circular(8)),
-            child: TextButton(
-              onPressed: () {},
-              child: const Text("View",
-                  style: TextStyle(
-                      letterSpacing: 1,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black)),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 }
+
+
+// class _MentorScreenState extends State<MentorScreen> {
+//   final AuthController mentorController = Get.put(AuthController());
+//
+//   final List<Map<String, String>> mentorData = [
+//     {
+//       "profileImage": "",
+//       "Full Name": "Aarav Sharma",
+//       "contact_no": "9876543210",
+//       "email": "aarav.sharma@gmail.com",
+//       "Address": "Mumbai, Maharashtra",
+//       "Experience": "6 years",
+//       "Qualification": "M.Tech",
+//       "Introduction/Bio": "Passionate about teaching and technology.",
+//       "Languages": "English, Hindi",
+//       "Status": "Approve"
+//     },
+//     {
+//       "profileImage": "",
+//       "Full Name": "Vivaan Patel",
+//       "contact_no": "8765432109",
+//       "email": "vivaan.patel@gmail.com",
+//       "Address": "Ahmedabad, Gujarat",
+//       "Experience": "4 years",
+//       "Qualification": "B.E. in Computer Science",
+//       "Introduction/Bio": "Expert in software development and mentoring.",
+//       "Languages": "English, Gujarati",
+//       "Status": "Disapprove"
+//     },
+//     {
+//       "profileImage": "",
+//       "Full Name": "Aditya Verma",
+//       "contact_no": "7654321098",
+//       "email": "aditya.verma@gmail.com",
+//       "Address": "Delhi",
+//       "Experience": "8 years",
+//       "Qualification": "MBA",
+//       "Introduction/Bio": "Specializes in business management.",
+//       "Languages": "English, Hindi",
+//       "Status": "Approve"
+//     },
+//     {
+//       "profileImage": "",
+//       "Full Name": "Sai Kiran",
+//       "contact_no": "6543210987",
+//       "email": "sai.kiran@gmail.com",
+//       "Address": "Hyderabad, Telangana",
+//       "Experience": "5 years",
+//       "Qualification": "B.Sc. in Mathematics",
+//       "Introduction/Bio": "Loves teaching mathematics and science.",
+//       "Languages": "English, Telugu",
+//       "Status": "Approve"
+//     },
+//
+//     {
+//       "profileImage": "",
+//       "Full Name": "Anaya Singh",
+//       "contact_no": "5432109876",
+//       "email": "anaya.singh@gmail.com",
+//       "Address": "Bangalore, Karnataka",
+//       "Experience": "3 years",
+//       "Qualification": "B.A. in English Literature",
+//       "Introduction/Bio": "Avid reader and literature enthusiast.",
+//       "Languages": "English, Kannada",
+//       "Status": "Approve"
+//
+//     },
+//     {
+//       "profileImage": "",
+//       "Full Name": "Rohan Mehta",
+//       "contact_no": "4321098765",
+//       "email": "rohan.mehta@gmail.com",
+//       "Address": "Pune, Maharashtra",
+//       "Experience": "7 years",
+//       "Qualification": "M.Sc. in Physics",
+//       "Introduction/Bio": "Passionate about physics and research.",
+//       "Languages": "English, Marathi",
+//       "Status": "Disapprove"
+//
+//     },
+//     {
+//       "profileImage": "",
+//       "Full Name": "Isha Gupta",
+//       "contact_no": "3210987654",
+//       "email": "isha.gupta@gmail.com",
+//       "Address": "Chennai, Tamil Nadu",
+//       "Experience": "2 years",
+//       "Qualification": "B.Com",
+//       "Introduction/Bio": "Focused on finance and accounting.",
+//       "Languages": "English, Tamil",
+//       "Status": "Approve"
+//
+//     },
+//     {
+//       "profileImage": "",
+//       "Full Name": "Kabir Khan",
+//       "contact_no": "2109876543",
+//       "email": "kabir.khan@gmail.com",
+//       "Address": "Lucknow, Uttar Pradesh",
+//       "Experience": "9 years",
+//       "Qualification": "M.A. in History",
+//       "Introduction/Bio": "History buff and passionate educator.",
+//       "Languages": "English, Hindi",
+//       "Status": "Disapprove"
+//
+//     },
+//     {
+//       "profileImage": "",
+//       "Full Name": "Nisha Reddy",
+//       "contact_no": "1098765432",
+//       "email": "nisha.reddy@gmail.com",
+//       "Address": "Visakhapatnam, Andhra Pradesh",
+//       "Experience": "4 years",
+//       "Qualification": "B.Tech in Information Technology",
+//       "Introduction/Bio": "Tech enthusiast and mentor.",
+//       "Languages": "English, Telugu",
+//       "Status": "Approve"
+//
+//     },
+//     {
+//       "profileImage": "",
+//       "Full Name": "Karan Joshi",
+//       "contact_no": "0987654321",
+//       "email": "karan.joshi@gmail.com",
+//       "Address": "Jaipur, Rajasthan",
+//       "Experience": "5 years",
+//       "Qualification": "B.Sc. in Chemistry",
+//       "Introduction/Bio": "Chemistry lover and educator.",
+//       "Languages": "English, Hindi",
+//       "Status": "Disapprove"
+//
+//     },
+//   ];
+//
+//
+//
+//   @override
+//   void initState() {
+//     // TODO: implement initState
+//     super.initState();
+//     mentorController.getAllMentors();
+//   }
+//
+//   void _toggleStatus(int index) async {
+//     bool? confirmation = await showDialog(
+//       context: context,
+//       builder: (BuildContext context) {
+//         return AlertDialog(
+//           title: const Text("Confirm Action"),
+//           content: const Text("Are you sure you want to change the status?"),
+//           actions: [
+//             TextButton(
+//               onPressed: () {
+//                 Navigator.of(context).pop(false);
+//               },
+//               child: const Text("No", style: TextStyle(color: Colors.red)),
+//             ),
+//             TextButton(
+//               onPressed: () {
+//                 Navigator.of(context).pop(true);
+//               },
+//               child: const Text("Yes", style: TextStyle(color: Colors.green)),
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//
+//     if (confirmation == true) {
+//       setState(() {
+//         mentorData[index]["Status"] =
+//         mentorData[index]["Status"] == "Approve" ? "Disapprove" : "Approve";
+//       });
+//     }
+//   }
+//
+//   void _removeMentor(int index) {
+//     setState(() {
+//       mentorData.removeAt(index);
+//     });
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: Colors.grey.shade50,
+//       body: LayoutBuilder(
+//         builder: (context, constraints) {
+//           bool isWideScreen = constraints.maxWidth > 800;
+//
+//           return Row(
+//             children: [
+//               if (isWideScreen)
+//                 Container(
+//                   width: 250,
+//                   color: Colors.orange.shade100,
+//                   child: const MyDrawer(),
+//                 ),
+//               Expanded(
+//                 child: Scaffold(
+//                   appBar: isWideScreen
+//                       ? null
+//                       : AppBar(
+//                     title: const Text('Dashboard'),
+//                     backgroundColor: Colors.blue.shade100,
+//                     actions: [
+//                       IconButton(
+//                         icon: const Icon(Icons.person, color: Colors.grey),
+//                         onPressed: () {},
+//                       ),
+//                     ],
+//                   ),
+//                   drawer: isWideScreen ? null : Drawer(child: const MyDrawer()),
+//                   body: Padding(
+//                     padding: const EdgeInsets.symmetric(
+//                         horizontal: 8.0, vertical: 16),
+//                     child: _buildMentorMainContent(),
+//                   ),
+//                 ),
+//               ),
+//             ],
+//           );
+//         },
+//       ),
+//     );
+//   }
+//
+//   Widget _buildMentorMainContent() {
+//     return Padding(
+//       padding: const EdgeInsets.all(16.0),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           _buildHeader(),
+//           const SizedBox(height: 16),
+//           Expanded(child: _buildMentorTable()),
+//         ],
+//       ),
+//     );
+//   }
+//
+//   Widget _buildHeader() {
+//     return Container(
+//       decoration: BoxDecoration(
+//         color: Colors.orange.shade100,
+//         borderRadius: BorderRadius.circular(10),
+//         border: Border.all(color: Colors.white),
+//       ),
+//       child: Padding(
+//         padding: const EdgeInsets.all(8.0),
+//         child: Row(
+//           children: [
+//             const Text(
+//               'All Registered Mentors',
+//               style: TextStyle(
+//                   fontWeight: FontWeight.bold,
+//                   fontSize: 20,
+//                   color: Colors.black),
+//             ),
+//             const Spacer(),
+//             Tooltip(
+//               message: 'Add a New Mentor',
+//               child: ElevatedButton.icon(
+//                 onPressed: () {
+//                   Navigator.push(
+//                     context,
+//                     MaterialPageRoute(
+//                         builder: (context) => MentorRegistration()),
+//                   );
+//                 },
+//                 icon: const Icon(Icons.add, color: Colors.white, size: 20),
+//                 label: const Text("Add Mentor",
+//                     style: TextStyle(color: Colors.white, fontSize: 16)),
+//                 style: ElevatedButton.styleFrom(
+//                   backgroundColor: Colors.deepOrange,
+//                   elevation: 3,
+//                   shape: RoundedRectangleBorder(
+//                       borderRadius: BorderRadius.circular(8)),
+//                   padding: const EdgeInsets.symmetric(
+//                       horizontal: 16, vertical: 12),
+//                 ),
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+//
+//   Widget _buildMentorTable() {
+//     return SingleChildScrollView(
+//       child: Card(
+//         elevation: 3,
+//         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+//         child: Table(
+//           border: const TableBorder.symmetric(
+//             inside: BorderSide(color: Colors.grey, width: 0.5),
+//             outside: BorderSide.none,
+//           ),
+//           columnWidths: const {
+//             0: FlexColumnWidth(2),
+//             1: FlexColumnWidth(2),
+//             2: FlexColumnWidth(3),
+//             3: FlexColumnWidth(2),
+//             4: FlexColumnWidth(3),
+//             5: FlexColumnWidth(2),
+//             6: FlexColumnWidth(2),
+//             7: FlexColumnWidth(2),
+//             8: FlexColumnWidth(1.6),
+//             9: FlexColumnWidth(2),
+//           },
+//           children: [
+//             _buildTableHeader(),
+//             ...mentorData.asMap().entries.map((entry) {
+//               int index = entry.key;
+//               Map<String, String> mentor = entry.value;
+//               return _buildTableRow(mentor, index);
+//             }).toList(),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+//
+//   TableRow _buildTableHeader() {
+//     return TableRow(
+//       decoration: BoxDecoration(
+//         color: Colors.blueGrey.shade50,
+//         borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+//       ),
+//       children: const [
+//         Padding(
+//             padding: EdgeInsets.all(12.0),
+//             child: Text('Profile', style: TextStyle(fontWeight: FontWeight.bold))),
+//         Padding(
+//             padding: EdgeInsets.all(12.0),
+//             child: Text('Name', style: TextStyle(fontWeight: FontWeight.bold))),
+//         Padding(
+//             padding: EdgeInsets.all(12.0),
+//             child: Text('Email', style: TextStyle(fontWeight: FontWeight.bold))),
+//         Padding(
+//             padding: EdgeInsets.all(12.0),
+//             child:
+//             Text('Contact No', style: TextStyle(fontWeight: FontWeight.bold))),
+//         Padding(
+//             padding: EdgeInsets.all(12.0),
+//             child: Text('Address', style: TextStyle(fontWeight: FontWeight.bold))),
+//         Padding(
+//             padding: EdgeInsets.all(12.0),
+//             child:
+//             Text('Experience', style: TextStyle(fontWeight: FontWeight.bold))),
+//         Padding(
+//             padding: EdgeInsets.all(12.0),
+//             child: Text('Qualification',
+//                 style: TextStyle(fontWeight: FontWeight.bold))),
+//         Padding(
+//             padding: EdgeInsets.all(12.0),
+//             child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
+//         Padding(
+//             padding: EdgeInsets.all(12.0),
+//             child:
+//             Text('Actions', style: TextStyle(fontWeight: FontWeight.bold))),
+//         Padding(
+//             padding: EdgeInsets.all(12.0),
+//             child: Text('Details', style: TextStyle(fontWeight: FontWeight.bold))),
+//       ],
+//     );
+//   }
+//
+//   TableRow _buildTableRow(Map<String, String> mentor, int index) {
+//     return TableRow(
+//       decoration: const BoxDecoration(color: Colors.white),
+//       children: [
+//         const Padding(
+//             padding: EdgeInsets.all(12.0),
+//             child: Icon(Icons.account_circle, size: 20)),
+//         Padding(
+//             padding: const EdgeInsets.all(12.0),
+//             child: Text(mentor["Full Name"] ?? 'No Name',
+//                 style: const TextStyle(fontSize: 14))),
+//         Padding(
+//             padding: const EdgeInsets.all(12.0),
+//             child: Text(mentor["email"] ?? 'No Email',
+//                 style: const TextStyle(fontSize: 14))),
+//         Padding(
+//             padding: const EdgeInsets.all(12.0),
+//             child: Text(mentor["contact_no"] ?? 'No Contact No',
+//                 style: const TextStyle(fontSize: 14))),
+//         Padding(
+//             padding: const EdgeInsets.all(12.0),
+//             child: Text(mentor["Address"] ?? 'No Address',
+//                 style: const TextStyle(fontSize: 14))),
+//         Padding(
+//             padding: const EdgeInsets.all(12.0),
+//             child: Text(mentor["Experience"] ?? 'No Experience',
+//                 style: const TextStyle(fontSize: 14))),
+//         Padding(
+//             padding: const EdgeInsets.all(12.0),
+//             child: Text(mentor["Qualification"] ?? 'No Qualification',
+//                 style: const TextStyle(fontSize: 14))),
+//         Padding(
+//           padding: const EdgeInsets.all(12.0),
+//           child: ElevatedButton(
+//             onPressed: () => _toggleStatus(index),
+//             style: ElevatedButton.styleFrom(
+//               shape: RoundedRectangleBorder(
+//                 borderRadius: BorderRadius.circular(8),
+//               ),
+//               backgroundColor: mentor["Status"] == "Approve"
+//                   ? Colors.green
+//                   : Colors.red,
+//               padding:
+//               const EdgeInsets.symmetric(horizontal: 7, vertical: 9),
+//             ),
+//             child: Text(
+//               mentor["Status"] ?? "Disapprove",
+//               style: const TextStyle(color: Colors.white, fontSize: 10),
+//             ),
+//           ),
+//         ),
+//         Padding(
+//           padding: const EdgeInsets.all(12.0),
+//           child: IconButton(
+//             icon: const Icon(Icons.delete, color: Colors.red),
+//             onPressed: () => _removeMentor(index),
+//           ),
+//         ),
+//         Padding(
+//           padding: const EdgeInsets.all(12.0),
+//           child: Container(
+//             decoration: BoxDecoration(
+//                 color: Colors.orange, borderRadius: BorderRadius.circular(8)),
+//             child: TextButton(
+//               onPressed: () {},
+//               child: const Text("View",
+//                   style: TextStyle(
+//                       letterSpacing: 1,
+//                       fontSize: 14,
+//                       fontWeight: FontWeight.bold,
+//                       color: Colors.black)),
+//             ),
+//           ),
+//         ),
+//       ],
+//     );
+//   }
+// }
 
 
 

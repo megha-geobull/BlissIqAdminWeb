@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:blissiqadmin/Global/Routes/AppRoutes.dart';
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
+import 'package:blissiqadmin/Global/constants/common_snackbar.dart';
 import 'package:blissiqadmin/Global/utils/shared_preference/shared_preference_services.dart';
 import 'package:blissiqadmin/Home/HomePage.dart';
 import 'package:country_code_picker/country_code_picker.dart';
@@ -34,9 +36,9 @@ class AuthController extends GetxController{
   var currentCountryCode = "IN-91".obs;
   var selectedUserType = 'Mentor'.obs;
 
-  List<PlatformFile>? _paths;
-  var pathsFile;
-  var pathsFileName;
+  RxList allMentorData = [].obs;
+
+
 
   // Handle country code change
   void onCountryChange(CountryCode countryCode) {
@@ -64,22 +66,7 @@ class AuthController extends GetxController{
   }
 
 
-  // File picker for profile image
-  pickFile() async {
-    _paths = (await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowMultiple: false,
-      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
-      allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
-    ))?.files;
 
-    if (_paths != null && _paths!.isNotEmpty) {
-      pathsFile = _paths!.first.bytes; // Store the bytes
-      pathsFileName = _paths!.first.name; // Store the file name
-    } else {
-      print('No file selected');
-    }
-  }
 
   void handleSignUp(BuildContext context) {
     if (formKey.currentState!.validate()) {
@@ -194,6 +181,8 @@ class AuthController extends GetxController{
     required String password,
     required String confirmPassword,
     required BuildContext context,
+    List<int>? profileImageBytes,
+    String? schoolId,
   }) async {
     isLoading.value = true;
 
@@ -215,29 +204,30 @@ class AuthController extends GetxController{
         'introBio': introBio,
         'password': password,
         'confirm_password': confirmPassword,
+        if (schoolId != null) 'school_id': schoolId, // Add school_id if provided
       });
 
       // Attach profile image if selected
-      if (_paths != null && pathsFile != null) {
-        final mimeType = lookupMimeType(pathsFileName);
+      if (profileImageBytes != null) {
         final multipartFile = http.MultipartFile.fromBytes(
-          'profile_img',
-          pathsFile,
-          filename: pathsFileName,
-          contentType: MediaType.parse(mimeType ?? 'application/octet-stream'),
+          'profile_image',
+          profileImageBytes,
+          filename: 'profile_image',
+          contentType: MediaType('image', 'jpeg'),
         );
         request.files.add(multipartFile);
       }
 
+
       final response = await request.send();
       final responseData = jsonDecode(await response.stream.bytesToString());
-
+      print(responseData);
       if (response.statusCode == 201 && responseData['status'] == 1) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(responseData['message'])),
         );
         clearControllers();
-        Get.toNamed(AppRoutes.login);
+        Get.toNamed(AppRoutes.mentorPage);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(responseData['message'] ?? 'Error occurred')),
@@ -245,8 +235,38 @@ class AuthController extends GetxController{
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred: \$e')),
+        SnackBar(content: Text('An error occurred: $e')),
       );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+  getAllMentors() async {
+    isLoading.value = true;
+    allMentorData.clear();
+    try {
+
+      final response = await http.post(
+        Uri.parse(ApiString.get_all_mentors),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          allMentorData.value = responseData["data"];
+        } else {
+          showSnackbar(message: "Failed to fetch category");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetch category $e");
+      log(e.toString());
     } finally {
       isLoading.value = false;
     }
