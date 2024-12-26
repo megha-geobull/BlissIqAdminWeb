@@ -21,7 +21,16 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    profileController.getProfile();
+    _loadProfile();
+  }
+
+  _loadProfile() async {
+    await profileController.getProfile();
+    setState(() {
+      profileController.nameController.text = profileController.profile['user_name'] ?? '';
+      profileController.emailController.text = profileController.profile['email'] ?? '';
+      profileController.phNoController.text = profileController.profile['contact_no'].toString() ?? '';
+    });
   }
 
 
@@ -116,8 +125,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     backgroundImage:
                                     profileController.pathsFile != null
                                         ? MemoryImage(profileController.pathsFile!)
-                                        : AssetImage("assets/business.png")
-                                    as ImageProvider,
+                                        : AssetImage("assets/icons/icon_white.png") as ImageProvider,
                                     child: const Align(
                                       alignment: Alignment.bottomRight,
                                       child: CircleAvatar(
@@ -235,7 +243,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             child: profileController.isLoading.value
                                 ? CircularProgressIndicator()
                                 : CustomButton(
-                              label: "Register",
+                              label: "Save Changes",
                               onPressed: () {
                                 if (profileController.formKey.currentState!
                                     .validate()) {
