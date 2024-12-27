@@ -18,13 +18,13 @@ class ApiString {
   static const String mentorBaseUrl = "http://65.0.211.122:4444/mentor_api/";
   static const String mentor_registration = "${mentorBaseUrl}mentor_registration";
   static const String get_all_mentors = "${baseUrl}get_all_mentors";
-
+  static const String approve_mentor = "${baseUrl}approve_mentor";
 
 
 
   ///school_registration
-  static const String schoolBaseUrl = "http://65.0.211.122:4444/mentor_api/";
-  static const String school_registration = "${mentorBaseUrl}mentor_registration";
+  static const String schoolBaseUrl = "http://65.0.211.122:4444/school_api/";
+  static const String school_registration = "${schoolBaseUrl}school_registration";
 
 
   /// Leaderboard

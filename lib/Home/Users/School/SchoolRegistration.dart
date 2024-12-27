@@ -2,6 +2,7 @@ import 'package:blissiqadmin/Global/Widgets/Button/CustomButton.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
+import 'package:blissiqadmin/auth/Controller/AuthController.dart';
 import 'package:blissiqadmin/auth/Controller/SchoolController/SchoolController.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,6 +16,7 @@ class SchoolRegistration extends StatefulWidget {
 
 class _SchoolRegistrationState extends State<SchoolRegistration> {
   final SchoolController schoolController = Get.put(SchoolController());
+  final AuthController authController = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -248,15 +250,26 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                             label: "School Register",
                             onPressed: () {
                               if (schoolController.formKey.currentState!.validate()) {
-                                schoolController.mentorRegistration(
-                                  fullName: schoolController.nameController.text,
-                                  email: schoolController.emailAddress.text,
-                                  address: schoolController.addressController.text,
-                                  contactNo: schoolController.phNoController.text,
-                                  password: schoolController.passwordController.text,
-                                  confirmPassword: schoolController.confirmPasswordController.text,
-                                  context: context,
-                                );
+                                schoolController.schoolRegistration(
+                                    schoolName: schoolController.nameController.text,
+                                    schoolRegNumber: schoolController.schoolRegNumber.text,
+                                    principalName: schoolController.principalName.text,
+                                    principalEmail: schoolController.emailAddress.text,
+                                    principalPhone: schoolController.phNoController.text,
+                                    address: schoolController.addressController.text,
+                                    schoolType: "schoolType",
+                                    password: schoolController.passwordController.text,
+                                    confirm_password: schoolController.confirmPasswordController.text,
+                                    context: context);
+                                // schoolController.schoolRegNumber(
+                                //   fullName: schoolController.nameController.text,
+                                //   email: schoolController.emailAddress.text,
+                                //   address: schoolController.addressController.text,
+                                //   contactNo: schoolController.phNoController.text,
+                                //   password: schoolController.passwordController.text,
+                                //   confirmPassword: schoolController.confirmPasswordController.text,
+                                //   context: context,
+                                // );
                               }
                             },
                           ),

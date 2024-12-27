@@ -1,6 +1,7 @@
 import 'package:blissiqadmin/Home/HomePage.dart';
 import 'package:blissiqadmin/Home/Users/Mentor/MentorRegistration.dart';
 import 'package:blissiqadmin/Home/Users/Mentor/MentorScreen.dart';
+import 'package:blissiqadmin/Home/Users/School/SchoolScreen.dart';
 import 'package:blissiqadmin/profile/ProfilePage.dart';
 import 'package:blissiqadmin/splash/SplashView.dart';
 import 'package:get/get.dart';
@@ -17,6 +18,7 @@ class AppRoutes {
   static const profile = '/profile';
   static const studentList = '/students';
   static const mentorPage = '/mentorPage';
+  static const schoolPage = '/schoolPage';
 
   static final routes = [
     GetPage(
@@ -31,6 +33,7 @@ class AppRoutes {
 
 
     GetPage(name: mentorPage, page: ()=> MentorScreen()),
+    GetPage(name: schoolPage, page: ()=> SchoolScreen()),
 
 
   ];
