@@ -61,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Padding(
                       padding: EdgeInsets.only(top: size.height * 0.38),
                       child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 28.0),
                         child: Form(
                           key: _formKey,
                           child: Column(
@@ -90,7 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 labelText: 'Enter your email',
                                 keyboardType: TextInputType.emailAddress,
                                 validator: signupController.validateEmail,
-                                prefixIcon: Icon(Icons.email_outlined, color: Colors.blueAccent, size: size.width * 0.03),
+                                prefixIcon: Icon(Icons.email_outlined, color: Colors.blueAccent, size: size.width * 0.02),
                               ),
                               boxH15(),
               
@@ -100,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 controller: _passwordController,
                                 labelText: 'Enter your password',
                                 obscureText: !_isPasswordVisible,
-                                prefixIcon: Icon(Icons.lock_outline, color: Colors.blueAccent, size: size.width * 0.03),
+                                prefixIcon: Icon(Icons.lock_outline, color: Colors.blueAccent, size: size.width * 0.02),
                                 sufixIcon: GestureDetector(
                                   onTap: () {
                                     setState(() {
@@ -110,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   child: Icon(
                                     _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
                                     color: Colors.blueAccent,
-                                    size: size.width * 0.03,
+                                    size: size.width * 0.02,
                                   ),
                                 ),
                               ),

@@ -160,23 +160,23 @@ class _TopicsScreenState extends State<TopicsScreen> {
                           () => ListView.builder(
                             itemCount: _controller.topics.length,
                             itemBuilder: (context, index) {
+                              final topic = _controller.topics[index];
+                              final topicId = topic['_id']; // Assuming this uniquely identifies each topic
+
                               return Card(
                                 color: Colors.white,
-                                margin: const EdgeInsets.symmetric(
-                                    vertical: 8, horizontal: 16),
+                                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                                 elevation: 0.4,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: ExpansionTile(
-                                  shape: Border.all(
-                                      color: Colors.grey.shade200, width: 0.8),
+                                  shape: Border.all(color: Colors.grey.shade200, width: 0.8),
                                   title: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        _controller.topics[index]['topic_name'],
+                                        topic['topic_name'],
                                         style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
@@ -186,19 +186,11 @@ class _TopicsScreenState extends State<TopicsScreen> {
                                       Row(
                                         children: [
                                           IconButton(
-                                            icon: const Icon(
-                                              Icons.add_circle_outline,
-                                              color: Colors.green,
-                                            ),
+                                            icon: const Icon(Icons.add_circle_outline, color: Colors.green),
                                             onPressed: () {
-                                              _showAddDialog(
-                                                  context,
-                                                  'subtopic',
-                                                  index,
-                                                  _controller.topics[index]);
+                                              _showAddDialog(context, 'subtopic', index, topic);
                                             },
                                           ),
-                                          // Add Question Button
                                           IconButton(
                                             icon: Image.asset(
                                               'assets/question.png',
@@ -210,26 +202,15 @@ class _TopicsScreenState extends State<TopicsScreen> {
                                               Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      AddQuestionsWidgets(
-                                                          // topicId: _controller.topics[index]['_id'],
-                                                          ),
+                                                  builder: (context) => AddQuestionsWidgets(),
                                                 ),
                                               );
                                             },
                                           ),
                                           IconButton(
-                                            icon: const Icon(
-                                              Icons.delete,
-                                              color: Colors.red,
-                                            ),
+                                            icon: const Icon(Icons.delete, color: Colors.red),
                                             onPressed: () {
-                                              onDelete(
-                                                  _controller.topics[index],
-                                                  index,
-                                                  "You want to delete this Topic?",
-                                                  'topic',
-                                                  '');
+                                              onDelete(topic, index, "You want to delete this Topic?", 'topic', '');
                                             },
                                           ),
                                         ],
@@ -237,70 +218,60 @@ class _TopicsScreenState extends State<TopicsScreen> {
                                     ],
                                   ),
                                   onExpansionChanged: (isExpanded) {
-                                    if (isExpanded &&
-                                        _controller.sub_topics.isEmpty) {
+                                    if (isExpanded && !_controller.subtopicsMap.containsKey(topicId)) {
+                                      // Fetch subtopics only if not already fetched
                                       _controller.get_SubTopic(
-                                        categoryId: _controller.topics[index]
-                                            ['main_category_id'],
-                                        sub_categoryId: _controller
-                                            .topics[index]['sub_category_id'],
-                                        topicId: _controller.topics[index]
-                                            ['_id'],
+                                        categoryId: topic['main_category_id'],
+                                        sub_categoryId: topic['sub_category_id'],
+                                        topicId: topicId,
                                       );
                                     }
                                   },
                                   children: [
-                                    Obx(() => Column(
-                                          children: _controller.sub_topics
-                                              .map((topic) {
-                                            return Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 8,
-                                                      horizontal: 16),
-                                              child: Card(
-                                                elevation: 3,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
+                                    Obx(() {
+                                      final subtopics = _controller.subtopicsMap[topicId] ?? [];
+                                      return Column(
+                                        children: subtopics.map((subTopic) {
+                                          return Padding(
+                                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                                            child: Card(
+                                              elevation: 3,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: ListTile(
+                                                contentPadding: const EdgeInsets.all(16),
+                                                title: Text(
+                                                  subTopic['sub_topic_name'],
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
                                                 ),
-                                                child: ListTile(
-                                                  contentPadding:
-                                                      const EdgeInsets.all(16),
-                                                  title: Text(
-                                                    topic['sub_topic_name'],
-                                                    style: const TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                    ),
-                                                  ),
-                                                  trailing: IconButton(
-                                                    icon: const Icon(
-                                                      Icons.delete,
-                                                      color: Colors.red,
-                                                    ),
-                                                    onPressed: () {
-                                                      onDelete(
-                                                        _controller
-                                                            .sub_topics[index],
-                                                        index,
-                                                        "You want to delete this Subtopic?",
-                                                        'subtopic',
-                                                        topic['_id'],
-                                                      );
-                                                    },
-                                                  ),
+                                                trailing: IconButton(
+                                                  icon: const Icon(Icons.delete, color: Colors.red),
+                                                  onPressed: () {
+                                                    onDelete(
+                                                      subTopic,
+                                                      index,
+                                                      "You want to delete this Subtopic?",
+                                                      'subtopic',
+                                                      subTopic['_id'],
+                                                    );
+                                                  },
                                                 ),
                                               ),
-                                            );
-                                          }).toList(),
-                                        )),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      );
+                                    }),
                                   ],
                                 ),
                               );
                             },
-                          ),
+                          )
+                          ,
                         ),
                       ),
                     ),
@@ -394,8 +365,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
     );
   }
 
-  void onDelete(
-      var topic, int index, String title, String type, String subtopic_id) {
+  void onDelete(var topic, int index, String title, String type, String subtopic_id) {
     showDialog(
       context: context,
       builder: (context) => CustomAlertDialog(
@@ -411,27 +381,27 @@ class _TopicsScreenState extends State<TopicsScreen> {
         }else{
           _controller.deleteSub_Topic(
               categoryId: topic['main_category_id'], sub_categoryId: topic['sub_category_id'],topicId:topic['topic_id'],sub_topicId: subtopic_id );
-          _controller.sub_topics.removeAt(index);
+          _controller.subtopicsMap[topic['topic_id']]?.removeAt(index);
         }
         },
       ),
     );
   }
 
-  void _showAddDialog(
-      BuildContext context, String type, int? categoryIndex, var topicDetails) {
+  void _showAddDialog(BuildContext context, String type, int? categoryIndex,var topicDetails) {
     TextEditingController controller = TextEditingController();
     String? selectedCategoryId;
     String? selectedSubCategoryId;
     String? selectedTopicId;
-    if (type == "subtopic") {
-      selectedCategoryId = topicDetails['main_category_id'];
+    if(type=="subtopic"){
+      selectedCategoryId =topicDetails['main_category_id'];
       selectedSubCategoryId = topicDetails['sub_category_id'];
-      selectedTopicId = topicDetails['_id'] ?? '';
-    } else {
-      selectedCategoryId = widget.subcategory['main_category_id'];
+      selectedTopicId = topicDetails['_id']??'';
+    }
+    else{
+      selectedCategoryId =widget.subcategory['main_category_id'];
       selectedSubCategoryId = widget.subcategory['_id'];
-      selectedTopicId = '';
+      selectedTopicId='';
     }
 
     showDialog(
@@ -439,19 +409,22 @@ class _TopicsScreenState extends State<TopicsScreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return AlertDialog(
-              title: Text('Add $type'),
-              content: SingleChildScrollView(
+            return Dialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text('Add $type', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 10),
                     TextField(
                       controller: controller,
                       decoration: InputDecoration(
                         labelText: 'Enter ${type.capitalizeFirst}',
                       ),
                     ),
-
                     SizedBox(height: 10),
                     ElevatedButton(
                       onPressed: () async {
@@ -488,37 +461,37 @@ class _TopicsScreenState extends State<TopicsScreen> {
                           itemBuilder: (context, index) {
                             final item = _controller.tempList[index];
                             return Card(
-                              margin: const EdgeInsets.symmetric(vertical: 5),
-                              child: Container(
-                                width:300,
-                            child:
-                            Row(
-                                children: [
-                                  //Image.file(File(item.path)),
-                                  SizedBox(
-                                    height:100,width: 100,
-                                    child:Image.memory(item.bytes!),),//Display selected image
-                                  SizedBox(
-                                      width:250,
-                                      child:TextField(
-                                    decoration: const InputDecoration(
-                                      labelText: 'Enter Name for Example',
-                                    ),
-                                    onChanged: (value) {
-                                      item.name = value;
-                                    },
-                                  ))
-                                  ,
-                                  IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.red),
-                                    onPressed: () {
-                                      setState(() {
-                                        _controller.tempList.removeAt(index);
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),)
+                                margin: const EdgeInsets.symmetric(vertical: 5),
+                                child: Container(
+                                  width:300,
+                                  child:
+                                  Row(
+                                    children: [
+                                      //Image.file(File(item.path)),
+                                      SizedBox(
+                                        height:100,width: 100,
+                                        child:Image.memory(item.bytes!),),//Display selected image
+                                      SizedBox(
+                                          width:250,
+                                          child:TextField(
+                                            decoration: const InputDecoration(
+                                              labelText: 'Enter Name for Example',
+                                            ),
+                                            onChanged: (value) {
+                                              item.name = value;
+                                            },
+                                          ))
+                                      ,
+                                      IconButton(
+                                        icon: Icon(Icons.delete, color: Colors.red),
+                                        onPressed: () {
+                                          setState(() {
+                                            _controller.tempList.removeAt(index);
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),)
                             );
                           },
                         ),
@@ -557,7 +530,9 @@ class _TopicsScreenState extends State<TopicsScreen> {
                         ),
                       ],
                     ),
-              ],
+                  ],
+                ),
+              ),
             );
           },
         );

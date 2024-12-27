@@ -15,6 +15,7 @@ class CategoryController extends GetxController {
   RxList topics = [].obs;
   RxList sub_topics = [].obs;
   RxList<ImageWithText> tempList = <ImageWithText>[].obs;
+  var subtopicsMap = <String, List<dynamic>>{}.obs;
 
   addCategory({
     required String categoryname,
@@ -427,6 +428,7 @@ class CategoryController extends GetxController {
         var responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
           sub_topics.value = responseData["data"];
+          subtopicsMap[topicId] = sub_topics.value;
         } else {
           showSnackbar(message: "Failed to fetch topic");
         }

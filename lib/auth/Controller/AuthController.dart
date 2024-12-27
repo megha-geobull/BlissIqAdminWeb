@@ -181,11 +181,9 @@ class AuthController extends GetxController {
           // Correcting userId access
           final userId = responseData['user']['_id'];
           final userName = responseData['user']['user_name'];
-          //final authToken = responseData['user']['token'];
 
           print("User ID: $userId");
           print("User Name: $userName");
-          //print("Token: $authToken");
 
           clearLocalStorage();
           await setDataToLocalStorage(
@@ -241,4 +239,4 @@ class AuthController extends GetxController {
 
 }
 
-}
+
