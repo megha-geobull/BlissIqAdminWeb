@@ -4,6 +4,7 @@ import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/profile/ProfileController.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:country_code_picker/country_code_picker.dart';
@@ -16,6 +17,10 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final ProfileController profileController = Get.put(ProfileController());
+
+  List<PlatformFile>? _paths;
+  var pathsFile;
+  var pathsFileName;
 
   @override
   void initState() {
@@ -31,6 +36,26 @@ class _ProfilePageState extends State<ProfilePage> {
       profileController.emailController.text = profileController.profile['email'] ?? '';
       profileController.phNoController.text = profileController.profile['contact_no'].toString() ?? '';
     });
+  }
+
+  // File picker for profile image
+  pickFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: false,
+      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
+      allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      setState(() {
+        _paths = result.files;
+        pathsFile = _paths!.first.bytes; // Store the bytes
+        pathsFileName = _paths!.first.name; // Store the file name
+      });
+    } else {
+      print('No file selected');
+    }
   }
 
 
@@ -115,24 +140,23 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                               ),
                               boxH10(),
-
                               GestureDetector(
                                   onTap: () {
-                                    profileController.pickFile();
+                                    pickFile();
                                   },
                                   child: CircleAvatar(
                                     radius: 50,
-                                    backgroundImage:
-                                    profileController.pathsFile != null
-                                        ? MemoryImage(profileController.pathsFile!)
-                                        : AssetImage("assets/icons/icon_white.png") as ImageProvider,
+                                    backgroundImage: pathsFile != null
+                                        ? MemoryImage(pathsFile!)
+                                        : AssetImage("assets/icons/mentor.png")
+                                    as ImageProvider,
                                     child: const Align(
                                       alignment: Alignment.bottomRight,
                                       child: CircleAvatar(
-                                        backgroundColor: Colors.blue,
+                                        backgroundColor: Colors.orange,
                                         radius: 15,
                                         child: Icon(Icons.add,
-                                            size: 20, color: Colors.white),
+                                            size: 18, color: Colors.white),
                                       ),
                                     ),
                                   )),
@@ -241,7 +265,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         Obx(() {
                           return Center(
                             child: profileController.isLoading.value
-                                ? CircularProgressIndicator()
+                                ? const CircularProgressIndicator()
                                 : CustomButton(
                               label: "Save Changes",
                               onPressed: () {
@@ -251,7 +275,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     user_name: profileController.nameController.text,
                                     email: profileController.emailController.text,
                                     contact_no: profileController.phNoController.text,
-                                    context: context, profile_image: profileController.pathsFile,
+                                    context: context, profile_image: pathsFile,
                                   );
                                 }
                               },
