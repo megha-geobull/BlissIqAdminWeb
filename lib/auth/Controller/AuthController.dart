@@ -310,8 +310,10 @@ class AuthController extends GetxController{
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
+
           if (kDebugMode) {
             print("Mentor assigned successfully");
+
           }
         } else {
           Fluttertoast.showToast(

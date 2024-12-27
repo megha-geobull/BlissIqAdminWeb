@@ -1,9 +1,13 @@
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:html' as html;
 import 'package:blissiqadmin/Global/Widgets/Button/CustomButton.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/controller/CategoryController.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -11,9 +15,9 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:csv/csv.dart';
 import 'package:share_extend/share_extend.dart';
-// import 'package:excel/excel.dart';
-import 'package:file_picker/file_picker.dart';
-// import 'package:excel/excel.dart' as excel;
+
+import '../../../Global/constants/common_snackbar.dart';
+import 'Header_Columns.dart';
 
 
 class AddQuestionsWidgets extends StatefulWidget {
@@ -57,6 +61,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
 
   String? mainCategoryId;
   String? subCategoryId;
+  String? topicId;
+  String? subtopicId;
 
   String? selectedQuestionType = "Multiple Choice Question";
   List<String> questionTypes = [
@@ -66,7 +72,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     "True/False",
     "Story",
     "Phrases",
-    "Conversation"
+    "Conversation",
+    "Learning Slide",
+    "Card Flip",
   ];
   final CategoryController _controller = Get.put(CategoryController());
 
@@ -90,82 +98,67 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     }
   }
 
-
-
   void _exportTableToCSV() async {
     List<List<dynamic>> rows = [];
 
-    // Header Row
-    List<String> headers = [
-      "Type",
-      "Question",
-      "Option 1",
-      "Option 2",
-      "Option 3",
-      "Option 4",
-      "Answer",
-      "Points",
-      "Main Category ID",
-      "Sub Category ID",
-      "Topic ID",
-      "Sub Topic ID",
-      "Question Type",
-      "Title",
-      "Question Image",
-    ];
+    List<String> headers = [];
+    if (selectedQuestionType == "Multiple Choice Question") {
+      headers = mcq_headers;
+    } else if (selectedQuestionType == "Re-Arrange the Word") {
+      headers = rearrange_headers;
+    } else if (selectedQuestionType == "Complete the Word") {
+      headers = rearrange_headers;
+    } else if (selectedQuestionType == "True/False") {
+      headers = true_false_headers;
+    } else if (selectedQuestionType == "Story") {
+      headers = story_headers;
+    } else if (selectedQuestionType == "Phrases") {
+      headers = phrases_headers;
+    } else if (selectedQuestionType == "Conversation") {
+      headers = conversation_headers;
+    } else if (selectedQuestionType == "Learning Slide") {
+      headers = learning_slide;
+    } else if (selectedQuestionType == "Card Flip") {
+      headers = cardFlip_headers;
+    }
     rows.add(headers);
+    List<dynamic> sampleData = [];
+    for (int i = 0; i < 6; i++) { // Assuming you want 5 rows of sample data
+      List<dynamic> row = [
+        '',
+        mainCategoryId,
+        subCategoryId,
+        topicId,
+        subtopicId,
+      ];
 
-    List<dynamic> sampleData = [
-      "add-mcq",
-      "",
-      "main_category_id",
-      "sub_category_id",
-      "topic_id",
-      "sub_topic_id",
-      "question_type",
-      "title",
-      "question",
-      "q_image",
-      "option_a",
-      "option_b",
-      "option_c",
-      "option_d",
-      "answer",
-      "points",
-    ];
-    rows.add(sampleData);
-
-    // Extract Data from Table Rows
-    for (var row in tableRows) {
-      List<dynamic> rowData = [];
-
-      for (var cell in row.children) {
-        // Extract text from each table cell
-        if (cell is Padding && cell.child is Text) {
-          rowData.add((cell.child as Text).data);
-        } else {
-          rowData.add("");  // Fallback if the data is not found
-        }
+      // Add dynamic placeholders for remaining headers
+      for (int j = 6; j < headers.length; j++) {
+        row.add('');
       }
 
-      rows.add(rowData);
+      sampleData.add(row);
     }
+    rows.add(sampleData);
+    String csvData = const ListToCsvConverter().convert(rows);
+    if(kIsWeb){
+      log("website file save");
+      final bytes = utf8.encode(csvData);
+      final blob = html.Blob([bytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
 
-    // Convert to CSV String
-    String csvString = const ListToCsvConverter().convert(rows);
+      final anchor = html.AnchorElement()
+        ..href = url
+        ..style.display = 'none'
+        ..download = '${selectedTopic}-${selectedQuestionType}.csv';
 
-    // Save CSV to Temporary Directory
-    final directory = await Directory.systemTemp.createTemp();
-    final file = File('${directory.path}/questions_data.csv');
-    await file.writeAsString(csvString);
+      html.document.body!.children.add(anchor);
+      anchor.click();
+      html.document.body!.children.remove(anchor);
 
-    // Share the File
-    if (file.existsSync()) {
-      ShareExtend.share(file.path, "file");
+      html.Url.revokeObjectUrl(url);
     }
   }
-
-
 
   getData() async {
     await _controller.getCategory();
@@ -175,7 +168,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   Widget _buildTabs() {
     return Column(
       children: [
-        /// Select Main Category
         Row(
           children: [
             // Main Category Dropdown
@@ -255,10 +247,10 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         ),
 
         boxH20(),
-        // Select Topic
-// Select Topic
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.3,
+        // Select sub Topic
+        Row(
+        children: [
+        Expanded(
           child: DropdownButtonFormField<String>(
             value: selectedTopic,
             hint: Text("Select Topic"),
@@ -282,32 +274,47 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 selectedTopic = value;
                 selectedSubtopic = null; // Reset subtopic when topic changes
                 // Fetch subtopics based on the selected topic
-                String topicId = _controller.topics.firstWhere((t) => t['topic_name'] == value)['_id'];
-                _controller.get_SubTopic(topicId: topicId, categoryId: mainCategoryId.toString(), sub_categoryId: subCategoryId.toString()).then((_) {
+                topicId = _controller.topics.firstWhere((t) => t['topic_name'] == value)['_id'];
+                _controller.get_SubTopic(topicId: topicId!, categoryId: mainCategoryId.toString(), sub_categoryId: subCategoryId.toString()).then((_) {
                   setState(() {});
                 });
               });
             },
           ),
         ),
-
-        // // Select Subtopic
-        // DropdownButtonFormField<String>(
-        //   value: selectedSubtopic,
-        //   hint: Text("Select Subtopic"),
-        //   items: _controller.sub_topics.map<DropdownMenuItem<String>>((subtopic) {
-        //     return DropdownMenuItem<String>(
-        //       value: subtopic['name'],
-        //       child: Text(subtopic['name']),
-        //     );
-        //   }).toList(),
-        //   onChanged: (value) {
-        //     setState(() {
-        //       selectedSubtopic = value;
-        //     });
-        //   },
-        // ),
-
+        boxW10(),
+      // Select Subtopic
+      _controller.sub_topics.isNotEmpty?
+        Expanded(
+          child: DropdownButtonFormField<String>(
+            value: selectedSubtopic,
+            hint: Text("Select SubTopic"),
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: BorderSide(color: Colors.grey.shade400),
+              ),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            ),
+            items: _controller.sub_topics.map<DropdownMenuItem<String>>((topic) {
+              return DropdownMenuItem<String>(
+                value: topic['sub_topic_name'],
+                child: Text(topic['sub_topic_name']),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                selectedSubtopic = value;
+                // Fetch subtopics based on the selected subtopic
+                subtopicId = _controller.sub_topics.firstWhere((t) => t['sub_topic_name'] == value)['_id'];
+                setState(() {});
+              });
+            },
+          ),
+        ):Expanded(child:SizedBox()),
+        ]),
       ],
     );
   }
@@ -354,14 +361,34 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'Conversational English',
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.orange.shade800,
+                                  Row(children: [
+                                    Text(
+                                      'Add questions and other data',
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.orange.shade800,
+                                      ),
                                     ),
-                                  ),
+
+                                    CircleAvatar(
+                                      backgroundColor: Colors.orange.shade100,
+                                      child: IconButton(
+                                        icon: Image.asset('assets/excel.png', width: 24, height: 24),
+                                        onPressed: (){
+                                          print("categoryId "+mainCategoryId!);
+                                          print("subcategoryId "+subCategoryId!);
+                                          print("topicId "+topicId!);
+                                          print("subtopicId "+subtopicId!);
+                                          if(mainCategoryId!.isNotEmpty && subCategoryId!.isNotEmpty && topicId!.isNotEmpty)
+                                            _exportTableToCSV();
+                                          else
+                                            showSnackbar(message: "Please select category,subcategory,topic,etc");
+                                        },
+                                        tooltip: 'Export to Excel',
+                                      ),
+                                    )
+                                  ],),
                                   SizedBox(height: 16),
                                   _buildTabs(),
                                   SizedBox(height: 20),
@@ -407,9 +434,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                       ),
                                       const Spacer(),
                                       SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.05,
+                                        width: MediaQuery.of(context).size.width * 0.06,
                                         child: CustomTextField(
                                           controller: pointsController,
                                           maxLines: 1,
@@ -421,11 +446,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                   boxH10(),
                                   // Display the appropriate question type UI based on selection
                                   SizedBox(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.4,
-                                      height:
-                                          MediaQuery.of(context).size.width *
-                                              0.4,
+                                      width: MediaQuery.of(context).size.width * 0.4,
+                                      height: MediaQuery.of(context).size.width * 0.4,
                                       child: _buildQuestionTypeContent()),
                                 ],
                               ),
@@ -444,176 +466,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     );
   }
 
-
-
-  // Widget _buildTabs() {
-  //   return DropdownButtonFormField<String>(
-  //     value: selectedMainCategory,
-  //     hint: Text("Select Main Category"),
-  //     items: _controller.categories.map((category) => DropdownMenuItem<String>(
-  //       value: category.toString(),  // Explicitly cast to String
-  //       child: Text(  category['category_name'].toString()),
-  //     ))
-  //         .toList(),
-  //     onChanged: (value) {
-  //       setState(() {
-  //         selectedMainCategory = value;
-  //       });
-  //     },
-  //   );
-  // }
-
-
-  // Widget _buildTabs() {
-  //   return SizedBox(
-  //     width: double.infinity,
-  //     child: Card(
-  //       color: Colors.white,
-  //       elevation: 1.0,
-  //       child: Padding(
-  //         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-  //         child: Wrap(
-  //           spacing: 8.0,
-  //           runSpacing: 8.0,
-  //           children: List.generate(tabs.length, (index) {
-  //             final bool isActive = index == selectedIndex;
-  //             return Container(
-  //               width: MediaQuery.of(context).size.width * 0.16,
-  //               height: MediaQuery.of(context).size.width * 0.04,
-  //               margin: const EdgeInsets.symmetric(vertical: 5),
-  //               decoration: BoxDecoration(
-  //                 color: isActive ? Colors.orange.shade100 : Colors.white,
-  //                 borderRadius: BorderRadius.circular(8),
-  //                 border: Border.all(
-  //                   color: isActive ? Colors.orange : Colors.grey,
-  //                   width: 1,
-  //                 ),
-  //                 boxShadow: isActive
-  //                     ? [
-  //                         BoxShadow(
-  //                           color: Colors.orange.withOpacity(0.3),
-  //                           blurRadius: 5,
-  //                           offset: const Offset(0, 3),
-  //                         )
-  //                       ]
-  //                     : [],
-  //               ),
-  //               child: TextButton(
-  //                 onPressed: () {
-  //                   setState(() {
-  //                     selectedIndex = index;
-  //                   });
-  //                 },
-  //                 style: TextButton.styleFrom(
-  //                   padding: const EdgeInsets.symmetric(
-  //                     vertical: 12,
-  //                     horizontal: 20,
-  //                   ),
-  //                   shape: RoundedRectangleBorder(
-  //                     borderRadius: BorderRadius.circular(8),
-  //                   ),
-  //                 ),
-  //                 child: Text(
-  //                   tabs[index],
-  //                   style: TextStyle(
-  //                     color: isActive ? Colors.black : Colors.grey.shade700,
-  //                     fontWeight: FontWeight.bold,
-  //                     fontSize: 16,
-  //                   ),
-  //                 ),
-  //               ),
-  //             );
-  //           }),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  ///
-  // Widget _buildQuestionsTable() {
-  //   return Card(
-  //     elevation: 1.0,
-  //     color: Colors.white,
-  //     shape: RoundedRectangleBorder(
-  //       borderRadius: BorderRadius.circular(8),
-  //     ),
-  //     child: Container(
-  //       padding: const EdgeInsets.all(16.0),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           Row(
-  //             children: [
-  //               const Text(
-  //                 'Question Data',
-  //                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-  //               ),
-  //               const Spacer(),
-  //
-  //               CircleAvatar(
-  //                 backgroundColor: Colors.orange.shade100,
-  //                 child: IconButton(
-  //                   icon: Image.asset('assets/excel.png', width: 24, height: 24),
-  //                   onPressed: _exportTableToCSV,
-  //                   tooltip: 'Import Excel Data',
-  //                 ),
-  //               )
-  //             ],
-  //           ),
-  //           SizedBox(height: 10),
-  //           Table(
-  //             border: TableBorder.all(
-  //               color: Colors.grey.shade300,
-  //               borderRadius: BorderRadius.circular(8),
-  //             ),
-  //             columnWidths: const {
-  //               0: FlexColumnWidth(1),
-  //               1: FlexColumnWidth(2),
-  //               2: FlexColumnWidth(1),
-  //               3: FlexColumnWidth(1),
-  //               4: FlexColumnWidth(1),
-  //               5: FlexColumnWidth(1),
-  //               6: FlexColumnWidth(1),
-  //             },
-  //             children: [
-  //               TableRow(
-  //                 decoration: BoxDecoration(
-  //                   color: Colors.orange.shade100,
-  //                   borderRadius: BorderRadius.circular(8),
-  //                 ),
-  //                 children: [
-  //                   _buildTableHeader("Type"),
-  //                   _buildTableHeader("Question"),
-  //                   _buildTableHeader("Option 1"),
-  //                   _buildTableHeader("Option 2"),
-  //                   _buildTableHeader("Option 3"),
-  //                   _buildTableHeader("Option 4"),
-  //                   _buildTableHeader("Answer"),
-  //                 ],
-  //               ),
-  //               ...tableRows,
-  //             ],
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-  //
-  // Widget _buildTableHeader(String title) {
-  //   return Padding(
-  //     padding: const EdgeInsets.all(8.0),
-  //     child: Text(
-  //       title,
-  //       style: const TextStyle(
-  //         fontWeight: FontWeight.bold,
-  //         fontSize: 16,
-  //       ),
-  //       textAlign: TextAlign.center,
-  //     ),
-  //   );
-  // }
   Widget _buildQuestionsTable() {
     return Card(
       elevation: 1.0,
@@ -638,7 +490,16 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                   backgroundColor: Colors.orange.shade100,
                   child: IconButton(
                     icon: Image.asset('assets/excel.png', width: 24, height: 24),
-                    onPressed: _exportTableToCSV,
+                    onPressed: (){
+                      print("categoryId "+mainCategoryId!);
+                      print("subcategoryId "+subCategoryId!);
+                      print("topicId "+topicId!);
+                      print("subtopicId "+subtopicId!);
+                      if(mainCategoryId!.isNotEmpty && subCategoryId!.isNotEmpty && topicId!.isNotEmpty)
+                      _exportTableToCSV();
+                      else
+                        showSnackbar(message: "Please select category,subcategory,topic,etc");
+                      },
                     tooltip: 'Export to Excel',
                   ),
                 )
@@ -796,7 +657,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           borderRadius: BorderRadius.circular(10),
           color: Colors.white,
         ),
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+        padding: const EdgeInsets.symmetric(vertical: 7.0, horizontal: 8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1284,449 +1145,5 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       ),
     ); // Placeholder for the actual implementation
   }
-
-
 }
-
-// class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
-//   final TextEditingController questionController = TextEditingController();
-//   final List<TextEditingController> optionControllers =
-//   List.generate(4, (_) => TextEditingController());
-//   TextEditingController correctAnswerController = TextEditingController();
-//   TextEditingController pointsController = TextEditingController();
-//
-//   File? selectedImage;
-//   List<TableRow> tableRows = [];
-//
-//   final List<String> tabs = [
-//     "Conversational English",
-//     "A1",
-//     "Greetings",
-//     "Story",
-//     "Phrases",
-//     "Quizzes",
-//     "Conversation"
-//   ];
-//   int selectedIndex = 0;
-//
-//   String? selectedQuestionType;
-//   List<String> questionTypes = [
-//     "Multiple Choice Question",
-//     "Complete the Word",
-//     "True/False",
-//     "Story",
-//     "Phrases",
-//     "Conversation"
-//   ];
-//   List<Widget> queTypeWidgets = [
-//     _buildMultipleChoiceQueContent(constraints),
-//     _buildStoryQueContent,
-//     _buildPhrasesQueContent,
-//     _buildTrueFalseQueContent,
-//     _buildConversationContent
-//   ];
-//
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: Colors.grey.shade200,
-//       body: LayoutBuilder(
-//         builder: (context, constraints) {
-//           bool isWideScreen = constraints.maxWidth > 800;
-//
-//           return Row(
-//             crossAxisAlignment: CrossAxisAlignment.stretch,
-//             children: [
-//               if (isWideScreen)
-//                 Container(
-//                   width: 250,
-//                   color: Colors.orange.shade100,
-//                   child: const MyDrawer(),
-//                 ),
-//               Expanded(
-//                 child: Scaffold(
-//                   backgroundColor: Colors.grey.shade100,
-//                   appBar: isWideScreen
-//                       ? null
-//                       : AppBar(
-//                     title: const Text('Dashboard'),
-//                     backgroundColor: Colors.blue.shade100,
-//                   ),
-//                   drawer: isWideScreen ? null : Drawer(child: const MyDrawer()),
-//                   body: Center(
-//                     child: SingleChildScrollView(
-//                       padding: const EdgeInsets.all(16.0),
-//                       child: ConstrainedBox(
-//                         constraints: BoxConstraints(
-//                           maxWidth: MediaQuery.of(context).size.width * 0.9,
-//                         ),
-//                         child: Row(
-//                           crossAxisAlignment: CrossAxisAlignment.start,
-//                           children: [
-//                             Expanded(
-//                               flex: 2,
-//                               child: Column(
-//                                 crossAxisAlignment: CrossAxisAlignment.start,
-//                                 children: [
-//                                   Text(
-//                                     'Conversational English',
-//                                     style: TextStyle(
-//                                       fontSize: 24,
-//                                       fontWeight: FontWeight.bold,
-//                                       color: Colors.orange.shade800,
-//                                     ),
-//                                   ),
-//                                   SizedBox(height: 16),
-//                                   _buildTabs(),
-//                                   SizedBox(height: 20),
-//                                   _buildQuestionsTable(),
-//                                 ],
-//                               ),
-//                             ),
-//                             const SizedBox(width: 20),
-//                             Expanded(
-//                               flex: 1,
-//                               child: Column(
-//                                 children: [
-//                                   Row(
-//                                     children: [
-//                                       SizedBox(
-//                                         width: MediaQuery.of(context).size.width * 0.18,
-//                                         child: DropdownButtonFormField<String>(
-//                                           value: selectedQuestionType,
-//                                           decoration: InputDecoration(
-//                                             labelText: "Select Question Type",
-//                                             border: OutlineInputBorder(
-//                                               borderRadius: BorderRadius.circular(10),
-//                                             ),
-//                                             filled: true,
-//                                             fillColor: Colors.white,
-//                                           ),
-//                                           items: questionTypes
-//                                               .map((type) => DropdownMenuItem(
-//                                             value: type,
-//                                             child: Text(type),
-//                                           ))
-//                                               .toList(),
-//                                           onChanged: (value) {
-//                                             setState(() {
-//                                               selectedQuestionType = value;
-//                                             });
-//                                           },
-//                                         ),
-//                                       ),
-//                                       const Spacer(),
-//                                       SizedBox(
-//                                         width: MediaQuery.of(context).size.width * 0.05,
-//                                         child: CustomTextField(
-//                                           controller: pointsController,
-//                                           maxLines: 1,
-//                                           labelText: "Points",
-//                                         ),
-//                                       ),
-//                                     ],
-//                                   ),
-//                                   boxH10(),
-//                                   here display the List one by one whenever he choose the quetion type then changes the below ui  here
-//                                   _buildMultipleChoiceQueContent(constraints),
-//                                 ],
-//                               ),
-//                             ),
-//                           ],
-//                         ),
-//                       ),
-//                     ),
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           );
-//         },
-//       ),
-//     );
-//   }
-//
-//   Widget _buildTabs() {
-//     return SizedBox(
-//       width: double.infinity,
-//       child: Card(
-//         color: Colors.white,
-//         elevation: 1.0,
-//         child: Padding(
-//           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-//           child: Wrap(
-//             spacing: 8.0,
-//             runSpacing: 8.0,
-//             children: List.generate(tabs.length, (index) {
-//               final bool isActive = index == selectedIndex;
-//               return Container(
-//                 width: MediaQuery.of(context).size.width * 0.16,
-//                 height: MediaQuery.of(context).size.width * 0.04,
-//                 margin: const EdgeInsets.symmetric(vertical: 5),
-//                 decoration: BoxDecoration(
-//                   color: isActive ? Colors.orange.shade100 : Colors.white,
-//                   borderRadius: BorderRadius.circular(8),
-//                   border: Border.all(
-//                     color: isActive ? Colors.orange : Colors.grey,
-//                     width: 1,
-//                   ),
-//                   boxShadow: isActive
-//                       ? [
-//                     BoxShadow(
-//                       color: Colors.orange.withOpacity(0.3),
-//                       blurRadius: 5,
-//                       offset: const Offset(0, 3),
-//                     )
-//                   ]
-//                       : [],
-//                 ),
-//                 child: TextButton(
-//                   onPressed: () {
-//                     setState(() {
-//                       selectedIndex = index;
-//                     });
-//                   },
-//                   style: TextButton.styleFrom(
-//                     padding: const EdgeInsets.symmetric(
-//                       vertical: 12,
-//                       horizontal: 20,
-//                     ),
-//                     shape: RoundedRectangleBorder(
-//                       borderRadius: BorderRadius.circular(8),
-//                     ),
-//                   ),
-//                   child: Text(
-//                     tabs[index],
-//                     style: TextStyle(
-//                       color: isActive ? Colors.black : Colors.grey.shade700,
-//                       fontWeight: FontWeight.bold,
-//                       fontSize: 16,
-//                     ),
-//                   ),
-//                 ),
-//               );
-//             }),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-//
-//   Widget _buildQuestionsTable() {
-//     return Card(
-//       elevation: 1.0,
-//       color: Colors.white,
-//       shape: RoundedRectangleBorder(
-//         borderRadius: BorderRadius.circular(8),
-//       ),
-//       child: Container(
-//         padding: const EdgeInsets.all(16.0),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             const Text(
-//               'Question Data',
-//               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//             ),
-//             SizedBox(height: 10),
-//             Table(
-//               border: TableBorder.all(
-//                 color: Colors.grey.shade300,
-//                 borderRadius: BorderRadius.circular(8),
-//               ),
-//               columnWidths: const {
-//                 0: FlexColumnWidth(1),
-//                 1: FlexColumnWidth(2),
-//                 2: FlexColumnWidth(1),
-//                 3: FlexColumnWidth(1),
-//                 4: FlexColumnWidth(1),
-//                 5: FlexColumnWidth(1),
-//                 6: FlexColumnWidth(1),
-//               },
-//               children: [
-//                 TableRow(
-//                   decoration: BoxDecoration(
-//                     color: Colors.orange.shade100,
-//                     borderRadius: BorderRadius.circular(8),
-//                   ),
-//                   children: [
-//                     _buildTableHeader("Type"),
-//                     _buildTableHeader("Question"),
-//                     _buildTableHeader("Option 1"),
-//                     _buildTableHeader("Option 2"),
-//                     _buildTableHeader("Option 3"),
-//                     _buildTableHeader("Option 4"),
-//                     _buildTableHeader("Answer"),
-//                   ],
-//                 ),
-//                 ...tableRows,
-//               ],
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-//
-//   Widget _buildTableHeader(String title) {
-//     return Padding(
-//       padding: const EdgeInsets.all(8.0),
-//       child: Text(
-//         title,
-//         style: const TextStyle(
-//           fontWeight: FontWeight.bold,
-//           fontSize: 16,
-//         ),
-//         textAlign: TextAlign.center,
-//       ),
-//     );
-//   }
-//
-//   Widget _buildMultipleChoiceQueContent(BoxConstraints constraints) {
-//     return DottedBorder(
-//       color: Colors.orange,
-//       strokeWidth: 1,
-//       dashPattern: [4, 4],
-//       child: Container(
-//         decoration: BoxDecoration(
-//           borderRadius: BorderRadius.circular(10),
-//           color: Colors.white,
-//         ),
-//         padding: const EdgeInsets.all(16.0),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             CustomTextField(
-//               controller: questionController,
-//               maxLines: 1,
-//               labelText: "Enter your question",
-//             ),
-//             const SizedBox(height: 20),
-//             DottedBorder(
-//               color: Colors .grey,
-//               strokeWidth: 1,
-//               dashPattern: [4, 4],
-//               child: Container(
-//                 width: double.infinity,
-//                 height: 50,
-//                 decoration: BoxDecoration(
-//                   borderRadius: BorderRadius.circular(10),
-//                 ),
-//                 child: const Center(
-//                   child: Text(
-//                     "Tap to upload image",
-//                     style: TextStyle(color: Colors.grey),
-//                   ),
-//                 ),
-//               ),
-//             ),
-//             const SizedBox(height: 20),
-//             const Text(
-//               'Options:',
-//               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-//             ),
-//             const SizedBox(height: 10),
-//             ...List.generate(
-//               optionControllers.length,
-//                   (index) => Padding(
-//                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-//                 child: CustomTextField(
-//                   controller: optionControllers[index],
-//                   labelText: "Option ${index + 1}",
-//                 ),
-//               ),
-//             ),
-//             // GestureDetector(
-//             //   onTap: () {
-//             //     setState(() {
-//             //       optionControllers.add(TextEditingController());
-//             //     });
-//             //   },
-//             //   child: Container(
-//             //     width: double.infinity,
-//             //     padding: const EdgeInsets.all(12.0),
-//             //     decoration: BoxDecoration(
-//             //       color: Colors.orange.shade100,
-//             //       borderRadius: BorderRadius.circular(8),
-//             //       border: Border.all(color: Colors.orange),
-//             //     ),
-//             //     child: const Center(child: Text("Add More Option")),
-//             //   ),
-//             // ),
-//             const SizedBox(height: 20),
-//             CustomTextField(
-//               controller: correctAnswerController,
-//               labelText: "Enter correct answer",
-//             ),
-//             const SizedBox(height: 20),
-//             CustomButton(
-//               label: "Add Question",
-//               onPressed: _submitQuestion,
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-//
-//   void _submitQuestion() {
-//     if (questionController.text.isEmpty) {
-//       _showError("Question cannot be empty");
-//       return;
-//     }
-//
-//     if (optionControllers.any((controller) => controller.text.isEmpty)) {
-//       _showError("All options must be filled");
-//       return;
-//     }
-//
-//     if (correctAnswerController.text.isEmpty) {
-//       _showError("Correct answer must be specified");
-//       return;
-//     }
-//
-//     if (!optionControllers
-//         .any((controller) => controller.text == correctAnswerController.text)) {
-//       _showError("Correct answer must be one of the options");
-//       return;
-//     }
-//
-//     tableRows.add(TableRow(
-//       children: [
-//         Padding(
-//           padding: const EdgeInsets.all(8.0),
-//           child: Text(selectedQuestionType ?? "N/A"),
-//         ),
-//         Padding(
-//           padding: const EdgeInsets.all(8.0),
-//           child: Text(questionController.text),
-//         ),
-//         ...optionControllers.map((controller) => Padding(
-//           padding: const EdgeInsets.all(8.0),
-//           child: Text(controller.text),
-//         )),
-//         Padding(
-//           padding: const EdgeInsets.all(8.0),
-//           child: Text(correctAnswerController.text),
-//         ),
-//       ],
-//     ));
-//
-//     setState(() {
-//       questionController.clear();
-//       optionControllers.forEach((controller) => controller.clear());
-//       correctAnswerController.clear();
-//     });
-//   }
-//
-//   void _showError(String message) {
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       SnackBar(
-//         content: Text(message),
-//         backgroundColor: Colors.red,
-//       ),
-//     );
-//   }
-// }
 

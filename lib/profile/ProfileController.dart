@@ -26,15 +26,19 @@ class ProfileController extends GetxController {
   String? getLanguage='';
   String? getAge = '';
   String? getPurpose = '';
-
   RxString userId = "".obs;
   var formKey = GlobalKey<FormState>();
   var currentCountryCode = "IN-91".obs;
 
   checkLogin() async {
-    print("checkLogin   MyProfileController");
+    print("checkLogin ");
 
-    userId.value = await getUserId();
+    String? fetchedUserId = await getUserId();
+    if (fetchedUserId != null) {
+      userId.value = fetchedUserId;
+    } else {
+      userId.value = ''; // Provide a fallback or log the error
+    }
     isLogin = userId.value.isNotEmpty ?true:false;
     print("userId.value   ${userId.value}  $isLogin");
     if (userId.value.isNotEmpty) {

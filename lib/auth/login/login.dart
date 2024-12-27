@@ -50,6 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     'assets/images/logo.png',
                     height: size.height * 0.12,
                   ),
+
                   const SizedBox(height: 40),
                   Container(
                     padding: const EdgeInsets.all(30.0),

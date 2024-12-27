@@ -86,6 +86,7 @@ dependencies:
   image_picker_web:
   csv: ^5.0.1
   share_extend: ^2.0.0
+  html:
 
 dev_dependencies:
   flutter_test:
