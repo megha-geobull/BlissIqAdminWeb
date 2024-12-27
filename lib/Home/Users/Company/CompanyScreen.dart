@@ -13,76 +13,43 @@ class CompanyScreen extends StatefulWidget {
 
 class _CompanyScreenState extends State<CompanyScreen> {
   // Sample data for 5 students
-  final List<Map<String, String>> studentData = [
+  final List<Map<String, String>> companyData = [
     {
       "profileImage": "",
-      "user_name": "Student 10",
+      "user_name": "Company 1",
       "contact_no": "7741918243",
-      "email": "student10@gmail.com",
-      "school": "Nath High School Paithan",
-      "std_class": "10th Class",
-      "board_name": "SSC Board of Maharashtra",
-      "language": "Marathi",
-      "age_group": "19-25 years",
-      "purpose": "Job",
-      "score": "85",
+      "email": "Company@gmail.com",
       "status": "Approve",
     },
     {
       "profileImage": "",
-      "user_name": "Student 11",
+      "user_name": "Company 2",
       "contact_no": "7741918244",
-      "email": "student11@gmail.com",
-      "school": "Nath High School Paithan",
-      "std_class": "10th Class",
-      "board_name": "SSC Board of Maharashtra",
-      "language": "Marathi",
-      "age_group": "19-25 years",
-      "purpose": "Job",
-      "score": "90",
+      "email": "Company@gmail.com",
       "status": "Disapprove",
     },
 
     {
       "profileImage": "",
-      "user_name": "Student 12",
+      "user_name": "Company 3",
       "contact_no": "7741918245",
-      "email": "student12@gmail.com",
-      "school": "Nath High School Paithan",
-      "std_class": "10th Class",
-      "board_name": "SSC Board of Maharashtra",
-      "language": "Marathi",
-      "age_group": "19-25 years",
-      "purpose": "Job",
-      "score": "92",
+      "email": "Company@gmail.com",
+      "status": "Disapprove",
     },
     {
       "profileImage": "",
-      "user_name": "Student 13",
+      "user_name": "Company 4",
       "contact_no": "7741918246",
-      "email": "student13@gmail.com",
-      "school": "Nath High School Paithan",
-      "std_class": "10th Class",
-      "board_name": "SSC Board of Maharashtra",
-      "language": "Marathi",
-      "age_group": "19-25 years",
-      "purpose": "Job",
-      "score": "88",
+      "email": "Company@gmail.com",
+      "status": "Disapprove",
     },
     {
       "profileImage": "",
-      "user_name": "Student 14",
+      "user_name": "Company 5",
       "contact_no": "7741918247",
-      "email": "student14@gmail.com",
-      "school": "Nath High School Paithan",
-      "std_class": "10th Class",
-      "board_name": "SSC Board of Maharashtra",
-      "language": "Marathi",
-      "age_group": "19-25 years",
-      "purpose": "Job",
-      "score": "80",
+      "email": "Company@gmail.com",
+      "status": "Disapprove",
     },
-    // More student data here
   ];
 
   void _toggleStatus(int index) async {
@@ -112,14 +79,14 @@ class _CompanyScreenState extends State<CompanyScreen> {
 
     if (confirmation == true) {
       setState(() {
-        studentData[index]["status"] = studentData[index]["status"] == "Approve" ? "Disapprove" : "Approve";
+        companyData[index]["status"] = companyData[index]["status"] == "Approve" ? "Disapprove" : "Approve";
       });
     }
   }
 
   void _removeStudent(int index) {
     setState(() {
-      studentData.removeAt(index);
+      companyData.removeAt(index);
     });
   }
 
@@ -250,13 +217,10 @@ class _CompanyScreenState extends State<CompanyScreen> {
                     0: FlexColumnWidth(2), // Profile
                     1: FlexColumnWidth(2), // Name
                     2: FlexColumnWidth(3), // Email
-                    3: FlexColumnWidth(2), // Contact No
-                    4: FlexColumnWidth(3), // School
-                    5: FlexColumnWidth(2), // Class
-                    6: FlexColumnWidth(1.4), // Score
-                    7: FlexColumnWidth(2), // Status
-                    8: FlexColumnWidth(1.6), // Actions
-                    9: FlexColumnWidth(2), // Details
+                    3: FlexColumnWidth(2), // Contact No// Score
+                    4: FlexColumnWidth(2), // Status
+                    5: FlexColumnWidth(1.6), // Actions
+                    6: FlexColumnWidth(2), // Details
                   },
                   children: [
                     TableRow(
@@ -298,35 +262,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
                         Padding(
                           padding: EdgeInsets.all(12.0),
                           child: Text(
-                            'School',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(12.0),
-                          child: Text(
-                            'Class',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(12.0),
-                          child: Text(
-                            'Score',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(12.0),
-                          child: Text(
                             'Status',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(12.0),
-                          child: Text(
-                            'Actions',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -337,62 +273,53 @@ class _CompanyScreenState extends State<CompanyScreen> {
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
+                        Padding(
+                          padding: EdgeInsets.all(12.0),
+                          child: Text(
+                            'Actions',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
                       ],
                     ),
-                    ...studentData.map(
-                          (student) {
-                        int index = studentData.indexOf(student);
+                    ...companyData.map(
+                          (company) {
+                        int index = companyData.indexOf(company);
                         return TableRow(
                           decoration: const BoxDecoration(
                             color: Colors.white,
                           ),
                           children: [
+
                             const Padding(
                               padding: EdgeInsets.all(12.0),
                               child: Icon(Icons.account_circle, size: 20),
                             ),
+
                             Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: Text(
-                                student["user_name"] ?? 'No Name',
+                                company["user_name"] ?? 'No Name',
                                 style: const TextStyle(fontSize: 14),
                               ),
                             ),
+
                             Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: Text(
-                                student["email"] ?? 'No Email',
+                                company["email"] ?? 'No Email',
                                 style: const TextStyle(fontSize: 14),
                               ),
                             ),
+
                             Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: Text(
-                                student["contact_no"] ?? 'No Contact No',
+                                company["contact_no"] ?? 'No Contact No',
                                 style: const TextStyle(fontSize: 14),
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Text(
-                                student["school"] ?? 'No School',
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Text(
-                                student["std_class"] ?? 'No Class',
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Text(
-                                student["score"] ?? 'No Score',
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                            ),
+
                             Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: ElevatedButton(
@@ -401,27 +328,20 @@ class _CompanyScreenState extends State<CompanyScreen> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  backgroundColor: student["status"] == "Approve"
+                                  backgroundColor: company["status"] == "Approve"
                                       ? Colors.green
                                       : Colors.red,
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 7, vertical: 9),
                                 ),
                                 child: Text(
-                                  student["status"] ?? "Disapprove",
+                                  company["status"] ?? "Disapprove",
                                   style: const TextStyle(
-                                      color: Colors.white, fontSize: 10),
+                                      color: Colors.white, fontSize: 14),
                                 ),
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: IconButton(
-                                icon:
-                                const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => _removeStudent(index),
-                              ),
-                            ),
+
                             Padding(
                               padding: EdgeInsets.all(12.0),
                               child: Container(
@@ -441,6 +361,15 @@ class _CompanyScreenState extends State<CompanyScreen> {
                                     ),
                                   ),
                                 ),
+                              ),
+                            ),
+
+                            Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: IconButton(
+                                icon:
+                                const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => _removeStudent(index),
                               ),
                             ),
                           ],

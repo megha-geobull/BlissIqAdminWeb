@@ -1,4 +1,5 @@
 class ApiString {
+
    /// Base URL
    static const String baseUrl = "http://65.0.211.122:4444/";
    static const String mentorBaseUrl= "";
@@ -69,5 +70,19 @@ class ApiString {
 
 
 
+  ///mentor
+  static const String mentorBaseUrl = "http://65.0.211.122:4444/mentor_api/";
+  static const String mentor_registration = "${mentorBaseUrl}mentor_registration";
+  static const String get_all_mentors = "${baseUrl}get_all_mentors";
+
+  ///learner
+  static const String get_all_learners = "${baseUrl}get_all_learners";
+  static const String assign_mentor = "${baseUrl}get_all_learners";
+
+
+
+  ///school_registration
+  static const String schoolBaseUrl = "http://65.0.211.122:4444/mentor_api/";
+  static const String school_registration = "${mentorBaseUrl}mentor_registration";
 
 }

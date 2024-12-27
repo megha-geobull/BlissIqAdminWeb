@@ -22,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final AuthController signupController = Get.put(AuthController());
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -35,158 +36,154 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return Container(
-            padding:EdgeInsets.symmetric(horizontal: 300),
-            child: Center(
-              child: Stack(
+      body: Center(
+        child: FractionallySizedBox(
+          widthFactor: size.width > 800 ? 0.4 : 0.9,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(vertical: size.height * 0.1),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Fixed background image
-              
-                  Positioned(
-                    top: size.height * 0.2,
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                      child: Image.asset(
-                        'assets/images/logo.png',
-                        height: size.height * 0.09, // Responsive size
-                      ),
-                    ),
+                  Image.asset(
+                    'assets/images/logo.png',
+                    height: size.height * 0.12,
                   ),
-              
-                  // Scrollable form content
-                  Positioned.fill(
-                    child: Padding(
-                      padding: EdgeInsets.only(top: size.height * 0.38),
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(horizontal: 28.0),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Hello!',
-                                style: TextStyle(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blueGrey.shade800,
-                                ),
-                              ),
-                              boxH05(),
-                              const Text(
-                                'Enter the correct Email & password to login into the account ',
-                                style: TextStyle(fontSize: 14, color: Colors.grey),
-                              ),
-                              boxH15(),
-              
-                              // Email Field
-                              _buildLabel('Email'),
-                              CustomTextField(
-                                controller: _emailController,
-                                labelText: 'Enter your email',
-                                keyboardType: TextInputType.emailAddress,
-                                validator: signupController.validateEmail,
-                                prefixIcon: Icon(Icons.email_outlined, color: Colors.blueAccent, size: size.width * 0.02),
-                              ),
-                              boxH15(),
-              
-                              // Password Field
-                              _buildLabel('Password'),
-                              CustomTextField(
-                                controller: _passwordController,
-                                labelText: 'Enter your password',
-                                obscureText: !_isPasswordVisible,
-                                prefixIcon: Icon(Icons.lock_outline, color: Colors.blueAccent, size: size.width * 0.02),
-                                sufixIcon: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _isPasswordVisible = !_isPasswordVisible;
-                                    });
-                                  },
-                                  child: Icon(
-                                    _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                                    color: Colors.blueAccent,
-                                    size: size.width * 0.02,
-                                  ),
-                                ),
-                              ),
-                              boxH20(),
-              
-                              Obx(() {
-                                return Center(
-                                  child: signupController.isLoading.value
-                                      ? CircularProgressIndicator()
-                                      : CustomButton(
-                                    label: 'Login',
-                                    color: Colors.amber,
-                                    textColor: Colors.blueGrey.shade800,
-                                    onPressed: () {
-                                      if (_formKey.currentState!.validate()) {
-                                        signupController.loginApi(
-                                          email: _emailController.text.trim(),
-                                          password: _passwordController.text.trim(),
-                                        );
-                                      }
-                                    },
-                                  ),
-                                );
-                              }),
-                              boxH05(),
-              
-                              // Forgot Password Link
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      // Navigator.push(
-                                      //   context,
-                                      //   MaterialPageRoute(
-                                      //       builder: (context) =>
-                                      //       const ForgotPasswordScreen()),
-                                      // );
-                                    },
-                                    child: Text(
-                                      'Forgot Password',
-                                      style: TextStyle(
-                                        color: Colors.blueGrey.shade700,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              boxH10(),
-              
-                              // Sign Up Link
-                            ],
-                          ),
+
+                  const SizedBox(height: 40),
+                  Container(
+                    padding: const EdgeInsets.all(30.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 15,
+                          spreadRadius: 5,
                         ),
+                      ],
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Welcome Back!',
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blueGrey.shade900,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
+                            'Login to your account',
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
+                          const SizedBox(height: 30),
+
+                          // Email Field
+                          _buildLabel('Email'),
+                          CustomTextField(
+                            controller: _emailController,
+                            labelText: 'Enter your email',
+                            keyboardType: TextInputType.emailAddress,
+                            validator: signupController.validateEmail,
+                            prefixIcon: const Icon(Icons.email_outlined, color: Colors.blueAccent),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Password Field
+                          _buildLabel('Password'),
+                          CustomTextField(
+                            controller: _passwordController,
+                            labelText: 'Enter your password',
+                            obscureText: !_isPasswordVisible,
+                            prefixIcon: const Icon(Icons.lock_outline, color: Colors.blueAccent),
+                            sufixIcon: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _isPasswordVisible = !_isPasswordVisible;
+                                });
+                              },
+                              child: Icon(
+                                _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                                color: Colors.blueAccent,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 30),
+
+                          // Login Button
+                          Obx(() {
+                            return signupController.isLoading.value
+                                ? const Center(child: CircularProgressIndicator())
+                                : SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    signupController.loginApi(
+                                      email: _emailController.text.trim(),
+                                      password: _passwordController.text.trim(),
+                                    );
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.amber,
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: Text(
+                                  'Login',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.blueGrey.shade900,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                          const SizedBox(height: 20),
+
+                          // Forgot Password Link
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {},
+                              child: const Text(
+                                'Forgot Password?',
+                                style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildLabel(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4.0),
+      padding: const EdgeInsets.only(bottom: 8.0),
       child: Text(
         text,
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: Colors.blueGrey.shade800,
-          fontSize: 14,
+          fontSize: 16,
+          color: Colors.blueGrey.shade900,
         ),
       ),
     );

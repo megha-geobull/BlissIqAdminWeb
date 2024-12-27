@@ -1,19 +1,24 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:blissiqadmin/Global/Routes/AppRoutes.dart';
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
+import 'package:blissiqadmin/Global/constants/common_snackbar.dart';
+import 'package:blissiqadmin/Global/utils/shared_preference/shared_preference_services.dart';
+import 'package:blissiqadmin/Home/HomePage.dart';
+import 'package:blissiqadmin/Home/Users/Models/GetAllMentorModel.dart';
 import 'package:country_code_picker/country_code_picker.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import '../../Global/utils/shared_preference/shared_preference_services.dart';
-import '../../Home/HomePage.dart';
 
+class AuthController extends GetxController{
 
-class AuthController extends GetxController {
   var nameController = TextEditingController();
   var emailController = TextEditingController();
   var passwordController = TextEditingController();
@@ -22,21 +27,22 @@ class AuthController extends GetxController {
   var addressController = TextEditingController();
   var experienceController = TextEditingController();
   var qualificationController = TextEditingController();
-
-  var introBioController = TextEditingController();
-
-  RxBool isLoading = false.obs;
   var languagesController = TextEditingController();
   var introBio = TextEditingController();
+
+
+  RxBool isLoading = false.obs;
   var formKey = GlobalKey<FormState>();
   RxBool passwordVisible = false.obs;
   RxBool confirmPasswordVisible = false.obs;
   var currentCountryCode = "IN-91".obs;
   var selectedUserType = 'Mentor'.obs;
 
-  List<PlatformFile>? _paths;
-  var pathsFile;
-  var pathsFileName;
+  RxList<Data> allMentorData = <Data>[].obs;
+  RxString userId = "".obs;
+
+
+
 
   // Handle country code change
   void onCountryChange(CountryCode countryCode) {
@@ -60,97 +66,22 @@ class AuthController extends GetxController {
     addressController.clear();
     experienceController.clear();
     qualificationController.clear();
-    introBioController.clear();
+    introBio.clear();
   }
 
 
-  // File picker for profile image
-   pickFile() async {
-    _paths = (await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowMultiple: false,
-      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
-      allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
-    ))?.files;
 
-    if (_paths != null && _paths!.isNotEmpty) {
-      pathsFile = _paths!.first.bytes; // Store the bytes
-      pathsFileName = _paths!.first.name; // Store the file name
-    } else {
-      print('No file selected');
-    }
-  }
 
-  // Mentor Registration API
-   mentorRegistration({
-    required String userType,
-    required String fullName,
-    required String email,
-    required String address,
-    required String contactNo,
-    required String experience,
-    required String qualification,
-    required String introBio,
-    required String password,
-    required String confirmPassword,
-    required BuildContext context,
-  }) async {
-    isLoading.value = true;
-
-    try {
-      final request = http.MultipartRequest(
-        'POST',
-        Uri.parse(ApiString.mentor_registration),
-      );
-
-      // Prepare the request body
-      request.fields.addAll({
-        'userType': userType,
-        'fullName': fullName,
-        'email': email,
-        'address': address,
-        'contact_no': contactNo,
-        'experience': experience,
-        'qualification': qualification,
-        'introBio': introBio,
-        'password': password,
-        'confirm_password': confirmPassword,
-      });
-
-      // Attach profile image if selected
-      if (_paths != null && pathsFile != null) {
-        final mimeType = lookupMimeType(pathsFileName);
-        final multipartFile = http.MultipartFile.fromBytes(
-          'profile_img',
-          pathsFile,
-          filename: pathsFileName,
-          contentType: MediaType.parse(mimeType ?? 'application/octet-stream'),
-        );
-        request.files.add(multipartFile);
-      }
-
-      final response = await request.send();
-      final responseData = jsonDecode(await response.stream.bytesToString());
-
-      if (response.statusCode == 201 && responseData['status'] == 1) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(responseData['message'])),
-        );
-        clearControllers();
-        Get.toNamed(AppRoutes.login);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(responseData['message'] ?? 'Error occurred')),
-        );
-      }
-    } catch (e) {
+  void handleSignUp(BuildContext context) {
+    if (formKey.currentState!.validate()) {
+      // TODO: Implement sign-up functionality
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred: \$e')),
+        const SnackBar(content: Text('Signing Up...')),
       );
-    } finally {
-      isLoading.value = false;
     }
   }
+
+  /// Admin login api
 
   loginApi({
     required String email,
@@ -181,9 +112,11 @@ class AuthController extends GetxController {
           // Correcting userId access
           final userId = responseData['user']['_id'];
           final userName = responseData['user']['user_name'];
+          //final authToken = responseData['user']['token'];
 
           print("User ID: $userId");
           print("User Name: $userName");
+          //print("Token: $authToken");
 
           clearLocalStorage();
           await setDataToLocalStorage(
@@ -220,6 +153,7 @@ class AuthController extends GetxController {
     }
   }
 
+
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email is required';
@@ -237,6 +171,166 @@ class AuthController extends GetxController {
     return null; // Return null if the email is valid
   }
 
-}
 
+  /// Mentor Registration API
+  mentorRegistration({
+    required String userType,
+    required String fullName,
+    required String email,
+    required String address,
+    required String contactNo,
+    required String experience,
+    required String qualification,
+    required String introBio,
+    required String password,
+    required String confirmPassword,
+    required BuildContext context,
+    List<int>? profileImageBytes,
+    String? schoolId,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse(ApiString.mentor_registration),
+      );
+
+      // Prepare the request body
+      request.fields.addAll({
+        'userType': userType,
+        'fullName': fullName,
+        'email': email,
+        'address': address,
+        'contact_no': contactNo,
+        'experience': experience,
+        'qualification': qualification,
+        'introBio': introBio,
+        'password': password,
+        'confirm_password': confirmPassword,
+        if (schoolId != null) 'school_id': schoolId, // Add school_id if provided
+      });
+
+      // Attach profile image if selected
+      if (profileImageBytes != null) {
+        final multipartFile = http.MultipartFile.fromBytes(
+          'profile_image',
+          profileImageBytes,
+          filename: 'profile_image',
+          contentType: MediaType('image', 'jpeg'),
+        );
+        request.files.add(multipartFile);
+      }
+
+
+      final response = await request.send();
+      final responseData = jsonDecode(await response.stream.bytesToString());
+      print(responseData);
+      if (response.statusCode == 201 && responseData['status'] == 1) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(responseData['message'])),
+        );
+        clearControllers();
+        Get.toNamed(AppRoutes.mentorPage);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(responseData['message'] ?? 'Error occurred')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: $e')),
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+  getAllMentors() async {
+    isLoading.value = true;
+    allMentorData.clear();
+    try {
+      final response = await http.post(
+        Uri.parse(ApiString.get_all_mentors),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+
+        if (responseData['status'] == 1) {
+          // Parse each JSON object into a Data model
+          allMentorData.value = (responseData["data"] as List)
+              .map((mentorJson) => Data.fromJson(mentorJson))
+              .toList();
+        } else {
+          showSnackbar(message: "Failed to fetch category");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetching category $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Get user ID from local storage
+  getUserId() async {
+    return await getDataFromLocalStorage(
+      dataType: "STRING",
+      prefKey: "user_id",
+    ) as String?;
+  }
+
+  assignMentorApi({
+    required String mentorId,
+    required String studentId,
+  }) async {
+    isLoading.value = true;
+    try {
+      final Map<String, dynamic> body = {
+        "user_id": studentId,
+        "mentor_id": mentorId,
+      };
+
+      final response = await http.post(
+        Uri.parse(ApiString.assign_mentor),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+
+          if (kDebugMode) {
+            print("Mentor assigned successfully");
+
+          }
+        } else {
+          Fluttertoast.showToast(
+            msg: responseData['message'] ?? "Something went wrong!",
+            backgroundColor: Colors.red,
+          );
+        }
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "An error occurred: $e",
+        backgroundColor: Colors.red,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+}
 

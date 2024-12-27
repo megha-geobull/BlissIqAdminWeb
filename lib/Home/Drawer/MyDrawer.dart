@@ -1,6 +1,7 @@
 // NavigationBar/MyDrawer.dart
 
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
+import 'package:blissiqadmin/Home/Drawer/ChangePasswordPage.dart';
 import 'package:blissiqadmin/Home/Drawer/MainCategoriesPage.dart';
 import 'package:blissiqadmin/Home/Drawer/Notification.dart';
 import 'package:blissiqadmin/Home/Drawer/QuestionWidgets.dart';
@@ -9,6 +10,8 @@ import 'package:blissiqadmin/Home/Drawer/UsersPage.dart';
 import 'package:blissiqadmin/Home/HomePage.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/AddQuetionsWidgets.dart';
 import 'package:blissiqadmin/auth/login/login.dart';
+import 'package:blissiqadmin/profile/ProfileController.dart';
+import 'package:blissiqadmin/profile/ProfilePage.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -33,6 +36,7 @@ class MyDrawer extends StatefulWidget {
 class _MyDrawerState extends State<MyDrawer> {
   final DrawerController controller = Get.put(DrawerController());
   final String profileImage = "assets/icons/icon_white.png";
+  final ProfileController profileController = Get.put(ProfileController());
 
   @override
   Widget build(BuildContext context) {
@@ -59,23 +63,48 @@ class _MyDrawerState extends State<MyDrawer> {
           ),
           child: Column(
             children: [
-              CircleAvatar(
-                radius: 40,
-                backgroundColor: Colors.deepOrange.shade50,
-                child: ClipOval(
-                  child: CachedNetworkImage(
-                    imageUrl: profileImage,
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) =>
-                        const CircularProgressIndicator(),
-                    errorWidget: (context, url, error) =>
-                        const Icon(Icons.error),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
+              // CircleAvatar(
+              //   radius: 40,
+              //   backgroundColor: Colors.deepOrange.shade50,
+              //   child: ClipOval(
+              //     child: CachedNetworkImage(
+              //       imageUrl: profileImage,
+              //       width: 100,
+              //       height: 100,
+              //       fit: BoxFit.cover,
+              //       placeholder: (context, url) =>
+              //           const CircularProgressIndicator(),
+              //       errorWidget: (context, url, error) =>
+              //           const Icon(Icons.error),
+              //     ),
+              //   ),
+              // ),
+              GestureDetector(
+                  onTap: () {
+                   // profileController.pickFile();
+                  },
+                  child: CircleAvatar(
+                    radius: 40,
+                    // backgroundImage: profileController.pathsFile != null
+                    //     ? MemoryImage(profileController.pathsFile!)
+                    //     : const AssetImage("assets/icons/icon_white.png") as ImageProvider,
+                    backgroundImage:  const AssetImage("assets/icons/icon_white.png") as ImageProvider,
+                    child: Align(
+                      alignment: Alignment.bottomRight,
+                      child: GestureDetector(
+                        onTap: () {
+                          Get.to(() => ProfilePage());
+                        },
+                        child: const CircleAvatar(
+                          backgroundColor: Colors.blue,
+                          radius: 15,
+                          child: Icon(Icons.add, size: 20, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  )),
+
+              boxH08(),
               const Text(
                 'Dashboard',
                 style: TextStyle(
@@ -95,7 +124,6 @@ class _MyDrawerState extends State<MyDrawer> {
               onTap: () {
                 controller.changePage('Dashboard');
                 Get.to(() => HomePage());
-
               },
             )),
         // Users
@@ -106,7 +134,6 @@ class _MyDrawerState extends State<MyDrawer> {
               onTap: () {
                 controller.changePage('Users');
                 Get.to(() => UsersPage());
-
               },
             )),
         // Categories
@@ -117,19 +144,17 @@ class _MyDrawerState extends State<MyDrawer> {
               onTap: () {
                 controller.changePage('Categories');
                 Get.to(() => const MainCategoriesPage());
-
               },
             )),
         Obx(() => buildDrawerTile(
-          title: 'Question Widgets',
-          icon: Icons.question_answer,
-          isSelected: controller.selectedPage.value == 'Question Widgets',
-          onTap: () {
-            controller.changePage('Question Widgets');
-            Get.to(() =>  AddQuestionsWidgets());
-          },
-        )),
-
+              title: 'Question Widgets',
+              icon: Icons.question_answer,
+              isSelected: controller.selectedPage.value == 'Question Widgets',
+              onTap: () {
+                controller.changePage('Question Widgets');
+                Get.to(() => AddQuestionsWidgets());
+              },
+            )),
 
         // Settings
         Obx(() => buildDrawerTile(
@@ -139,9 +164,19 @@ class _MyDrawerState extends State<MyDrawer> {
               onTap: () {
                 controller.changePage('Notification');
                 Get.to(() => const NotificationPage());
-
               },
             )),
+
+        Obx(() => buildDrawerTile(
+          title: 'Change Password',
+          icon: Icons.password,
+          isSelected: controller.selectedPage.value == 'Change Password',
+          onTap: () {
+            controller.changePage('Change Password');
+            Get.to(() => const ChangePasswordPage());
+          },
+        )),
+
         // Logout
         Obx(() => buildDrawerTile(
               title: 'Logout',
@@ -203,7 +238,13 @@ class _MyDrawerState extends State<MyDrawer> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Cancel',style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -215,13 +256,15 @@ class _MyDrawerState extends State<MyDrawer> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Logout',style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+              child: const Text(
+                'Logout',
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         );
       },
     );
   }
-
 }
-

@@ -1,18 +1,15 @@
-
-import 'package:blissiqadmin/Global/constants/AppColor.dart';
-import 'package:blissiqadmin/Home/Controller/MainCategoryController.dart';
+import 'package:blissiqadmin/Global/Widgets/ExampleModel.dart';
+import 'package:blissiqadmin/Global/constants/CustomAlertDialogue.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
+import 'package:blissiqadmin/controller/CategoryController.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../Global/Widgets/ExampleModel.dart';
-import '../../Global/constants/CustomAlertDialogue.dart';
-import '../../controller/CategoryController.dart';
-import '../Quetion type widgets/AddQuetionsWidgets/AddQuetionsWidgets.dart';
+
 
 class TopicsScreen extends StatefulWidget {
-  TopicsScreen({super.key, required this.subcategory});
+  TopicsScreen({super.key,required this.subcategory});
   var subcategory;
 
   @override
@@ -29,12 +26,11 @@ class _TopicsScreenState extends State<TopicsScreen> {
     getData();
   }
 
-  getData() async {
-    await _controller.get_topic(
-        categoryId: widget.subcategory['main_category_id'],
+  getData() async{
+    await _controller.get_topic(categoryId: widget.subcategory['main_category_id'],
         sub_categoryId: widget.subcategory['_id']);
     Future.delayed(const Duration(seconds: 2), () {
-      if (_controller.topics.isNotEmpty) {
+      if(_controller.topics.isNotEmpty) {
         _controller.get_SubTopic(
           categoryId: _controller.topics[0]['main_category_id'],
           sub_categoryId: _controller.topics[0]['sub_category_id'],
@@ -65,9 +61,9 @@ class _TopicsScreenState extends State<TopicsScreen> {
                   appBar: isWideScreen
                       ? null
                       : AppBar(
-                          title: const Text('Dashboard'),
-                          backgroundColor: Colors.blue.shade100,
-                        ),
+                    title: const Text('Dashboard'),
+                    backgroundColor: Colors.blue.shade100,
+                  ),
                   drawer: isWideScreen ? null : Drawer(child: MyDrawer()),
                   body: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -86,70 +82,57 @@ class _TopicsScreenState extends State<TopicsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Text(
-                "Manage Topics and Subtopics from here:",
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Row(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      _showAddDialog(context, 'topic', 0, '');
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.only(right: 10.0),
-                      child: Text(
-                        'Add Topic',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.deepOrange,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.add_circle_outline,
-                      color: Colors.deepOrange,
-                      size: 30,
-                    ),
-                    onPressed: () {
-                      _showAddDialog(context, 'topic', 0, '');
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
+        Row(children:[const Text(
+          "Manage Topics and Subtopics from here:",
+          style: TextStyle(
+              fontSize: 18, color: Colors.black, fontWeight: FontWeight.bold),
         ),
-        Obx(
-          () => _controller.isLoading == true
-              ? const Center(
-                  child: CircularProgressIndicator(
-                    color:
-                        Colors.deepOrange, // More professional loading spinner
-                  ),
-                )
-              : _controller.isLoading == false && _controller.topics.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'No Topics available',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey,
+          Spacer(),
+          InkWell(
+              onTap: (){
+                _showAddDialog(context,'topic',0,'');
+              },
+              child: const Text('Add Topic')),
+
+          IconButton(
+              icon: Icon(Icons.add_circle_outline),
+              onPressed: () {
+                _showAddDialog(context,'topic',0,'');
+              })
+        ]),
+        Obx(()=>_controller.isLoading==true?Container(child:Center(child: Text('Loading Topics...'),)):
+        _controller.isLoading==false && _controller.topics.isEmpty?
+        Container(child:Center(child:Text('No Topics available'))):
+        SingleChildScrollView(
+          child: SizedBox(
+              height:MediaQuery.of(context).size.height/1.5,
+              child:Obx(()=>
+                  ListView.builder(
+                    itemCount: _controller.topics.length,
+                    itemBuilder: (context, index) {
+                      return ExpansionTile(
+                        title: Row(
+                          children: [
+                            Text(_controller.topics[index]['topic_name']),
+                            IconButton(
+                              icon: Icon(Icons.add_circle_outline),
+                              onPressed: () {
+                                _showAddDialog(context, 'subtopic', index, _controller.topics[index]);
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                onDelete(
+                                    _controller.topics[index],
+                                    index,
+                                    "You want to delete this Topic?",
+                                    'topic',
+                                    ''
+                                );
+                              },
+                            ),
+                          ],
                         ),
                       ),
                     )
@@ -275,95 +258,12 @@ class _TopicsScreenState extends State<TopicsScreen> {
                         ),
                       ),
                     ),
-        ),
 
-        ///dont delete this code
-        // Obx(() => _controller.isLoading == true
-        //     ? Container(
-        //         child: const Center(
-        //         child: Text('Loading Topics...'),
-        //       ))
-        //     : _controller.isLoading == false && _controller.topics.isEmpty
-        //         ? const Center(child: Text('No Topics available'))
-        //         : SingleChildScrollView(
-        //             child: SizedBox(
-        //                 height: MediaQuery.of(context).size.height / 2,
-        //                 child: Obx(
-        //                   () => ListView.builder(
-        //                     itemCount: _controller.topics.length,
-        //                     itemBuilder: (context, index) {
-        //                       return ExpansionTile(
-        //                         title: Row(
-        //                           children: [
-        //                             Text(_controller.topics[index]
-        //                                 ['topic_name']),
-        //                             IconButton(
-        //                               icon: const Icon(Icons.add_circle_outline),
-        //                               onPressed: () {
-        //                                 _showAddDialog(context, 'subtopic',
-        //                                     index, _controller.topics[index]);
-        //                               },
-        //                             ),
-        //                             IconButton(
-        //                               icon:
-        //                                   const Icon(Icons.delete, color: Colors.red),
-        //                               onPressed: () {
-        //                                 onDelete(
-        //                                     _controller.topics[index],
-        //                                     index,
-        //                                     "You want to delete this Topic?",
-        //                                     'topic',
-        //                                     '');
-        //                               },
-        //                             ),
-        //                           ],
-        //                         ),
-        //                         onExpansionChanged: (isExpanded) {
-        //                           if (isExpanded &&
-        //                               _controller.sub_topics.isEmpty) {
-        //                             _controller.get_SubTopic(
-        //                               categoryId: _controller.topics[index]
-        //                                   ['main_category_id'],
-        //                               sub_categoryId: _controller.topics[index]
-        //                                   ['sub_category_id'],
-        //                               topicId: _controller.topics[index]['_id'],
-        //                             );
-        //                           }
-        //                         },
-        //                         children: [
-        //                           Obx(() => Column(
-        //                                 children:
-        //                                     _controller.sub_topics.map((topic) {
-        //                                   return ListTile(
-        //                                     title:
-        //                                         Text(topic['sub_topic_name']),
-        //                                     trailing: IconButton(
-        //                                       icon: const Icon(
-        //                                         Icons.delete,
-        //                                         color: Colors.red,
-        //                                       ),
-        //                                       onPressed: () {
-        //                                         onDelete(
-        //                                             _controller
-        //                                                 .sub_topics[index],
-        //                                             index,
-        //                                             "You want to delete this Topic?",
-        //                                             'subtopic',
-        //                                             topic['_id']);
-        //                                       },
-        //                                     ),
-        //                                   );
-        //                                 }).toList(),
-        //                               )),
-        //                         ],
-        //                       );
-        //                     },
-        //                   ),
-        //                 )),
-        //           )),
+        ),
       ],
     );
   }
+
 
   void onDelete(var topic, int index, String title, String type, String subtopic_id) {
     showDialog(
@@ -383,7 +283,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
               categoryId: topic['main_category_id'], sub_categoryId: topic['sub_category_id'],topicId:topic['topic_id'],sub_topicId: subtopic_id );
           _controller.subtopicsMap[topic['topic_id']]?.removeAt(index);
         }
-        },
+      },
       ),
     );
   }
@@ -539,4 +439,5 @@ class _TopicsScreenState extends State<TopicsScreen> {
       },
     );
   }
+
 }
