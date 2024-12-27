@@ -19,6 +19,12 @@ class ApiString {
   static const String mentor_registration = "${mentorBaseUrl}mentor_registration";
   static const String get_all_mentors = "${baseUrl}get_all_mentors";
 
+  ///learner
+  static const String get_all_learners = "${baseUrl}get_all_learners";
+  static const String assign_mentor = "${baseUrl}get_all_learners";
+
+
+
 
 
 

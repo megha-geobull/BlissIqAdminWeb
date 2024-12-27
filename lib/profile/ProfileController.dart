@@ -12,10 +12,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Global/constants/ApiString.dart';
 import '../Global/utils/shared_preference/shared_preference_services.dart';
 
-bool isLogin = false;
 
 class ProfileController extends GetxController {
-
+  bool isLogin = false;
 
   var nameController = TextEditingController();
   var emailController = TextEditingController();
@@ -27,9 +26,6 @@ class ProfileController extends GetxController {
   String? getLanguage='';
   String? getAge = '';
   String? getPurpose = '';
-
-
-
 
   RxString userId = "".obs;
   var formKey = GlobalKey<FormState>();
@@ -46,29 +42,9 @@ class ProfileController extends GetxController {
     }
   }
 
-  List<PlatformFile>? _paths;
-  var pathsFile;
-  var pathsFileName;
-
   // Handle country code change
   void onCountryChange(CountryCode countryCode) {
     currentCountryCode.value = '${countryCode.code}-${countryCode.dialCode}';
-  }
-
-  pickFile() async {
-    _paths = (await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowMultiple: false,
-      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
-      allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
-    ))?.files;
-
-    if (_paths != null && _paths!.isNotEmpty) {
-      pathsFile = _paths!.first.bytes; // Store the bytes
-      pathsFileName = _paths!.first.name; // Store the file name
-    } else {
-      print('No file selected');
-    }
   }
 
 
@@ -145,13 +121,7 @@ class ProfileController extends GetxController {
     }
 
     try {
-      await setData();  // Make sure setData is called before proceeding
-
-      // Default values in case SharedPreferences values are not set
-      String? language = getLanguage ;  // Default to Marathi if not set
-      String? ageGroup = getAge ;  // Default age group
-      String? purpose = getPurpose;  // Default purpose
-
+      await setData();
       final Uri url = Uri.parse(ApiString.edit_profile);
       var request = http.MultipartRequest('POST', url)
         ..fields['user_id'] = userId

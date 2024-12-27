@@ -1,6 +1,7 @@
 // NavigationBar/MyDrawer.dart
 
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
+import 'package:blissiqadmin/Home/Drawer/ChangePasswordPage.dart';
 import 'package:blissiqadmin/Home/Drawer/MainCategoriesPage.dart';
 import 'package:blissiqadmin/Home/Drawer/Notification.dart';
 import 'package:blissiqadmin/Home/Drawer/QuestionWidgets.dart';
@@ -165,6 +166,17 @@ class _MyDrawerState extends State<MyDrawer> {
                 Get.to(() => const NotificationPage());
               },
             )),
+
+        Obx(() => buildDrawerTile(
+          title: 'Change Password',
+          icon: Icons.password,
+          isSelected: controller.selectedPage.value == 'Change Password',
+          onTap: () {
+            controller.changePage('Change Password');
+            Get.to(() => const ChangePasswordPage());
+          },
+        )),
+
         // Logout
         Obx(() => buildDrawerTile(
               title: 'Logout',

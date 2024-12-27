@@ -103,6 +103,7 @@ class _NotificationPageState extends State<NotificationPage> {
     return Center(
       child: Container(
         width: constraints.maxWidth * 0.5,
+        height: constraints.maxWidth * 0.5,
         constraints: const BoxConstraints(
           maxWidth: 600,
         ),

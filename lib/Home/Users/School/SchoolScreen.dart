@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
+import 'package:blissiqadmin/Home/Users/Company/CompnayListBottomSheet.dart';
 import 'package:blissiqadmin/Home/Users/Mentor/MentorListBottomSheet.dart';
 import 'package:blissiqadmin/Home/Users/School/SchoolRegistration.dart';
 import 'package:flutter/foundation.dart';
@@ -107,7 +108,7 @@ class _SchoolScreenState extends State<SchoolScreen> {
     String? selectedMentor = await showModalBottomSheet<String>(
       context: context,
       builder: (context) {
-        return MentorListBottomSheet();
+        return CompnayListBottomSheet();
       },
     );
 
