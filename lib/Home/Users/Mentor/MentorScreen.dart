@@ -1,7 +1,9 @@
+import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/Home/Users/Mentor/MentorRegistration.dart';
 import 'package:blissiqadmin/Home/Users/Models/GetAllMentorModel.dart';
 import 'package:blissiqadmin/auth/Controller/AuthController.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -44,7 +46,6 @@ class _MentorScreenState extends State<MentorScreen> {
         );
       },
     );
-
     if (confirmation == true) {
       setState(() {
         var mentor = mentorController.allMentorData[index];
@@ -153,7 +154,22 @@ class _MentorScreenState extends State<MentorScreen> {
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: CircleAvatar(
-            backgroundImage: NetworkImage(mentor.profileImage ?? ''),
+            radius: 24,
+            backgroundColor: Colors.grey.shade300,
+            child: CachedNetworkImage(
+              imageUrl: "${ApiString.ImgBaseUrl}${mentor.profileImage}",
+              imageBuilder: (context, imageProvider) => Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              placeholder: (context, url) => const CircularProgressIndicator(),
+              errorWidget: (context, url, error) => const Icon(Icons.person, size: 48, color: Colors.grey),
+            ),
           ),
         ),
         Padding(

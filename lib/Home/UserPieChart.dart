@@ -75,7 +75,7 @@ class _UserPieChartState extends State<UserPieChart> {
       case 2:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const SchoolScreen()),
+          MaterialPageRoute(builder: (context) =>  SchoolScreen()),
         );
         break;
       case 3:

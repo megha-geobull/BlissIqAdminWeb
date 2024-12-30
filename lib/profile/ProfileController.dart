@@ -80,7 +80,7 @@ class ProfileController extends GetxController {
       };
 
       final response = await http.post(
-        Uri.parse(ApiString.get_profile),
+        Uri.parse(ApiString.getProfile),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(body),
       );
