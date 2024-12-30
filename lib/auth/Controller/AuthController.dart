@@ -8,6 +8,7 @@ import 'package:blissiqadmin/Global/utils/shared_preference/shared_preference_se
 import 'package:blissiqadmin/Home/HomePage.dart';
 import 'package:blissiqadmin/Home/Users/Models/GetAllMentorModel.dart';
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +39,7 @@ class AuthController extends GetxController{
   var selectedUserType = 'Mentor'.obs;
 
   RxList<Data> allMentorData = <Data>[].obs;
+  RxString userId = "".obs;
 
 
 
@@ -317,8 +319,58 @@ class AuthController extends GetxController{
     }
   }
 
+  // Get user ID from local storage
+  getUserId() async {
+    return await getDataFromLocalStorage(
+      dataType: "STRING",
+      prefKey: "user_id",
+    ) as String?;
+  }
 
+  assignMentorApi({
+    required String mentorId,
+    required String studentId,
+  }) async {
+    isLoading.value = true;
+    try {
+      final Map<String, dynamic> body = {
+        "user_id": studentId,
+        "mentor_id": mentorId,
+      };
 
+      final response = await http.post(
+        Uri.parse(ApiString.assign_mentor),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+
+          if (kDebugMode) {
+            print("Mentor assigned successfully");
+
+          }
+        } else {
+          Fluttertoast.showToast(
+            msg: responseData['message'] ?? "Something went wrong!",
+            backgroundColor: Colors.red,
+          );
+        }
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "An error occurred: $e",
+        backgroundColor: Colors.red,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
 }
 

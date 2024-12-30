@@ -1,6 +1,7 @@
 import 'package:blissiqadmin/Global/Widgets/ExampleModel.dart';
 import 'package:blissiqadmin/Global/constants/CustomAlertDialogue.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/AddQuetionsWidgets.dart';
 import 'package:blissiqadmin/controller/CategoryController.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -103,79 +104,136 @@ class _TopicsScreenState extends State<TopicsScreen> {
         Obx(()=>_controller.isLoading==true?Container(child:Center(child: Text('Loading Topics...'),)):
         _controller.isLoading==false && _controller.topics.isEmpty?
         Container(child:Center(child:Text('No Topics available'))):
-        SingleChildScrollView(
-          child: SizedBox(
-              height:MediaQuery.of(context).size.height/1.5,
-              child:Obx(()=>
-                  ListView.builder(
-                    itemCount: _controller.topics.length,
-                    itemBuilder: (context, index) {
-                      return ExpansionTile(
-                        title: Row(
-                          children: [
-                            Text(_controller.topics[index]['topic_name']),
-                            IconButton(
-                              icon: Icon(Icons.add_circle_outline),
-                              onPressed: () {
-                                _showAddDialog(context, 'subtopic', index, _controller.topics[index]);
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                onDelete(
-                                    _controller.topics[index],
-                                    index,
-                                    "You want to delete this Topic?",
-                                    'topic',
-                                    ''
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                        onExpansionChanged: (isExpanded) {
-                          if (isExpanded && _controller.sub_topics.isEmpty) {
-                            _controller.get_SubTopic(
-                              categoryId: _controller.topics[index]['main_category_id'],
-                              sub_categoryId: _controller.topics[index]['sub_category_id'],
-                              topicId: _controller.topics[index]['_id'],
-                            );
-                          }
-                        },
-                        children: [
-                          Obx(() => Column(
-                            children: _controller.sub_topics.map((topic) {
-                              return ListTile(
-                                title: Text(topic['sub_topic_name']),
-                                trailing: IconButton(
-                                  icon: Icon(Icons.delete,color: Colors.red,),
-                                  onPressed: () {
-                                    onDelete(
-                                        _controller.sub_topics[index],
-                                        index,
-                                        "You want to delete this Topic?",
-                                        'subtopic',
-                                        topic['_id']
-                                    );
+       SingleChildScrollView(
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height / 1.5,
+                        child: Obx(
+                          () => ListView.builder(
+                            itemCount: _controller.topics.length,
+                            itemBuilder: (context, index) {
+                              final topic = _controller.topics[index];
+                              final topicId = topic['_id']; // Assuming this uniquely identifies each topic
+
+                              return Card(
+                                color: Colors.white,
+                                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                                elevation: 0.4,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: ExpansionTile(
+                                  shape: Border.all(color: Colors.grey.shade200, width: 0.8),
+                                  title: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        topic['topic_name'],
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      Row(
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.add_circle_outline, color: Colors.green),
+                                            onPressed: () {
+                                              _showAddDialog(context, 'subtopic', index, topic);
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon: Image.asset(
+                                              'assets/question.png',
+                                              width: 30,
+                                              height: 30,
+                                              fit: BoxFit.cover,
+                                            ),
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => AddQuestionsWidgets(),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.delete, color: Colors.red),
+                                            onPressed: () {
+                                              onDelete(topic, index, "You want to delete this Topic?", 'topic', '');
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  onExpansionChanged: (isExpanded) {
+                                    if (isExpanded && !_controller.subtopicsMap.containsKey(topicId)) {
+                                      // Fetch subtopics only if not already fetched
+                                      _controller.get_SubTopic(
+                                        categoryId: topic['main_category_id'],
+                                        sub_categoryId: topic['sub_category_id'],
+                                        topicId: topicId,
+                                      );
+                                    }
                                   },
+                                  children: [
+                                    Obx(() {
+                                      final subtopics = _controller.subtopicsMap[topicId] ?? [];
+                                      return Column(
+                                        children: subtopics.map((subTopic) {
+                                          return Padding(
+                                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                                            child: Card(
+                                              elevation: 3,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: ListTile(
+                                                contentPadding: const EdgeInsets.all(16),
+                                                title: Text(
+                                                  subTopic['sub_topic_name'],
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                                trailing: IconButton(
+                                                  icon: const Icon(Icons.delete, color: Colors.red),
+                                                  onPressed: () {
+                                                    onDelete(
+                                                      subTopic,
+                                                      index,
+                                                      "You want to delete this Subtopic?",
+                                                      'subtopic',
+                                                      subTopic['_id'],
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      );
+                                    }),
+                                  ],
                                 ),
                               );
-                            }).toList(),
-                          )),
-                        ],
-                      );
-                    },
-                  )
-                ,)
-          ),
-        )
+                            },
+                          )
+                          ,
+                        ),
+                      ),
+                    ),
+
         ),
       ],
     );
   }
 
-  void onDelete(var topic,int index,String title,String type,String subtopic_id) {
+
+  void onDelete(var topic, int index, String title, String type, String subtopic_id) {
     showDialog(
       context: context,
       builder: (context) => CustomAlertDialog(
@@ -191,7 +249,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
         }else{
           _controller.deleteSub_Topic(
               categoryId: topic['main_category_id'], sub_categoryId: topic['sub_category_id'],topicId:topic['topic_id'],sub_topicId: subtopic_id );
-          _controller.sub_topics.removeAt(index);
+          _controller.subtopicsMap[topic['topic_id']]?.removeAt(index);
         }
       },
       ),
