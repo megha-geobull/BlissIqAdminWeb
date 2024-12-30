@@ -63,13 +63,13 @@ class _UserPieChartState extends State<UserPieChart> {
       case 0:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const MentorScreen()),
+          MaterialPageRoute(builder: (context) => MentorScreen()),
         );
         break;
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const CompanyScreen()),
+          MaterialPageRoute(builder: (context) => CompanyScreen()),
         );
         break;
       case 2:
@@ -81,7 +81,7 @@ class _UserPieChartState extends State<UserPieChart> {
       case 3:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const StudentScreen()),
+          MaterialPageRoute(builder: (context) => StudentScreen()),
         );
         break;
     }

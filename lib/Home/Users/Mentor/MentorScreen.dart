@@ -1,4 +1,5 @@
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
+import 'package:blissiqadmin/Global/constants/AppColor.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/Home/Users/Mentor/MentorRegistration.dart';
 import 'package:blissiqadmin/Home/Users/Models/GetAllMentorModel.dart';
@@ -26,7 +27,7 @@ class _MentorScreenState extends State<MentorScreen> {
 
   }
 
-  void _toggleStatus(int index) async {
+  void _toggleStatus(String mentorId) async {
     bool? confirmation = await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -47,10 +48,15 @@ class _MentorScreenState extends State<MentorScreen> {
       },
     );
     if (confirmation == true) {
-      setState(() {
-        var mentor = mentorController.allMentorData[index];
-        mentor.status = (mentor.status == "Approve") ? "Disapprove" : "Approve";
-      });
+      var mentor = mentorController.allMentorData
+          .where((p0) => p0.sId == mentorId)
+          .first;
+
+      mentorController.approveMentors(
+        mentor_id: mentorId,
+        approval_status: (mentor.approvalStatus == "Disapproved" || mentor.approvalStatus == "Pending") ? "Approved" : "Disapproved",
+      );
+
     }
   }
 
@@ -127,13 +133,15 @@ class _MentorScreenState extends State<MentorScreen> {
             inside: BorderSide(color: Colors.grey, width: 0.5),
           ),
           columnWidths: const {
-            0: FlexColumnWidth(1),
-            1: FlexColumnWidth(1),
-            2: FlexColumnWidth(1.8),
-            3: FlexColumnWidth(1),
-            4: FlexColumnWidth(1),
-            5: FlexColumnWidth(1),
-            6: FlexColumnWidth(1),
+            0: FlexColumnWidth(1.5), // Profile column
+            1: FlexColumnWidth(1.5), // Name column
+            2: FlexColumnWidth(2.5), // Email column (increased width)
+            3: FlexColumnWidth(1.5), // Contact No column
+            4: FlexColumnWidth(1.5), // Address column
+            5: FlexColumnWidth(1.5), // Experience column
+            6: FlexColumnWidth(1.5), // Qualification column
+            7: FlexColumnWidth(2.0), // Status column (increased width)
+            8: FlexColumnWidth(1.5), // Actions column
           },
           children: [
             _buildTableHeader(),
@@ -154,23 +162,17 @@ class _MentorScreenState extends State<MentorScreen> {
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: CircleAvatar(
-            radius: 24,
-            backgroundColor: Colors.grey.shade300,
+            radius: 30,
+            backgroundColor: Colors.white,
             child: CachedNetworkImage(
-              imageUrl: "${ApiString.ImgBaseUrl}${mentor.profileImage}",
-              imageBuilder: (context, imageProvider) => Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    image: imageProvider,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              placeholder: (context, url) => const CircularProgressIndicator(),
-              errorWidget: (context, url, error) => const Icon(Icons.person, size: 48, color: Colors.grey),
+              imageUrl: ApiString.ImgBaseUrl + (mentor.profileImage ?? ''),
+              placeholder: (context, url) => CircularProgressIndicator(),
+              errorWidget: (context, url, error) => Icon(Icons.error),
+              fit: BoxFit.cover,
+
             ),
           ),
+
         ),
         Padding(
           padding: const EdgeInsets.all(12.0),
@@ -199,15 +201,24 @@ class _MentorScreenState extends State<MentorScreen> {
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: ElevatedButton(
-            onPressed: () => _toggleStatus(index),
+            onPressed: () => _toggleStatus(mentor.sId ?? ''),
             style: ElevatedButton.styleFrom(
-              backgroundColor: mentor.status == "Approve"
-                  ? Colors.green
-                  : Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              backgroundColor: _getButtonColor(mentor.approvalStatus), // Dynamic color
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 9),
             ),
-            child: Text(mentor.status ?? 'Disapprove'),
+            child: Text(
+              mentor.approvalStatus ?? 'Pending',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+              ),
+            ),
           ),
         ),
+
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: IconButton(
@@ -217,6 +228,18 @@ class _MentorScreenState extends State<MentorScreen> {
         ),
       ],
     );
+  }
+  Color _getButtonColor(String? approvalStatus) {
+    switch (approvalStatus) {
+      case "Approved":
+        return AppColor.green;
+      case "Disapproved":
+        return AppColor.red;
+      case "Pending":
+        return AppColor.amber;
+      default:
+        return AppColor.grey;
+    }
   }
 
   Widget _buildHeader() {

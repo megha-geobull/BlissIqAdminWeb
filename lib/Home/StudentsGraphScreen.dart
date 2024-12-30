@@ -1,26 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 class StudentsGraphController extends GetxController {
   // Dropdown values
   final selectedFilter = 'Monthly'.obs;
   // Sample data for each filter
   final weeklyData = [5, 10, 7, 12, 15, 9, 20]; // Data for 7 days
-  final monthlyData = [
-    50,
-    40,
-    45,
-    60,
-    55,
-    65,
-    70,
-    75,
-    80,
-    85,
-    90,
-    100
-  ]; // Data for 12 months
+  final monthlyData = [50, 40, 45, 60, 55, 65, 70, 75, 80, 85, 90, 100]; // Data for 12 months
   final yearlyData = [500, 520, 550, 600, 700]; // Data for 5 years
   // Data for the graph
   final RxList<int> graphData = <int>[].obs;
@@ -29,7 +15,6 @@ class StudentsGraphController extends GetxController {
     super.onInit();
     graphData.assignAll(monthlyData); // Default filter is Monthly
   }
-
   void updateGraphData(String filter) {
     selectedFilter.value = filter;
     if (filter == 'Weekly') {
@@ -41,7 +26,6 @@ class StudentsGraphController extends GetxController {
     }
   }
 }
-
 class StudentsGraphScreen extends StatelessWidget {
   final StudentsGraphController controller = Get.put(StudentsGraphController());
   @override
@@ -55,7 +39,7 @@ class StudentsGraphScreen extends StatelessWidget {
       child: SizedBox(
         height: Get.height * 0.55,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 14,vertical: 10),
           child: Column(
             children: [
               Row(
@@ -71,7 +55,8 @@ class StudentsGraphScreen extends StatelessWidget {
                   ),
                   Spacer(),
                   // Dropdown for filter
-                  Obx(() => Container(
+                  Obx(
+                          () => Container(
                         height: 40,
                         padding: const EdgeInsets.symmetric(horizontal: 12.0),
                         decoration: BoxDecoration(
@@ -87,7 +72,8 @@ class StudentsGraphScreen extends StatelessWidget {
                           style: const TextStyle(
                               fontSize: 16,
                               color: Colors.black,
-                              fontWeight: FontWeight.bold),
+                              fontWeight: FontWeight.bold
+                          ),
                           borderRadius: BorderRadius.circular(15),
                           underline: SizedBox(),
                           items: const [
@@ -95,8 +81,7 @@ class StudentsGraphScreen extends StatelessWidget {
                               value: 'Weekly',
                               child: Row(
                                 children: [
-                                  Icon(Icons.calendar_today,
-                                      color: Colors.orangeAccent),
+                                  Icon(Icons.calendar_today, color: Colors.orangeAccent),
                                   SizedBox(width: 8),
                                   Text('Weekly'),
                                 ],
@@ -106,8 +91,7 @@ class StudentsGraphScreen extends StatelessWidget {
                               value: 'Monthly',
                               child: Row(
                                 children: [
-                                  Icon(Icons.date_range,
-                                      color: Colors.orangeAccent),
+                                  Icon(Icons.date_range, color: Colors.orangeAccent),
                                   SizedBox(width: 8),
                                   Text('Monthly'),
                                 ],
@@ -117,8 +101,7 @@ class StudentsGraphScreen extends StatelessWidget {
                               value: 'Yearly',
                               child: Row(
                                 children: [
-                                  Icon(Icons.calendar_view_day,
-                                      color: Colors.orangeAccent),
+                                  Icon(Icons.calendar_view_day, color: Colors.orangeAccent),
                                   SizedBox(width: 8),
                                   Text('Yearly'),
                                 ],
@@ -131,13 +114,14 @@ class StudentsGraphScreen extends StatelessWidget {
                             }
                           },
                         ),
-                      )),
+                      )
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
               // Line graph
               Obx(
-                () => SizedBox(
+                    () => SizedBox(
                   height: 300,
                   child: LineChart(
                     LineChartData(
@@ -149,54 +133,19 @@ class StudentsGraphScreen extends StatelessWidget {
                             interval: 1,
                             getTitlesWidget: (value, meta) {
                               int index = value.toInt();
-                              if (controller.selectedFilter.value == 'Weekly' &&
-                                  index >= 0 &&
-                                  index < 7) {
+                              if (controller.selectedFilter.value == 'Weekly' && index >= 0 && index < 7) {
                                 return Text(
-                                  [
-                                    'Sun',
-                                    'Mon',
-                                    'Tue',
-                                    'Wed',
-                                    'Thu',
-                                    'Fri',
-                                    'Sat'
-                                  ][index],
+                                  ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][index],
                                   style: const TextStyle(fontSize: 12),
                                 );
-                              } else if (controller.selectedFilter.value ==
-                                      'Monthly' &&
-                                  index >= 0 &&
-                                  index < 12) {
+                              } else if (controller.selectedFilter.value == 'Monthly' && index >= 0 && index < 12) {
                                 return Text(
-                                  [
-                                    'Jan',
-                                    'Feb',
-                                    'Mar',
-                                    'Apr',
-                                    'May',
-                                    'Jun',
-                                    'Jul',
-                                    'Aug',
-                                    'Sep',
-                                    'Oct',
-                                    'Nov',
-                                    'Dec'
-                                  ][index],
+                                  ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][index],
                                   style: const TextStyle(fontSize: 12),
                                 );
-                              } else if (controller.selectedFilter.value ==
-                                      'Yearly' &&
-                                  index >= 0 &&
-                                  index < 5) {
+                              } else if (controller.selectedFilter.value == 'Yearly' && index >= 0 && index < 5) {
                                 return Text(
-                                  [
-                                    '2019',
-                                    '2020',
-                                    '2021',
-                                    '2022',
-                                    '2023'
-                                  ][index],
+                                  ['2019', '2020', '2021', '2022', '2023'][index],
                                   style: const TextStyle(fontSize: 12),
                                 );
                               }
@@ -221,16 +170,13 @@ class StudentsGraphScreen extends StatelessWidget {
                           spots: controller.graphData
                               .asMap()
                               .entries
-                              .map((entry) => FlSpot(
-                                  entry.key.toDouble(), entry.value.toDouble()))
+                              .map((entry) => FlSpot(entry.key.toDouble(), entry.value.toDouble()))
                               .toList(),
                           isCurved: true,
                           color: Colors.deepOrange,
                           barWidth: 1.5,
                           belowBarData: BarAreaData(show: false),
-                          dotData: FlDotData(
-                            show: true,
-                          ),
+                          dotData: FlDotData(show: true,),
                           // gradient: LinearGradient(colors: [Colors.white,Colors.blue],
                           // end: Alignment.bottomLeft,
                           // begin: Alignment.centerRight)

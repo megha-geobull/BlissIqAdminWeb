@@ -11,6 +11,23 @@ class ApiString {
   static const String forgotPassword = "${baseUrl}forgot_password";
   static const String changePassword = "${baseUrl}change_password";
 
+  static const String edit_profile = "${baseUrl}edit_profile";
+  static const String get_profile = "${baseUrl}get_profile";
+
+
+  ///mentor
+  static const String mentorBaseUrl = "http://65.0.211.122:4444/mentor_api/";
+  static const String mentor_registration = "${mentorBaseUrl}mentor_registration";
+  static const String get_all_mentors = "${baseUrl}get_all_mentors";
+  static const String approve_mentor = "${baseUrl}approve_mentor";
+
+
+
+  ///school_registration
+  static const String schoolBaseUrl = "http://65.0.211.122:4444/school_api/";
+  static const String school_registration = "${schoolBaseUrl}school_registration";
+
+
   /// Profile Endpoints
   static const String updateProfile = "${baseUrl}update_profile";
   static const String getProfile = "${baseUrl}get_profile";

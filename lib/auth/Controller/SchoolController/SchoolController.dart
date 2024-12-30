@@ -1,4 +1,5 @@
 import 'dart:convert';
+=======
 import 'dart:developer';
 import 'package:blissiqadmin/Global/Routes/AppRoutes.dart';
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
@@ -78,6 +79,7 @@ class SchoolController extends GetxController {
     super.onClose();
   }
 
+
   schoolRegistrationApi({
     required String schoolName,
     required String schoolRegNumber,
@@ -88,54 +90,66 @@ class SchoolController extends GetxController {
     required String schoolType,
     required String affiliatedCompany,
     required String password,
-    required String confirmPassword,
+    required String confirm_password,
     required BuildContext context,
+    String? company_id,
+    String? affiliatedCompany,
+    String? status,
+    String? token,
   }) async {
+    // Indicate loading state
     isLoading.value = true;
 
     try {
+      // Create request body
+      final body = {
+        'schoolName': schoolName,
+        'schoolRegNumber': schoolRegNumber,
+        'principalName': principalName,
+        'principalEmail': principalEmail,
+        'principalPhone': principalPhone,
+        'address': address,
+        'schoolType': schoolType,
+        'password': password,
+        'confirm_password': confirm_password,
+        if (affiliatedCompany != null) 'affiliatedCompany': affiliatedCompany,
+        if (company_id != null) 'company_id': company_id,
+        if (status != null) 'status': status,
+        if (token != null) 'token': token,
+      };
+
+      // Send HTTP POST request
       final response = await http.post(
         Uri.parse(ApiString.school_registration),
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer YOUR_TOKEN",
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
-        body: jsonEncode({
-          'schoolName': schoolName,
-          'schoolRegNumber': schoolRegNumber,
-          'principalName': principalName,
-          'principalEmail': principalEmail,
-          'principalPhone': principalPhone,
-          'address': address,
-          'schoolType': schoolType,
-          'affiliatedCompany': affiliatedCompany,
-          'status': "",// optional
-          'token': "",// optional
-          'company_id': "",// optional
-          'approval_status': "",// optional
-          'password': password,
-          'confirm_password': confirmPassword,
-        }),
+        body: jsonEncode(body),
+
       );
 
+      // Parse response
       final responseData = jsonDecode(response.body);
       print(responseData);
       if (response.statusCode == 201 && responseData['status'] == 1) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(responseData['message'])),
         );
-        clearControllers();
-        Get.toNamed(AppRoutes.login);
+        clearControllers(); // Reset input fields
+        Get.toNamed(AppRoutes.schoolPage);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(responseData['message'] ?? 'Error occurred')),
         );
       }
     } catch (e) {
+      // Handle errors
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('An error occurred: $e')),
       );
     } finally {
+      // Reset loading state
       isLoading.value = false;
     }
   }

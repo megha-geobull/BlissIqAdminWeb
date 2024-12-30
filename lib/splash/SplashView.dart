@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
-import 'package:blissiqadmin/auth/Signup/SignupScreen.dart';
 import 'package:blissiqadmin/controller/SplashController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,12 +23,12 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _animation;
 
   void navigateToHomeScreen() {
-    Timer(Duration(seconds: 2), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => SignUpScreen()),
-      );
-    });
+    // Timer(Duration(seconds: 2), () {
+    //   Navigator.pushReplacement(
+    //     context,
+    //     MaterialPageRoute(builder: (context) => SignUpScreen()),
+    //   );
+    // });
   }
 
   @override
@@ -101,10 +100,10 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   goToScreen() {
-    Timer(
-       Duration(seconds: 3),
-          () => Get.to(SignUpScreen()),
-    );
+    // Timer(
+    //    Duration(seconds: 3),
+    //       () => Get.to(SignUpScreen()),
+    // );
   }
 }
 
