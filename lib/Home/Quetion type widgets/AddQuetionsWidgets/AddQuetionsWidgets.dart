@@ -15,9 +15,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:csv/csv.dart';
-import 'package:share_extend/share_extend.dart';
-
 import '../../../Global/constants/common_snackbar.dart';
+import '../AddDataController.dart';
 import 'Header_Columns.dart';
 
 
@@ -29,12 +28,14 @@ class AddQuestionsWidgets extends StatefulWidget {
 class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
 
   final TextEditingController questionController = TextEditingController();
+  final TextEditingController title_descController = TextEditingController();
   final List<TextEditingController> optionControllers =
       List.generate(4, (_) => TextEditingController());
   final List<TextEditingController> paragraphOptionControllers =
   List.generate(6, (_) => TextEditingController());
   TextEditingController correctAnswerController = TextEditingController();
   TextEditingController pointsController = TextEditingController();
+  TextEditingController indexController = TextEditingController();
   TextEditingController titleController = TextEditingController();
   TextEditingController storyContentController = TextEditingController();
   TextEditingController storyPhrasesController = TextEditingController();
@@ -96,6 +97,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     "Card Flip",
   ];
   final CategoryController _controller = Get.put(CategoryController());
+  final Add_DataController _data_controller = Get.put(Add_DataController());
 
   @override
   void initState() {
@@ -461,11 +463,25 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                       ),
                                     ],
                                   ),
+                                  boxH05(),
+                                  Row(
+                                    children: [
+                                      const Spacer(),
+                                      SizedBox(
+                                        width: MediaQuery.of(context).size.width * 0.06,
+                                        child: CustomTextField(
+                                          controller: indexController,
+                                          maxLines: 1,
+                                          labelText: "Index",
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                   boxH10(),
                                   // Display the appropriate question type UI based on selection
                                   SizedBox(
                                       width: MediaQuery.of(context).size.width * 0.4,
-                                      height: MediaQuery.of(context).size.width * 0.4,
+                                      height: MediaQuery.of(context).size.width * 0.5,
                                       child: _buildQuestionTypeContent()),
                                 ],
                               ),
@@ -593,7 +609,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     );
   }
 
-
   ///question type content
   Widget _buildQuestionTypeContent() {
     switch (selectedQuestionType) {
@@ -623,36 +638,108 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   }
 
   void _submitQuestion() {
+    print(selectedQuestionType);
+    if (selectedQuestionType == "Multiple Choice Question") {
+      //_data_controller.is_excel.value=false; // For base64 encoding
+
+      // if (selectedImage != null && selectedImage!.isNotEmpty) {
+      //   // Convert to base64 only if selectedImage is not null and not empty
+      //   String base64Image = base64Encode(selectedImage!);
+      //
+      //   // Now you can pass base64Image to your API
+      //   _data_controller.add_mcq(
+      //       maincategory_id: selectedMainCategory!,
+      //       sub_categoryId: selectedSubCategory!,
+      //       topicId: selectedTopic!,
+      //       subtopic_id: selectedSubtopic!,
+      //       question_type: selectedQuestionType!,
+      //       title: title_descController.text,
+      //       question: questionController.text,
+      //       q_image: base64Image, // Pass base64 encoded image
+      //       option_a: optionControllers[0].text,
+      //       option_b: optionControllers[1].text,
+      //       option_c: optionControllers[2].text,
+      //       option_d: optionControllers[3].text,
+      //       answer: correctAnswerController.text,
+      //       points: pointsController.text,
+      //       index: indexController.text
+      //   );
+      // } else {
+        // Handle the case when there is no image (e.g., send an empty field or skip)
+        _data_controller.add_mcq(
+            maincategory_id: selectedMainCategory!,
+            sub_categoryId: selectedSubCategory!,
+            topicId: selectedTopic!,
+            subtopic_id: selectedSubtopic!,
+            question_type: selectedQuestionType!,
+            title: title_descController.text,
+            question: questionController.text,
+            q_image: '', // Empty string or skip the key depending on API requirements
+            option_a: optionControllers[0].text,
+            option_b: optionControllers[1].text,
+            option_c: optionControllers[2].text,
+            option_d: optionControllers[3].text,
+            answer: correctAnswerController.text,
+            points: pointsController.text,
+            index: indexController.text
+        );
+      //}
+      _data_controller.add_mcq(maincategory_id: selectedMainCategory!,
+          sub_categoryId: selectedSubCategory!, topicId: selectedTopic!, subtopic_id: selectedSubtopic!,
+          question_type: selectedQuestionType!, title: title_descController.text,
+          question: questionController.text,
+          q_image: selectedImage, option_a: optionControllers[0].text, option_b: optionControllers[1].text,
+          option_c: optionControllers[2].text, option_d: optionControllers[3].text,
+          answer: correctAnswerController.text, points: pointsController.text, index: indexController.text);
+    } else if (selectedQuestionType == "Re-Arrange the Word") {
+
+    } else if (selectedQuestionType == "Complete the Word") {
+
+    } else if (selectedQuestionType == "True/False") {
+
+    } else if (selectedQuestionType == "Story") {
+
+    } else if (selectedQuestionType == "Phrases") {
+
+    } else if (selectedQuestionType == "Conversation") {
+
+    } else if (selectedQuestionType == "Learning Slide") {
+
+    } else if (selectedQuestionType == "Card Flip") {
+
+    }
+
+    ///old dummy code
     // Create a list to hold the options or default values ("-")
-    final List<String> options = optionControllers
-        .map((controller) => controller.text.isNotEmpty ? controller.text : "-")
-        .toList();
+    // final List<String> options = optionControllers
+    //     .map((controller) => controller.text.isNotEmpty ? controller.text : "-")
+    //     .toList();
 
     // Add a new table row with data or default values ("-")
-    tableRows.add(TableRow(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(selectedQuestionType ?? "-"),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(questionController.text.isNotEmpty
-              ? questionController.text
-              : "-"),
-        ),
-        ...options.map((option) => Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(option),
-            )),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(correctAnswerController.text.isNotEmpty
-              ? correctAnswerController.text
-              : "-"),
-        ),
-      ],
-    ));
+    // tableRows.add(TableRow(
+    //   children: [
+    //     Padding(
+    //       padding: const EdgeInsets.all(8.0),
+    //       child: Text(selectedQuestionType ?? "-"),
+    //     ),
+    //     Padding(
+    //       padding: const EdgeInsets.all(8.0),
+    //       child: Text(questionController.text.isNotEmpty
+    //           ? questionController.text
+    //           : "-"),
+    //     ),
+    //     ...options.map((option) => Padding(
+    //           padding: const EdgeInsets.all(8.0),
+    //           child: Text(option),
+    //         )),
+    //     Padding(
+    //       padding: const EdgeInsets.all(8.0),
+    //       child: Text(correctAnswerController.text.isNotEmpty
+    //           ? correctAnswerController.text
+    //           : "-"),
+    //     ),
+    //   ],
+    // ));
 
     // Clear the input fields after submission
     setState(() {
@@ -686,6 +773,16 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
+              'Title',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: title_descController,
+              maxLines: 1,
+              labelText: "Enter question description.",
+            ),
+            const Text(
               'Question',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
@@ -697,7 +794,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
             ),
             boxH10(),
             const Text(
-              'Upload Story Image',
+              'Upload Image',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -716,7 +813,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                   child: Center(
                     child: selectedImage == null
                         ? const Text(
-                      "Tap to upload story image",
+                      "Tap to upload image",
                       style: TextStyle(color: Colors.grey),
                     )
                         : Image.memory(

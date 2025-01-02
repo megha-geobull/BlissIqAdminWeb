@@ -1,7 +1,6 @@
 import 'dart:typed_data';
-
 import 'package:file_picker/file_picker.dart';
-import 'package:image_picker/image_picker.dart';
+
 
 class ImageWithText {
   final PlatformFile file; // Path to the selected image

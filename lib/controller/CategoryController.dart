@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -430,11 +429,11 @@ class CategoryController extends GetxController {
           sub_topics.value = responseData["data"];
           subtopicsMap[topicId] = sub_topics.value;
         } else {
-          showSnackbar(message: "Failed to fetch topic");
+          showSnackbar(message: "Failed to fetch subtopic");
         }
       }else
       if (response.statusCode == 204) {
-        showSnackbar(message: "No Topics available");
+        //showSnackbar(message: "No subtopics available");
       }
     } catch (e) {
       showSnackbar(message: "Error while fetch $e");

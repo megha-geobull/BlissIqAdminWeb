@@ -226,7 +226,6 @@ class _TopicsScreenState extends State<TopicsScreen> {
                         ),
                       ),
                     ),
-
         ),
       ],
     );
@@ -247,6 +246,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
               categoryId: topic['main_category_id'], sub_categoryId: topic['sub_category_id'],topicId:topic['_id'] );
           _controller.topics.removeAt(index);
         }else{
+          Navigator.pop(context);
           _controller.deleteSub_Topic(
               categoryId: topic['main_category_id'], sub_categoryId: topic['sub_category_id'],topicId:topic['topic_id'],sub_topicId: subtopic_id );
           _controller.subtopicsMap[topic['topic_id']]?.removeAt(index);
