@@ -120,30 +120,6 @@ class _MentorRegistrationState extends State<MentorRegistration> {
                                       ),
                                     ),
                                   )),
-
-                              // GestureDetector(
-                              //   onTap: () {
-                              //     mentorController.pickFile();
-                              //   },
-                              //   child: Obx(() {
-                              //     return CircleAvatar(
-                              //       radius: 50,
-                              //       backgroundImage: mentorController.pathsFile != null
-                              //           ? MemoryImage(mentorController.pathsFile!)
-                              //           : AssetImage("assets/business.png")
-                              //               as ImageProvider,
-                              //       child: const Align(
-                              //         alignment: Alignment.bottomRight,
-                              //         child: CircleAvatar(
-                              //           backgroundColor: Colors.blue,
-                              //           radius: 15,
-                              //           child: Icon(Icons.add,
-                              //               size: 20, color: Colors.white),
-                              //         ),
-                              //       ),
-                              //     );
-                              //   }),
-                              // ),
                             ],
                           ),
                         ),
@@ -387,7 +363,7 @@ class _MentorRegistrationState extends State<MentorRegistration> {
 
                         // Bio/Introduction TextField
                         CustomTextField(
-                          controller: mentorController.introBioController,
+                          controller: mentorController.introBio,
                           labelText: 'Introduction/Bio',
                           maxLines: 3,
                           prefixIcon: Icon(Icons.person_outline),
@@ -472,7 +448,7 @@ class _MentorRegistrationState extends State<MentorRegistration> {
                                           qualification: mentorController
                                               .qualificationController.text,
                                           introBio: mentorController
-                                              .introBioController.text,
+                                              .introBio.text,
                                           password: mentorController
                                               .passwordController.text,
                                           confirmPassword: mentorController
