@@ -20,18 +20,20 @@ class ApiString {
   static const String mentor_registration = "${mentorBaseUrl}mentor_registration";
   static const String get_all_mentors = "${baseUrl}get_all_mentors";
   static const String approve_mentor = "${baseUrl}approve_mentor";
+  static const String assign_mentor = "${baseUrl}assign_mentor";
 
 
 
   ///school_registration
   static const String schoolBaseUrl = "http://65.0.211.122:4444/school_api/";
   static const String school_registration = "${schoolBaseUrl}school_registration";
+  static const String approve_school = "${baseUrl}approve_school";
+
 
 
   /// Profile Endpoints
   static const String updateProfile = "${baseUrl}update_profile";
   static const String getProfile = "${baseUrl}get_profile";
-  static const String edit_profile = "${baseUrl}edit_profile";
 
   /// Leaderboard
   static const String getLeaderboard = "${baseUrl}get_leaderboard";
@@ -85,18 +87,10 @@ class ApiString {
   static const String delete_story = "${baseUrl}delete_story";
   static const String update_story = "${baseUrl}update_story";
 
-  ///mentor
-  static const String mentorBaseUrl = "http://65.0.211.122:4444/mentor_api/";
-  static const String mentor_registration = "${mentorBaseUrl}mentor_registration";
-  static const String get_all_mentors = "${baseUrl}get_all_mentors";
-
   ///learner
   static const String get_all_learners = "${baseUrl}get_all_learners";
-  static const String assign_mentor = "${baseUrl}get_all_learners";
 
 
   ///school_registration
-  static const String schoolBaseUrl = "http://65.0.211.122:4444/school_api/";
-  static const String school_registration = "${schoolBaseUrl}school_registration";
   static const String get_all_schools = "${baseUrl}get_all_schools";
 }

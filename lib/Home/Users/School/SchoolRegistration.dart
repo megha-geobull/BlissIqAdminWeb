@@ -3,7 +3,6 @@ import 'package:blissiqadmin/Global/Widgets/Button/CustomButton.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
-import 'package:blissiqadmin/auth/Controller/AuthController.dart';
 import 'package:blissiqadmin/auth/Controller/SchoolController/SchoolController.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,53 +16,52 @@ class SchoolRegistration extends StatefulWidget {
 
 class _SchoolRegistrationState extends State<SchoolRegistration> {
   final SchoolController schoolController = Get.put(SchoolController());
-  final AuthController authController = Get.find();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold (
-    body: LayoutBuilder(
-      builder: (context, constraints) {
-        bool isWideScreen = constraints.maxWidth > 800;
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          bool isWideScreen = constraints.maxWidth > 800;
 
-        return Row(
-          children: [
-            if (isWideScreen)
-              Container(
-                width: 250,
-                color: Colors.orange.shade100,
-                child: MyDrawer(),
-              ),
-            Expanded(
-              child: Scaffold(
-                backgroundColor: Colors.grey.shade50,
-                appBar: isWideScreen
-                    ? null
-                    : AppBar(
-                  title: const Text('Dashboard'),
-                  scrolledUnderElevation: 0,
-                  backgroundColor: Colors.blue.shade100,
-                  actions: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.person,
-                        color: Colors.grey,
+          return Row(
+            children: [
+              if (isWideScreen)
+                Container(
+                  width: 250,
+                  color: Colors.orange.shade100,
+                  child: MyDrawer(),
+                ),
+              Expanded(
+                child: Scaffold(
+                  backgroundColor: Colors.grey.shade50,
+                  appBar: isWideScreen
+                      ? null
+                      : AppBar(
+                    title: const Text('Dashboard'),
+                    scrolledUnderElevation: 0,
+                    backgroundColor: Colors.blue.shade100,
+                    actions: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.person,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {},
                       ),
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
-                drawer: isWideScreen ? null : Drawer(child: MyDrawer()),
-                body: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
-                  child: _buildSchoolMainContent(constraints),
+                    ],
+                  ),
+                  drawer: isWideScreen ? null : Drawer(child: MyDrawer()),
+                  body: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
+                    child: _buildSchoolMainContent(constraints),
+                  ),
                 ),
               ),
-            ),
-          ],
-        );
-      },
-    ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -305,36 +303,29 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                         ),
                       ),
                       boxH20(),
-                      Obx(() {
-                        return Center(
-                          child: schoolController.isLoading.value
-                              ? CircularProgressIndicator()
-                              : CustomButton(
-                            label: "School Register",
-                            onPressed: () {
-                              if (schoolController.formKey.currentState!.validate()) {
-                                schoolController.schoolRegistration(
-                                    schoolName: schoolController.nameController.text,
-                                    schoolRegNumber: schoolController.schoolRegNumber.text,
-                                    principalName: schoolController.principalName.text,
-                                    principalEmail: schoolController.emailAddress.text,
-                                    principalPhone: schoolController.phNoController.text,
-                                    address: schoolController.addressController.text,
-                                    schoolType: "schoolType",
-                                    password: schoolController.passwordController.text,
-                                    confirm_password: schoolController.confirmPasswordController.text,
-                                    context: context);
-                                // schoolController.schoolRegNumber(
-                                //   fullName: schoolController.nameController.text,
-                                //   email: schoolController.emailAddress.text,
-                                //   address: schoolController.addressController.text,
-                                //   contactNo: schoolController.phNoController.text,
-                                //   password: schoolController.passwordController.text,
-                                //   confirmPassword: schoolController.confirmPasswordController.text,
-                                //   context: context,
-                                // );
-                              }
-                            },
+
+
+                      ElevatedButton(
+                        onPressed: () {
+                          schoolController.schoolRegistrationApi(
+                            schoolName: schoolController.schoolNameController.text,
+                            schoolRegNumber: schoolController.schoolRegNumberController.text,
+                            principalName: schoolController.principalNameController.text,
+                            principalEmail: schoolController.principalEmailController.text,
+                            principalPhone: schoolController.principalPhoneController.text,
+                            address: schoolController.addressController.text,
+                            schoolType: schoolController.schoolTypeController.text,
+                            affiliatedCompany: schoolController.affiliatedCompanyController.text,
+                            password: schoolController.passwordController.text,
+                            confirmPassword: schoolController.confirmPasswordController.text,
+                            context: context,
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          minimumSize: const Size(double.infinity, 50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                         child: const Text(

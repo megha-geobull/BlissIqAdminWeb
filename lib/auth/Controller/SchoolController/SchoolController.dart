@@ -1,5 +1,4 @@
 import 'dart:convert';
-=======
 import 'dart:developer';
 import 'package:blissiqadmin/Global/Routes/AppRoutes.dart';
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
@@ -10,6 +9,7 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class SchoolController extends GetxController {
@@ -90,66 +90,54 @@ class SchoolController extends GetxController {
     required String schoolType,
     required String affiliatedCompany,
     required String password,
-    required String confirm_password,
+    required String confirmPassword,
     required BuildContext context,
-    String? company_id,
-    String? affiliatedCompany,
-    String? status,
-    String? token,
   }) async {
-    // Indicate loading state
     isLoading.value = true;
 
     try {
-      // Create request body
-      final body = {
-        'schoolName': schoolName,
-        'schoolRegNumber': schoolRegNumber,
-        'principalName': principalName,
-        'principalEmail': principalEmail,
-        'principalPhone': principalPhone,
-        'address': address,
-        'schoolType': schoolType,
-        'password': password,
-        'confirm_password': confirm_password,
-        if (affiliatedCompany != null) 'affiliatedCompany': affiliatedCompany,
-        if (company_id != null) 'company_id': company_id,
-        if (status != null) 'status': status,
-        if (token != null) 'token': token,
-      };
-
-      // Send HTTP POST request
       final response = await http.post(
         Uri.parse(ApiString.school_registration),
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          "Content-Type": "application/json",
+          "Authorization": "Bearer YOUR_TOKEN",
         },
-        body: jsonEncode(body),
-
+        body: jsonEncode({
+          'schoolName': schoolName,
+          'schoolRegNumber': schoolRegNumber,
+          'principalName': principalName,
+          'principalEmail': principalEmail,
+          'principalPhone': principalPhone,
+          'address': address,
+          'schoolType': schoolType,
+          'affiliatedCompany': affiliatedCompany,
+          'status': "",// optional
+          'token': "",// optional
+          'company_id': "",// optional
+          'approval_status': "",// optional
+          'password': password,
+          'confirm_password': confirmPassword,
+        }),
       );
 
-      // Parse response
       final responseData = jsonDecode(response.body);
       print(responseData);
       if (response.statusCode == 201 && responseData['status'] == 1) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(responseData['message'])),
         );
-        clearControllers(); // Reset input fields
-        Get.toNamed(AppRoutes.schoolPage);
+        clearControllers();
+        Get.toNamed(AppRoutes.login);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(responseData['message'] ?? 'Error occurred')),
         );
       }
     } catch (e) {
-      // Handle errors
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('An error occurred: $e')),
       );
     } finally {
-      // Reset loading state
       isLoading.value = false;
     }
   }
@@ -187,142 +175,42 @@ class SchoolController extends GetxController {
     }
   }
 
+  approveSchool({required String school_id, required String approval_status}) async {
+    isLoading.value = true;
+    var body = {
+      "school_id": school_id,
+      "approval_status": approval_status,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(ApiString.approve_school),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+
+        if (responseData['status'] == 1) {
+          print("response approve mentor: ${responseData['message']}");
+          showSnackbar(message: responseData['message']);
+
+          // Fetch updated mentor list after approval
+          await getAllSchools(); // Ensure this completes before proceeding
+        } else {
+          showSnackbar(message: responseData['message']);
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
 }
-
-
-// class SchoolController extends GetxController {
-//   var nameController = TextEditingController();
-//   var emailAddress = TextEditingController();
-//   var schoolRegNumber = TextEditingController();
-//   var principalName = TextEditingController();
-//   var phNoController = TextEditingController();
-//   var addressController = TextEditingController();
-//   var passwordController = TextEditingController();
-//   var confirmPasswordController = TextEditingController();
-//
-//   RxBool isLoading = false.obs;
-//   var formKey = GlobalKey<FormState>();
-//   RxBool passwordVisible = false.obs;
-//   RxBool confirmPasswordVisible = false.obs;
-//
-//   RxList<Data> allMentorData = <Data>[].obs;
-//
-//   // var schoolTypes = ['Public', 'Private', 'Charter', 'International'].obs;
-//   // var affiliatedCompanies = ['EduCorp', 'Global Education', 'LearnWorld'].obs;
-//   //
-//   // var selectedSchoolType = 'Public'.obs;
-//   // var selectedAffiliatedCompany = 'EduCorp'.obs;
-//
-//
-//   void onCountryChange(CountryCode countryCode) {
-//     String code = countryCode.dialCode ?? '+1';
-//     phNoController.text = '$code ${phNoController.text.replaceAll(RegExp(r'^\+\d+\s?'), '')}';
-//   }
-//
-//   Future<void> schoolRegistration({
-//     required String schoolName,
-//     required String schoolRegNumber,
-//     required String principalName,
-//     required String principalEmail,
-//     required String principalPhone,
-//     required String address,
-//     required String schoolType,
-//     required String affiliatedCompany,
-//     required String password,
-//     required String confirmPassword,
-//     required BuildContext context,
-//   }) async {
-//     isLoading.value = true;
-//
-//     try {
-//       final response = await http.post(
-//         Uri.parse(ApiString.school_registration),
-//         headers: {
-//           "Content-Type": "application/json",
-//           "Authorization": "Bearer YOUR_TOKEN",
-//         },
-//         body: jsonEncode({
-//           'school_name': schoolName,
-//           'school_reg_number': schoolRegNumber,
-//           'principal_name': principalName,
-//           'principal_email': principalEmail,
-//           'principal_phone': principalPhone,
-//           'address': address,
-//           'school_type': schoolType,
-//           'affiliated_company': affiliatedCompany,
-//           'password': password,
-//           'confirm_password': confirmPassword,
-//         }),
-//       );
-//
-//       final responseData = jsonDecode(response.body);
-//
-//       if (response.statusCode == 201 && responseData['status'] == 1) {
-//         ScaffoldMessenger.of(context).showSnackBar(
-//           SnackBar(content: Text(responseData['message'])),
-//         );
-//         clearControllers();
-//         Get.toNamed(AppRoutes.login);
-//       } else {
-//         ScaffoldMessenger.of(context).showSnackBar(
-//           SnackBar(content: Text(responseData['message'] ?? 'Error occurred')),
-//         );
-//       }
-//     } catch (e) {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         SnackBar(content: Text('An error occurred: $e')),
-//       );
-//     } finally {
-//       isLoading.value = false;
-//     }
-//   }
-//
-//
-//   getAllSchools() async {
-//     isLoading.value = true;
-//     allMentorData.clear();
-//     try {
-//       final response = await http.post(
-//         Uri.parse(ApiString.get_all_mentors),
-//         headers: {"Content-Type": "application/json"},
-//       );
-//
-//       print('Response status: ${response.statusCode}');
-//       print('Response body: ${response.body}');
-//
-//       if (response.statusCode == 200) {
-//         var responseData = jsonDecode(response.body);
-//
-//         if (responseData['status'] == 1) {
-//           // Parse each JSON object into a Data model
-//           allMentorData.value = (responseData["data"] as List)
-//               .map((mentorJson) => Data.fromJson(mentorJson))
-//               .toList();
-//         } else {
-//           showSnackbar(message: "Failed to fetch category");
-//         }
-//       }
-//     } catch (e) {
-//       showSnackbar(message: "Error while fetching category $e");
-//       log(e.toString());
-//     } finally {
-//       isLoading.value = false;
-//     }
-//   }
-//
-//
-//
-//
-//
-//   void clearControllers() {
-//     nameController.clear();
-//     emailAddress.clear();
-//     schoolRegNumber.clear();
-//     principalName.clear();
-//     phNoController.clear();
-//     addressController.clear();
-//     passwordController.clear();
-//     confirmPasswordController.clear();
-//   }
-// }
