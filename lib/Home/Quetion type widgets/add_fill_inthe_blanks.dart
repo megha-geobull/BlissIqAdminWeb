@@ -18,9 +18,7 @@ class _AddFillInTheBlanksState extends State<AddFillInTheBlanks> {
   final TextEditingController answerController = TextEditingController();
   final TextEditingController titleController = TextEditingController();
   final List<TextEditingController> optionControllers = [];
-  String? imagePath;
 
-  final ImagePicker _picker = ImagePicker();
 
   // Function to add an option field
   void addOptionField() {
@@ -37,6 +35,8 @@ class _AddFillInTheBlanksState extends State<AddFillInTheBlanks> {
     });
   }
 
+  String? imagePath;
+  final ImagePicker _picker = ImagePicker();
   // Function to pick an image from the gallery
   Future<void> pickImage() async {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);

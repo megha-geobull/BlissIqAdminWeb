@@ -20,7 +20,7 @@ class _UserPieChartState extends State<UserPieChart> {
       "title": "Mentors",
       "imagePath": "assets/icons/mentor.png",
       "gradient": LinearGradient(
-        colors: [Colors.red.shade200, Colors.redAccent.shade200],
+        colors: [Colors.purple.shade200, Colors.purpleAccent.shade400],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
@@ -30,7 +30,7 @@ class _UserPieChartState extends State<UserPieChart> {
       "title": "Companies",
       "imagePath": "assets/icons/Company.png",
       "gradient": LinearGradient(
-        colors: [Colors.blueAccent.shade100, Colors.blue.shade200],
+        colors: [Colors.blue.shade200, Colors.blue.shade400],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
@@ -40,7 +40,7 @@ class _UserPieChartState extends State<UserPieChart> {
       "title": "Schools",
       "imagePath": "assets/icons/School.png",
       "gradient": LinearGradient(
-        colors: [Colors.deepOrange.shade200, Colors.deepOrange.shade400],
+        colors: [Colors.amber.shade300, Colors.orange.shade600],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
@@ -50,7 +50,7 @@ class _UserPieChartState extends State<UserPieChart> {
       "title": "Students",
       "imagePath": "assets/icons/students.png",
       "gradient": LinearGradient(
-        colors: [Colors.pinkAccent.shade100, Colors.pinkAccent.shade200],
+        colors: [Colors.tealAccent.shade200, Colors.teal.shade400],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
@@ -58,30 +58,31 @@ class _UserPieChartState extends State<UserPieChart> {
     },
   ];
 
+
   void navigateToScreen(int index) {
     switch (index) {
       case 0:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const MentorScreen()),
+          MaterialPageRoute(builder: (context) => MentorScreen()),
         );
         break;
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const CompanyScreen()),
+          MaterialPageRoute(builder: (context) => CompanyScreen()),
         );
         break;
       case 2:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const SchoolScreen()),
+          MaterialPageRoute(builder: (context) =>  SchoolScreen()),
         );
         break;
       case 3:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const StudentScreen()),
+          MaterialPageRoute(builder: (context) => StudentScreen()),
         );
         break;
     }

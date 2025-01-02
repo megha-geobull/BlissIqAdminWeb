@@ -1,3 +1,4 @@
+import 'package:blissiqadmin/Global/Routes/AppRoutes.dart';
 import 'package:blissiqadmin/Global/Widgets/Button/CustomButton.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
@@ -19,48 +20,48 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
   @override
   Widget build(BuildContext context) {
     return Scaffold (
-    body: LayoutBuilder(
-      builder: (context, constraints) {
-        bool isWideScreen = constraints.maxWidth > 800;
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          bool isWideScreen = constraints.maxWidth > 800;
 
-        return Row(
-          children: [
-            if (isWideScreen)
-              Container(
-                width: 250,
-                color: Colors.orange.shade100,
-                child: MyDrawer(),
-              ),
-            Expanded(
-              child: Scaffold(
-                backgroundColor: Colors.grey.shade50,
-                appBar: isWideScreen
-                    ? null
-                    : AppBar(
-                  title: const Text('Dashboard'),
-                  scrolledUnderElevation: 0,
-                  backgroundColor: Colors.blue.shade100,
-                  actions: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.person,
-                        color: Colors.grey,
+          return Row(
+            children: [
+              if (isWideScreen)
+                Container(
+                  width: 250,
+                  color: Colors.orange.shade100,
+                  child: MyDrawer(),
+                ),
+              Expanded(
+                child: Scaffold(
+                  backgroundColor: Colors.grey.shade50,
+                  appBar: isWideScreen
+                      ? null
+                      : AppBar(
+                    title: const Text('Dashboard'),
+                    scrolledUnderElevation: 0,
+                    backgroundColor: Colors.blue.shade100,
+                    actions: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.person,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {},
                       ),
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
-                drawer: isWideScreen ? null : Drawer(child: MyDrawer()),
-                body: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
-                  child: _buildSchoolMainContent(constraints),
+                    ],
+                  ),
+                  drawer: isWideScreen ? null : Drawer(child: MyDrawer()),
+                  body: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
+                    child: _buildSchoolMainContent(constraints),
+                  ),
                 ),
               ),
-            ),
-          ],
-        );
-      },
-    ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -77,64 +78,58 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                 return Form(
                   key: schoolController.formKey,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Center(
-                        child: Text(
-                          'School Registration',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
+                      // Image.asset('assets/business.png', height: 100),
+                      // const SizedBox(height: 30),
+                      const Text(
+                        'School Registration',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueAccent,
                         ),
                       ),
                       boxH20(),
+
                       CustomTextField(
-                        controller: schoolController.nameController,
+                        controller: schoolController.schoolNameController,
                         labelText: 'School Name',
-                        keyboardType: TextInputType.text,
-                        prefixIcon: Icon(Icons.school),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please Enter your school name';
+                            return 'Please enter the com.blissiq.school name';
                           }
                           return null;
                         },
+                        prefixIcon: Icon(Icons.school_outlined),
                       ),
                       boxH20(),
+
                       CustomTextField(
-                        controller: schoolController.emailAddress,
+                        controller: schoolController.schoolRegNumberController,
+                        labelText: 'School Registration Number',
+                        inputFormatters: [LengthLimitingTextInputFormatter(12)],
+                        prefixIcon: Icon(Icons.assignment),
+                      ),
+
+                      boxH20(),
+
+                      CustomTextField(
+                        controller: schoolController.principalNameController,
+                        labelText: 'Principal/Administrator Name',
+                        prefixIcon: Icon(Icons.person_2_outlined),
+                      ),
+                      boxH20(),
+
+                      CustomTextField(
+                        controller: schoolController.principalEmailController,
+                        labelText: 'Principal/Administrator Email',
                         keyboardType: TextInputType.emailAddress,
-                        labelText: 'Email',
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your email';
-                          }
-                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                            return 'Please enter a valid email address';
-                          }
-                          return null;
-                        },
                         prefixIcon: Icon(Icons.email_outlined),
                       ),
+
                       boxH20(),
-                      CustomTextField(
-                        controller: schoolController.schoolRegNumber,
-                        keyboardType: TextInputType.text,
-                        labelText: 'School reg.No',
-                        prefixIcon: Icon(Icons.app_registration_sharp),
-                      ),
-                      boxH20(),
-                      CustomTextField(
-                        controller: schoolController.principalName,
-                        labelText: 'Principal Name',
-                        maxLines: 2,
-                        keyboardType: TextInputType.text,
-                        prefixIcon: Icon(Icons.location_on_outlined),
-                      ),
-                      boxH20(),
+
                       Row(
                         children: [
                           Expanded(
@@ -142,8 +137,10 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                             child: Container(
                               margin: EdgeInsets.only(right: 10),
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                                border: Border.all(width: 1, color: Colors.blueAccent),
+                                borderRadius:
+                                BorderRadius.all(Radius.circular(8.0)),
+                                border:
+                                Border.all(width: 1, color: Colors.blueAccent),
                               ),
                               height: 50,
                               alignment: Alignment.centerLeft,
@@ -162,7 +159,9 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                             child: SizedBox(
                               height: 50,
                               child: TextFormField(
-                                inputFormatters: [LengthLimitingTextInputFormatter(10)],
+                                inputFormatters: [
+                                  LengthLimitingTextInputFormatter(10)
+                                ],
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Please Enter your mobile number';
@@ -170,7 +169,8 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                                   return null;
                                 },
                                 keyboardType: TextInputType.phone,
-                                controller: schoolController.phNoController,
+                                controller:
+                                schoolController.principalPhoneController,
                                 cursorColor: Colors.black,
                                 decoration: InputDecoration(
                                   border: OutlineInputBorder(),
@@ -178,7 +178,8 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                                   fillColor: Colors.white.withOpacity(0.2),
                                   focusedBorder: const OutlineInputBorder(
                                     borderSide: BorderSide(color: Colors.grey),
-                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                    borderRadius:
+                                    BorderRadius.all(Radius.circular(10)),
                                   ),
                                   hintText: 'Enter mobile number',
                                 ),
@@ -187,7 +188,69 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                           ),
                         ],
                       ),
+
                       boxH20(),
+
+                      CustomTextField(
+                        controller: schoolController.addressController,
+                        labelText: 'School Address',
+                        maxLines: 3,
+                        prefixIcon: Icon(Icons.location_on_outlined),
+                      ),
+                      boxH20(),
+                      CustomTextField(
+                        controller: schoolController.schoolTypeController,
+                        labelText: 'School Type',
+                        maxLines: 1,
+                        prefixIcon: Icon(Icons.location_on_outlined),
+                      ),
+                      // Obx(() => DropdownButtonFormField<String>(
+                      //       value: schoolController.schoolType.value.isEmpty
+                      //           ? null
+                      //           : schoolController.schoolType.value,
+                      //       items: schoolController.schoolTypes
+                      //           .map((type) => DropdownMenuItem<String>(
+                      //                 value: type,
+                      //                 child: Text(type),
+                      //               ))
+                      //           .toList(),
+                      //       onChanged: (value) {
+                      //         schoolController.schoolType.value = value!;
+                      //       },
+                      //       decoration: const InputDecoration(
+                      //         prefixIcon: Icon(Icons.school),
+                      //         labelText: 'School Type',
+                      //         border: OutlineInputBorder(),
+                      //       ),
+                      //     )),
+                      boxH20(),
+                      CustomTextField(
+                        controller: schoolController.affiliatedCompanyController,
+                        labelText: 'Affiliated Company',
+                        maxLines: 1,
+                        prefixIcon: Icon(Icons.location_on_outlined),
+                      ),
+                      // Obx(() => DropdownButtonFormField<String>(
+                      //       value: schoolController.affiliatedCompany.value.isEmpty
+                      //           ? null
+                      //           : schoolController.affiliatedCompany.value,
+                      //       items: schoolController.affiliatedCompanies
+                      //           .map((company) => DropdownMenuItem<String>(
+                      //                 value: company,
+                      //                 child: Text(company),
+                      //               ))
+                      //           .toList(),
+                      //       onChanged: (value) {
+                      //         schoolController.affiliatedCompany.value = value!;
+                      //       },
+                      //       decoration: const InputDecoration(
+                      //         labelText: 'Affiliated Company',
+                      //         prefixIcon: Icon(Icons.business),
+                      //         border: OutlineInputBorder(),
+                      //       ),
+                      //     )),
+                      boxH30(),
+
                       CustomTextField(
                         controller: schoolController.passwordController,
                         labelText: 'Enter your password',
@@ -199,15 +262,15 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                           }
                           return null;
                         },
-                        obscureText: !schoolController.passwordVisible.value,
+                        obscureText: !schoolController.isPasswordVisible.value,
                         sufixIcon: IconButton(
-                          icon: Icon(schoolController.passwordVisible.value
+                          icon: Icon(schoolController.isPasswordVisible.value
                               ? Icons.visibility
                               : Icons.visibility_off),
                           onPressed: () {
                             setState(() {
-                              schoolController.passwordVisible.value =
-                              !schoolController.passwordVisible.value;
+                              schoolController.isPasswordVisible.value =
+                              !schoolController.isPasswordVisible.value;
                             });
                           },
                         ),
@@ -217,7 +280,7 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please Confirm your password';
-                          } else if (value != schoolController.passwordController.text) {
+                          } else if (value != schoolController.confirmPasswordController.text) {
                             return 'Passwords do not match';
                           }
                           return null;
@@ -226,42 +289,51 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                         labelText: 'Confirm your password',
                         keyboardType: TextInputType.visiblePassword,
                         prefixIcon: const Icon(Icons.password_rounded),
-                        obscureText: !schoolController.passwordVisible.value,
+                        obscureText: !schoolController.isConfirmPasswordVisible.value,
                         sufixIcon: IconButton(
-                          icon: Icon(schoolController.passwordVisible.value
+                          icon: Icon(schoolController.isConfirmPasswordVisible.value
                               ? Icons.visibility
                               : Icons.visibility_off),
                           onPressed: () {
                             setState(() {
-                              schoolController.passwordVisible.value =
-                              !schoolController.passwordVisible.value;
+                              schoolController.isConfirmPasswordVisible.value =
+                              !schoolController.isConfirmPasswordVisible.value;
                             });
                           },
                         ),
                       ),
                       boxH20(),
-                      Obx(() {
-                        return Center(
-                          child: schoolController.isLoading.value
-                              ? CircularProgressIndicator()
-                              : CustomButton(
-                            label: "School Register",
-                            onPressed: () {
-                              if (schoolController.formKey.currentState!.validate()) {
-                                schoolController.mentorRegistration(
-                                  fullName: schoolController.nameController.text,
-                                  email: schoolController.emailAddress.text,
-                                  address: schoolController.addressController.text,
-                                  contactNo: schoolController.phNoController.text,
-                                  password: schoolController.passwordController.text,
-                                  confirmPassword: schoolController.confirmPasswordController.text,
-                                  context: context,
-                                );
-                              }
-                            },
+
+
+                      ElevatedButton(
+                        onPressed: () {
+                          schoolController.schoolRegistrationApi(
+                            schoolName: schoolController.schoolNameController.text,
+                            schoolRegNumber: schoolController.schoolRegNumberController.text,
+                            principalName: schoolController.principalNameController.text,
+                            principalEmail: schoolController.principalEmailController.text,
+                            principalPhone: schoolController.principalPhoneController.text,
+                            address: schoolController.addressController.text,
+                            schoolType: schoolController.schoolTypeController.text,
+                            affiliatedCompany: schoolController.affiliatedCompanyController.text,
+                            password: schoolController.passwordController.text,
+                            confirmPassword: schoolController.confirmPasswordController.text,
+                            context: context,
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          minimumSize: const Size(double.infinity, 50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                        );
-                      }),
+                        ),
+                        child: const Text(
+                          'Register',
+                          style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
                     ],
                   ),
                 );

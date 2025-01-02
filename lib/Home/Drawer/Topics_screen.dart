@@ -1,6 +1,7 @@
 import 'package:blissiqadmin/Global/Widgets/ExampleModel.dart';
 import 'package:blissiqadmin/Global/constants/CustomAlertDialogue.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/AddQuetionsWidgets.dart';
 import 'package:blissiqadmin/controller/CategoryController.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -103,40 +104,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
         Obx(()=>_controller.isLoading==true?Container(child:Center(child: Text('Loading Topics...'),)):
         _controller.isLoading==false && _controller.topics.isEmpty?
         Container(child:Center(child:Text('No Topics available'))):
-        SingleChildScrollView(
-          child: SizedBox(
-              height:MediaQuery.of(context).size.height/1.5,
-              child:Obx(()=>
-                  ListView.builder(
-                    itemCount: _controller.topics.length,
-                    itemBuilder: (context, index) {
-                      return ExpansionTile(
-                        title: Row(
-                          children: [
-                            Text(_controller.topics[index]['topic_name']),
-                            IconButton(
-                              icon: Icon(Icons.add_circle_outline),
-                              onPressed: () {
-                                _showAddDialog(context, 'subtopic', index, _controller.topics[index]);
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                onDelete(
-                                    _controller.topics[index],
-                                    index,
-                                    "You want to delete this Topic?",
-                                    'topic',
-                                    ''
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  : SingleChildScrollView(
+       SingleChildScrollView(
                       child: SizedBox(
                         height: MediaQuery.of(context).size.height / 1.5,
                         child: Obx(

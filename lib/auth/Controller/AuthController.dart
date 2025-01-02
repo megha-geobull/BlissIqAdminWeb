@@ -246,10 +246,9 @@ class AuthController extends GetxController{
     }
   }
 
-
   getAllMentors() async {
     isLoading.value = true;
-    allMentorData.clear();
+
     try {
       final response = await http.post(
         Uri.parse(ApiString.get_all_mentors),
@@ -261,18 +260,59 @@ class AuthController extends GetxController{
 
       if (response.statusCode == 200) {
         var responseData = jsonDecode(response.body);
-
         if (responseData['status'] == 1) {
           // Parse each JSON object into a Data model
           allMentorData.value = (responseData["data"] as List)
               .map((mentorJson) => Data.fromJson(mentorJson))
               .toList();
+
+          print("Fetched ${allMentorData.length} mentors");
         } else {
-          showSnackbar(message: "Failed to fetch category");
+          showSnackbar(message: responseData['message'] ?? "Failed to fetch mentors");
+        }
+      } else {
+        showSnackbar(message: "Failed to fetch mentors. Status: ${response.statusCode}");
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetching mentors: $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  approveMentors({required String mentor_id, required String approval_status}) async {
+    isLoading.value = true;
+    var body = {
+      "mentor_id": mentor_id,
+      "approval_status": approval_status,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(ApiString.approve_mentor),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+
+        if (responseData['status'] == 1) {
+          print("response approve mentor: ${responseData['message']}");
+          showSnackbar(message: responseData['message']);
+
+          // Fetch updated mentor list after approval
+          await getAllMentors(); // Ensure this completes before proceeding
+        } else {
+          showSnackbar(message: responseData['message']);
         }
       }
     } catch (e) {
-      showSnackbar(message: "Error while fetching category $e");
+      showSnackbar(message: "Error $e");
       log(e.toString());
     } finally {
       isLoading.value = false;

@@ -1,7 +1,9 @@
+import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/Home/Users/Mentor/MentorListBottomSheet.dart';
 import 'package:blissiqadmin/Home/Users/Models/AllStudentModel.dart';
 import 'package:blissiqadmin/auth/Controller/StudentController.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 //import 'MentorListScreen.dart'; // Import the new Mentor List screen
@@ -25,34 +27,6 @@ class _StudentScreenState extends State<StudentScreen> {
     });
   }
 
-  void _toggleStatus(int index) async {
-    bool? confirmation = await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Confirm Action"),
-          content: const Text("Are you sure you want to change the status?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text("No", style: TextStyle(color: Colors.red)),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text("Yes", style: TextStyle(color: Colors.green)),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirmation == true) {
-      setState(() {
-        var mentor = studentController.allLearnerData[index];
-        mentor.status = (mentor.status == "Approve") ? "Disapprove" : "Approve";
-      });
-    }
-  }
 
   void _removeStudent(int index) {
     setState(() {
@@ -170,9 +144,26 @@ class _StudentScreenState extends State<StudentScreen> {
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: CircleAvatar(
-            backgroundImage: NetworkImage(student.profileImage ?? ''),
+            radius: 24,
+            backgroundColor: Colors.grey.shade300,
+            child: CachedNetworkImage(
+              imageUrl: "${ApiString.ImgBaseUrl}${student.profileImage}",
+              imageBuilder: (context, imageProvider) => Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              placeholder: (context, url) => const CircularProgressIndicator(),
+              errorWidget: (context, url, error) => const Icon(Icons.person, size: 48, color: Colors.grey),
+            ),
           ),
         ),
+
+
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: Text(student.userName ?? 'No Name'),
@@ -328,7 +319,7 @@ class _StudentScreenState extends State<StudentScreen> {
         ),
         Padding(
           padding: EdgeInsets.all(12.0),
-          child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold)),
+          child: Text('Assign', style: TextStyle(fontWeight: FontWeight.bold)),
         ),
         Padding(
           padding: EdgeInsets.all(12.0),

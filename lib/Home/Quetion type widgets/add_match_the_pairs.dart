@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 
@@ -9,10 +10,8 @@ class AddMatchPairs extends StatefulWidget {
 }
 
 class _AddMatchPairsState extends State<AddMatchPairs> {
-  final List<TextImageSoundPair> leftColumnPairs =
-  List.generate(5, (_) => TextImageSoundPair());
-  final List<TextImageSoundPair> rightColumnPairs =
-  List.generate(5, (_) => TextImageSoundPair());
+  final List<TextImageSoundPair> leftColumnPairs = List.generate(5, (_) => TextImageSoundPair());
+  final List<TextImageSoundPair> rightColumnPairs = List.generate(5, (_) => TextImageSoundPair());
   final TextEditingController pointsController = TextEditingController();
 
   PairType leftColumnType = PairType.text;
@@ -40,12 +39,15 @@ class _AddMatchPairsState extends State<AddMatchPairs> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: const Text("Add Match Pairs"),
-      ),
-      body: Padding(
+    return  DottedBorder(
+      color: Colors.orange,
+      strokeWidth: 1,
+      dashPattern: [4, 4],
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+        ),
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -74,31 +76,6 @@ class _AddMatchPairsState extends State<AddMatchPairs> {
                         _updateColumnType(rightColumnPairs, type);
                       },
                     ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Points:',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        width: 100,
-                        child: CustomTextField(
-                          controller: pointsController,
-                          labelText: "",
-                          hintText: "00",
-                          prefixIcon: SizedBox(
-                            width: 40,
-                            height: 40,
-                            child: Image.asset("assets/coins.png"),
-                          ),
-                          keyboardType: TextInputType.number,
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -193,9 +170,16 @@ class _AddMatchPairsState extends State<AddMatchPairs> {
       case PairType.image:
         return pair.imageBytes == null
             ? ElevatedButton(
-          onPressed: () => _pickImage(pair),
-          child: const Text("Upload Image"),
-        )
+                      onPressed: () => _pickImage(pair),
+                      style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+             side: BorderSide(color: Colors.grey),
+             backgroundColor: Colors.white,
+             elevation: 0.5,
+             padding: EdgeInsets.symmetric(vertical: 22,horizontal: 8)
+                      ),
+                      child: const Text("Upload Image"),
+                    )
             : Image.memory(
           pair.imageBytes!,
           width: 50,
