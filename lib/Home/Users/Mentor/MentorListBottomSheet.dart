@@ -1,13 +1,26 @@
-import 'package:flutter/cupertino.dart';
+import 'package:blissiqadmin/auth/Controller/AuthController.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class MentorListBottomSheet extends StatelessWidget {
-  final List<String> mentorNames = [
-    'Mentor 1',
-    'Mentor 2',
-    'Mentor 3',
-    'Mentor 4',
-  ];
+class MentorListBottomSheet extends StatefulWidget {
+  final String? studentID;
+
+  const MentorListBottomSheet(this.studentID, {super.key});
+
+  @override
+  State<MentorListBottomSheet> createState() => _MentorListBottomSheetState();
+}
+
+class _MentorListBottomSheetState extends State<MentorListBottomSheet> {
+  final AuthController mentorController = Get.put(AuthController());
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      mentorController.getAllMentors();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,24 +31,24 @@ class MentorListBottomSheet extends StatelessWidget {
       ),
       child: Container(
         color: Colors.white,
-        height: 400,
-        width: 300,// Set the height to reduce the size of the bottom sheet
+        height: MediaQuery.of(context).size.height * 0.5,
+        width: MediaQuery.of(context).size.width * 0.38,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header with gradient background
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.orange, Colors.orange],
+                  gradient: const LinearGradient(
+                    colors: [Colors.white, Colors.white],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey),
                 ),
                 child: const Text(
                   'Select Mentor',
@@ -48,22 +61,18 @@ class MentorListBottomSheet extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              // Mentor list
               Expanded(
-                child: ListView.builder(
-                  itemCount: mentorNames.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () {
-                        // Return the selected mentor to the previous screen
-                        Navigator.pop(context, mentorNames[index]);
-                      },
-                      child: Container(
+                child: Obx(
+                      () => ListView.builder(
+                    itemCount: mentorController.allMentorData.length,
+                    itemBuilder: (context, index) {
+                      var mentor = mentorController.allMentorData[index];
+                      return Container(
                         margin: const EdgeInsets.only(bottom: 12),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(15),
-                          boxShadow: [
+                          boxShadow: const [
                             BoxShadow(
                               color: Colors.black26,
                               offset: Offset(0, 2),
@@ -76,7 +85,7 @@ class MentorListBottomSheet extends StatelessWidget {
                             horizontal: 10.0,
                             vertical: 8.0,
                           ),
-                          leading: CircleAvatar(
+                          leading: const CircleAvatar(
                             backgroundColor: Colors.orange,
                             child: Icon(
                               Icons.person,
@@ -84,21 +93,42 @@ class MentorListBottomSheet extends StatelessWidget {
                             ),
                           ),
                           title: Text(
-                            mentorNames[index],
+                            mentor.fullName ?? 'Unknown Mentor',
                             style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 18,
                               color: Colors.black,
                             ),
                           ),
-                          trailing: const Icon(
-                            Icons.arrow_forward_ios,
-                            color: Colors.orange,
+                          trailing:   Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                mentorController.assignMentorApi(mentorId: mentor.sId.toString(), studentId: widget.studentID.toString());
+                                Navigator.pop(context, mentor.fullName);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                              ),
+                              child: const Text(
+                                'Assign',
+                                style: TextStyle(
+                                  letterSpacing: 1,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             ],

@@ -1,11 +1,11 @@
-
 import 'dart:io';
 
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
+import 'package:blissiqadmin/Home/Users/Company/CompnayListBottomSheet.dart';
 import 'package:blissiqadmin/Home/Users/Mentor/MentorListBottomSheet.dart';
+import 'package:blissiqadmin/Home/Users/School/SchoolRegistration.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 
 class SchoolScreen extends StatefulWidget {
   const SchoolScreen({super.key});
@@ -91,8 +91,9 @@ class _SchoolScreenState extends State<SchoolScreen> {
 
     if (confirmation == true) {
       setState(() {
-        studentData[index]["status"] =
-        studentData[index]["status"] == "Approve" ? "Disapprove" : "Approve";
+        studentData[index]["status"] = studentData[index]["status"] == "Approve"
+            ? "Disapprove"
+            : "Approve";
       });
     }
   }
@@ -107,7 +108,7 @@ class _SchoolScreenState extends State<SchoolScreen> {
     String? selectedMentor = await showModalBottomSheet<String>(
       context: context,
       builder: (context) {
-        return MentorListBottomSheet();
+        return CompnayListBottomSheet();
       },
     );
 
@@ -117,7 +118,6 @@ class _SchoolScreenState extends State<SchoolScreen> {
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -142,21 +142,21 @@ class _SchoolScreenState extends State<SchoolScreen> {
                   appBar: isWideScreen
                       ? null
                       : AppBar(
-                    title: const Text('Dashboard'),
-                    scrolledUnderElevation: 0,
-                    backgroundColor: Colors.blue.shade100,
-                    actions: [
-                      IconButton(
-                        icon: const Icon(
-                          Icons.person,
-                          color: Colors.grey,
+                          title: const Text('Dashboard'),
+                          scrolledUnderElevation: 0,
+                          backgroundColor: Colors.blue.shade100,
+                          actions: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.person,
+                                color: Colors.grey,
+                              ),
+                              onPressed: () {
+                                // Handle notifications
+                              },
+                            ),
+                          ],
                         ),
-                        onPressed: () {
-                          // Handle notifications
-                        },
-                      ),
-                    ],
-                  ),
                   drawer: isWideScreen ? null : Drawer(child: MyDrawer()),
                   body: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -180,20 +180,19 @@ class _SchoolScreenState extends State<SchoolScreen> {
         children: [
           Container(
             decoration: BoxDecoration(
-                color: Colors.orange.shade100,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: Colors.white,
-                )),
+              color: Colors.orange.shade100,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white),
+            ),
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
                   const Text(
-                    'All Registered School',
+                    'All Registered Schools',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 20,
+                      fontSize: 24,
                       color: Colors.black,
                     ),
                   ),
@@ -201,7 +200,13 @@ class _SchoolScreenState extends State<SchoolScreen> {
                   Tooltip(
                     message: 'Add a New School',
                     child: ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SchoolRegistration()),
+                        );
+                      },
                       icon: const Icon(
                         Icons.add,
                         color: Colors.white,
@@ -233,25 +238,25 @@ class _SchoolScreenState extends State<SchoolScreen> {
           Expanded(
             child: SingleChildScrollView(
               child: Card(
-                elevation: 3,
+                elevation: 2,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Table(
-                  border: const TableBorder.symmetric(
-                    inside: BorderSide(color: Colors.grey, width: 0.5),
-                    outside: BorderSide.none,
+                  border: const TableBorder(
+                    horizontalInside:
+                        BorderSide(color: Colors.grey, width: 0.5),
+                    verticalInside: BorderSide(color: Colors.grey, width: 0.5),
                   ),
                   columnWidths: const {
                     0: FlexColumnWidth(2), // Profile
-                    1: FlexColumnWidth(2), // Name
-                    2: FlexColumnWidth(3), // Email
-                    3: FlexColumnWidth(2), // Contact No
-                    4: FlexColumnWidth(3), // School
-                    7: FlexColumnWidth(2), // Status
-                    8: FlexColumnWidth(2), // Assign
-                    9: FlexColumnWidth(1.6), // Actions
-                    10: FlexColumnWidth(2), // Details
+                    1: FlexColumnWidth(3), // Name
+                    2: FlexColumnWidth(2), // Email
+                    3: FlexColumnWidth(3), // Contact No
+                    4: FlexColumnWidth(2), // School
+                    5: FlexColumnWidth(2), // Status
+                    6: FlexColumnWidth(2), // Assign
+                    7: FlexColumnWidth(2), // Actions
                   },
                   children: [
                     TableRow(
@@ -262,13 +267,6 @@ class _SchoolScreenState extends State<SchoolScreen> {
                         ),
                       ),
                       children: const [
-                        Padding(
-                          padding: EdgeInsets.all(12.0),
-                          child: Text(
-                            'Profile',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
                         Padding(
                           padding: EdgeInsets.all(12.0),
                           child: Text(
@@ -304,7 +302,6 @@ class _SchoolScreenState extends State<SchoolScreen> {
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
-
                         Padding(
                           padding: EdgeInsets.all(12.0),
                           child: Text(
@@ -312,7 +309,6 @@ class _SchoolScreenState extends State<SchoolScreen> {
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
-
                         Padding(
                           padding: EdgeInsets.all(12.0),
                           child: Text(
@@ -330,17 +326,13 @@ class _SchoolScreenState extends State<SchoolScreen> {
                       ],
                     ),
                     ...studentData.map(
-                          (student) {
+                      (student) {
                         int index = studentData.indexOf(student);
                         return TableRow(
                           decoration: const BoxDecoration(
                             color: Colors.white,
                           ),
                           children: [
-                            const Padding(
-                              padding: EdgeInsets.all(12.0),
-                              child: Icon(Icons.account_circle, size: 20),
-                            ),
                             Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: Text(
@@ -377,20 +369,20 @@ class _SchoolScreenState extends State<SchoolScreen> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  backgroundColor: student["status"] == "Approve"
-                                      ? Colors.green
-                                      : Colors.red,
+                                  backgroundColor:
+                                      student["status"] == "Approve"
+                                          ? Colors.green
+                                          : Colors.red,
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 7, vertical: 9),
                                 ),
                                 child: Text(
                                   student["status"] ?? "Disapprove",
                                   style: const TextStyle(
-                                      color: Colors.white, fontSize: 9),
+                                      color: Colors.white, fontSize: 12),
                                 ),
                               ),
                             ),
-
                             Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: ElevatedButton(
@@ -398,19 +390,20 @@ class _SchoolScreenState extends State<SchoolScreen> {
                                   // Assign logic
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange, // Set the background color to green
-                                  shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.zero, // Makes the button rectangular
+                                  backgroundColor: Colors.deepOrange,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), // Adjust padding if needed
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 8),
                                 ),
                                 child: const Text(
                                   'Assign',
                                   style: TextStyle(
                                     letterSpacing: 1,
-                                    fontSize: 8,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.black, // White text color for contrast
+                                    color: Colors.black,
                                   ),
                                 ),
                               ),
@@ -419,12 +412,12 @@ class _SchoolScreenState extends State<SchoolScreen> {
                               padding: const EdgeInsets.all(12.0),
                               child: IconButton(
                                 icon:
-                                const Icon(Icons.delete, color: Colors.red),
+                                    const Icon(Icons.delete, color: Colors.red),
                                 onPressed: () => _removeStudent(index),
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsets.all(12.0),
+                              padding: const EdgeInsets.all(12.0),
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Colors.orange,
@@ -452,13 +445,12 @@ class _SchoolScreenState extends State<SchoolScreen> {
                 ),
               ),
             ),
-          ),
+          )
         ],
       ),
     );
   }
 }
-
 
 //
 // import 'dart:io';
@@ -974,4 +966,3 @@ class _SchoolScreenState extends State<SchoolScreen> {
 //
 //
 //
-
