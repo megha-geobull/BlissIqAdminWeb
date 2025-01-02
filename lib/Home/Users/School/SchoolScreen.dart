@@ -1,4 +1,5 @@
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
+import 'package:blissiqadmin/Global/constants/AppColor.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/Home/Users/Mentor/MentorRegistration.dart';
 import 'package:blissiqadmin/Home/Users/Models/AllSchoolModel.dart';
@@ -27,7 +28,7 @@ class _SchoolScreenState extends State<SchoolScreen> {
 
   }
 
-  void _toggleStatus(int index) async {
+  void _toggleStatus(String schoolId) async {
     bool? confirmation = await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -48,13 +49,17 @@ class _SchoolScreenState extends State<SchoolScreen> {
       },
     );
     if (confirmation == true) {
-      setState(() {
-        var school = schoolController.allSchoolData[index];
-        school.status = (school.status == "Approve") ? "Disapprove" : "Approve";
-      });
+      var school = schoolController.allSchoolData
+          .where((p0) => p0.id == schoolId)
+          .first;
+
+      schoolController.approveSchool(
+        school_id: schoolId,
+        approval_status: (school.approvalStatus == "Disapproved" || school.approvalStatus == "Pending") ? "Approved" : "Disapproved",
+      );
+
     }
   }
-
   void _removeSchool(int index) {
     setState(() {
       schoolController.allSchoolData.removeAt(index);
@@ -200,13 +205,21 @@ class _SchoolScreenState extends State<SchoolScreen> {
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: ElevatedButton(
-            onPressed: () => _toggleStatus(index),
+            onPressed: () => _toggleStatus(school.id ?? ''),
             style: ElevatedButton.styleFrom(
-              backgroundColor: school.status == "Approve"
-                  ? Colors.green
-                  : Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              backgroundColor: _getButtonColor(school.approvalStatus), // Dynamic color
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 9),
             ),
-            child: Text(school.status ?? 'Disapprove'),
+            child: Text(
+              school.approvalStatus ?? 'Pending',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+              ),
+            ),
           ),
         ),
         Padding(
@@ -219,7 +232,18 @@ class _SchoolScreenState extends State<SchoolScreen> {
       ],
     );
   }
-
+  Color _getButtonColor(String? approvalStatus) {
+    switch (approvalStatus) {
+      case "Approved":
+        return AppColor.green;
+      case "Disapproved":
+        return AppColor.red;
+      case "Pending":
+        return AppColor.amber;
+      default:
+        return AppColor.grey;
+    }
+  }
   Widget _buildHeader() {
     return Container(
       decoration: BoxDecoration(

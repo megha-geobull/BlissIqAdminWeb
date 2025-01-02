@@ -319,7 +319,7 @@ class _StudentScreenState extends State<StudentScreen> {
         ),
         Padding(
           padding: EdgeInsets.all(12.0),
-          child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold)),
+          child: Text('Assign', style: TextStyle(fontWeight: FontWeight.bold)),
         ),
         Padding(
           padding: EdgeInsets.all(12.0),
