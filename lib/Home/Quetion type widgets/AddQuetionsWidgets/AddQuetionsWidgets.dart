@@ -6,8 +6,10 @@ import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/add_match_the_pairs.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/question_controller.dart';
 import 'package:blissiqadmin/controller/CategoryController.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -36,9 +38,11 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   TextEditingController correctAnswerController = TextEditingController();
   TextEditingController pointsController = TextEditingController();
   TextEditingController titleController = TextEditingController();
+  TextEditingController indexController = TextEditingController();
   TextEditingController storyContentController = TextEditingController();
   TextEditingController storyPhrasesController = TextEditingController();
-
+  QuestionController addQuestionController = Get.find();
+  CategoryController categoryController = Get.find();
   Uint8List? selectedImage;
   List<TableRow> tableRows = [];
 
@@ -80,6 +84,27 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     }
   }
 
+  List<PlatformFile>? _paths;
+  var pathsFile;
+  var pathsFileName;
+  pickFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: false,
+      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
+      allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      setState(() {
+        _paths = result.files;
+        pathsFile = _paths!.first.bytes;
+        pathsFileName = _paths!.first.name;
+      });
+    } else {
+      print('No file selected');
+    }
+  }
   String? selectedQuestionType = "Multiple Choice Question";
   List<String> questionTypes = [
     "Multiple Choice Question",
@@ -682,91 +707,136 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           color: Colors.white,
         ),
         padding: const EdgeInsets.symmetric(vertical: 7.0, horizontal: 8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Question',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            CustomTextField(
-              controller: questionController,
-              maxLines: 1,
-              labelText: "Enter your question",
-            ),
-            boxH10(),
-            const Text(
-              'Upload Story Image',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: _pickImage,
-              child: DottedBorder(
-                color: Colors.grey,
-                strokeWidth: 1,
-                dashPattern: [4, 4],
-                child: Container(
-                  width: double.infinity,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: selectedImage == null
-                        ? const Text(
-                      "Tap to upload story image",
-                      style: TextStyle(color: Colors.grey),
-                    )
-                        : Image.memory(
-                      selectedImage!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Question Index:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              CustomTextField(
+                controller: indexController,
+                labelText: '',
+                hintText: "0",
+              ),
+              boxH15(),
+              const Text(
+                'Question title:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              CustomTextField(
+                controller: titleController,
+                labelText: 'Enter question title here...',
+              ),
+              boxH15(),
+              const Text(
+                'Question',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              boxH08(),
+              CustomTextField(
+                controller: questionController,
+                maxLines: 1,
+                labelText: "Enter your question",
+              ),
+              boxH10(),
+              const Text(
+                'Upload Story Image',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              GestureDetector(
+                onTap: pickFile,
+                child: DottedBorder(
+                  color: Colors.grey,
+                  strokeWidth: 1,
+                  dashPattern: [4, 4],
+                  child: Container(
+                    width: double.infinity,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: pathsFile == null
+                          ? const Text(
+                        "Tap to upload story image",
+                        style: TextStyle(color: Colors.grey),
+                      )
+                          : Image.memory(
+                        pathsFile!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            boxH15(),
-            const Text(
-              'Enter Options',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Number of items per row
-                crossAxisSpacing: 10.0, // Spacing between columns
-                mainAxisSpacing: 5.0, // Spacing between rows
-                childAspectRatio: 2.8, // Adjust height and width of grid items
+              boxH15(),
+              const Text(
+                'Enter Options',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
-              itemCount: optionControllers.length,
-              itemBuilder: (context, index) {
-                return CustomTextField(
-                  controller: optionControllers[index],
-                  labelText: "Option ${index + 1}",
-                );
-              },
-            ),
-            const Text(
-              'Correct answer',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            CustomTextField(
-              controller: correctAnswerController,
-              labelText: "Enter correct answer",
-            ),
-            boxH15(),
-            CustomButton(
-              label: "Add Question",
-              onPressed: _submitQuestion,
-            ),
-          ],
+              boxH08(),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2, // Number of items per row
+                  crossAxisSpacing: 10.0, // Spacing between columns
+                  mainAxisSpacing: 5.0, // Spacing between rows
+                  childAspectRatio: 2.8, // Adjust height and width of grid items
+                ),
+                itemCount: optionControllers.length,
+                itemBuilder: (context, index) {
+                  return CustomTextField(
+                    controller: optionControllers[index],
+                    labelText: "Option ${index + 1}",
+                  );
+                },
+              ),
+              const Text(
+                'Correct answer',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              boxH08(),
+              CustomTextField(
+                controller: correctAnswerController,
+                labelText: "Enter correct answer",
+              ),
+              boxH15(),
+              CustomButton(
+                label: "Add Question",
+                onPressed: () {
+                  print(mainCategoryId ?? 'null');
+                  print(subCategoryId ?? 'null');
+                  print(topicId ?? 'null');
+                  print(subtopicId ?? 'null');
+                  addQuestionController.addMCQ(
+                      main_category_id: mainCategoryId!,
+                      sub_category_id: subCategoryId!,
+                      sub_topic_id: subtopicId!,
+                      topic_id: topicId!,
+                      index: indexController.text,
+                      question: questionController.text,
+                      question_type: selectedQuestionType!,
+                      title:titleController.text,
+                      option_a: optionControllers[0].text,
+                      option_b: optionControllers[1].text,
+                      option_c: optionControllers[2].text,
+                      option_d: optionControllers[3].text,
+                      answer: correctAnswerController.text,
+                      points: pointsController.text,
+                      q_image: pathsFile,
+                      context: context);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
