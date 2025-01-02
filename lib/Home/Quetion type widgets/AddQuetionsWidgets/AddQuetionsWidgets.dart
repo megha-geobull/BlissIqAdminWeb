@@ -6,8 +6,10 @@ import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/add_match_the_pairs.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/question_controller.dart';
 import 'package:blissiqadmin/controller/CategoryController.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,8 +17,9 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:csv/csv.dart';
+import 'package:share_extend/share_extend.dart';
+
 import '../../../Global/constants/common_snackbar.dart';
-import '../AddDataController.dart';
 import 'Header_Columns.dart';
 
 
@@ -28,18 +31,18 @@ class AddQuestionsWidgets extends StatefulWidget {
 class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
 
   final TextEditingController questionController = TextEditingController();
-  final TextEditingController title_descController = TextEditingController();
   final List<TextEditingController> optionControllers =
       List.generate(4, (_) => TextEditingController());
   final List<TextEditingController> paragraphOptionControllers =
   List.generate(6, (_) => TextEditingController());
   TextEditingController correctAnswerController = TextEditingController();
   TextEditingController pointsController = TextEditingController();
-  TextEditingController indexController = TextEditingController();
   TextEditingController titleController = TextEditingController();
+  TextEditingController indexController = TextEditingController();
   TextEditingController storyContentController = TextEditingController();
   TextEditingController storyPhrasesController = TextEditingController();
-
+  QuestionController addQuestionController = Get.find();
+  CategoryController categoryController = Get.find();
   Uint8List? selectedImage;
   List<TableRow> tableRows = [];
 
@@ -81,6 +84,27 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     }
   }
 
+  List<PlatformFile>? _paths;
+  var pathsFile;
+  var pathsFileName;
+  pickFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: false,
+      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
+      allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      setState(() {
+        _paths = result.files;
+        pathsFile = _paths!.first.bytes;
+        pathsFileName = _paths!.first.name;
+      });
+    } else {
+      print('No file selected');
+    }
+  }
   String? selectedQuestionType = "Multiple Choice Question";
   List<String> questionTypes = [
     "Multiple Choice Question",
@@ -97,7 +121,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     "Card Flip",
   ];
   final CategoryController _controller = Get.put(CategoryController());
-  final Add_DataController _data_controller = Get.put(Add_DataController());
 
   @override
   void initState() {
@@ -463,25 +486,11 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                       ),
                                     ],
                                   ),
-                                  boxH05(),
-                                  Row(
-                                    children: [
-                                      const Spacer(),
-                                      SizedBox(
-                                        width: MediaQuery.of(context).size.width * 0.06,
-                                        child: CustomTextField(
-                                          controller: indexController,
-                                          maxLines: 1,
-                                          labelText: "Index",
-                                        ),
-                                      ),
-                                    ],
-                                  ),
                                   boxH10(),
                                   // Display the appropriate question type UI based on selection
                                   SizedBox(
                                       width: MediaQuery.of(context).size.width * 0.4,
-                                      height: MediaQuery.of(context).size.width * 0.5,
+                                      height: MediaQuery.of(context).size.width * 0.4,
                                       child: _buildQuestionTypeContent()),
                                 ],
                               ),
@@ -609,6 +618,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     );
   }
 
+
   ///question type content
   Widget _buildQuestionTypeContent() {
     switch (selectedQuestionType) {
@@ -638,108 +648,36 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   }
 
   void _submitQuestion() {
-    print(selectedQuestionType);
-    if (selectedQuestionType == "Multiple Choice Question") {
-      //_data_controller.is_excel.value=false; // For base64 encoding
-
-      // if (selectedImage != null && selectedImage!.isNotEmpty) {
-      //   // Convert to base64 only if selectedImage is not null and not empty
-      //   String base64Image = base64Encode(selectedImage!);
-      //
-      //   // Now you can pass base64Image to your API
-      //   _data_controller.add_mcq(
-      //       maincategory_id: selectedMainCategory!,
-      //       sub_categoryId: selectedSubCategory!,
-      //       topicId: selectedTopic!,
-      //       subtopic_id: selectedSubtopic!,
-      //       question_type: selectedQuestionType!,
-      //       title: title_descController.text,
-      //       question: questionController.text,
-      //       q_image: base64Image, // Pass base64 encoded image
-      //       option_a: optionControllers[0].text,
-      //       option_b: optionControllers[1].text,
-      //       option_c: optionControllers[2].text,
-      //       option_d: optionControllers[3].text,
-      //       answer: correctAnswerController.text,
-      //       points: pointsController.text,
-      //       index: indexController.text
-      //   );
-      // } else {
-        // Handle the case when there is no image (e.g., send an empty field or skip)
-        _data_controller.add_mcq(
-            maincategory_id: selectedMainCategory!,
-            sub_categoryId: selectedSubCategory!,
-            topicId: selectedTopic!,
-            subtopic_id: selectedSubtopic!,
-            question_type: selectedQuestionType!,
-            title: title_descController.text,
-            question: questionController.text,
-            q_image: '', // Empty string or skip the key depending on API requirements
-            option_a: optionControllers[0].text,
-            option_b: optionControllers[1].text,
-            option_c: optionControllers[2].text,
-            option_d: optionControllers[3].text,
-            answer: correctAnswerController.text,
-            points: pointsController.text,
-            index: indexController.text
-        );
-      //}
-      _data_controller.add_mcq(maincategory_id: selectedMainCategory!,
-          sub_categoryId: selectedSubCategory!, topicId: selectedTopic!, subtopic_id: selectedSubtopic!,
-          question_type: selectedQuestionType!, title: title_descController.text,
-          question: questionController.text,
-          q_image: selectedImage, option_a: optionControllers[0].text, option_b: optionControllers[1].text,
-          option_c: optionControllers[2].text, option_d: optionControllers[3].text,
-          answer: correctAnswerController.text, points: pointsController.text, index: indexController.text);
-    } else if (selectedQuestionType == "Re-Arrange the Word") {
-
-    } else if (selectedQuestionType == "Complete the Word") {
-
-    } else if (selectedQuestionType == "True/False") {
-
-    } else if (selectedQuestionType == "Story") {
-
-    } else if (selectedQuestionType == "Phrases") {
-
-    } else if (selectedQuestionType == "Conversation") {
-
-    } else if (selectedQuestionType == "Learning Slide") {
-
-    } else if (selectedQuestionType == "Card Flip") {
-
-    }
-
-    ///old dummy code
     // Create a list to hold the options or default values ("-")
-    // final List<String> options = optionControllers
-    //     .map((controller) => controller.text.isNotEmpty ? controller.text : "-")
-    //     .toList();
+    final List<String> options = optionControllers
+        .map((controller) => controller.text.isNotEmpty ? controller.text : "-")
+        .toList();
 
     // Add a new table row with data or default values ("-")
-    // tableRows.add(TableRow(
-    //   children: [
-    //     Padding(
-    //       padding: const EdgeInsets.all(8.0),
-    //       child: Text(selectedQuestionType ?? "-"),
-    //     ),
-    //     Padding(
-    //       padding: const EdgeInsets.all(8.0),
-    //       child: Text(questionController.text.isNotEmpty
-    //           ? questionController.text
-    //           : "-"),
-    //     ),
-    //     ...options.map((option) => Padding(
-    //           padding: const EdgeInsets.all(8.0),
-    //           child: Text(option),
-    //         )),
-    //     Padding(
-    //       padding: const EdgeInsets.all(8.0),
-    //       child: Text(correctAnswerController.text.isNotEmpty
-    //           ? correctAnswerController.text
-    //           : "-"),
-    //     ),
-    //   ],
-    // ));
+    tableRows.add(TableRow(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(selectedQuestionType ?? "-"),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(questionController.text.isNotEmpty
+              ? questionController.text
+              : "-"),
+        ),
+        ...options.map((option) => Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(option),
+            )),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(correctAnswerController.text.isNotEmpty
+              ? correctAnswerController.text
+              : "-"),
+        ),
+      ],
+    ));
 
     // Clear the input fields after submission
     setState(() {
@@ -769,101 +707,136 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           color: Colors.white,
         ),
         padding: const EdgeInsets.symmetric(vertical: 7.0, horizontal: 8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Title',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            CustomTextField(
-              controller: title_descController,
-              maxLines: 1,
-              labelText: "Enter question description.",
-            ),
-            const Text(
-              'Question',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            CustomTextField(
-              controller: questionController,
-              maxLines: 1,
-              labelText: "Enter your question",
-            ),
-            boxH10(),
-            const Text(
-              'Upload Image',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: _pickImage,
-              child: DottedBorder(
-                color: Colors.grey,
-                strokeWidth: 1,
-                dashPattern: [4, 4],
-                child: Container(
-                  width: double.infinity,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: selectedImage == null
-                        ? const Text(
-                      "Tap to upload image",
-                      style: TextStyle(color: Colors.grey),
-                    )
-                        : Image.memory(
-                      selectedImage!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Question Index:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              CustomTextField(
+                controller: indexController,
+                labelText: '',
+                hintText: "0",
+              ),
+              boxH15(),
+              const Text(
+                'Question title:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              CustomTextField(
+                controller: titleController,
+                labelText: 'Enter question title here...',
+              ),
+              boxH15(),
+              const Text(
+                'Question',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              boxH08(),
+              CustomTextField(
+                controller: questionController,
+                maxLines: 1,
+                labelText: "Enter your question",
+              ),
+              boxH10(),
+              const Text(
+                'Upload Story Image',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              GestureDetector(
+                onTap: pickFile,
+                child: DottedBorder(
+                  color: Colors.grey,
+                  strokeWidth: 1,
+                  dashPattern: [4, 4],
+                  child: Container(
+                    width: double.infinity,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: pathsFile == null
+                          ? const Text(
+                        "Tap to upload story image",
+                        style: TextStyle(color: Colors.grey),
+                      )
+                          : Image.memory(
+                        pathsFile!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            boxH15(),
-            const Text(
-              'Enter Options',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Number of items per row
-                crossAxisSpacing: 10.0, // Spacing between columns
-                mainAxisSpacing: 5.0, // Spacing between rows
-                childAspectRatio: 2.8, // Adjust height and width of grid items
+              boxH15(),
+              const Text(
+                'Enter Options',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
-              itemCount: optionControllers.length,
-              itemBuilder: (context, index) {
-                return CustomTextField(
-                  controller: optionControllers[index],
-                  labelText: "Option ${index + 1}",
-                );
-              },
-            ),
-            const Text(
-              'Correct answer',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            CustomTextField(
-              controller: correctAnswerController,
-              labelText: "Enter correct answer",
-            ),
-            boxH15(),
-            CustomButton(
-              label: "Add Question",
-              onPressed: _submitQuestion,
-            ),
-          ],
+              boxH08(),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2, // Number of items per row
+                  crossAxisSpacing: 10.0, // Spacing between columns
+                  mainAxisSpacing: 5.0, // Spacing between rows
+                  childAspectRatio: 2.8, // Adjust height and width of grid items
+                ),
+                itemCount: optionControllers.length,
+                itemBuilder: (context, index) {
+                  return CustomTextField(
+                    controller: optionControllers[index],
+                    labelText: "Option ${index + 1}",
+                  );
+                },
+              ),
+              const Text(
+                'Correct answer',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              boxH08(),
+              CustomTextField(
+                controller: correctAnswerController,
+                labelText: "Enter correct answer",
+              ),
+              boxH15(),
+              CustomButton(
+                label: "Add Question",
+                onPressed: () {
+                  print(mainCategoryId ?? 'null');
+                  print(subCategoryId ?? 'null');
+                  print(topicId ?? 'null');
+                  print(subtopicId ?? 'null');
+                  addQuestionController.addMCQ(
+                      main_category_id: mainCategoryId!,
+                      sub_category_id: subCategoryId!,
+                      sub_topic_id: subtopicId!,
+                      topic_id: topicId!,
+                      index: indexController.text,
+                      question: questionController.text,
+                      question_type: selectedQuestionType!,
+                      title:titleController.text,
+                      option_a: optionControllers[0].text,
+                      option_b: optionControllers[1].text,
+                      option_c: optionControllers[2].text,
+                      option_d: optionControllers[3].text,
+                      answer: correctAnswerController.text,
+                      points: pointsController.text,
+                      q_image: pathsFile,
+                      context: context);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
