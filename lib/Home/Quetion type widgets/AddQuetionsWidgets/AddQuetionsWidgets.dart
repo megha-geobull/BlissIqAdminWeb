@@ -32,17 +32,17 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
 
   final TextEditingController questionController = TextEditingController();
   final List<TextEditingController> optionControllers =
-      List.generate(4, (_) => TextEditingController());
+  List.generate(4, (_) => TextEditingController());
   final List<TextEditingController> paragraphOptionControllers =
   List.generate(6, (_) => TextEditingController());
   TextEditingController correctAnswerController = TextEditingController();
   TextEditingController pointsController = TextEditingController();
   TextEditingController titleController = TextEditingController();
-  TextEditingController indexController = TextEditingController();
   TextEditingController storyContentController = TextEditingController();
   TextEditingController storyPhrasesController = TextEditingController();
   QuestionController addQuestionController = Get.find();
-  CategoryController categoryController = Get.find();
+  TextEditingController indexController = TextEditingController();
+
   Uint8List? selectedImage;
   List<TableRow> tableRows = [];
 
@@ -50,6 +50,16 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   final List<String> subCategories = [];
   final List<String> topics = [];
   final List<String> subTopics = [];
+
+  final List<String> tabs = [
+    "Conversational English",
+    "A1",
+    "Greetings",
+    "Story",
+    "Phrases",
+    "Quiz's",
+    "Conversation"
+  ];
 
   int selectedIndex = 0;
   String? selectedMainCategory;
@@ -73,7 +83,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       });
     }
   }
-
   List<PlatformFile>? _paths;
   var pathsFile;
   var pathsFileName;
@@ -318,75 +327,76 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         boxH20(),
         // Select sub Topic
         Row(
-        children: [
-        Expanded(
-          child: DropdownButtonFormField<String>(
-            value: selectedTopic,
-            hint: Text("Select Topic"),
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: BorderSide(color: Colors.grey.shade400),
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: selectedTopic,
+                  hint: Text("Select Topic"),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: Colors.grey.shade400),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                  ),
+                  items: _controller.topics.map<DropdownMenuItem<String>>((topic) {
+                    return DropdownMenuItem<String>(
+                      value: topic['topic_name'],
+                      child: Text(topic['topic_name']),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedTopic = value;
+                      selectedSubtopic = null; // Reset subtopic when topic changes
+                      // Fetch subtopics based on the selected topic
+                      topicId = _controller.topics.firstWhere((t) => t['topic_name'] == value)['_id'];
+                      _controller.get_SubTopic(topicId: topicId!, categoryId: mainCategoryId.toString(), sub_categoryId: subCategoryId.toString()).then((_) {
+                        setState(() {});
+                      });
+                    });
+                  },
+                ),
               ),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-            ),
-            items: _controller.topics.map<DropdownMenuItem<String>>((topic) {
-              return DropdownMenuItem<String>(
-                value: topic['topic_name'],
-                child: Text(topic['topic_name']),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                selectedTopic = value;
-                selectedSubtopic = null; // Reset subtopic when topic changes
-                // Fetch subtopics based on the selected topic
-                topicId = _controller.topics.firstWhere((t) => t['topic_name'] == value)['_id'];
-                _controller.get_SubTopic(topicId: topicId!, categoryId: mainCategoryId.toString(), sub_categoryId: subCategoryId.toString()).then((_) {
-                  setState(() {});
-                });
-              });
-            },
-          ),
-        ),
-        boxW10(),
-      // Select Subtopic
-      _controller.sub_topics.isNotEmpty?
-        Expanded(
-          child: DropdownButtonFormField<String>(
-            value: selectedSubtopic,
-            hint: Text("Select SubTopic"),
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: BorderSide(color: Colors.grey.shade400),
-              ),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-            ),
-            items: _controller.sub_topics.map<DropdownMenuItem<String>>((topic) {
-              return DropdownMenuItem<String>(
-                value: topic['sub_topic_name'],
-                child: Text(topic['sub_topic_name']),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                selectedSubtopic = value;
-                // Fetch subtopics based on the selected subtopic
-                subtopicId = _controller.sub_topics.firstWhere((t) => t['sub_topic_name'] == value)['_id'];
-                setState(() {});
-              });
-            },
-          ),
-        ):Expanded(child:SizedBox()),
-        ]),
+              boxW10(),
+              // Select Subtopic
+              _controller.sub_topics.isNotEmpty?
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: selectedSubtopic,
+                  hint: Text("Select SubTopic"),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: Colors.grey.shade400),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                  ),
+                  items: _controller.sub_topics.map<DropdownMenuItem<String>>((topic) {
+                    return DropdownMenuItem<String>(
+                      value: topic['sub_topic_name'],
+                      child: Text(topic['sub_topic_name']),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedSubtopic = value;
+                      // Fetch subtopics based on the selected subtopic
+                      subtopicId = _controller.sub_topics.firstWhere((t) => t['sub_topic_name'] == value)['_id'];
+                      setState(() {});
+                    });
+                  },
+                ),
+              ):Expanded(child:SizedBox()),
+            ]),
       ],
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -411,9 +421,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                   appBar: isWideScreen
                       ? null
                       : AppBar(
-                          title: const Text('Dashboard'),
-                          backgroundColor: Colors.blue.shade100,
-                        ),
+                    title: const Text('Dashboard'),
+                    backgroundColor: Colors.blue.shade100,
+                  ),
                   drawer: isWideScreen ? null : Drawer(child: const MyDrawer()),
                   body: Center(
                     child: SingleChildScrollView(
@@ -430,13 +440,15 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Row(children: [
-                                    Text(
-                                      'Add questions and other data',
-                                      style: TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.orange.shade800,
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Add questions and other data',
+                                        style: TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.orange.shade800,
+                                        ),
                                       ),
                                     ),
 
@@ -456,10 +468,41 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                     )
                                     ],
                                   ),
-                                  const SizedBox(height: 16),
+             
+
+                                  SizedBox(height: 16),
                                   _buildTabs(),
-                                  const SizedBox(height: 20),
-                                  _buildQuestionsTable(),
+                                  SizedBox(height: 20),
+                                  // Only show _buildQuestionsTable if selectedQuestionType is "Multiple Choice Question"
+                                  if (selectedQuestionType == "Multiple Choice Question")
+                                    _buildQuestionsTable(),
+
+                                  if (selectedQuestionType == "Re-Arrange the Word")
+                                    _buildRearrangeTheWordQuestionsTable(),
+
+                                  if (selectedQuestionType == "Complete the Word")
+                                    _buildQuestionsCompleteTheWordTable(),
+
+                                  if (selectedQuestionType == "True/False")
+                                    _buildQuestionsTrueFalseTable(),
+
+                                  if (selectedQuestionType == "Story")
+                                    _buildQuestionsStoryTable(),
+
+                                  if (selectedQuestionType == "Phrases")
+                                    _buildQuestionsPhrasesTable(),
+
+                                  if (selectedQuestionType == "Conversation")
+                                    _buildQuestionsConversationTable(),
+
+                                  if (selectedQuestionType == "Fill in the blanks")
+                                    _buildQuestionsFillInTheBlanksTable(),
+
+                                  if (selectedQuestionType == "Match the pairs")
+                                    _buildQuestionsMatchthepairsTable(),
+
+                                  if (selectedQuestionType == "Complete the paragraph")
+                                    _buildQuestionsCompleteTheParagraphTable(),//// Show this widget for "Re-Arrange the Word"
                                 ],
                               ),
                             ),
@@ -471,26 +514,23 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                   Row(
                                     children: [
                                       SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.18,
+                                        width: MediaQuery.of(context).size.width * 0.18,
                                         child: DropdownButtonFormField<String>(
                                           value: selectedQuestionType,
                                           dropdownColor: Colors.grey.shade50,
                                           decoration: InputDecoration(
                                             labelText: "Select Question Type",
                                             border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
+                                              borderRadius: BorderRadius.circular(10),
                                             ),
                                             filled: true,
                                             fillColor: Colors.white,
                                           ),
                                           items: questionTypes
                                               .map((type) => DropdownMenuItem(
-                                                    value: type,
-                                                    child: Text(type),
-                                                  ))
+                                            value: type,
+                                            child: Text(type),
+                                          ))
                                               .toList(),
                                           onChanged: (value) {
                                             setState(() {
@@ -513,9 +553,10 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                   boxH10(),
                                   // Display the appropriate question type UI based on selection
                                   SizedBox(
-                                      width: MediaQuery.of(context).size.width * 0.4,
-                                      height: MediaQuery.of(context).size.width * 0.4,
-                                      child: _buildQuestionTypeContent()),
+                                    width: MediaQuery.of(context).size.width * 0.4,
+                                    height: MediaQuery.of(context).size.width * 0.4,
+                                    child: _buildQuestionTypeContent(),
+                                  ),
                                 ],
                               ),
                             ),
@@ -532,6 +573,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       ),
     );
   }
+
 
   void showImportExportDialog() {
     showDialog(
@@ -718,82 +760,1110 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
-
-                CircleAvatar(
-                  backgroundColor: Colors.orange.shade100,
-                  child: IconButton(
-                    icon: Image.asset('assets/excel.png', width: 24, height: 24),
-                    onPressed: (){
-                      // print("categoryId "+mainCategoryId!);
-                      // print("subcategoryId "+subCategoryId!);
-                      // print("topicId "+topicId!);
-                      // print("subtopicId "+subtopicId!);
-                      // if(mainCategoryId!.isNotEmpty && subCategoryId!.isNotEmpty && topicId!.isNotEmpty)
-                      // _exportTableToCSV();
-                      // else
-                      //   showSnackbar(message: "Please select category,subcategory,topic,etc");
-                      showImportExportDialog();
+                Tooltip(
+                  message: 'Export to Excel',
+                  child: CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: IconButton(
+                      icon: Image.asset('assets/excel.png', width: 24, height: 24),
+                      onPressed: () {
+                        print("categoryId " + mainCategoryId!);
+                        print("subcategoryId " + subCategoryId!);
+                        print("topicId " + topicId!);
+                        print("subtopicId " + subtopicId!);
+                        if (mainCategoryId!.isNotEmpty &&
+                            subCategoryId!.isNotEmpty &&
+                            topicId!.isNotEmpty) {
+                          _exportTableToCSV();
+                        } else {
+                          showSnackbar(message: "Please select category,subcategory,topic,etc");
+                        }
                       },
-                    tooltip: 'Export to Excel',
+                    ),
                   ),
-                )
+                ),
               ],
             ),
             SizedBox(height: 10),
-            Table(
-              border: TableBorder.all(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              columnWidths: const {
-                0: FlexColumnWidth(1),  // Type
-                1: FlexColumnWidth(2),  // Question
-                2: FlexColumnWidth(1),  // Option 1
-                3: FlexColumnWidth(1),  // Option 2
-                4: FlexColumnWidth(1),  // Option 3
-                5: FlexColumnWidth(1),  // Option 4
-                6: FlexColumnWidth(1),  // Answer
-                7: FlexColumnWidth(1),  // Points
-                8: FlexColumnWidth(1),  // Main Category ID
-                9: FlexColumnWidth(1),  // Sub Category ID
-                10: FlexColumnWidth(1), // Topic ID
-                11: FlexColumnWidth(1), // Sub Topic ID
-                12: FlexColumnWidth(1), // Question Type
-                13: FlexColumnWidth(1), // Title
-                14: FlexColumnWidth(1), // Question Image
-              },
-              children: [
-                TableRow(
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade100,
-                    borderRadius: BorderRadius.circular(8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 1200), // Max width constraint
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical, // Vertical scroll
+                  child: Table(
+                    border: TableBorder.all(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    columnWidths: const {
+                      0: FlexColumnWidth(1),
+                      1: FlexColumnWidth(2),
+                      2: FlexColumnWidth(1),
+                      3: FlexColumnWidth(1),
+                      4: FlexColumnWidth(1),
+                      5: FlexColumnWidth(1),
+                      6: FlexColumnWidth(1),
+                      7: FlexColumnWidth(1),
+                      8: FlexColumnWidth(1),
+                      9: FlexColumnWidth(1),
+                    },
+                    children: [
+                      TableRow(
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        children: [
+                          _buildTableHeader("Question Type"),
+                          _buildTableHeader("Title"),
+                          _buildTableHeader("Question"),
+                          _buildTableHeader("Option 1"),
+                          _buildTableHeader("Option 2"),
+                          _buildTableHeader("Option 3"),
+                          _buildTableHeader("Option 4"),
+                          _buildTableHeader("Answer"),
+                          _buildTableHeader("Points"),
+                          _buildTableHeader("Question Image"),
+                        ],
+                      ),
+                      // Dummy rows
+                      // for (int i = 0; i < 5; i++)
+                        TableRow(
+                          children: [
+                            _buildTableCell(selectedQuestionType ?? ""),
+                            _buildTableCell(titleController.text ?? ""),
+                            _buildTableCell(questionController.text ?? ""),
+                              _buildTableCell(optionControllers[0].text ?? ""),
+                            _buildTableCell(optionControllers[1].text ?? ""),
+                            _buildTableCell(optionControllers[2].text ?? ""),
+                            _buildTableCell(optionControllers[3].text ?? ""),
+                            _buildTableCell(correctAnswerController.text),
+                            _buildTableCell(pointsController.text),
+                            GestureDetector(
+                              onTap: () => _showImagePopup(),
+                              child: Text(
+                                "View",
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
                   ),
-                  children: [
-                    _buildTableHeader("Type"),
-                    _buildTableHeader("Question"),
-                    _buildTableHeader("Option 1"),
-                    _buildTableHeader("Option 2"),
-                    _buildTableHeader("Option 3"),
-                    _buildTableHeader("Option 4"),
-                    _buildTableHeader("Answer"),
-                    _buildTableHeader("Points"),
-                    _buildTableHeader("Main Category ID"),
-                    _buildTableHeader("Sub Category ID"),
-                    _buildTableHeader("Topic ID"),
-                    _buildTableHeader("Sub Topic ID"),
-                    _buildTableHeader("Question Type"),
-                    _buildTableHeader("Title"),
-                    _buildTableHeader("Question Image"),
-                  ],
                 ),
-                ...tableRows,
-              ],
+              ),
             ),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildRearrangeTheWordQuestionsTable() {
+    return Card(
+      elevation: 1.0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'Question Data',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Tooltip(
+                  message: 'Export to Excel',
+                  child: CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: IconButton(
+                      icon: Image.asset('assets/excel.png', width: 24, height: 24),
+                      onPressed: () {
+                        print("categoryId " + mainCategoryId!);
+                        print("subcategoryId " + subCategoryId!);
+                        print("topicId " + topicId!);
+                        print("subtopicId " + subtopicId!);
+                        showImportExportDialog();
+
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal, // Horizontal scroll
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 1200), // Max width constraint
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical, // Vertical scroll
+                  child: Table(
+                    border: TableBorder.all(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    columnWidths: const {
+                      0: FlexColumnWidth(1),
+                      1: FlexColumnWidth(2),
+                      2: FlexColumnWidth(2),
+                      3: FlexColumnWidth(1),
+                      4: FlexColumnWidth(1),
+                    },
+                    children: [
+                      TableRow(
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        children: [
+                          _buildTableHeader("Question Type"),
+                          _buildTableHeader("Title"),
+                          _buildTableHeader("Re-Arrange Word"),
+                          _buildTableHeader("Points"),
+                          _buildTableHeader("Question Image"),
+                        ],
+                      ),
+                      // Dummy rows
+                      for (int i = 0; i < 5; i++)
+                        TableRow(
+                          children: [
+                            _buildTableCell("Re-Arrange"),
+                            _buildTableCell("Title $i"),
+                            _buildTableCell("Arrange these words correctly."),
+                            _buildTableCell((10 + i * 5).toString()),
+                            GestureDetector(
+                              onTap: () => _showImagePopup(),
+                              child: Text(
+                                "View",
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuestionsCompleteTheWordTable() {
+    return Card(
+      elevation: 1.0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'Question Data',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Tooltip(
+                  message: 'Export to Excel',
+                  child: CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: IconButton(
+                      icon: Image.asset('assets/excel.png', width: 24, height: 24),
+                      onPressed: () {
+                        print("categoryId " + mainCategoryId!);
+                        print("subcategoryId " + subCategoryId!);
+                        print("topicId " + topicId!);
+                        print("subtopicId " + subtopicId!);
+                        if (mainCategoryId!.isNotEmpty &&
+                            subCategoryId!.isNotEmpty &&
+                            topicId!.isNotEmpty)
+                          _exportTableToCSV();
+                        else
+                          showSnackbar(message: "Please select category,subcategory,topic,etc");
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal, // Horizontal scroll
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 1200), // Max width constraint
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical, // Vertical scroll
+                  child: Table(
+                    border: TableBorder.all(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    columnWidths: const {
+                      0: FlexColumnWidth(1),
+                      1: FlexColumnWidth(2),
+                      2: FlexColumnWidth(1),
+                      3: FlexColumnWidth(1),
+                      4: FlexColumnWidth(1),
+                      5: FlexColumnWidth(1),
+                      6: FlexColumnWidth(1),
+                      7: FlexColumnWidth(1),
+                    },
+                    children: [
+                      TableRow(
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        children: [
+                          _buildTableHeader("Question Type"),
+                          _buildTableHeader("Question"),
+                          _buildTableHeader("Option 1"),
+                          _buildTableHeader("Option 2"),
+                          _buildTableHeader("Option 3"),
+                          _buildTableHeader("Option 4"),
+                          _buildTableHeader("Answer"),
+                          _buildTableHeader("Points"),
+                        ],
+                      ),
+                      // Dummy rows
+                      for (int i = 0; i < 5; i++)
+                        TableRow(
+                          children: [
+                            _buildTableCell("Complete The Word"),
+                            _buildTableCell("Fill in the blank: W_rld"),
+                            _buildTableCell("World"),
+                            _buildTableCell("Word"),
+                            _buildTableCell("Ward"),
+                            _buildTableCell("Wild"),
+                            _buildTableCell("World"),
+                            _buildTableCell((5 + i * 5).toString()),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuestionsTrueFalseTable() {
+    return Card(
+      elevation: 1.0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'Question Data',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Tooltip(
+                  message: 'Export to Excel',
+                  child: CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: IconButton(
+                      icon: Image.asset('assets/excel.png', width: 24, height: 24),
+                      onPressed: () {
+                        print("categoryId " + mainCategoryId!);
+                        print("subcategoryId " + subCategoryId!);
+                        print("topicId " + topicId!);
+                        print("subtopicId " + subtopicId!);
+                        if (mainCategoryId!.isNotEmpty &&
+                            subCategoryId!.isNotEmpty &&
+                            topicId!.isNotEmpty)
+                          _exportTableToCSV();
+                        else
+                          showSnackbar(message: "Please select category,subcategory,topic,etc");
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal, // Horizontal scroll
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 1200), // Max width constraint
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical, // Vertical scroll
+                  child: Table(
+                    border: TableBorder.all(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    columnWidths: const {
+                      0: FlexColumnWidth(1),
+                      1: FlexColumnWidth(2),
+                      2: FlexColumnWidth(1),
+                      3: FlexColumnWidth(1),
+                      4: FlexColumnWidth(1),
+                    },
+                    children: [
+                      TableRow(
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        children: [
+                          _buildTableHeader("Question Type"),
+                          _buildTableHeader("Question"),
+                          _buildTableHeader("Answer"),
+                          _buildTableHeader("Points"),
+                          _buildTableHeader("Question Image"),
+
+
+                        ],
+                      ),
+                      // Dummy rows
+                      for (int i = 0; i < 5; i++)
+                        TableRow(
+                          children: [
+                            _buildTableCell("True/False"),
+                            _buildTableCell("The sky is blue."),
+                            _buildTableCell(i % 2 == 0 ? "True" : "False"),
+                            _buildTableCell((10 + i * 5).toString()),
+                            GestureDetector(
+                              onTap: () => _showImagePopup(),
+                              child: Text(
+                                "View",
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuestionsStoryTable() {
+    return Card(
+      elevation: 1.0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'Question Data',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Tooltip(
+                  message: 'Export to Excel',
+                  child: CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: IconButton(
+                      icon: Image.asset('assets/excel.png', width: 24, height: 24),
+                      onPressed: () {
+                        print("categoryId " + mainCategoryId!);
+                        print("subcategoryId " + subCategoryId!);
+                        print("topicId " + topicId!);
+                        print("subtopicId " + subtopicId!);
+                        if (mainCategoryId!.isNotEmpty &&
+                            subCategoryId!.isNotEmpty &&
+                            topicId!.isNotEmpty)
+                          _exportTableToCSV();
+                        else
+                          showSnackbar(message: "Please select category,subcategory,topic,etc");
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal, // Horizontal scroll
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 1200), // Max width constraint
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical, // Vertical scroll
+                  child: Table(
+                    border: TableBorder.all(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    columnWidths: const {
+                      0: FlexColumnWidth(1),
+                      1: FlexColumnWidth(2),
+                      2: FlexColumnWidth(1),
+                      3: FlexColumnWidth(2),
+                      4: FlexColumnWidth(1),
+                    },
+                    children: [
+                      TableRow(
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        children: [
+                          _buildTableHeader("Question Type"),
+                          _buildTableHeader("Story Title"),
+                          _buildTableHeader("Story Content"),
+                          _buildTableHeader("Points"),
+                          _buildTableHeader("Story Image"),
+
+                        ],
+                      ),
+                      // Dummy rows
+                      for (int i = 0; i < 5; i++)
+                        TableRow(
+                          children: [
+                            _buildTableCell("Story"),
+                            _buildTableCell("Story Title $i"),
+                            _buildTableCell("This is the content of story $i."),
+                            _buildTableCell((10 + i * 5).toString()),
+                            GestureDetector(
+                              onTap: () => _showImagePopup(),
+                              child: Text(
+                                "View",
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuestionsPhrasesTable() {
+    return Card(
+      elevation: 1.0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'Question Data',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Tooltip(
+                  message: 'Export to Excel',
+                  child: CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: IconButton(
+                      icon: Image.asset('assets/excel.png', width: 24, height: 24),
+                      onPressed: () {
+                        print("categoryId " + mainCategoryId!);
+                        print("subcategoryId " + subCategoryId!);
+                        print("topicId " + topicId!);
+                        print("subtopicId " + subtopicId!);
+                        if (mainCategoryId!.isNotEmpty &&
+                            subCategoryId!.isNotEmpty &&
+                            topicId!.isNotEmpty)
+                          _exportTableToCSV();
+                        else
+                          showSnackbar(message: "Please select category,subcategory,topic,etc");
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal, // Horizontal scroll
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 1200), // Max width constraint
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical, // Vertical scroll
+                  child: Table(
+                    border: TableBorder.all(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    columnWidths: const {
+                      0: FlexColumnWidth(1),
+                      1: FlexColumnWidth(2),
+                      2: FlexColumnWidth(1),
+                      3: FlexColumnWidth(1),
+                    },
+                    children: [
+                      TableRow(
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        children: [
+                          _buildTableHeader("Question Type"),
+                          _buildTableHeader("Story Phrases"),
+                          _buildTableHeader("Answer"),
+                          _buildTableHeader("Points"),
+                        ],
+                      ),
+                      // Dummy rows
+                      for (int i = 0; i < 5; i++)
+                        TableRow(
+                          children: [
+                            _buildTableCell("Phrase"),
+                            _buildTableCell("Phrase Content $i"),
+                            _buildTableCell("Correct Answer $i"),
+                            _buildTableCell((10 + i * 5).toString()),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuestionsConversationTable() {
+    return Card(
+      elevation: 1.0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'Question Data',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Tooltip(
+                  message: 'Export to Excel',
+                  child: CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: IconButton(
+                      icon: Image.asset('assets/excel.png', width: 24, height: 24),
+                      onPressed: () {
+                        print("categoryId " + mainCategoryId!);
+                        print("subcategoryId " + subCategoryId!);
+                        print("topicId " + topicId!);
+                        print("subtopicId " + subtopicId!);
+                        if (mainCategoryId!.isNotEmpty &&
+                            subCategoryId!.isNotEmpty &&
+                            topicId!.isNotEmpty)
+                          _exportTableToCSV();
+                        else
+                          showSnackbar(message: "Please select category,subcategory,topic,etc");
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal, // Horizontal scroll
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 1200), // Max width constraint
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical, // Vertical scroll
+                  child: Table(
+                    border: TableBorder.all(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    columnWidths: const {
+                      0: FlexColumnWidth(1),
+                      1: FlexColumnWidth(2),
+                      2: FlexColumnWidth(1),
+                      3: FlexColumnWidth(1),
+                    },
+                    children: [
+                      TableRow(
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        children: [
+                          _buildTableHeader("Question Type"),
+                          _buildTableHeader("Question"),
+                          _buildTableHeader("Answer"),
+                          _buildTableHeader("Points"),
+                        ],
+                      ),
+                      // Dummy rows
+                      for (int i = 0; i < 5; i++)
+                        TableRow(
+                          children: [
+                            _buildTableCell("Conversation"),
+                            _buildTableCell("What is the response for '$i'?"),
+                            _buildTableCell("Answer $i"),
+                            _buildTableCell((10 + i * 5).toString()),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuestionsFillInTheBlanksTable() {
+    return Card(
+      elevation: 1.0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'Question Data',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Tooltip(
+                  message: 'Export to Excel',
+                  child: CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: IconButton(
+                      icon: Image.asset('assets/excel.png', width: 24, height: 24),
+                      onPressed: () {
+                        print("categoryId " + mainCategoryId!);
+                        print("subcategoryId " + subCategoryId!);
+                        print("topicId " + topicId!);
+                        print("subtopicId " + subtopicId!);
+                        if (mainCategoryId!.isNotEmpty &&
+                            subCategoryId!.isNotEmpty &&
+                            topicId!.isNotEmpty)
+                          _exportTableToCSV();
+                        else
+                          showSnackbar(message: "Please select category,subcategory,topic,etc");
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal, // Horizontal scroll
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 1200), // Max width constraint
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical, // Vertical scroll
+                  child: Table(
+                    border: TableBorder.all(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    columnWidths: const {
+                      0: FlexColumnWidth(1),
+                      1: FlexColumnWidth(2),
+                      2: FlexColumnWidth(2),
+                      3: FlexColumnWidth(1),
+                      4: FlexColumnWidth(1),
+                      5: FlexColumnWidth(1),
+                      6: FlexColumnWidth(1),
+                      7: FlexColumnWidth(1),
+                      8: FlexColumnWidth(1),
+                      9: FlexColumnWidth(2),
+                    },
+                    children: [
+                      TableRow(
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        children: [
+                          _buildTableHeader("Question Type"),
+                          _buildTableHeader("Title"),
+                          _buildTableHeader("Question"),
+                          _buildTableHeader("Option 1"),
+                          _buildTableHeader("Option 2"),
+                          _buildTableHeader("Option 3"),
+                          _buildTableHeader("Option 4"),
+                          _buildTableHeader("Answer"),
+                          _buildTableHeader("Points"),
+                          _buildTableHeader("Question Image"),
+                        ],
+                      ),
+                      // Dummy rows
+                      for (int i = 0; i < 5; i++)
+                        TableRow(
+                          children: [
+                            _buildTableCell("Fill in the Blanks"),
+                            _buildTableCell("Title $i"),
+                            _buildTableCell("Complete the sentence: 'This is ___ example $i.'"),
+                            _buildTableCell("Option 1"),
+                            _buildTableCell("Option 2"),
+                            _buildTableCell("Option 3"),
+                            _buildTableCell("Option 4"),
+                            _buildTableCell("Option ${i % 4 + 1}"),
+                            _buildTableCell((10 + i * 5).toString()),
+                            GestureDetector(
+                              onTap: () => _showImagePopup(),
+                              child: Text(
+                                "View",
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuestionsMatchthepairsTable() {
+    return Card(
+      elevation: 1.0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'Question Data',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Tooltip(
+                  message: 'Export to Excel',
+                  child: CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: IconButton(
+                      icon: Image.asset('assets/excel.png', width: 24, height: 24),
+                      onPressed: () {
+                        print("categoryId " + mainCategoryId!);
+                        print("subcategoryId " + subCategoryId!);
+                        print("topicId " + topicId!);
+                        print("subtopicId " + subtopicId!);
+                        if (mainCategoryId!.isNotEmpty &&
+                            subCategoryId!.isNotEmpty &&
+                            topicId!.isNotEmpty)
+                          _exportTableToCSV();
+                        else
+                          showSnackbar(message: "Please select category,subcategory,topic,etc");
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal, // Horizontal scroll
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 1200), // Max width constraint
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical, // Vertical scroll
+                  child: Table(
+                    border: TableBorder.all(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    columnWidths: const {
+                      0: FlexColumnWidth(1),
+                      1: FlexColumnWidth(2),
+                      2: FlexColumnWidth(2),
+                      3: FlexColumnWidth(1),
+                    },
+                    children: [
+                      TableRow(
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        children: [
+                          _buildTableHeader("Question Type"),
+                          _buildTableHeader("Left Column"),
+                          _buildTableHeader("Right Column"),
+                          _buildTableHeader("Points"),
+                        ],
+                      ),
+                      // Dummy rows
+                      for (int i = 0; i < 5; i++)
+                        TableRow(
+                          children: [
+                            _buildTableCell("Match the Pairs"),
+                            _buildTableCell("Item A$i"),
+                            _buildTableCell("Item B$i"),
+                            _buildTableCell((10 + i * 5).toString()),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuestionsCompleteTheParagraphTable() {
+    return Card(
+      elevation: 1.0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'Question Data',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Tooltip(
+                  message: 'Export to Excel',
+                  child: CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: IconButton(
+                      icon: Image.asset('assets/excel.png', width: 24, height: 24),
+                      onPressed: () {
+                        print("categoryId " + mainCategoryId!);
+                        print("subcategoryId " + subCategoryId!);
+                        print("topicId " + topicId!);
+                        print("subtopicId " + subtopicId!);
+                        if (mainCategoryId!.isNotEmpty &&
+                            subCategoryId!.isNotEmpty &&
+                            topicId!.isNotEmpty)
+                          _exportTableToCSV();
+                        else
+                          showSnackbar(message: "Please select category,subcategory,topic,etc");
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal, // Horizontal scroll
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 1200), // Max width constraint
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical, // Vertical scroll
+                  child: Table(
+                    border: TableBorder.all(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    columnWidths: const {
+                      0: FlexColumnWidth(1),
+                      1: FlexColumnWidth(2),
+                      2: FlexColumnWidth(3),
+                      3: FlexColumnWidth(1),
+                      4: FlexColumnWidth(1),
+                      5: FlexColumnWidth(1),
+                      6: FlexColumnWidth(1),
+                      7: FlexColumnWidth(1),
+                      8: FlexColumnWidth(1),
+                      9: FlexColumnWidth(1),
+                      10: FlexColumnWidth(1),
+                    },
+                    children: [
+                      TableRow(
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        children: [
+                          _buildTableHeader("Question Type"),
+                          _buildTableHeader("Title"),
+                          _buildTableHeader("Paragraph"),
+                          _buildTableHeader("Option 1"),
+                          _buildTableHeader("Option 2"),
+                          _buildTableHeader("Option 3"),
+                          _buildTableHeader("Option 4"),
+                          _buildTableHeader("Option 5"),
+                          _buildTableHeader("Option 6"),
+                          _buildTableHeader("Answer"),
+                          _buildTableHeader("Points"),
+                        ],
+                      ),
+                      // Dummy rows
+                      for (int i = 0; i < 5; i++)
+                        TableRow(
+                          children: [
+                            _buildTableCell("Complete Paragraph"),
+                            _buildTableCell("Title $i"),
+                            _buildTableCell(
+                                "This is a sample paragraph content $i for testing purposes."),
+                            _buildTableCell("Option A$i"),
+                            _buildTableCell("Option B$i"),
+                            _buildTableCell("Option C$i"),
+                            _buildTableCell("Option D$i"),
+                            _buildTableCell("Option E$i"),
+                            _buildTableCell("Option F$i"),
+                            _buildTableCell("Option A$i"),
+                            _buildTableCell((5 + i).toString()),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  void _showImagePopup() {
+    showDialog(
+      context: context, // Ensure you pass a valid BuildContext
+      builder: (context) {
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Question Image',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              SizedBox(height: 10),
+              Image.asset(
+                'assets/sample_image.png', // Replace with your image path
+                width: 200,
+                height: 200,
+                fit: BoxFit.cover,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the popup
+              },
+              child: Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+  Widget _buildTableCell(String text) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+      ),
+    );
+  }
+
 
   Widget _buildTableHeader(String title) {
     return Padding(
@@ -802,7 +1872,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         title,
         style: const TextStyle(
           fontWeight: FontWeight.bold,
-          fontSize: 16,
+          fontSize: 14,
         ),
         textAlign: TextAlign.center,
       ),
@@ -826,11 +1896,13 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         return _buildPhrasesContent();
       case "Conversation":
         return _buildConversationContent();
-        case "Fill in the blanks":
+      case "Fill in the blanks":
         return _buildFillInTheBlanksContent();
-        case "Match the pairs":
-        return AddMatchPairs();
-        case "Complete the paragraph":
+      case "Match the pairs":
+        return AddMatchPairs(main_category_id: mainCategoryId,
+            sub_category_id: subCategoryId,
+            topic_id: topicId,sub_topic_id: subtopicId, pointsController: pointsController,);
+      case "Complete the paragraph":
         return _buildCompleteTheParagraphContent();
       default:
         return Container();
@@ -873,6 +1945,32 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     } else if (selectedQuestionType == "Card Flip") {
 
     }
+    // Add a new table row with data or default values ("-")
+//     tableRows.add(TableRow(
+//       children: [
+//         Padding(
+//           padding: const EdgeInsets.all(8.0),
+//           child: Text(selectedQuestionType ?? "-"),
+//         ),
+//         Padding(
+//           padding: const EdgeInsets.all(8.0),
+//           child: Text(questionController.text.isNotEmpty
+//               ? questionController.text
+//               : "-"),
+//         ),
+//         ...options.map((option) => Padding(
+//           padding: const EdgeInsets.all(8.0),
+//           child: Text(option),
+//         )),
+//         Padding(
+//           padding: const EdgeInsets.all(8.0),
+//           child: Text(correctAnswerController.text.isNotEmpty
+//               ? correctAnswerController.text
+//               : "-"),
+//         ),
+//       ],
+//     ));
+
 
     setState(() {
       questionController.clear();
@@ -889,6 +1987,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       ),
     );
   }
+
 
   Widget _buildMultipleChoiceQueContent() {
     return DottedBorder(
@@ -1455,7 +2554,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 labelText: 'Enter your question here...',
                 maxLines: 3,
               ),
-          
+
               const SizedBox(height: 16),
               const Text(
                 'Question Image (Optional):',
