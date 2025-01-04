@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:html' as html;
 import 'package:blissiqadmin/Global/Widgets/Button/CustomButton.dart';
+import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
@@ -13,12 +14,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:csv/csv.dart';
-import 'package:share_extend/share_extend.dart';
-
 import '../../../Global/constants/common_snackbar.dart';
 import 'Header_Columns.dart';
 
@@ -67,10 +67,10 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   String? selectedTopic;
   String? selectedSubtopic;
 
-  String? mainCategoryId;
-  String? subCategoryId;
-  String? topicId;
-  String? subtopicId;
+  String mainCategoryId='';
+  String subCategoryId='';
+  String topicId='';
+  String subtopicId='';
 
   String? imagePath;
   final ImagePicker _picker = ImagePicker();
@@ -86,6 +86,32 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   List<PlatformFile>? _paths;
   var pathsFile;
   var pathsFileName;
+
+  String? selectedQuestionType = "Multiple Choice Question";
+  List<String> questionTypes = [
+    "Multiple Choice Question",
+    "Re-Arrange the Word",
+    "Complete the Word",
+    "True/False",
+    "Story",
+    "Phrases",
+    "Conversation",
+    "Fill in the blanks",
+    "Match the pairs",
+    "Complete the paragraph",
+    "Learning Slide",
+    "Card Flip",
+    "Alphabets Example",
+  ];
+  final CategoryController _controller = Get.put(CategoryController());
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getData();
+  }
+
   pickFile() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -103,29 +129,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     } else {
       print('No file selected');
     }
-  }
-  String? selectedQuestionType = "Multiple Choice Question";
-  List<String> questionTypes = [
-    "Multiple Choice Question",
-    "Re-Arrange the Word",
-    "Complete the Word",
-    "True/False",
-    "Story",
-    "Phrases",
-    "Conversation",
-    "Fill in the blanks",
-    "Match the pairs",
-    "Complete the paragraph",
-    "Learning Slide",
-    "Card Flip",
-  ];
-  final CategoryController _controller = Get.put(CategoryController());
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    getData();
   }
 
   Future<void> _pickImage() async {
@@ -162,10 +165,12 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = learning_slide;
     } else if (selectedQuestionType == "Card Flip") {
       headers = cardFlip_headers;
+    }else if (selectedQuestionType == "Alphabets Example") {
+      headers = alphabet_example;
     }
     rows.add(headers);
     List<dynamic> sampleData = [];
-    for (int i = 0; i < 6; i++) { // Assuming you want 5 rows of sample data
+    for (int i = 0; i < 1; i++) { // Assuming you want 5 rows of sample data
       List<dynamic> row = [
         '',
         mainCategoryId,
@@ -175,9 +180,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       ];
 
       // Add dynamic placeholders for remaining headers
-      for (int j = 6; j < headers.length; j++) {
-        row.add('');
-      }
+      // for (int j = 5; j < headers.length; j++) {
+      //   row.add('');
+      // }
 
       sampleData.add(row);
     }
@@ -200,6 +205,37 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
 
       html.Url.revokeObjectUrl(url);
     }
+  }
+
+  void _importTableToCSV() async {
+    List<List<dynamic>> rows = [];
+
+    List<String> headers = [];
+    if (selectedQuestionType == "Multiple Choice Question") {
+      headers = mcq_headers;
+      uploadCsvToApi(headers);
+    } else if (selectedQuestionType == "Re-Arrange the Word") {
+      headers = rearrange_headers;
+    } else if (selectedQuestionType == "Complete the Word") {
+      headers = rearrange_headers;
+    } else if (selectedQuestionType == "True/False") {
+      headers = true_false_headers;
+    } else if (selectedQuestionType == "Story") {
+      headers = story_headers;
+      uploadCsvToApi(headers);
+    } else if (selectedQuestionType == "Phrases") {
+      headers = phrases_headers;
+    } else if (selectedQuestionType == "Conversation") {
+      headers = conversation_headers;
+    } else if (selectedQuestionType == "Learning Slide") {
+      headers = learning_slide;
+    } else if (selectedQuestionType == "Card Flip") {
+      headers = cardFlip_headers;
+    }else if (selectedQuestionType == "Alphabets Example") {
+      headers = alphabet_example;
+      uploadCsvToApi(headers);
+    }
+    rows.add(headers);
   }
 
   getData() async {
@@ -414,25 +450,26 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                           color: Colors.orange.shade800,
                                         ),
                                       ),
-                                      CircleAvatar(
-                                        backgroundColor: Colors.orange.shade100,
-                                        child: IconButton(
-                                          icon: Image.asset('assets/excel.png', width: 24, height: 24),
-                                          onPressed: () {
-                                            print("categoryId " + mainCategoryId!);
-                                            print("subcategoryId " + subCategoryId!);
-                                            print("topicId " + topicId!);
-                                            print("subtopicId " + subtopicId!);
-                                            if (mainCategoryId!.isNotEmpty && subCategoryId!.isNotEmpty && topicId!.isNotEmpty)
-                                              _exportTableToCSV();
-                                            else
-                                              showSnackbar(message: "Please select category, subcategory, topic, etc.");
-                                          },
-                                          tooltip: 'Export to Excel',
-                                        ),
+                                    ),
+
+                                    CircleAvatar(
+                                      backgroundColor: Colors.orange.shade100,
+                                      child: IconButton(
+                                        icon: Image.asset('assets/excel.png', width: 24, height: 24),
+                                        onPressed: (){
+                                          // print("categoryId "+mainCategoryId!);
+                                          // print("subcategoryId "+subCategoryId!);
+                                          // print("topicId "+topicId!);
+                                          // print("subtopicId "+subtopicId!);
+                                          showImportExportDialog();
+                                        },
+                                        tooltip: 'Export to Excel',
                                       ),
+                                    )
                                     ],
                                   ),
+             
+
                                   SizedBox(height: 16),
                                   _buildTabs(),
                                   SizedBox(height: 20),
@@ -537,6 +574,172 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     );
   }
 
+
+  void showImportExportDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Import/Export CSV"),
+          content: const SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Instructions for CSV Import/Export:",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8),
+                Text("1. Ensure the CSV file is formatted according to the required structure."),
+                Text("2. The CSV file should contain data related to the selected category, subcategory, and topic."),
+                Text("3. The category, subcategory, and topic IDs must match the existing records."),
+                SizedBox(height: 16),
+                Text("Tap on the respective button to import or export data."),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                if (selectedQuestionType != "") {
+                  _importTableToCSV();
+                }
+              },
+              child: const Text("Import"),
+            ),
+            TextButton(
+              onPressed: () {
+                if (mainCategoryId!.isNotEmpty &&
+                    subCategoryId!.isNotEmpty &&
+                    topicId!.isNotEmpty) {
+                  _exportTableToCSV();
+                  Navigator.pop(context); // Close the dialog
+                }
+                else if (selectedQuestionType=="Alphabets Example" && mainCategoryId!.isNotEmpty &&
+                    subCategoryId!.isNotEmpty) {
+                  _exportTableToCSV();
+                  Navigator.pop(context); // Close the dialog
+                }else {
+                  showSnackbar(message: "Please select category, subcategory, and topic.");
+                }
+              },
+              child: const Text("Export"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> uploadCsvToApi(List<String> requiredHeaders) async {
+    try {
+      // Pick the .csv file
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+      );
+
+      if (result == null) {
+        print('No file selected');
+        return;
+      }
+
+      String content;
+
+      if (result.files.single.bytes != null) {
+        // Read file content directly from bytes
+        content = String.fromCharCodes(result.files.single.bytes!);
+      } else if (result.files.single.path != null) {
+        // Read file content from path
+        File file = File(result.files.single.path!);
+        content = await file.readAsString();
+      } else {
+        print('Failed to read file content.');
+        return;
+      }
+
+      // Parse the CSV content
+      List<List<dynamic>> rows = const CsvToListConverter().convert(content);
+
+      if (rows.isEmpty) {
+        print('The CSV file is empty.');
+        return;
+      }
+
+      // Validate headers
+      List<String> csvHeaders = rows.first.cast<String>();
+      if (!listEquals(csvHeaders, requiredHeaders)) {
+        print('CSV headers do not match the required columns.');
+        print('Expected: $requiredHeaders');
+        print('Found: $csvHeaders');
+        return;
+      }
+
+      // Parse data rows
+      List<Map<String, dynamic>> data = rows.skip(1).map((row) {
+        Map<String, dynamic> map = {};
+        for (int i = 0; i < csvHeaders.length; i++) {
+          map[csvHeaders[i]] = row[i];
+        }
+        return map;
+      }).toList();
+
+      // Validate and clean data
+      for (var row in data) {
+        if (row['main_category_id'] == null || row['main_category_id'].isEmpty) {
+          print('Error: main_category_id is missing for row: $row');
+          return;
+        }
+        if (row['sub_category_id'] == null || row['sub_category_id'].isEmpty) {
+          print('Error: sub_category_id is missing for row: $row');
+          return;
+        }
+        if (row['topic_name'] == null || row['topic_name'].isEmpty) {
+          print('Error: topic_name is missing for row: $row');
+          return;
+        }
+      }
+      // Make API call
+      String apiUrl = selectedQuestionType == "Alphabets Example" ? ApiString.add_topics:
+      selectedQuestionType == "Multiple Choice Question"? ApiString.add_mcq:
+      selectedQuestionType == "Re-Arrange the Word"? ApiString.add_rearrange:
+      selectedQuestionType == "True/False"? ApiString.add_true_false:
+      selectedQuestionType == "Story"? ApiString.add_story:ApiString.add_fill_blanks;
+
+
+      for (var map in data) {
+        String payload = jsonEncode(map);
+        //String payload = jsonEncode({'data': [map]});
+        print('Payload for this row: $payload');
+
+        http.Response response = await http.post(
+          Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: payload,
+        );
+        print('Status Code : '+response.statusCode.toString());
+        if (response.statusCode == 201) {
+          print('Row uploaded successfully: $map');
+        } else {
+          print('Failed to upload row: ${response.body}');
+        }
+      }
+      showSnackbar(message: "$selectedQuestionType added successfully");
+      Navigator.pop(context);
+    } catch (e) {
+      print('Error occurred: $e');
+    }
+  }
+
+  /// Helper function to compare two lists
+  bool listEquals(List<String> list1, List<String> list2) {
+    if (list1.length != list2.length) return false;
+    for (int i = 0; i < list1.length; i++) {
+      if (list1[i] != list2[i]) return false;
+    }
+    return true;
+  }
 
   Widget _buildQuestionsTable() {
     return Card(
@@ -691,12 +894,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         print("subcategoryId " + subCategoryId!);
                         print("topicId " + topicId!);
                         print("subtopicId " + subtopicId!);
-                        if (mainCategoryId!.isNotEmpty &&
-                            subCategoryId!.isNotEmpty &&
-                            topicId!.isNotEmpty)
-                          _exportTableToCSV();
-                        else
-                          showSnackbar(message: "Please select category,subcategory,topic,etc");
+                        showImportExportDialog();
+
                       },
                     ),
                   ),
@@ -1680,8 +1879,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     );
   }
 
-
-
   ///question type content
   Widget _buildQuestionTypeContent() {
     switch (selectedQuestionType) {
@@ -1713,38 +1910,68 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   }
 
   void _submitQuestion() {
-    // Create a list to hold the options or default values ("-")
-    final List<String> options = optionControllers
-        .map((controller) => controller.text.isNotEmpty ? controller.text : "-")
-        .toList();
+    if (selectedQuestionType == "Multiple Choice Question") {
+      addQuestionController.addMCQ(
+          main_category_id: mainCategoryId!,
+          sub_category_id: subCategoryId!,
+          sub_topic_id: subtopicId!,
+          topic_id: topicId!,
+          index: indexController.text,
+          question: questionController.text,
+          question_type: selectedQuestionType!,
+          title:titleController.text,
+          option_a: optionControllers[0].text,
+          option_b: optionControllers[1].text,
+          option_c: optionControllers[2].text,
+          option_d: optionControllers[3].text,
+          answer: correctAnswerController.text,
+          points: pointsController.text,
+          q_image: pathsFile,
+          context: context);
+    } else if (selectedQuestionType == "Re-Arrange the Word") {
 
+    } else if (selectedQuestionType == "Complete the Word") {
+
+    } else if (selectedQuestionType == "True/False") {
+
+    } else if (selectedQuestionType == "Story") {
+
+    } else if (selectedQuestionType == "Phrases") {
+
+    } else if (selectedQuestionType == "Conversation") {
+
+    } else if (selectedQuestionType == "Learning Slide") {
+
+    } else if (selectedQuestionType == "Card Flip") {
+
+    }
     // Add a new table row with data or default values ("-")
-    tableRows.add(TableRow(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(selectedQuestionType ?? "-"),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(questionController.text.isNotEmpty
-              ? questionController.text
-              : "-"),
-        ),
-        ...options.map((option) => Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(option),
-        )),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(correctAnswerController.text.isNotEmpty
-              ? correctAnswerController.text
-              : "-"),
-        ),
-      ],
-    ));
+//     tableRows.add(TableRow(
+//       children: [
+//         Padding(
+//           padding: const EdgeInsets.all(8.0),
+//           child: Text(selectedQuestionType ?? "-"),
+//         ),
+//         Padding(
+//           padding: const EdgeInsets.all(8.0),
+//           child: Text(questionController.text.isNotEmpty
+//               ? questionController.text
+//               : "-"),
+//         ),
+//         ...options.map((option) => Padding(
+//           padding: const EdgeInsets.all(8.0),
+//           child: Text(option),
+//         )),
+//         Padding(
+//           padding: const EdgeInsets.all(8.0),
+//           child: Text(correctAnswerController.text.isNotEmpty
+//               ? correctAnswerController.text
+//               : "-"),
+//         ),
+//       ],
+//     ));
 
-    // Clear the input fields after submission
+
     setState(() {
       questionController.clear();
       optionControllers.forEach((controller) => controller.clear());
@@ -1810,7 +2037,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
               ),
               boxH10(),
               const Text(
-                'Upload Story Image',
+                'Upload Image',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -1829,7 +2056,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                     child: Center(
                       child: pathsFile == null
                           ? const Text(
-                        "Tap to upload story image",
+                        "Tap to upload image",
                         style: TextStyle(color: Colors.grey),
                       )
                           : Image.memory(
@@ -1882,23 +2109,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                   print(subCategoryId ?? 'null');
                   print(topicId ?? 'null');
                   print(subtopicId ?? 'null');
-                  addQuestionController.addMCQ(
-                      main_category_id: mainCategoryId!,
-                      sub_category_id: subCategoryId!,
-                      sub_topic_id: subtopicId!,
-                      topic_id: topicId!,
-                      index: indexController.text,
-                      question: questionController.text,
-                      question_type: selectedQuestionType!,
-                      title:titleController.text,
-                      option_a: optionControllers[0].text,
-                      option_b: optionControllers[1].text,
-                      option_c: optionControllers[2].text,
-                      option_d: optionControllers[3].text,
-                      answer: correctAnswerController.text,
-                      points: pointsController.text,
-                      q_image: pathsFile,
-                      context: context);
+                  _submitQuestion();
                 },
               ),
             ],

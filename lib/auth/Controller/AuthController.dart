@@ -118,7 +118,7 @@ class AuthController extends GetxController{
           print("User Name: $userName");
           //print("Token: $authToken");
 
-          clearLocalStorage();
+          // clearLocalStorage();
           await setDataToLocalStorage(
             dataType: "STRING",
             prefKey: "user_id",

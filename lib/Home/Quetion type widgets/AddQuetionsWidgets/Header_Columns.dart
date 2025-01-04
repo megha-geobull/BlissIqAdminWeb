@@ -1,5 +1,5 @@
-List<String> story_headers = ["id","main_category_id", "sub_category_id", "topic_id",
-  "sub_topic_id","story_title","story_img", "content", "points",'index'];
+List<String> story_headers = ["main_category_id", "sub_category_id", "topic_id",
+  "story_title","story_img", "content","highlight_word", "points",'index'];
 
 List<String> phrases_headers = ["id","main_category_id", "sub_category_id", "topic_id",
   "sub_topic_id","question_type","phrase_name", "points","index"];
@@ -28,4 +28,6 @@ List<String> match_pair_headers = ["id","main_category_id", "sub_category_id", "
 
 List<String> learning_slide =["id","main_category_id", "sub_category_id", "topic_id", "sub_topic_id",
   "question_type","title","transcription","onscreen_content","examples","index"];
+
+List<String> alphabet_example =["main_category_id", "sub_category_id","topic_name","exg_name","image_name"];
 
