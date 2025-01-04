@@ -92,6 +92,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     "Complete the paragraph",
     "Learning Slide",
     "Card Flip",
+    "Alphabets Example",
   ];
   final CategoryController _controller = Get.put(CategoryController());
 
@@ -155,10 +156,12 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = learning_slide;
     } else if (selectedQuestionType == "Card Flip") {
       headers = cardFlip_headers;
+    }else if (selectedQuestionType == "Alphabets Example") {
+      headers = alphabet_example;
     }
     rows.add(headers);
     List<dynamic> sampleData = [];
-    for (int i = 0; i < 6; i++) { // Assuming you want 5 rows of sample data
+    for (int i = 0; i < 1; i++) { // Assuming you want 5 rows of sample data
       List<dynamic> row = [
         '',
         mainCategoryId,
@@ -168,9 +171,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       ];
 
       // Add dynamic placeholders for remaining headers
-      for (int j = 6; j < headers.length; j++) {
-        row.add('');
-      }
+      // for (int j = 5; j < headers.length; j++) {
+      //   row.add('');
+      // }
 
       sampleData.add(row);
     }
@@ -210,6 +213,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = true_false_headers;
     } else if (selectedQuestionType == "Story") {
       headers = story_headers;
+      uploadCsvToApi(headers);
     } else if (selectedQuestionType == "Phrases") {
       headers = phrases_headers;
     } else if (selectedQuestionType == "Conversation") {
@@ -218,6 +222,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = learning_slide;
     } else if (selectedQuestionType == "Card Flip") {
       headers = cardFlip_headers;
+    }else if (selectedQuestionType == "Alphabets Example") {
+      headers = alphabet_example;
+      uploadCsvToApi(headers);
     }
     rows.add(headers);
   }
@@ -553,7 +560,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           actions: [
             TextButton(
               onPressed: () {
-                if (selectedQuestionType == "") {
+                if (selectedQuestionType != "") {
                   _importTableToCSV();
                 }
               },
@@ -566,7 +573,12 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                     topicId!.isNotEmpty) {
                   _exportTableToCSV();
                   Navigator.pop(context); // Close the dialog
-                } else {
+                }
+                else if (selectedQuestionType=="Alphabets Example" && mainCategoryId!.isNotEmpty &&
+                    subCategoryId!.isNotEmpty) {
+                  _exportTableToCSV();
+                  Navigator.pop(context); // Close the dialog
+                }else {
                   showSnackbar(message: "Please select category, subcategory, and topic.");
                 }
               },
@@ -579,7 +591,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   }
 
   Future<void> uploadCsvToApi(List<String> requiredHeaders) async {
-
     try {
       // Pick the .csv file
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -592,9 +603,19 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         return;
       }
 
-      // Read the file
-      File file = File(result.files.single.path!);
-      String content = await file.readAsString();
+      String content;
+
+      if (result.files.single.bytes != null) {
+        // Read file content directly from bytes
+        content = String.fromCharCodes(result.files.single.bytes!);
+      } else if (result.files.single.path != null) {
+        // Read file content from path
+        File file = File(result.files.single.path!);
+        content = await file.readAsString();
+      } else {
+        print('Failed to read file content.');
+        return;
+      }
 
       // Parse the CSV content
       List<List<dynamic>> rows = const CsvToListConverter().convert(content);
@@ -616,24 +637,54 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       // Parse data rows
       List<Map<String, dynamic>> data = rows.skip(1).map((row) {
         Map<String, dynamic> map = {};
-        for (int i = 1; i < csvHeaders.length; i++) {
+        for (int i = 0; i < csvHeaders.length; i++) {
           map[csvHeaders[i]] = row[i];
         }
         return map;
       }).toList();
 
-      http.Response response = await http.post(
-        Uri.parse(ApiString.add_mcq),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'data': data}),
-      );
-
-      if (response.statusCode == 200) {
-        print('Data uploaded successfully');
-      } else {
-        print('Failed to upload data: ${response.body}');
+      // Validate and clean data
+      for (var row in data) {
+        if (row['main_category_id'] == null || row['main_category_id'].isEmpty) {
+          print('Error: main_category_id is missing for row: $row');
+          return;
+        }
+        if (row['sub_category_id'] == null || row['sub_category_id'].isEmpty) {
+          print('Error: sub_category_id is missing for row: $row');
+          return;
+        }
+        if (row['topic_name'] == null || row['topic_name'].isEmpty) {
+          print('Error: topic_name is missing for row: $row');
+          return;
+        }
       }
+      // Make API call
+      String apiUrl = selectedQuestionType == "Alphabets Example" ? ApiString.add_topics:
+      selectedQuestionType == "Multiple Choice Question"? ApiString.add_mcq:
+      selectedQuestionType == "Re-Arrange the Word"? ApiString.add_rearrange:
+      selectedQuestionType == "True/False"? ApiString.add_true_false:
+      selectedQuestionType == "Story"? ApiString.add_story:ApiString.add_fill_blanks;
 
+
+      for (var map in data) {
+        String payload = jsonEncode(map);
+        //String payload = jsonEncode({'data': [map]});
+        print('Payload for this row: $payload');
+
+        http.Response response = await http.post(
+          Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: payload,
+        );
+        print('Status Code : '+response.statusCode.toString());
+        if (response.statusCode == 201) {
+          print('Row uploaded successfully: $map');
+        } else {
+          print('Failed to upload row: ${response.body}');
+        }
+      }
+      showSnackbar(message: "$selectedQuestionType added successfully");
+      Navigator.pop(context);
     } catch (e) {
       print('Error occurred: $e');
     }
@@ -822,38 +873,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     } else if (selectedQuestionType == "Card Flip") {
 
     }
-        // Create a list to hold the options or default values ("-")
-    // final List<String> options = optionControllers
-    //     .map((controller) => controller.text.isNotEmpty ? controller.text : "-")
-    //     .toList();
-    //
-    // // Add a new table row with data or default values ("-")
-    // tableRows.add(TableRow(
-    //   children: [
-    //     Padding(
-    //       padding: const EdgeInsets.all(8.0),
-    //       child: Text(selectedQuestionType ?? "-"),
-    //     ),
-    //     Padding(
-    //       padding: const EdgeInsets.all(8.0),
-    //       child: Text(questionController.text.isNotEmpty
-    //           ? questionController.text
-    //           : "-"),
-    //     ),
-    //     ...options.map((option) => Padding(
-    //           padding: const EdgeInsets.all(8.0),
-    //           child: Text(option),
-    //         )),
-    //     Padding(
-    //       padding: const EdgeInsets.all(8.0),
-    //       child: Text(correctAnswerController.text.isNotEmpty
-    //           ? correctAnswerController.text
-    //           : "-"),
-    //     ),
-    //   ],
-    // ));
 
-    // Clear the input fields after submission
     setState(() {
       questionController.clear();
       optionControllers.forEach((controller) => controller.clear());

@@ -87,6 +87,16 @@ class ApiString {
   static const String delete_story = "${baseUrl}delete_story";
   static const String update_story = "${baseUrl}update_story";
 
+  static const String add_rearrange = "${baseUrl}add_rearrange";
+  static const String delete_rearrange = "${baseUrl}delete_rearrange";
+  static const String get_rearrange = "${baseUrl}get_rearrange";
+  static const String update_rearrange = "${baseUrl}update_rearrange";
+
+  static const String add_true_false = "${baseUrl}add_true_false";
+  static const String get_true_false = "${baseUrl}get_true_false";
+  static const String delete_true_false = "${baseUrl}delete_true_false";
+  static const String update_true_false = "${baseUrl}update_true_false";
+
   ///learner
   static const String get_all_learners = "${baseUrl}get_all_learners";
 
