@@ -13,6 +13,7 @@ import 'package:http_parser/http_parser.dart';
 class QuestionController extends GetxController {
 
   RxBool isLoading = false.obs;
+  RxList mcqList = [].obs;
 
   addMCQ({
     required String main_category_id,
@@ -78,6 +79,54 @@ class QuestionController extends GetxController {
       if (response.statusCode == 201 && responseData['status'] == 1) {
         Fluttertoast.showToast(
           msg: responseData['message'] ?? 'Added successfully',
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: responseData['message'] ?? 'Error occurred',
+        );
+      }
+    } catch (e, stacktrace) {
+      print('An error occurred: $e');
+      print('Stacktrace: $stacktrace');
+      Fluttertoast.showToast(
+        msg: 'An error occurred: $e',
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  get_MCQ({
+    required String main_category_id,
+    required String sub_category_id,
+    required String topic_id,
+    String? sub_topic_id,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse(ApiString.get_mcq),
+      );
+
+      // Prepare the request body
+      request.fields.addAll({
+        'main_category_id': main_category_id,
+        'sub_category_id': sub_category_id,
+        'topic_id': topic_id,
+        'sub_topic_id': sub_topic_id ?? "",
+      });
+
+      final response = await request.send();
+      final responseData = jsonDecode(await response.stream.bytesToString());
+
+      print("Response Data: $responseData");
+
+      // Handle success and error responses
+      if (response.statusCode == 201 && responseData['status'] == 1) {
+        Fluttertoast.showToast(
+          msg: responseData['message'] ?? 'fetched successfully',
         );
       } else {
         Fluttertoast.showToast(
