@@ -28,7 +28,18 @@ class ApiString {
   static const String schoolBaseUrl = "http://65.0.211.122:4444/school_api/";
   static const String school_registration = "${schoolBaseUrl}school_registration";
   static const String approve_school = "${baseUrl}approve_school";
+  static const String get_all_schools = "${baseUrl}get_all_schools";
+  static const String assign_school = "${baseUrl}assign_school";
 
+  ///learner
+  static const String get_all_learners = "${baseUrl}get_all_learners";
+
+
+  ///company registration
+  static const String companyBaseUrl = "http://65.0.211.122:4444/company_api/";
+  static const String company_registration = "${companyBaseUrl}company_registration";
+  static const String approve_company = "${baseUrl}approve_company";
+  static const String get_all_companies = "${companyBaseUrl}get_all_companies";
 
 
   /// Profile Endpoints
@@ -42,12 +53,9 @@ class ApiString {
   static const String addTodaysAttendance = "${baseUrl}add_todays_attendance";
 
   /// Vocabulary
-  static const String getVocabularyCategories =
-      "${baseUrl}get_vocabulary_categories";
-  static const String add_vocabulary_categories =
-      "${baseUrl}add_vocabulary_categories";
-  static const String delete_vocabulary_categories =
-      "${baseUrl}delete_vocabulary_categories";
+  static const String getVocabularyCategories = "${baseUrl}get_vocabulary_categories";
+  static const String add_vocabulary_categories = "${baseUrl}add_vocabulary_categories";
+  static const String delete_vocabulary_categories = "${baseUrl}delete_vocabulary_categories";
 
   static const String add_notifications = "${baseUrl}add_notifications";
 
@@ -97,10 +105,15 @@ class ApiString {
   static const String delete_true_false = "${baseUrl}delete_true_false";
   static const String update_true_false = "${baseUrl}update_true_false";
 
-  ///learner
   static const String get_all_learners = "${baseUrl}get_all_learners";
 
 
-  ///school_registration
-  static const String get_all_schools = "${baseUrl}get_all_schools";
+
+
+  /// Questions widgets
+  static const String add_rearrange = "${baseUrl}add_rearrange";
+  static const String add_true_false = "${baseUrl}add_true_false";
+  static const String add_story_phrases = "${baseUrl}add_story_phrases";
+  static const String add_match_pair_question = "${baseUrl}add_match_pair_question";
+
 }

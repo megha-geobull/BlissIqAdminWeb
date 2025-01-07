@@ -6,6 +6,7 @@ import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/QuestionController/QuestionApiController.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/add_match_the_pairs.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/question_controller.dart';
 import 'package:blissiqadmin/controller/CategoryController.dart';
@@ -22,34 +23,37 @@ import 'package:csv/csv.dart';
 import '../../../Global/constants/common_snackbar.dart';
 import 'Header_Columns.dart';
 
-
 class AddQuestionsWidgets extends StatefulWidget {
   @override
   _AddQuestionsWidgetsState createState() => _AddQuestionsWidgetsState();
 }
 
 class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
-
   final TextEditingController questionController = TextEditingController();
   final List<TextEditingController> optionControllers =
   List.generate(4, (_) => TextEditingController());
   final List<TextEditingController> paragraphOptionControllers =
-  List.generate(6, (_) => TextEditingController());
+      List.generate(6, (_) => TextEditingController());
   TextEditingController correctAnswerController = TextEditingController();
   TextEditingController pointsController = TextEditingController();
   TextEditingController titleController = TextEditingController();
   TextEditingController storyContentController = TextEditingController();
   TextEditingController storyPhrasesController = TextEditingController();
+  TextEditingController storyTitleController = TextEditingController();
+  TextEditingController highlightWordController = TextEditingController();
+  TextEditingController indexController = TextEditingController();
+  TextEditingController optLangController = TextEditingController();
+
   QuestionController addQuestionController = Get.find();
   TextEditingController indexController = TextEditingController();
 
-  Uint8List? selectedImage;
   List<TableRow> tableRows = [];
 
   final List<String> mainCategories = [];
   final List<String> subCategories = [];
   final List<String> topics = [];
   final List<String> subTopics = [];
+
 
   final List<String> tabs = [
     "Conversational English",
@@ -72,14 +76,24 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   String topicId='';
   String subtopicId='';
 
-  String? imagePath;
-  final ImagePicker _picker = ImagePicker();
-  // Function to pick an image from the gallery
-  Future<void> pickImage() async {
-    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
+  List<PlatformFile>? _paths;
+  var pathsFile;
+  var pathsFileName;
+
+  pickImage() async {
+    // Using FilePicker to allow the user to select an image
+    _paths = (await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: false,
+      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
+      allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
+    ))
+        ?.files;
+
+    if (_paths != null && _paths!.isNotEmpty) {
       setState(() {
-        imagePath = pickedFile.path;
+        pathsFile = _paths!.first.bytes!;
+        pathsFileName = _paths!.first.name;
       });
     }
   }
@@ -104,7 +118,10 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     "Alphabets Example",
   ];
   final CategoryController _controller = Get.put(CategoryController());
+  final QuestionApiController questionApiController =
+
   final QuestionController _question_controller = Get.put(QuestionController());
+
 
   @override
   void initState() {
@@ -112,6 +129,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     super.initState();
     getData();
   }
+
 
   pickFile() async {
     final result = await FilePicker.platform.pickFiles(
@@ -132,17 +150,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     }
   }
 
-  Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-
-    if (image != null) {
-      final Uint8List imageData = await image.readAsBytes();
-      setState(() {
-        selectedImage = imageData;
-      });
-    }
-  }
+  
 
   void _exportTableToCSV() async {
     List<List<dynamic>> rows = [];
@@ -171,6 +179,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     }
     rows.add(headers);
     List<dynamic> sampleData = [];
+    
+//     for (int i = 0; i < 6; i++) {
     for (int i = 0; i < 1; i++) { // Assuming you want 5 rows of sample data
       List<dynamic> row = [
         '',
@@ -189,7 +199,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     }
     rows.add(sampleData);
     String csvData = const ListToCsvConverter().convert(rows);
-    if(kIsWeb){
+    if (kIsWeb) {
       log("website file save");
       final bytes = utf8.encode(csvData);
       final blob = html.Blob([bytes]);
@@ -261,9 +271,11 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                     borderRadius: BorderRadius.circular(8.0),
                     borderSide: BorderSide(color: Colors.grey.shade400),
                   ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                 ),
-                items: _controller.categories.map<DropdownMenuItem<String>>((category) {
+                items: _controller.categories
+                    .map<DropdownMenuItem<String>>((category) {
                   String categoryName = category['category_name'].toString();
                   return DropdownMenuItem<String>(
                     value: categoryName,
@@ -277,9 +289,13 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                     selectedTopic = null;
                     selectedSubtopic = null; // Reset subtopic as well
                     // Fetch subcategories based on the selected main category
-                    mainCategoryId = _controller.categories.firstWhere((cat) => cat['category_name'] == value)['_id'];
-                    _controller.getSubCategory(categoryId: mainCategoryId.toString()).then((_) {
-                      setState(() {}); // Update the state after fetching subcategories
+                    mainCategoryId = _controller.categories.firstWhere(
+                        (cat) => cat['category_name'] == value)['_id'];
+                    _controller
+                        .getSubCategory(categoryId: mainCategoryId.toString())
+                        .then((_) {
+                      setState(
+                          () {}); // Update the state after fetching subcategories
                     });
                   });
                 },
@@ -298,10 +314,13 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                     borderRadius: BorderRadius.circular(8.0),
                     borderSide: BorderSide(color: Colors.grey.shade400),
                   ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                 ),
-                items: _controller.sub_categories.map<DropdownMenuItem<String>>((subCategory) {
-                  String subCategoryName = subCategory['sub_category'].toString();
+                items: _controller.sub_categories
+                    .map<DropdownMenuItem<String>>((subCategory) {
+                  String subCategoryName =
+                      subCategory['sub_category'].toString();
                   return DropdownMenuItem<String>(
                     value: subCategoryName,
                     child: Text(subCategoryName),
@@ -310,12 +329,19 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 onChanged: (value) {
                   setState(() {
                     selectedSubCategory = value;
-                    selectedTopic = null; // Reset topic when subcategory changes
+                    selectedTopic =
+                        null; // Reset topic when subcategory changes
                     selectedSubtopic = null; // Reset subtopic as well
-                    subCategoryId = _controller.sub_categories.firstWhere((subcategory) => subcategory['sub_category'] == value)['_id'];
-                    print( mainCategoryId.toString());
+                    subCategoryId = _controller.sub_categories.firstWhere(
+                        (subcategory) =>
+                            subcategory['sub_category'] == value)['_id'];
+                    print(mainCategoryId.toString());
                     print(subCategoryId.toString());
-                    _controller.get_topic(categoryId: mainCategoryId.toString(), sub_categoryId: subCategoryId.toString()).then((_) {
+                    _controller
+                        .get_topic(
+                            categoryId: mainCategoryId.toString(),
+                            sub_categoryId: subCategoryId.toString())
+                        .then((_) {
                       setState(() {}); // Update the state after fetching topics
                     });
                   });
@@ -327,76 +353,85 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
 
         boxH20(),
         // Select sub Topic
-        Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: selectedTopic,
-                  hint: Text("Select Topic"),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide(color: Colors.grey.shade400),
+        Row(children: [
+          Expanded(
+            child: DropdownButtonFormField<String>(
+              value: selectedTopic,
+              hint: Text("Select Topic"),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(color: Colors.grey.shade400),
+                ),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              ),
+              items: _controller.topics.map<DropdownMenuItem<String>>((topic) {
+                return DropdownMenuItem<String>(
+                  value: topic['topic_name'],
+                  child: Text(topic['topic_name']),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedTopic = value;
+                  selectedSubtopic = null; // Reset subtopic when topic changes
+                  // Fetch subtopics based on the selected topic
+                  topicId = _controller.topics
+                      .firstWhere((t) => t['topic_name'] == value)['_id'];
+                  _controller
+                      .get_SubTopic(
+                          topicId: topicId!,
+                          categoryId: mainCategoryId.toString(),
+                          sub_categoryId: subCategoryId.toString())
+                      .then((_) {
+                    setState(() {});
+                  });
+                });
+              },
+            ),
+          ),
+          boxW10(),
+          // Select Subtopic
+          _controller.sub_topics.isNotEmpty
+              ? Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: selectedSubtopic,
+                    hint: Text("Select SubTopic"),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(color: Colors.grey.shade400),
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                     ),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                  ),
-                  items: _controller.topics.map<DropdownMenuItem<String>>((topic) {
-                    return DropdownMenuItem<String>(
-                      value: topic['topic_name'],
-                      child: Text(topic['topic_name']),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedTopic = value;
-                      selectedSubtopic = null;
-                      _question_controller.get_MCQ(main_category_id: mainCategoryId,sub_category_id: subCategoryId,
-                          topic_id: topicId,sub_topic_id: subtopicId);
-                      // Reset subtopic when topic changes
-                      // Fetch subtopics based on the selected topic
-                      topicId = _controller.topics.firstWhere((t) => t['topic_name'] == value)['_id'];
-                      _controller.get_SubTopic(topicId: topicId!, categoryId: mainCategoryId.toString(), sub_categoryId: subCategoryId.toString()).then((_) {
+                    items: _controller.sub_topics
+                        .map<DropdownMenuItem<String>>((topic) {
+                      return DropdownMenuItem<String>(
+                        value: topic['sub_topic_name'],
+                        child: Text(topic['sub_topic_name']),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedSubtopic = value;
+                        // Fetch subtopics based on the selected subtopic
+                        subtopicId = _controller.sub_topics.firstWhere(
+                            (t) => t['sub_topic_name'] == value)['_id'];
                         setState(() {});
                       });
-                    });
-                  },
-                ),
-              ),
-              boxW10(),
-              // Select Subtopic
-              _controller.sub_topics.isNotEmpty?
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: selectedSubtopic,
-                  hint: Text("Select SubTopic"),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide(color: Colors.grey.shade400),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                    },
                   ),
-                  items: _controller.sub_topics.map<DropdownMenuItem<String>>((topic) {
-                    return DropdownMenuItem<String>(
-                      value: topic['sub_topic_name'],
-                      child: Text(topic['sub_topic_name']),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedSubtopic = value;
-                      // Fetch subtopics based on the selected subtopic
-                      subtopicId = _controller.sub_topics.firstWhere((t) => t['sub_topic_name'] == value)['_id'];
-                      setState(() {});
-                    });
-                  },
-                ),
-              ):Expanded(child:SizedBox()),
-            ]),
+                )
+              : Expanded(child: SizedBox()),
+        ]),
+
+
       ],
     );
   }
@@ -409,7 +444,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isWideScreen = constraints.maxWidth > 800;
-
           return Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -1707,6 +1741,23 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                   ),
                 ),
               ),
+              columnWidths: const {
+                0: FlexColumnWidth(1), // Type
+                1: FlexColumnWidth(2), // Question
+                2: FlexColumnWidth(1), // Option 1
+                3: FlexColumnWidth(1), // Option 2
+                4: FlexColumnWidth(1), // Option 3
+                5: FlexColumnWidth(1), // Option 4
+                6: FlexColumnWidth(1), // Answer
+                7: FlexColumnWidth(1), // Points
+                8: FlexColumnWidth(1), // Main Category ID
+                9: FlexColumnWidth(1), // Sub Category ID
+                10: FlexColumnWidth(1), // Topic ID
+                11: FlexColumnWidth(1), // Sub Topic ID
+                12: FlexColumnWidth(1), // Question Type
+                13: FlexColumnWidth(1), // Title
+                14: FlexColumnWidth(1), // Question Image
+              },
             ),
           ],
         ),
@@ -1727,6 +1778,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+
               children: [
                 const Text(
                   'Question Data',
@@ -1867,32 +1919,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   }
 
 
-  // Widget _buildTableCell(String text) {
-  //   return Padding(
-  //     padding: const EdgeInsets.all(8.0),
-  //     child: Text(
-  //       text,
-  //       style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
-  //     ),
-  //   );
-  // }
-  //
-  //
-  // Widget _buildTableHeader(String title) {
-  //   return Padding(
-  //     padding: const EdgeInsets.all(8.0),
-  //     child: Text(
-  //       title,
-  //       style: const TextStyle(
-  //         fontWeight: FontWeight.bold,
-  //         fontSize: 14,
-  //       ),
-  //       textAlign: TextAlign.center,
-  //     ),
-  //   );
-  // }
 
-  ///question type content
   Widget _buildQuestionTypeContent() {
     switch (selectedQuestionType) {
       case "Multiple Choice Question":
@@ -1912,9 +1939,13 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       case "Fill in the blanks":
         return _buildFillInTheBlanksContent();
       case "Match the pairs":
-        return AddMatchPairs(main_category_id: mainCategoryId,
-          sub_category_id: subCategoryId,
-          topic_id: topicId,sub_topic_id: subtopicId, pointsController: pointsController,);
+        return AddMatchPairs(
+            pointsController: pointsController,
+            sub_topic_id: subtopicId,
+            topic_id: topicId,
+            sub_category_id: subCategoryId,
+            main_category_id: mainCategoryId);
+
       case "Complete the paragraph":
         return _buildCompleteTheParagraphContent();
       default:
@@ -1957,39 +1988,102 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
 
     } else if (selectedQuestionType == "Card Flip") {
 
+    /// Add a new table row with data or default values ("-")
+    // tableRows.add(TableRow(
+    //   children: [
+    //     Padding(
+    //       padding: const EdgeInsets.all(8.0),
+    //       child: Text(selectedQuestionType ?? "-"),
+    //     ),
+    //     Padding(
+    //       padding: const EdgeInsets.all(8.0),
+    //       child: Text(questionController.text.isNotEmpty
+    //           ? questionController.text
+    //           : "-"),
+    //     ),
+    //     ...options.map((option) => Padding(
+    //           padding: const EdgeInsets.all(8.0),
+    //           child: Text(option),
+    //         )),
+    //     Padding(
+    //       padding: const EdgeInsets.all(8.0),
+    //       child: Text(correctAnswerController.text.isNotEmpty
+    //           ? correctAnswerController.text
+    //           : "-"),
+    //     ),
+    //   ],
+    // ));
+
+    // _handleApiCall();
+
     }
-    // Add a new table row with data or default values ("-")
-//     tableRows.add(TableRow(
-//       children: [
-//         Padding(
-//           padding: const EdgeInsets.all(8.0),
-//           child: Text(selectedQuestionType ?? "-"),
-//         ),
-//         Padding(
-//           padding: const EdgeInsets.all(8.0),
-//           child: Text(questionController.text.isNotEmpty
-//               ? questionController.text
-//               : "-"),
-//         ),
-//         ...options.map((option) => Padding(
-//           padding: const EdgeInsets.all(8.0),
-//           child: Text(option),
-//         )),
-//         Padding(
-//           padding: const EdgeInsets.all(8.0),
-//           child: Text(correctAnswerController.text.isNotEmpty
-//               ? correctAnswerController.text
-//               : "-"),
-//         ),
-//       ],
-//     ));
-
-
     setState(() {
       questionController.clear();
       optionControllers.forEach((controller) => controller.clear());
       correctAnswerController.clear();
+      pointsController.clear();
+      titleController.clear();
+      storyContentController.clear();
+      storyPhrasesController.clear();
+      indexController.clear();
     });
+  }
+
+  void _handleApiCall() {
+    switch (selectedQuestionType) {
+      case "Re-Arrange the Word":
+        int pointsValue = int.tryParse(pointsController.text) ?? 0;
+        questionApiController.addRearrangeApi(
+            mainCategoryId: mainCategoryId.toString(),
+            subCategoryId: subCategoryId.toString(),
+            topicId: topicId.toString(),
+            subTopicId: subtopicId.toString(),
+            questionType: selectedQuestionType.toString(),
+            title: titleController.text,
+            question: questionController.text,
+            answer: correctAnswerController.text,
+            points: pointsValue.toString(),
+            qImage: pathsFile,
+            index: indexController.text);
+        break;
+      case "True/False":
+        int pointsValue = int.tryParse(pointsController.text) ?? 0;
+        questionApiController.addTrueFalseApi(
+            mainCategoryId: mainCategoryId.toString(),
+            subCategoryId: subCategoryId.toString(),
+            topicId: topicId.toString(),
+            subTopicId: subtopicId.toString(),
+            questionType: selectedQuestionType.toString(),
+            question: questionController.text,
+            answer: correctAnswerController.text,
+            points: pointsValue.toString(),
+            qImage: pathsFile,
+            index: indexController.text);
+        break;
+      case "Fill in the blanks":
+        int pointsValue = int.tryParse(pointsController.text) ?? 0;
+        questionApiController.addFillBlanks(
+            mainCategoryId: mainCategoryId.toString(),
+            subCategoryId: subCategoryId.toString(),
+            topicId: topicId.toString(),
+            subTopicId: subtopicId.toString(),
+            questionType: selectedQuestionType.toString(),
+            title: titleController.text,
+            question: questionController.text,
+            qImage: pathsFile,
+            optionA: optionControllers[0].text,
+            optionB: optionControllers[1].text,
+            optionC: optionControllers[2].text,
+            optionD: optionControllers[3].text,
+            answer: correctAnswerController.text,
+            points: pointsValue.toString(),
+            index: indexController.text,
+            optionLanguage: '',
+            questionLanguage: '');
+        break;
+      default:
+        Container();
+    }
   }
 
   void _showError(String message) {
@@ -2013,6 +2107,47 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           color: Colors.white,
         ),
         padding: const EdgeInsets.symmetric(vertical: 7.0, horizontal: 8.0),
+// <<<<<<< narayan.dev
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             const Text(
+//               'Question',
+//               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+//             ),
+//             boxH08(),
+//             CustomTextField(
+//               controller: questionController,
+//               maxLines: 1,
+//               labelText: "Enter your question",
+//             ),
+//             boxH10(),
+//             const Text(
+//               'Upload Story Image',
+//               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+//             ),
+//             const SizedBox(height: 8),
+//             GestureDetector(
+//               onTap: pickImage,
+//               child: DottedBorder(
+//                 color: Colors.grey,
+//                 strokeWidth: 1,
+//                 dashPattern: [4, 4],
+//                 child: Container(
+//                   width: double.infinity,
+//                   height: 80,
+//                   decoration: BoxDecoration(
+//                     borderRadius: BorderRadius.circular(10),
+//                   ),
+//                   child: pathsFile != null
+//                       ? Image.memory(
+//                           pathsFile,
+//                           height: 100,
+//                           width: 100,
+//                           fit: BoxFit.fitHeight,
+//                         )
+//                       : Container(),
+
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -2132,8 +2267,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     );
   }
 
-  Widget _buildTrueFalseContent() {
-    // Implement the UI for "True/False" question type
+  /// Re-arrange the word
+  Widget _reArrangeWord() {
+    // Implement the UI for "Story" question type
     return DottedBorder(
       color: Colors.orange,
       strokeWidth: 1,
@@ -2146,13 +2282,141 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             const Text(
-              'Enter true false question:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              'Enter index',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.08,
+              child: CustomTextField(
+                controller: indexController,
+                maxLines: 1,
+                labelText: "Enter index",
+              ),
+            ),
+            boxH10(),
+            const Text(
+              'Enter title',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: titleController,
+              maxLines: 1,
+              labelText: "Enter title",
+            ),
+            boxH10(),
+            const Text(
+              'Enter the re-arrange word/sentence',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: questionController,
+              maxLines: 1,
+              labelText: "Enter the re-arrange word/sentence",
+            ),
+            boxH10(),
+            const Text(
+              'Upload Question Image',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            GestureDetector(
+              onTap: pickImage,
+              child: DottedBorder(
+                color: Colors.grey,
+                strokeWidth: 1,
+                dashPattern: [4, 4],
+                child: Container(
+                  width: double.infinity,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: pathsFile != null
+                      ? Image.memory(
+                          pathsFile,
+                          height: 100,
+                          width: 100,
+                          fit: BoxFit.fitHeight,
+                        )
+                      : Container(),
+                ),
+              ),
+            ),
+            boxH10(),
+            const Text(
+              'Enter the correct answer',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: correctAnswerController,
+              maxLines: 1,
+              labelText: "Correct answer",
+            ),
+            boxH50(),
+            CustomButton(
+              label: "Add Question",
+              onPressed: () {
+                int pointsValue = int.tryParse(pointsController.text) ?? 0;
+                questionApiController.addRearrangeApi(
+                    mainCategoryId: mainCategoryId.toString(),
+                    subCategoryId: subCategoryId.toString(),
+                    topicId: topicId.toString(),
+                    subTopicId: subtopicId.toString(),
+                    questionType: selectedQuestionType.toString(),
+                    title: titleController.text,
+                    question: questionController.text,
+                    answer: correctAnswerController.text,
+                    points: pointsValue.toString(),
+                    qImage: pathsFile,
+                    index: indexController.text);
+              },
+            ),
+          ],
+        ),
+      ),
+    ); // Placeholder for the actual implementation
+  }
+
+  /// true false content
+  Widget _buildTrueFalseContent() {
+    return DottedBorder(
+      color: Colors.orange,
+      strokeWidth: 1,
+      dashPattern: [4, 4],
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+        ),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter index',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.08,
+              child: CustomTextField(
+                controller: indexController,
+                maxLines: 1,
+                labelText: "Enter index",
+              ),
             ),
             boxH20(),
+            const Text(
+              'Enter your question',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
             CustomTextField(
               controller: questionController,
               maxLines: 1,
@@ -2160,12 +2424,12 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
             ),
             boxH20(),
             const Text(
-              'Upload Story Image',
+              'Upload Image',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             GestureDetector(
-              onTap: _pickImage,
+              onTap: pickImage,
               child: DottedBorder(
                 color: Colors.grey,
                 strokeWidth: 1,
@@ -2176,31 +2440,45 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Center(
-                    child: selectedImage == null
-                        ? const Text(
-                      "Tap to upload story image",
-                      style: TextStyle(color: Colors.grey),
-                    )
-                        : Image.memory(
-                      selectedImage!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
-                  ),
+                  child: pathsFile != null
+                      ? Image.memory(
+                          pathsFile!,
+                          height: 100,
+                          width: 100,
+                          fit: BoxFit.fitHeight,
+                        )
+                      : Container(),
                 ),
               ),
             ),
             boxH20(),
+            const Text(
+              'Enter correct answer',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
             CustomTextField(
               controller: correctAnswerController,
-              labelText: "Enter correct answer",
+              labelText: "Enter correct answer (True/False)",
             ),
             const SizedBox(height: 20),
             CustomButton(
               label: "Add Question",
-              onPressed: _submitQuestion,
+              onPressed: () {
+                int pointsValue = int.tryParse(pointsController.text) ?? 0;
+                questionApiController.addTrueFalseApi(
+                  mainCategoryId: mainCategoryId.toString(),
+                  subCategoryId: subCategoryId.toString(),
+                  topicId: topicId.toString(),
+                  subTopicId: subtopicId.toString(),
+                  questionType: selectedQuestionType.toString(),
+                  question: questionController.text,
+                  answer: correctAnswerController.text,
+                  points: pointsValue.toString(),
+                  qImage: pathsFile,
+                  index: indexController.text,
+                );
+              },
             ),
           ],
         ),
@@ -2208,8 +2486,409 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     );
   }
 
+  /// Story content
+  Widget _buildStoryContent() {
+    return DottedBorder(
+      color: Colors.orange,
+      strokeWidth: 1,
+      dashPattern: [4, 4],
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+        ),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter index',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.08,
+              child: CustomTextField(
+                controller: indexController,
+                maxLines: 1,
+                labelText: "Enter index",
+              ),
+            ),
+            boxH15(),
+            const Text(
+              'Enter Story Title',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: storyTitleController,
+              maxLines: 1,
+              labelText: "Enter Story Title",
+            ),
+            boxH20(),
+            const Text(
+              'Upload Story Image',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: pickImage,
+              child: DottedBorder(
+                color: Colors.grey,
+                strokeWidth: 1,
+                dashPattern: [4, 4],
+                child: Container(
+                  width: double.infinity,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: pathsFile != null
+                      ? Image.memory(
+                          pathsFile!,
+                          height: 80,
+                          width: 100,
+                          fit: BoxFit.fitHeight,
+                        )
+                      : Container(),
+                ),
+              ),
+            ),
+            boxH15(),
+            const Text(
+              'Enter Story Content',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: storyContentController,
+              labelText: "Enter Story Content",
+              maxLines: 4,
+            ),
+            boxH15(),
+            const Text(
+              'Highlight Word',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: highlightWordController,
+              labelText: "Enter Highlight Word",
+              maxLines: 1,
+            ),
+            boxH15(),
+            CustomButton(
+              label: "Add Story",
+              onPressed: () {
+                int pointsValue = int.tryParse(pointsController.text) ?? 0;
+                questionApiController.addStoryApi(
+                  mainCategoryId: mainCategoryId.toString(),
+                  subCategoryId: subCategoryId.toString(),
+                  topicId: topicId.toString(),
+                  subTopicId: subtopicId.toString(),
+                  storyTitle: storyTitleController.text,
+                  content: storyContentController.text,
+                  highlightWord: highlightWordController.text,
+                  story_img: pathsFile,
+                  points: pointsValue.toString(),
+                  index: indexController.text,
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Fill in the blanks
+  Widget _buildFillInTheBlanksContent() {
+    return DottedBorder(
+      color: Colors.orange,
+      strokeWidth: 1,
+      dashPattern: [4, 4],
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+        ),
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Enter index',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              boxH08(),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.08,
+                child: CustomTextField(
+                  controller: indexController,
+                  maxLines: 1,
+                  labelText: "Enter index",
+                ),
+              ),
+              boxH10(),
+              const Text(
+                'Enter title',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              boxH08(),
+              CustomTextField(
+                controller: titleController,
+                maxLines: 1,
+                labelText: "Enter title",
+              ),
+              boxH10(),
+              const SizedBox(height: 16),
+              const Text(
+                'Question:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              CustomTextField(
+                controller: questionController,
+                labelText: 'Enter your question here...',
+                maxLines: 3,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Question Image (Optional):',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              GestureDetector(
+                onTap: pickImage,
+                child: DottedBorder(
+                  color: Colors.grey,
+                  strokeWidth: 1,
+                  dashPattern: [4, 4],
+                  child: Container(
+                    width: double.infinity,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: pathsFile != null
+                        ? Image.memory(
+                            pathsFile!,
+                            height: 100,
+                            width: 100,
+                            fit: BoxFit.fitHeight,
+                          )
+                        : Container(),
+                  ),
+                ),
+              ),
+              boxH05(),
+              const Text(
+                'Enter Options',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              boxH08(),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 10.0,
+                  mainAxisSpacing: 5.0,
+                  childAspectRatio: 2.8,
+                ),
+                itemCount: optionControllers.length,
+                itemBuilder: (context, index) {
+                  return CustomTextField(
+                    controller: optionControllers[index],
+                    labelText: "Option ${index + 1}",
+                  );
+                },
+              ),
+              const Text(
+                'Correct answer',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              boxH08(),
+              CustomTextField(
+                controller: correctAnswerController,
+                labelText: "Enter correct answer",
+              ),
+              boxH08(),
+              const Text(
+                'Option language',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              boxH08(),
+              CustomTextField(
+                controller: optLangController,
+                labelText: "Enter option language",
+              ),
+              boxH15(),
+              CustomButton(
+                label: "Add Question",
+                onPressed: () {
+                  int pointsValue = int.tryParse(pointsController.text) ?? 0;
+                  questionApiController.addFillBlanks(
+                      mainCategoryId: mainCategoryId.toString(),
+                      subCategoryId: subCategoryId.toString(),
+                      topicId: topicId.toString(),
+                      subTopicId: subtopicId.toString(),
+                      questionType: selectedQuestionType.toString(),
+                      title: titleController.text,
+                      question: questionController.text,
+                      qImage: pathsFile,
+                      answer: correctAnswerController.text,
+                      points: pointsValue.toString(),
+                      index: indexController.text,
+                      optionA: optionControllers[0].text,
+                      optionB: optionControllers[1].text,
+                      optionC: optionControllers[2].text,
+                      optionD: optionControllers[3].text,
+                      optionLanguage: optLangController.text,
+                      questionLanguage: '');
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildConversationContent() {
+    // Implement the UI for "Conversation" question type
+    return DottedBorder(
+      color: Colors.orange,
+      strokeWidth: 1,
+      dashPattern: [4, 4],
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+        ),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter index',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.08,
+              child: CustomTextField(
+                controller: indexController,
+                maxLines: 1,
+                labelText: "Enter index",
+              ),
+            ),
+            boxH10(),
+            const Text(
+              'Enter title',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: titleController,
+              maxLines: 1,
+              labelText: "Enter title",
+            ),
+            boxH10(),
+            const Text(
+              'Enter conversation question',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: questionController,
+              maxLines: 1,
+              labelText: "Enter question",
+            ),
+            boxH20(),
+            const Text(
+              'Enter correct answer',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: correctAnswerController,
+              labelText: "Enter correct answer",
+            ),
+            boxH20(),
+            CustomButton(
+              label: "Add Question",
+              onPressed: _submitQuestion,
+            ),
+          ],
+        ),
+      ),
+    ); // Placeholder for the actual implementation
+  }
+
+  Widget _buildPhrasesContent() {
+    // Implement the UI for "Phrases" question type
+    return DottedBorder(
+      color: Colors.orange,
+      strokeWidth: 1,
+      dashPattern: [4, 4],
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+        ),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter index',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.08,
+              child: CustomTextField(
+                controller: indexController,
+                maxLines: 1,
+                labelText: "Enter index",
+              ),
+            ),
+            boxH10(),
+            const Text(
+              'Enter title',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: titleController,
+              maxLines: 1,
+              labelText: "Enter title",
+            ),
+            boxH10(),
+            const Text(
+              'Enter Phrase Name',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: storyPhrasesController,
+              labelText: "Enter Phrase Name",
+              maxLines: 1,
+            ),
+            boxH20(),
+            CustomButton(
+              label: "Add Question",
+              onPressed: _submitQuestion,
+            ),
+          ],
+        ),
+      ),
+    ); // Placeholder for the actual implementation
+  }
+
   Widget _buildCompleteWordContent() {
-    // Implement the UI for "Complete the Word" question type
     return DottedBorder(
       color: Colors.orange,
       strokeWidth: 1,
@@ -2276,259 +2955,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     ); // Placeholder for the actual implementation
   }
 
-  Widget _buildStoryContent() {
-    // Implement the UI for "Story" question type
-    return DottedBorder(
-      color: Colors.orange,
-      strokeWidth: 1,
-      dashPattern: [4, 4],
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.white,
-        ),
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Enter Story title',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            CustomTextField(
-              controller: questionController,
-              maxLines: 1,
-              labelText: "Enter Story title",
-            ),
-            boxH20(),
-            const Text(
-              'Upload Story Image',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: _pickImage,
-              child: DottedBorder(
-                color: Colors.grey,
-                strokeWidth: 1,
-                dashPattern: [4, 4],
-                child: Container(
-                  width: double.infinity,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: selectedImage == null
-                        ? const Text(
-                      "Tap to upload story image",
-                      style: TextStyle(color: Colors.grey),
-                    )
-                        : Image.memory(
-                      selectedImage!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            boxH20(),
-            const Text(
-              'Enter Story Content',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            CustomTextField(
-              controller: storyContentController,
-              labelText: "Enter story content",
-              maxLines: 6,
-            ),
-            boxH20(),
-            CustomButton(
-              label: "Add Question",
-              onPressed: _submitQuestion,
-            ),
-          ],
-        ),
-      ),
-    ); // Placeholder for the actual implementation
-  }
-
-  Widget _reArrangeWord() {
-    // Implement the UI for "Story" question type
-    return DottedBorder(
-      color: Colors.orange,
-      strokeWidth: 1,
-      dashPattern: [4, 4],
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.white,
-        ),
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Enter title',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            CustomTextField(
-              controller: questionController,
-              maxLines: 1,
-              labelText: "Enter title",
-            ),
-            boxH10(),
-            const Text(
-              'Enter the re-arrange word/sentence',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            CustomTextField(
-              controller: questionController,
-              maxLines: 1,
-              labelText: "Enter the re-arrange word/sentence",
-            ),
-            boxH10(),
-            const Text(
-              'Upload Story Image',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: _pickImage,
-              child: DottedBorder(
-                color: Colors.grey,
-                strokeWidth: 1,
-                dashPattern: [4, 4],
-                child: Container(
-                  width: double.infinity,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: selectedImage == null
-                        ? const Text(
-                      "Tap to upload story image",
-                      style: TextStyle(color: Colors.grey),
-                    )
-                        : Image.memory(
-                      selectedImage!,
-                      fit: BoxFit.fill,
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            boxH50(),
-            CustomButton(
-              label: "Add Question",
-              onPressed: _submitQuestion,
-            ),
-          ],
-        ),
-      ),
-    ); // Placeholder for the actual implementation
-  }
-
-  Widget _buildConversationContent() {
-    // Implement the UI for "Conversation" question type
-    return DottedBorder(
-      color: Colors.orange,
-      strokeWidth: 1,
-      dashPattern: [4, 4],
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.white,
-        ),
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Enter conversation question',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            CustomTextField(
-              controller: questionController,
-              maxLines: 1,
-              labelText: "Enter question",
-            ),
-            boxH20(),
-            const Text(
-              'Enter correct answer',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            CustomTextField(
-              controller: correctAnswerController,
-              labelText: "Enter correct answer",
-            ),
-            boxH20(),
-            CustomButton(
-              label: "Add Question",
-              onPressed: _submitQuestion,
-            ),
-          ],
-        ),
-      ),
-    ); // Placeholder for the actual implementation
-  }
-
-  Widget _buildPhrasesContent() {
-    // Implement the UI for "Phrases" question type
-    return DottedBorder(
-      color: Colors.orange,
-      strokeWidth: 1,
-      dashPattern: [4, 4],
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.white,
-        ),
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Enter Story phrases',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            CustomTextField(
-              controller: storyPhrasesController,
-              labelText: "Enter story phrases",
-              maxLines: 1,
-            ),
-            boxH20(),
-            const Text(
-              'Enter correct answer',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            CustomTextField(
-              controller: correctAnswerController,
-              labelText: "Enter correct answer",
-            ),
-            boxH20(),
-            CustomButton(
-              label: "Add Question",
-              onPressed: _submitQuestion,
-            ),
-          ],
-        ),
-      ),
-    ); // Placeholder for the actual implementation
-  }
 
   Widget _buildFillInTheBlanksContent() {
     // Implement the UI for "Phrases" question type
@@ -2662,14 +3088,28 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Question title',
+                'Enter index',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              boxH08(),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.08,
+                child: CustomTextField(
+                  controller: indexController,
+                  maxLines: 1,
+                  labelText: "Enter index",
+                ),
+              ),
+              boxH10(),
+              const Text(
+                'Enter title',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               boxH08(),
               CustomTextField(
                 controller: titleController,
                 maxLines: 1,
-                labelText: "Enter your question title",
+                labelText: "Enter title",
               ),
               boxH10(),
               const Text(
@@ -2695,7 +3135,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                   crossAxisCount: 2, // Number of items per row
                   crossAxisSpacing: 10.0, // Spacing between columns
                   mainAxisSpacing: 5.0, // Spacing between rows
-                  childAspectRatio: 2.8, // Adjust height and width of grid items
+                  childAspectRatio:
+                      2.8, // Adjust height and width of grid items
                 ),
                 itemCount: paragraphOptionControllers.length,
                 itemBuilder: (context, index) {
@@ -2713,7 +3154,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
               CustomTextField(
                 controller: correctAnswerController,
                 labelText: "",
-                hintText:"mouse, bird, snake" ,
+                hintText: "mouse, bird, snake",
               ),
               boxH15(),
               CustomButton(
@@ -2726,5 +3167,4 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       ),
     );
   }
-
 }
