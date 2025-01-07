@@ -66,7 +66,7 @@ class ProfileController extends GetxController {
   }
 
   getProfile() async {
-     userId.value = await getUserId();
+    userId.value = await getUserId();
 
     if (userId.value == null || userId.value!.isEmpty) {
       print("User ID:- $userId");
@@ -109,13 +109,13 @@ class ProfileController extends GetxController {
     }
   }
 
-   editProfile({
+  editProfile({
     required String user_name,
     required String contact_no,
     required String email,
     required String profile_image,
-     required BuildContext context,
-   }) async {
+    required BuildContext context,
+  }) async {
     isLoading.value = true;
     final String? userId = await getUserId();
 
@@ -201,8 +201,8 @@ class ProfileController extends GetxController {
   }
 
 
-    // Get user ID from local storage
-   getUserId() async {
+  // Get user ID from local storage
+  getUserId() async {
     return await getDataFromLocalStorage(
       dataType: "STRING",
       prefKey: "user_id",
@@ -247,7 +247,7 @@ class ProfileController extends GetxController {
         //   'std_class': data['std_class'] ?? '',
         //   'profile_image': data['profile_image'] ?? '',
         // };
-         print("Profile fetched successfully: ${response.body}");
+        print("Profile fetched successfully: ${response.body}");
       } else {
         print("Failed to update attendance: ${response.body}");
       }
