@@ -6,7 +6,9 @@ import 'package:blissiqadmin/Global/constants/common_snackbar.dart';
 import 'package:blissiqadmin/Global/utils/shared_preference/shared_preference_services.dart';
 import 'package:blissiqadmin/Home/Users/Models/AllSchoolModel.dart';
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -208,6 +210,52 @@ class SchoolController extends GetxController {
     } catch (e) {
       showSnackbar(message: "Error $e");
       log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+  assignSchoolApi({
+    required String schoolId,
+    required String companyId,
+  }) async {
+    isLoading.value = true;
+    try {
+      final Map<String, dynamic> body = {
+        "school_id": schoolId,
+        "company_id": companyId,
+      };
+
+      final response = await http.post(
+        Uri.parse(ApiString.assign_school),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+
+          if (kDebugMode) {
+            print("School assigned successfully");
+
+          }
+        } else {
+          Fluttertoast.showToast(
+            msg: responseData['message'] ?? "Something went wrong!",
+            backgroundColor: Colors.red,
+          );
+        }
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "An error occurred: $e",
+        backgroundColor: Colors.red,
+      );
     } finally {
       isLoading.value = false;
     }
