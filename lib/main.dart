@@ -1,6 +1,6 @@
 import 'dart:async';
-
 import 'package:blissiqadmin/Home/HomePage.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/controller/GetAllQuestionsApiController.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/question_controller.dart';
 import 'package:blissiqadmin/auth/login/login.dart';
 import 'package:blissiqadmin/profile/ProfileController.dart';
@@ -17,6 +17,7 @@ void main() {
   Get.put(ProfileController());
   Get.put(AuthController());
   Get.put(QuestionController());
+  Get.put(GetAllQuestionsApiController());
   runApp(const MyApp());
 }
 

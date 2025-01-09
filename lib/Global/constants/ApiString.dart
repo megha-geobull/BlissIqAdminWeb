@@ -106,6 +106,11 @@ class ApiString {
   static const String update_true_false = "${baseUrl}update_true_false";
 
 
+  ///learner
+
+  static const String get_all_learners = "${baseUrl}get_all_learners";
+
+
 
   /// Questions widgets
   static const String add_story_phrases = "${baseUrl}add_story_phrases";
