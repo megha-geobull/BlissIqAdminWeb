@@ -214,9 +214,7 @@ class QuestionApiController extends GetxController {
     isLoading.value = true;
     var uri = Uri.parse(ApiString.add_story_phrases);
     try {
-
       var request = http.MultipartRequest("POST", uri);
-
       request.fields['main_category_id'] = mainCategoryId;
       request.fields['sub_category_id'] = subCategoryId;
       request.fields['topic_id'] = topicId;
@@ -229,7 +227,6 @@ class QuestionApiController extends GetxController {
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
-
       if (response.statusCode == 201) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         print('Response status: ${responseData}');
@@ -246,8 +243,8 @@ class QuestionApiController extends GetxController {
     }
   }
 
-
-  addFillBlanks({
+  ///Add fill in blanks
+  addFillBlanksApi({
     required String mainCategoryId,
     required String subCategoryId,
     required String topicId,
@@ -324,7 +321,9 @@ class QuestionApiController extends GetxController {
       isLoading.value = false;
     }
   }
-    Future<void> addMatchThePairs({
+
+
+  addMatchThePairs({
     required String main_category_id,
     required String title,
     required String sub_category_id,

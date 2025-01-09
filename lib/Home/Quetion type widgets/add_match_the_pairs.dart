@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
-import 'package:blissiqadmin/Home/Quetion%20type%20widgets/QuestionController/QuestionApiController.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/question_controller.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -31,13 +30,8 @@ class AddMatchPairs extends StatefulWidget {
 class _AddMatchPairsState extends State<AddMatchPairs> {
   final List<TextImageSoundPair> leftColumnPairs =
   List.generate(5, (_) => TextImageSoundPair());
-  TextEditingController indexController = TextEditingController();
-  TextEditingController titleController = TextEditingController();
-
-  QuestionApiController addQuestionController = Get.find();
-      List.generate(5, (_) => TextImageSoundPair());
   final List<TextImageSoundPair> rightColumnPairs =
-      List.generate(5, (_) => TextImageSoundPair());
+  List.generate(5, (_) => TextImageSoundPair());
   TextEditingController indexController = TextEditingController();
   TextEditingController titleController = TextEditingController();
 
@@ -46,11 +40,20 @@ class _AddMatchPairsState extends State<AddMatchPairs> {
   PairType leftColumnType = PairType.text;
   PairType rightColumnType = PairType.text;
 
-  Future<void> _pickImage(TextImageSoundPair pair) async {
+  // List to store uploaded images
+  final List<Uint8List?> uploadedImages = [];
+
+  Future<void> _pickImage(TextImageSoundPair pair, int pairIndex) async {
     final imageBytes = await ImagePickerWeb.getImageAsBytes();
     if (imageBytes != null) {
       setState(() {
         pair.imageBytes = imageBytes;
+        // Add or update the image in the uploadedImages list
+        if (uploadedImages.length > pairIndex) {
+          uploadedImages[pairIndex] = imageBytes;
+        } else {
+          uploadedImages.add(imageBytes);
+        }
       });
     }
   }
@@ -135,99 +138,11 @@ class _AddMatchPairsState extends State<AddMatchPairs> {
               child: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.8,
                 child: ElevatedButton(
-                  onPressed: () async {
-                    // Prepare entries for the left and right column
-                    List<Map<String, String>> entries = [];
-                    for (int i = 0; i < leftColumnPairs.length; i++) {
-                      final leftPair = leftColumnPairs[i];
-                      final rightPair = rightColumnPairs[i];
-                      if (leftPair.textController.text.isEmpty || rightPair.textController.text.isEmpty) {
-                        Fluttertoast.showToast(msg: 'Please fill all the fields for entry ${i + 1}');
-                        return;
-                      }
-
-                      Map<String, String> entry = {
-                        'question': leftPair.type == PairType.text
-                            ? leftPair.textController.text
-                            : leftPair.type == PairType.sound
-                            ? 'sound:${leftPair.textController.text}'
-                            : 'image:${DateTime.now().millisecondsSinceEpoch}', // Temp identifier for image
-                      };
-
-                      // Attach imageBytes for image type
-                      if (leftPair.type == PairType.image && leftPair.imageBytes != null) {
-                        entry['question_bytes'] = leftPair.imageBytes;
-                      }
-
-                      // Prepare right pair
-                      entry['answer'] = rightPair.type == PairType.text
-                          ? rightPair.textController.text
-                          : rightPair.type == PairType.sound
-                          ? 'sound:${rightPair.textController.text}'
-                          : 'image:${DateTime.now().millisecondsSinceEpoch}';
-
-                      if (rightPair.type == PairType.image && rightPair.imageBytes != null) {
-                        entry['answer_bytes'] = rightPair.imageBytes;
-                      }
-
-                      entries.add(entry);
-                    }
-
-                    // Validate other inputs
-=======
-                            : 'image',
-                        'answer': rightPair.type == PairType.text
-                            ? rightPair.textController.text
-                            : rightPair.type == PairType.sound
-                            ? 'sound:${rightPair.textController.text}'
-                            : 'image',
-                      };
-
-                      entries.add(entry);
-                    }
-
-                    // Validate inputs
-                    if (indexController.text.isEmpty || titleController.text.isEmpty) {
-                      Fluttertoast.showToast(msg: 'Please fill all the required fields');
-                      return;
-                    }
-
-                    int? points = int.tryParse(widget.pointsController.text);
-
-                    // Call API
-                    await addQuestionController.addMatchThePairs(
-                      main_category_id: widget.main_category_id ?? "",
-                      sub_category_id: widget.sub_category_id ?? "",
-                      topic_id: widget.topic_id ?? "",
-                      sub_topic_id: widget.sub_topic_id,
-                      question_type: 'match_pair',
-                      question_format: leftColumnType.name,
-                      answer_format: rightColumnType.name,
-                      title: titleController.text,
-                      points: points.toString(),
-                      index: indexController.text,
-                      entries: entries,
-                      context: context,
-                    );
-                  
-                  int? points = int.tryParse(widget.pointsController!.text);
-                    // Call the API to add the question
-                    // await addQuestionController.addMatchThePairs(
-                    //   main_category_id: widget.main_category_id ?? "",
-                    //   sub_category_id: widget.sub_category_id ?? "",
-                    //   topic_id: widget.topic_id ?? "",
-                    //   sub_topic_id: widget.sub_topic_id,
-                    //   question_type: 'match_pair',
-                    //   question_format: leftColumnType.name,
-                    //   answer_format: rightColumnType.name,
-                    //   title: titleController.text,
-                    //   points: points.toString(),
-                    //   index: indexController.text,
-                    //   entries: entries,
-                    //   context: context,
-                    // );
+                  onPressed: () {
+                    // Debug uploaded images
+                    print(uploadedImages);
+                    print(uploadedImages.length);
                   },
-
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                     padding: const EdgeInsets.symmetric(
@@ -280,7 +195,7 @@ class _AddMatchPairsState extends State<AddMatchPairs> {
           child: ListView.builder(
             itemCount: pairs.length,
             itemBuilder: (context, index) {
-              return _buildPairRow(pairs[index]);
+              return _buildPairRow(pairs[index], index);
             },
           ),
         ),
@@ -288,14 +203,14 @@ class _AddMatchPairsState extends State<AddMatchPairs> {
     );
   }
 
-  Widget _buildPairRow(TextImageSoundPair pair) {
+  Widget _buildPairRow(TextImageSoundPair pair, int index) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: _buildInputField(pair),
+      child: _buildInputField(pair, index),
     );
   }
 
-  Widget _buildInputField(TextImageSoundPair pair) {
+  Widget _buildInputField(TextImageSoundPair pair, int index) {
     switch (pair.type) {
       case PairType.text:
         return CustomTextField(
@@ -311,7 +226,7 @@ class _AddMatchPairsState extends State<AddMatchPairs> {
       case PairType.image:
         return pair.imageBytes == null
             ? ElevatedButton(
-          onPressed: () => _pickImage(pair),
+          onPressed: () => _pickImage(pair, index),
           style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
@@ -322,16 +237,17 @@ class _AddMatchPairsState extends State<AddMatchPairs> {
           child: const Text("Upload Image"),
         )
             : Image.memory(
-                pair.imageBytes!,
-                width: 50,
-                height: 50,
-                fit: BoxFit.cover,
-              );
+          pair.imageBytes!,
+          width: 50,
+          height: 50,
+          fit: BoxFit.cover,
+        );
       default:
         return const SizedBox.shrink();
     }
   }
 }
+
 
 class TextImageSoundPair {
   PairType type;
