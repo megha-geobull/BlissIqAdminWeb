@@ -18,29 +18,29 @@ class MentorRegistration extends StatefulWidget {
 class _MentorRegistrationState extends State<MentorRegistration> {
   final AuthController mentorController = Get.put(AuthController());
 
-  List<PlatformFile>? _paths;
-  var pathsFile;
-  var pathsFileName;
+    List<PlatformFile>? _paths;
+    var pathsFile;
+    var pathsFileName;
 
-  // File picker for profile image
-  pickFile() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowMultiple: false,
-      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
-      allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
-    );
+    // File picker for profile image
+    pickFile() async {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowMultiple: false,
+        onFileLoading: (FilePickerStatus status) => print("status .... $status"),
+        allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
+      );
 
-    if (result != null && result.files.isNotEmpty) {
-      setState(() {
-        _paths = result.files;
-        pathsFile = _paths!.first.bytes; // Store the bytes
-        pathsFileName = _paths!.first.name; // Store the file name
-      });
-    } else {
-      print('No file selected');
+      if (result != null && result.files.isNotEmpty) {
+        setState(() {
+          _paths = result.files;
+          pathsFile = _paths!.first.bytes; // Store the bytes
+          pathsFileName = _paths!.first.name; // Store the file name
+        });
+      } else {
+        print('No file selected');
+      }
     }
-  }
 
   @override
   Widget build(BuildContext context) {
