@@ -208,7 +208,7 @@ class AuthController extends GetxController{
         'introBio': introBio,
         'password': password,
         'confirm_password': confirmPassword,
-        if (schoolId != null) 'school_id': schoolId, // Add school_id if provided
+        if (schoolId != null) 'school_id': schoolId,
       });
 
       // Attach profile image if selected
