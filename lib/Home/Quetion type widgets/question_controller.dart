@@ -74,10 +74,13 @@ class QuestionController extends GetxController {
       final response = await request.send();
       final responseData = jsonDecode(await response.stream.bytesToString());
 
+      print("Url: "+ApiString.get_mcq);
+      print("Request Fields: "+request.fields.toString());
       print("Response Data: $responseData");
 
       // Handle success and error responses
       if (response.statusCode == 201 && responseData['status'] == 1) {
+        //mcqList=
         Fluttertoast.showToast(
           msg: responseData['message'] ?? 'Added successfully',
         );

@@ -18,6 +18,8 @@ class GetAllQuestionsApiController extends GetxController{
   RxList<TrueOrFalse> getTrueOrFalseList = <TrueOrFalse>[].obs;
   RxList<FillInTheBlanks> getFillInTheBlanksList = <FillInTheBlanks>[].obs;
   RxList<StoryData> getStoryDataList = <StoryData>[].obs;
+  RxList<PhrasesData> getStoryPhrasesList = <PhrasesData>[].obs;
+  RxList<PhrasesData> getConversationList = <PhrasesData>[].obs;
 
   getAllMCQS({
     required String main_category_id ,
@@ -245,6 +247,100 @@ class GetAllQuestionsApiController extends GetxController{
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching mcqs: $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  getStoryPhrases({
+    required String main_category_id ,
+    required String sub_category_id,
+    required String topic_id,
+    String? sub_topic_id}) async {
+    isLoading.value = true;
+    getStoryPhrasesList.clear();
+    try {
+      var body = {
+        'main_category_id':main_category_id,
+        'sub_category_id':sub_category_id,
+        'topic_id':topic_id,
+        'sub_topic_id':sub_topic_id??''
+      };
+      final response = await http.post(
+          Uri.parse(ApiString.get_story_phrases),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(body)
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          // Parse each JSON object into a Data model
+          getStoryPhrasesList.clear();
+          getStoryPhrasesList.value = (responseData["data"] as List)
+              .map((mcqJson) => PhrasesData.fromJson(mcqJson))
+              .toList();
+
+          print("Fetched ${getStoryPhrasesList.length} phrases");
+        } else {
+          showSnackbar(message: responseData['message'] ?? "Failed to fetch phrases ");
+        }
+      } else {
+        showSnackbar(message: "Failed to fetch phrases. Status: ${response.statusCode}");
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetching phrases: $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  getConversation({
+    required String main_category_id ,
+    required String sub_category_id,
+    required String topic_id,
+    String? sub_topic_id}) async {
+    isLoading.value = true;
+    getConversationList.clear();
+    try {
+      var body = {
+        'main_category_id':main_category_id,
+        'sub_category_id':sub_category_id,
+        'topic_id':topic_id,
+        'sub_topic_id':sub_topic_id??''
+      };
+      final response = await http.post(
+          Uri.parse(ApiString.get_user_conversation),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(body)
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          // Parse each JSON object into a Data model
+          getConversationList.clear();
+          getConversationList.value = (responseData["data"] as List)
+              .map((mcqJson) => PhrasesData.fromJson(mcqJson))
+              .toList();
+
+          print("Fetched ${getConversationList.length} conversation");
+        } else {
+          showSnackbar(message: responseData['message'] ?? "Failed to fetch phrases ");
+        }
+      } else {
+        showSnackbar(message: "Failed to fetch conversation. Status: ${response.statusCode}");
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetching conversation: $e");
       log(e.toString());
     } finally {
       isLoading.value = false;
