@@ -97,6 +97,9 @@ class ApiString {
   static const String delete_true_false = "${baseUrl}delete_true_false";
   static const String update_true_false = "${baseUrl}update_true_false";
 
+
+  static const String add_match_pair_question = "${baseUrl}add_match_pair_question";
+
   ///learner
   static const String get_all_learners = "${baseUrl}get_all_learners";
 

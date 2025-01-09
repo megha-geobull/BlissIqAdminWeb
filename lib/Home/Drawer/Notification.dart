@@ -13,6 +13,7 @@ class NotificationPage extends StatefulWidget {
 
 class _NotificationPageState extends State<NotificationPage> {
   final TextEditingController notificationController = TextEditingController();
+  final TextEditingController titleController = TextEditingController();
   String? selectedUser;
   final List<String> users = [
     "Student",
@@ -151,6 +152,16 @@ class _NotificationPageState extends State<NotificationPage> {
               },
             ),
             boxH20(),
+            const Text(
+              'Question title:',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            CustomTextField(
+              controller: titleController,
+              labelText: 'Enter question title here...',
+            ),
+            boxH15(),
             const Text(
               'Notification Message',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
