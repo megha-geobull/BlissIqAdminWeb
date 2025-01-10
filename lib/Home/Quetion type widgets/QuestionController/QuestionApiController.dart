@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/common_snackbar.dart';
@@ -200,7 +201,6 @@ class QuestionApiController extends GetxController {
     }
   }
 
-
   ///Add story-phrase api function
   addStoryPhraseApi({
     required String mainCategoryId,
@@ -392,6 +392,75 @@ class QuestionApiController extends GetxController {
       print('Stacktrace: $stacktrace');
       showSnackbar(
         message: 'An error occurred: $e',
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  addCompleteWordApi({
+    required String mainCategoryId,
+    required String title,
+    required String subCategoryId,
+    required String topicId,
+    String? subTopicId,
+    required String questionType,
+    required String question,
+    required String index,
+    required String optionA,
+    required String optionB,
+    required String optionC,
+    required String optionD,
+    required String answer,
+    required String points,
+    required BuildContext context,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse(ApiString.add_complete_the_word),
+      );
+
+      // Prepare the request body
+      request.fields.addAll({
+        'main_category_id': mainCategoryId,
+        'sub_category_id': subCategoryId,
+        'topic_id': topicId,
+        'sub_topic_id': subTopicId ?? "",
+        'question_type': questionType,
+        'question': question,
+        'title': title,
+        'index': index,
+        'option_a': optionA,
+        'option_b': optionB,
+        'option_c': optionC,
+        'option_d': optionD,
+        'points': points,
+        'answer': answer,
+      });
+
+      final response = await request.send();
+      final responseData = jsonDecode(await response.stream.bytesToString());
+
+      print("Response Data: $responseData");
+
+      // Handle success and error responses
+      if (response.statusCode == 201 && responseData['status'] == 1) {
+        Fluttertoast.showToast(
+          msg: responseData['message'] ?? 'Added successfully',
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: responseData['message'] ?? 'Error occurred',
+        );
+      }
+    } catch (e, stacktrace) {
+      print('An error occurred: $e');
+      print('Stacktrace: $stacktrace');
+      Fluttertoast.showToast(
+        msg: 'An error occurred: $e',
       );
     } finally {
       isLoading.value = false;
