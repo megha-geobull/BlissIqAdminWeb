@@ -7,15 +7,15 @@ List<String> phrases_headers = ["id","main_category_id", "sub_category_id", "top
 List<String> cardFlip_headers = ["id","main_category_id", "sub_category_id", "topic_id",
   "sub_topic_id","question_type","letters[]","images[]","points","index"];
 
-List<String> fill_in_the_blanks_headers = ["id","main_category_id", "sub_category_id", "topic_id",
+List<String> fill_in_the_blanks_headers = ["main_category_id", "sub_category_id", "topic_id",
   "sub_topic_id", "question_type", "title", "question_language","question",
-  "q_image","option_language","option_a","option_b","option_c","option_d","answer","points","index"];
+  "q_image_name","option_language","option_a","option_b","option_c","option_d","answer","points","index"];
 
-List<String> mcq_headers = ["id","main_category_id", "sub_category_id", "topic_id", "sub_topic_id", "question_type",
-  "title","question","q_image","option_a","option_b","option_c",'option_d',"answer","points","index"];
+List<String> mcq_headers = ["main_category_id", "sub_category_id", "topic_id", "sub_topic_id", "question_type",
+  "title","question","q_image_name","option_a","option_b","option_c",'option_d',"answer","points","index"];
 
-List<String> rearrange_headers = ["id","main_category_id", "sub_category_id", "topic_id", "sub_topic_id",
-  "question_type", "title", "question", "q_image", "answer",'points',"index"];
+List<String> rearrange_headers = ["main_category_id", "sub_category_id", "topic_id", "sub_topic_id",
+  "question_type", "title", "question", "q_image_name", "answer",'points',"index"];
 
 List<String> true_false_headers = ["id","main_category_id", "sub_category_id", "topic_id", "sub_topic_id",
   "question_type", "question", "q_image", "answer",'points',"index"];
