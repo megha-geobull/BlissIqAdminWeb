@@ -19,6 +19,7 @@ class MentorRegistration extends StatefulWidget {
 class _MentorRegistrationState extends State<MentorRegistration> {
   final AuthController mentorController = Get.put(AuthController());
 
+
   String? selectedSchool;
 
   List<PlatformFile>? _paths;
@@ -46,16 +47,16 @@ class _MentorRegistrationState extends State<MentorRegistration> {
       allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
     );
 
-    if (result != null && result.files.isNotEmpty) {
-      setState(() {
-        _paths = result.files;
-        pathsFile = _paths!.first.bytes; // Store the bytes
-        pathsFileName = _paths!.first.name; // Store the file name
-      });
-    } else {
-      print('No file selected');
+      if (result != null && result.files.isNotEmpty) {
+        setState(() {
+          _paths = result.files;
+          pathsFile = _paths!.first.bytes; // Store the bytes
+          pathsFileName = _paths!.first.name; // Store the file name
+        });
+      } else {
+        print('No file selected');
+      }
     }
-  }
 
 
 
