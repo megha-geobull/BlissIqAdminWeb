@@ -14,6 +14,9 @@ List<String> fill_in_the_blanks_headers = ["main_category_id", "sub_category_id"
 List<String> mcq_headers = ["main_category_id", "sub_category_id", "topic_id", "sub_topic_id", "question_type",
   "title","question","q_image_name","option_a","option_b","option_c",'option_d',"answer","points","index"];
 
+List<String> complete_the_word_headers = ["main_category_id", "sub_category_id", "topic_id", "sub_topic_id", "question_type",
+  "title","question","option_a","option_b","option_c",'option_d',"answer","points","index"];
+
 List<String> rearrange_headers = ["main_category_id", "sub_category_id", "topic_id", "sub_topic_id",
   "question_type", "title", "question", "q_image_name", "answer",'points',"index"];
 

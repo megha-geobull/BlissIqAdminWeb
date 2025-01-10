@@ -14,7 +14,7 @@ import 'package:http_parser/http_parser.dart';
 class QuestionController extends GetxController {
 
   RxBool isLoading = false.obs;
-
+  List<dynamic> mcqList = [];
 
   addMCQ({
     required String main_category_id,
