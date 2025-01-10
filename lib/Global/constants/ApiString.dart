@@ -14,6 +14,9 @@ class ApiString {
   static const String edit_profile = "${baseUrl}edit_profile";
   static const String get_profile = "${baseUrl}get_profile";
 
+  static const String add_conversation = "${baseUrl}add_conversation";
+  static const String add_learning_slide = "${baseUrl}add_learning_slide";
+
 
   ///mentor
   static const String mentorBaseUrl = "http://65.0.211.122:4444/mentor_api/";
@@ -21,6 +24,7 @@ class ApiString {
   static const String get_all_mentors = "${baseUrl}get_all_mentors";
   static const String approve_mentor = "${baseUrl}approve_mentor";
   static const String assign_mentor = "${baseUrl}assign_mentor";
+  static const String get_assign_teachers = "${baseUrl}get_assign_teachers";
 
 
 
@@ -31,6 +35,9 @@ class ApiString {
   static const String get_all_schools = "${baseUrl}get_all_schools";
   static const String assign_school = "${baseUrl}assign_school";
 
+
+
+
   ///learner
   static const String get_all_learners = "${baseUrl}get_all_learners";
 
@@ -39,7 +46,9 @@ class ApiString {
   static const String companyBaseUrl = "http://65.0.211.122:4444/company_api/";
   static const String company_registration = "${companyBaseUrl}company_registration";
   static const String approve_company = "${baseUrl}approve_company";
-  static const String get_all_companies = "${companyBaseUrl}get_all_companies";
+  static const String get_all_companies = "${baseUrl}get_all_companies";
+  static const String get_assign_schools = "${baseUrl}get_assign_schools";
+
 
 
   /// Profile Endpoints
@@ -132,6 +141,7 @@ class ApiString {
   static const String add_match_pair_question = "${baseUrl}add_match_pair_question";
   static const String get_match_pair_question = "${baseUrl}get_match_pair_question";
   static const String delete_match_pair_question = "${baseUrl}delete_match_pair_question";
+
 
 
 }

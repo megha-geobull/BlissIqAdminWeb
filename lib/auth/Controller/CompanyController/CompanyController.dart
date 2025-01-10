@@ -6,6 +6,7 @@ import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/common_snackbar.dart';
 import 'package:blissiqadmin/Global/utils/shared_preference/shared_preference_services.dart';
 import 'package:blissiqadmin/Home/HomePage.dart';
+import 'package:blissiqadmin/Home/Users/Models/GetSchoolsAssignModel.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -39,6 +40,8 @@ class CompanyController extends GetxController{
   var selectedUserType = 'Mentor'.obs;
 
   RxList<Data> allCompanyData = <Data>[].obs;
+  RxList<AllAssignedSchoolsData> allAssignSchoolData = <AllAssignedSchoolsData>[].obs;
+
   RxString userId = "".obs;
 
 
@@ -273,11 +276,11 @@ class CompanyController extends GetxController{
     }
   }
 
-  approveCompany({required String company_id, required String approval_status}) async {
+  approveCompany({required String companyID, required String approvalStatus}) async {
     isLoading.value = true;
     var body = {
-      "company_id": company_id,
-      "approval_status": approval_status,
+      "company_id": companyID,
+      "status": approvalStatus,
     };
 
     try {
@@ -362,6 +365,47 @@ class CompanyController extends GetxController{
       isLoading.value = false;
     }
   }
+
+
+
+  getAssignedSchoolsApi(String companyID) async {
+    isLoading.value = true;
+
+    try {
+      final body = jsonEncode({
+        "company_id": companyID,
+      });
+
+      final response = await http.post(
+        Uri.parse(ApiString.get_assign_schools),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: body,
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var responseData = GetSchoolsAssignModel.fromJson(jsonDecode(response.body));
+        if (responseData.status == 1) {
+          allAssignSchoolData.value = responseData.data;
+          print("Fetched ${allAssignSchoolData.value.length} assigned schools");
+        } else {
+          showSnackbar(message: "Failed to fetch assigned schools");
+        }
+      } else {
+        showSnackbar(message: "Failed to fetch assigned schools. Status: ${response.statusCode}");
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetching assigned schools: $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
 
 }
 

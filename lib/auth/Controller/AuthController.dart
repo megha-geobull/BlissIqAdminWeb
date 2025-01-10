@@ -7,6 +7,7 @@ import 'package:blissiqadmin/Global/constants/common_snackbar.dart';
 import 'package:blissiqadmin/Global/utils/shared_preference/shared_preference_services.dart';
 import 'package:blissiqadmin/Home/HomePage.dart';
 import 'package:blissiqadmin/Home/Users/Models/GetAllMentorModel.dart';
+import 'package:blissiqadmin/Home/Users/Models/GetMentorsAssignModel.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -40,6 +41,7 @@ class AuthController extends GetxController{
   RxList<Data> allMentorData = <Data>[].obs;
   RxString userId = "".obs;
 
+  RxList<AllAssignedMentorsData> allAssignMentorData = <AllAssignedMentorsData>[].obs;
 
   // Handle country code change
   void onCountryChange(CountryCode countryCode) {
@@ -204,7 +206,7 @@ class AuthController extends GetxController{
         'introBio': introBio,
         'password': password,
         'confirm_password': confirmPassword,
-        if (schoolId != null) 'school_id': schoolId, // Add school_id if provided
+        if (schoolId != null) 'school_id': schoolId,
       });
 
       // Attach profile image if selected
@@ -271,6 +273,45 @@ class AuthController extends GetxController{
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching mentors: $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+  getAssignedMentorsApi(String schoolID) async {
+    isLoading.value = true;
+
+    try {
+      final body = jsonEncode({
+        "school_id": schoolID,
+      });
+
+      final response = await http.post(
+        Uri.parse(ApiString.get_assign_teachers),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: body,
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var responseData = GetMentorsAssignModel.fromJson(jsonDecode(response.body));
+        if (responseData.status == 1) {
+          allAssignMentorData.value = responseData.data;
+          print("Fetched ${allAssignMentorData.value.length} assigned mentor");
+        } else {
+          showSnackbar(message: "Failed to fetch assigned mentors");
+        }
+      } else {
+        showSnackbar(message: "Failed to fetch assigned schools. Status: ${response.statusCode}");
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetching assigned schools: $e");
       log(e.toString());
     } finally {
       isLoading.value = false;

@@ -1,5 +1,8 @@
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/AppColor.dart';
+import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
+import 'package:blissiqadmin/Home/Assign/AssignedMentorPage.dart';
+import 'package:blissiqadmin/Home/Assign/AssignedStudentPage.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/Home/Users/Mentor/MentorRegistration.dart';
 import 'package:blissiqadmin/Home/Users/Models/AllSchoolModel.dart';
@@ -96,7 +99,7 @@ class _SchoolScreenState extends State<SchoolScreen> {
                       body: Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8.0, vertical: 16),
-                        child: _buildMentorMainContent(),
+                        child: _buildSchoolMainContent(),
                       ),
                     ),
                   ),
@@ -109,7 +112,7 @@ class _SchoolScreenState extends State<SchoolScreen> {
     );
   }
 
-  Widget _buildMentorMainContent() {
+  Widget _buildSchoolMainContent() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -140,6 +143,8 @@ class _SchoolScreenState extends State<SchoolScreen> {
             4: FlexColumnWidth(1),
             5: FlexColumnWidth(1),
             6: FlexColumnWidth(1),
+            7: FlexColumnWidth(1),
+            8: FlexColumnWidth(1),
           },
           children: [
             _buildTableHeader(),
@@ -224,6 +229,44 @@ class _SchoolScreenState extends State<SchoolScreen> {
         ),
         Padding(
           padding: const EdgeInsets.all(12.0),
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AssignedMentorPage(schoolID: school.id ?? ''),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              backgroundColor: Colors.blue,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
+            child: const Text('View', style: TextStyle(fontSize: 12,color: Colors.white)),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AssignedStudentPage(schoolID: school.id ?? ''),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              backgroundColor: Colors.blueAccent,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
+            child: const Text('View', style: TextStyle(fontSize: 12,color: Colors.white)),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(12.0),
           child: IconButton(
             icon: const Icon(Icons.delete, color: Colors.red),
             onPressed: () => _removeSchool(index),
@@ -232,6 +275,7 @@ class _SchoolScreenState extends State<SchoolScreen> {
       ],
     );
   }
+
   Color _getButtonColor(String? approvalStatus) {
     switch (approvalStatus) {
       case "Approved":
@@ -244,6 +288,7 @@ class _SchoolScreenState extends State<SchoolScreen> {
         return AppColor.grey;
     }
   }
+
   Widget _buildHeader() {
     return Container(
       decoration: BoxDecoration(
@@ -330,6 +375,13 @@ class _SchoolScreenState extends State<SchoolScreen> {
         Padding(
           padding: EdgeInsets.all(12.0),
           child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
+        Padding(
+          padding: EdgeInsets.all(12.0),
+          child: Text('Mentor', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),Padding(
+          padding: EdgeInsets.all(12.0),
+          child: Text('Student', style: TextStyle(fontWeight: FontWeight.bold)),
         ),
         Padding(
           padding: EdgeInsets.all(12.0),

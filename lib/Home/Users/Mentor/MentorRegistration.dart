@@ -4,6 +4,7 @@ import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/auth/Controller/AuthController.dart';
+import 'package:blissiqadmin/auth/Controller/SchoolController/SchoolController.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,18 +19,33 @@ class MentorRegistration extends StatefulWidget {
 class _MentorRegistrationState extends State<MentorRegistration> {
   final AuthController mentorController = Get.put(AuthController());
 
-    List<PlatformFile>? _paths;
-    var pathsFile;
-    var pathsFileName;
 
-    // File picker for profile image
-    pickFile() async {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowMultiple: false,
-        onFileLoading: (FilePickerStatus status) => print("status .... $status"),
-        allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
-      );
+  String? selectedSchool;
+
+  List<PlatformFile>? _paths;
+  var pathsFile;
+  var pathsFileName;
+
+
+  final SchoolController schoolController = Get.put(SchoolController());
+
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      schoolController.getAllSchools();
+    });
+  }
+
+  // File picker for profile image
+  pickFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: false,
+      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
+      allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
+    );
 
       if (result != null && result.files.isNotEmpty) {
         setState(() {
@@ -41,6 +57,8 @@ class _MentorRegistrationState extends State<MentorRegistration> {
         print('No file selected');
       }
     }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -204,6 +222,58 @@ class _MentorRegistrationState extends State<MentorRegistration> {
                       ),
                     ),
                     boxH20(),
+                    Obx(() {
+                      if (schoolController.isLoading.value) {
+                        return const CircularProgressIndicator();
+                      } else {
+                        return DropdownButtonFormField<String>(
+                          value: selectedSchool,
+                          decoration: InputDecoration(
+                            labelText: 'Select School',
+                            labelStyle: const TextStyle(
+                              color: Colors.blueGrey,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 18,
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: MediaQuery.of(context).size.width * 0.01,
+                              vertical: MediaQuery.of(context).size.height * 0.01,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: const BorderSide(color: Colors.blueAccent, width: 0.8),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedSchool = value;
+                            });
+                          },
+                          items: schoolController.allSchoolData.map((school) {
+                            return DropdownMenuItem<String>(
+                              value: school.id,
+                              child: Text(
+                                school.schoolName.toString(),
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black.withOpacity(0.8),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          icon: Icon(
+                            Icons.arrow_drop_down_circle,
+                            color : Colors.grey.shade600,
+                            size: 18,
+                          ),
+                        );
+                      }
+                    }),
+                    boxH20(),
+
                     // Name TextField
                     CustomTextField(
                       controller: mentorController.nameController,
@@ -419,6 +489,7 @@ class _MentorRegistrationState extends State<MentorRegistration> {
                                           .confirmPasswordController.text,
                                       context: context,
                                       profileImageBytes: pathsFile,
+                                        schoolId : selectedSchool
                                     );
                                   }
                                 },

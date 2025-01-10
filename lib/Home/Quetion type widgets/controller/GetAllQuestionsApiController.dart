@@ -5,6 +5,7 @@ import 'package:blissiqadmin/Global/constants/common_snackbar.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_fill_in_the_blanks.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_rearrange_model.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_story_model.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_story_phrases_model.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_trueOrfalse_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
@@ -18,6 +19,7 @@ class GetAllQuestionsApiController extends GetxController{
   RxList<TrueOrFalse> getTrueOrFalseList = <TrueOrFalse>[].obs;
   RxList<FillInTheBlanks> getFillInTheBlanksList = <FillInTheBlanks>[].obs;
   RxList<StoryData> getStoryDataList = <StoryData>[].obs;
+
   RxList<PhrasesData> getStoryPhrasesList = <PhrasesData>[].obs;
   RxList<PhrasesData> getConversationList = <PhrasesData>[].obs;
 
@@ -30,6 +32,7 @@ class GetAllQuestionsApiController extends GetxController{
     getStoryPhrasesList.clear();
     getConversationList.clear();
   }
+
 
   getAllMCQS({
     required String main_category_id ,
@@ -219,7 +222,7 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-   getStoryDataBlanks({
+   getStoryData({
     required String main_category_id ,
     required String sub_category_id,
     required String topic_id,
