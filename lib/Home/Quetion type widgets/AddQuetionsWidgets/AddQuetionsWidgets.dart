@@ -120,7 +120,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   final QuestionApiController questionApiController =
       Get.put(QuestionApiController());
 
-  final QuestionController _question_controller = Get.put(QuestionController());
   final GetAllQuestionsApiController _getAllQuestionsApiController = Get.find();
   late ScrollController _scrollController;
   @override
@@ -203,7 +202,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     for (int i = 0; i < 1; i++) {
       // Example: Add 1 row of sample data
       List<dynamic> row = [
-        '', // Empty for the first column
         mainCategoryId,
         subCategoryId,
         topicId,
@@ -244,6 +242,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       uploadCsvToApi(headers);
     } else if (selectedQuestionType == "Re-Arrange the Word") {
       headers = rearrange_headers;
+      uploadCsvToApi(headers).whenComplete(() => _getAllQuestionsApiController);
     } else if (selectedQuestionType == "Complete the Word") {
       headers = rearrange_headers;
     } else if (selectedQuestionType == "True/False") {
@@ -255,6 +254,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = phrases_headers;
     } else if (selectedQuestionType == "Conversation") {
       headers = conversation_headers;
+    }else if (selectedQuestionType == "Fill in the blanks") {
+      headers = fill_in_the_blanks_headers;
+      uploadCsvToApi(headers);
     } else if (selectedQuestionType == "Learning Slide") {
       headers = learning_slide;
     } else if (selectedQuestionType == "Card Flip") {
@@ -290,7 +292,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           sub_category_id: subCategoryId,
           topic_id: topicId,sub_topic_id: subtopicId);
     }else if (selectedQuestionType == "Story") {
-      _getAllQuestionsApiController.getStoryDataBlanks(
+      _getAllQuestionsApiController.getStoryData(
           main_category_id: mainCategoryId,
           sub_category_id: subCategoryId,
           topic_id: topicId,sub_topic_id: subtopicId);
@@ -300,6 +302,10 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           sub_category_id: subCategoryId,
           topic_id: topicId,sub_topic_id: subtopicId);
     } else if (selectedQuestionType == "Phrases") {
+      _getAllQuestionsApiController.getStoryPhrases(
+          main_category_id: mainCategoryId,
+          sub_category_id: subCategoryId,
+          topic_id: topicId,sub_topic_id: subtopicId);
     } else if (selectedQuestionType == "Conversation") {
     } else if (selectedQuestionType == "Learning Slide") {
     } else if (selectedQuestionType == "Card Flip") {}
@@ -776,7 +782,14 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
 
       // Validate headers
       List<String> csvHeaders = rows.first.cast<String>();
+// Remove BOM from the first header if present
+      if (csvHeaders.isNotEmpty && csvHeaders.first.startsWith('ï»¿')) {
+        csvHeaders[0] = csvHeaders.first.substring(3);
+        // Update the first header without BOM
+      }
+
       if (!listEquals(csvHeaders, requiredHeaders)) {
+        showSnackbar(message: "CSV headers do not match the required columns.");
         print('CSV headers do not match the required columns.');
         print('Expected: $requiredHeaders');
         print('Found: $csvHeaders');
@@ -794,8 +807,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
 
       // Validate and clean data
       for (var row in data) {
-        if (row['main_category_id'] == null ||
-            row['main_category_id'].isEmpty) {
+        if (row['main_category_id'] == null || row['main_category_id'].isEmpty) {
           print('Error: main_category_id is missing for row: $row');
           return;
         }
@@ -803,24 +815,42 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           print('Error: sub_category_id is missing for row: $row');
           return;
         }
-        if (row['topic_name'] == null || row['topic_name'].isEmpty) {
+        if (selectedQuestionType!="Alphabets Example" && row['topic_id'] == null || row['topic_id'].isEmpty) {
+          print('Error: topic_id is missing for row: $row');
+          return;
+        }
+        if (selectedQuestionType=="Alphabets Example" && (row['topic_name'] == null || row['topic_name'].isEmpty)) {
           print('Error: topic_name is missing for row: $row');
           return;
         }
       }
       // Make API call
-      String apiUrl = selectedQuestionType == "Alphabets Example"
+      String apiUrl =
+      selectedQuestionType == "Multiple Choice Question"
+          ? ApiString.add_mcq:
+      selectedQuestionType == "Alphabets Example"
           ? ApiString.add_topics
-          : selectedQuestionType == "Multiple Choice Question"
-              ? ApiString.add_mcq
-              : selectedQuestionType == "Re-Arrange the Word"
-                  ? ApiString.add_rearrange
-                  : selectedQuestionType == "True/False"
-                      ? ApiString.add_true_false
-                      : selectedQuestionType == "Story"
-                          ? ApiString.add_story
-                          : ApiString.add_fill_blanks;
-
+          : selectedQuestionType == "Re-Arrange the Word"
+          ? ApiString.add_rearrange
+          : selectedQuestionType == "True/False"
+          ? ApiString.add_true_false
+          : selectedQuestionType == "Story"
+          ? ApiString.add_story
+          : selectedQuestionType == "Fill in the blanks"
+          ? ApiString.add_fill_blanks
+          : selectedQuestionType == "Phrases"
+          ? ApiString.add_story_phrases
+          : selectedQuestionType == "Conversation"
+          ? ApiString.add_conversation
+          : selectedQuestionType == "Card Flip"
+          ? ApiString.add_card_flipping
+          : selectedQuestionType == "Learning Slide"
+          ? ApiString.add_learning_slide
+          : selectedQuestionType == "Complete the Word"
+          ? ApiString.add_complete_the_word
+          : selectedQuestionType == "Complete the paragraph"
+          ? ApiString.add_complete_the_word: ApiString.add_fill_blanks;
+      print(apiUrl);
       for (var map in data) {
         // String payload = jsonEncode(map);
         String payload = jsonEncode({
@@ -1573,53 +1603,72 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
               ],
             ),
             SizedBox(height: 10),
-            // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal, // Horizontal scroll
-              child: Container(
-                constraints:
-                    BoxConstraints(maxWidth: 1200), // Max width constraint
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical, // Vertical scroll
-                  child: Table(
-                    border: TableBorder.all(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    columnWidths: const {
-                      0: FlexColumnWidth(1),
-                      1: FlexColumnWidth(2),
-                      2: FlexColumnWidth(1),
-                      3: FlexColumnWidth(1),
-                    },
-                    children: [
-                      TableRow(
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade100,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+            Obx(() {
+              return Center(
+                child: _getAllQuestionsApiController.isLoading.value
+                    ? CircularProgressIndicator()
+                    : (_getAllQuestionsApiController.getStoryPhrasesList.isEmpty
+                    ? Center(
+                  child: Text(
+                    'No data available',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey),
+                  ),
+                )
+                    : SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  controller: _scrollController,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                        minWidth: 1200, minHeight: 400),
+                    child: SizedBox(
+                      height: 400,
+                      width: 600,
+                      child: Column(
                         children: [
-                          _buildTableHeader("Question Type"),
-                          _buildTableHeader("Story Phrases"),
-                          _buildTableHeader("Answer"),
-                          _buildTableHeader("Points"),
+                          // Table Header
+                          Container(
+                            color: Colors.orange.shade100,
+                            child: Row(
+                              children: [
+                                _buildTableHeader("Index"),
+                                _buildTableHeader("Phrase"),
+                                _buildTableHeader("Points"),
+                              ],
+                            ),
+                          ),
+                          // Table Rows
+                          Expanded(
+                            child: ListView.builder(
+                              scrollDirection: Axis.vertical,
+                              itemCount: _getAllQuestionsApiController
+                                  .getStoryPhrasesList.length,
+                              itemBuilder: (context, index) {
+                                var row =
+                                _getAllQuestionsApiController
+                                    .getStoryPhrasesList[index];
+                                return Row(
+                                  children: [
+                                    _buildTableCell(
+                                        row.index.toString() ?? ""),
+                                    _buildTableCell(
+                                        row.phraseName ?? ""),
+                                    _buildTableCell(
+                                        row.points.toString() ?? ""),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
                         ],
                       ),
-                      // Dummy rows
-                      for (int i = 0; i < 5; i++)
-                        TableRow(
-                          children: [
-                            _buildTableCell("Phrase"),
-                            _buildTableCell("Phrase Content $i"),
-                            _buildTableCell("Correct Answer $i"),
-                            _buildTableCell((10 + i * 5).toString()),
-                          ],
-                        ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            ),
+                )),
+              );
+            })
           ],
         ),
       ),
@@ -2903,7 +2952,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       ),
     ); // Placeholder for the actual implementation
   }
-
 
   /// add Conversation
   Widget _buildConversationContent() {
