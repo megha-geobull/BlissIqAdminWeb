@@ -22,10 +22,17 @@ class _StudentScreenState extends State<StudentScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      studentController.getAllLearners();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        await studentController.getAllLearners();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load students: $e')),
+        );
+      }
     });
   }
+
 
 
   void _removeStudent(int index) {
@@ -138,123 +145,6 @@ class _StudentScreenState extends State<StudentScreen> {
     );
   }
 
-  TableRow _buildTableRow(Data student, int index) {
-    return TableRow(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: CircleAvatar(
-            radius: 24,
-            backgroundColor: Colors.grey.shade300,
-            child: CachedNetworkImage(
-              imageUrl: "${ApiString.ImgBaseUrl}${student.profileImage}",
-              imageBuilder: (context, imageProvider) => Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    image: imageProvider,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              placeholder: (context, url) => const CircularProgressIndicator(),
-              errorWidget: (context, url, error) => const Icon(Icons.person, size: 48, color: Colors.grey),
-            ),
-          ),
-        ),
-
-
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(student.userName ?? 'No Name'),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(student.email ?? 'No Email'),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(student.contactNo?.toString() ?? '-'),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(student.school ?? 'No school'),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(student.language ?? 'No provided'),
-        ), // Placeholder if experience is missing
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(student.purpose ?? 'not provided'),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: selectedMentor == null
-              ? ElevatedButton(
-            onPressed: () {
-              print("student.sId ${student.sId}");
-              _showMentorBottomSheet(context, student.sId);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10)),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            ),
-            child:
-            const Text(
-              'Assign',
-              style: TextStyle(
-                letterSpacing: 1,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          )
-              :
-          Text(
-            'Assigned to $selectedMentor',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-          ),
-        ),
-        // Padding(
-        //   padding: const EdgeInsets.all(12.0),
-        //   child: ElevatedButton(
-        //     onPressed: () {
-        //       print("student.sId ${student.sId}");
-        //       _showMentorBottomSheet(context,student.sId);
-        //     },
-        //     style: ElevatedButton.styleFrom(
-        //       backgroundColor: Colors.green,
-        //       shape: const RoundedRectangleBorder(
-        //         borderRadius: BorderRadius.all(Radius.circular(10)),
-        //       ),
-        //       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        //     ),
-        //     child: const Text(
-        //       'Assign',
-        //       style: TextStyle(
-        //         letterSpacing: 1,
-        //         fontSize: 12,
-        //         fontWeight: FontWeight.bold,
-        //         color: Colors.white,
-        //       ),
-        //     ),
-        //   ),
-        // ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () => _removeStudent(index),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildHeader() {
     return Container(
@@ -328,5 +218,108 @@ class _StudentScreenState extends State<StudentScreen> {
       ],
     );
   }
+
+  TableRow _buildTableRow(Data student, int index) {
+    return TableRow(
+      children: [
+        // Profile Image
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: CircleAvatar(
+            radius: 24,
+            backgroundColor: Colors.grey.shade300,
+            child: student.profileImage != null && student.profileImage!.isNotEmpty
+                ? CachedNetworkImage(
+              imageUrl: "${ApiString.ImgBaseUrl}${student.profileImage}",
+              imageBuilder: (context, imageProvider) => Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              placeholder: (context, url) => const CircularProgressIndicator(),
+              errorWidget: (context, url, error) =>
+              const Icon(Icons.person, size: 48, color: Colors.grey),
+            )
+                : const Icon(Icons.person, size: 48, color: Colors.grey),
+          ),
+        ),
+        // User Name
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(student.userName ?? 'No Name'),
+        ),
+        // Email
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(student.email ?? 'No Email'),
+        ),
+        // Contact Number
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(student.contactNo?.toString() ?? '-'),
+        ),
+        // School
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(student.school ?? 'No School'),
+        ),
+        // Language
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(student.language ?? 'No Language Provided'),
+        ),
+        // Purpose
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(student.purpose ?? 'Not Provided'),
+        ),
+        // Mentor Assignment
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: selectedMentor == null
+              ? ElevatedButton(
+            onPressed: () {
+              print("student.sId ${student.sId}");
+              _showMentorBottomSheet(context, student.sId);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            ),
+            child: const Text(
+              'Assign',
+              style: TextStyle(
+                letterSpacing: 1,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          )
+              : Text(
+            'Assigned to ${selectedMentor ?? "Unknown"}',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
+        ),
+        // Delete Button
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () => _removeStudent(index),
+          ),
+        ),
+      ],
+    );
+  }
+
+
 }
 

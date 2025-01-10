@@ -5,6 +5,7 @@ import 'package:blissiqadmin/Home/Users/Company/CompanyRegistrationPage.dart';
 import 'package:blissiqadmin/Home/Users/Company/CompnayListBottomSheet.dart';
 import 'package:blissiqadmin/auth/Controller/CompanyController/CompanyController.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -50,13 +51,19 @@ class _CompanyScreenState extends State<CompanyScreen> {
         );
       },
     );
+
     if (confirmation == true) {
-      var company = companyController.allCompanyData
-          .where((p0) => p0.id == companyId)
-          .first;
-      companyController.approveCompany(
-        company_id: companyId,
-        approval_status: (company.approvalStatus == "Disapproved" || company.approvalStatus == "Pending") ? "Approved" : "Disapproved",
+      var company = companyController.allCompanyData.firstWhere((p0) => p0.id == companyId);
+      if (kDebugMode) {
+        print("Company ID: $companyId");
+      }
+      String newStatus = (company.approvalStatus?.toLowerCase() == "disapproved" ||
+          company.approvalStatus?.toLowerCase() == "pending")
+          ? "Approved"
+          : "Disapproved";
+      await companyController.approveCompany(
+        companyID: companyId,
+        approvalStatus: newStatus,
       );
     }
   }

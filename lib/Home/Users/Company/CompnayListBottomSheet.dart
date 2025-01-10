@@ -1,3 +1,4 @@
+import 'package:blissiqadmin/Home/Assign/AssignedSchoolPage.dart';
 import 'package:blissiqadmin/auth/Controller/AuthController.dart';
 import 'package:blissiqadmin/auth/Controller/CompanyController/CompanyController.dart';
 import 'package:blissiqadmin/auth/Controller/SchoolController/SchoolController.dart';
@@ -41,32 +42,55 @@ class _CompnayListBottomSheetState extends State<CompnayListBottomSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 12.0),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Colors.white, Colors.white],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+              Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Select School',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey),
-                ),
-                child: const Text(
-                  'Select School',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                  const Spacer(),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        Get.to(() => AssignedSchoolPage(companyID: widget.companyID.toString()));
+                        print(widget.companyID);
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 12.0),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Colors.orange, Colors.orange],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Text(
+                          'Assigned Schools',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
               const SizedBox(height: 16),
               Expanded(
                 child: Obx(
-                      () => ListView.builder(
+                  () => ListView.builder(
                     itemCount: schoolController.allSchoolData.length,
                     itemBuilder: (context, index) {
                       var school = schoolController.allSchoolData[index];
@@ -103,19 +127,23 @@ class _CompnayListBottomSheetState extends State<CompnayListBottomSheet> {
                               color: Colors.black,
                             ),
                           ),
-                          trailing:   Padding(
+                          trailing: Padding(
                             padding: const EdgeInsets.all(12.0),
                             child: ElevatedButton(
                               onPressed: () {
-                                schoolController.assignSchoolApi(companyId: widget.companyID.toString(),schoolId: school.id.toString());
+                                schoolController.assignSchoolApi(
+                                    companyId: widget.companyID.toString(),
+                                    schoolId: school.id.toString());
                                 Navigator.pop(context, school.schoolName);
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.green,
                                 shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10)),
                                 ),
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 8),
                               ),
                               child: const Text(
                                 'Assign',
