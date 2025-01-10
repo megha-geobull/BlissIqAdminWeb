@@ -271,7 +271,7 @@ class CategoryController extends GetxController {
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
           get_topic(categoryId: maincategory_id,sub_categoryId: sub_categoryId);
@@ -386,10 +386,11 @@ class CategoryController extends GetxController {
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
           showSnackbar(message: "Subtopic added successfully");
+          get_SubTopic(categoryId: maincategory_id, sub_categoryId: sub_categoryId, topicId: topicId);
         } else {
           showSnackbar(message: "Failed to add Subtopic");
         }

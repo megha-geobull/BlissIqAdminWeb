@@ -89,7 +89,23 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   String topicId = '';
   String subtopicId = '';
 
-// <<<<<<< narayan.dev
+
+  // late List<Map<String, dynamic>> entries;
+
+  String? imagePath;
+  final ImagePicker _picker = ImagePicker();
+  // Function to pick an image from the gallery
+  Future<void> pickImage() async {
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        imagePath = pickedFile.path;
+      });
+    }
+  }
+
+
   List<PlatformFile>? _paths;
   var pathsFile;
   var pathsFileName;
@@ -117,11 +133,13 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   ];
 
   final CategoryController _controller = Get.put(CategoryController());
+
   final QuestionApiController questionApiController =
       Get.put(QuestionApiController());
 
   final GetAllQuestionsApiController _getAllQuestionsApiController = Get.find();
   late ScrollController _scrollController;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -174,10 +192,10 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     List<String> headers = [];
     if (selectedQuestionType == "Multiple Choice Question") {
       headers = mcq_headers;
-    } else if (selectedQuestionType == "Re-Arrange the Word") {
-      headers = rearrange_headers;
     } else if (selectedQuestionType == "Fill in the blanks") {
       headers = fill_in_the_blanks_headers;
+    }else if (selectedQuestionType == "Re-Arrange the Word") {
+      headers = rearrange_headers;
     } else if (selectedQuestionType == "Complete the Word") {
       headers = complete_the_word_headers;
     } else if (selectedQuestionType == "True/False") {
@@ -192,7 +210,11 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = learning_slide;
     } else if (selectedQuestionType == "Card Flip") {
       headers = cardFlip_headers;
-    } else if (selectedQuestionType == "Alphabets Example") {
+    } else if (selectedQuestionType == "Complete the paragraph") {
+      headers = complete_paragraph;
+    }else if (selectedQuestionType == "Match the pairs") {
+      headers = match_the_pairs_example;
+    }else if (selectedQuestionType == "Alphabets Example") {
       headers = alphabet_example;
     }
 
@@ -235,13 +257,15 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   }
 
   void _importTableToCSV() async {
+    print("inside import csv");
     List<List<dynamic>> rows = [];
 
     List<String> headers = [];
     if (selectedQuestionType == "Multiple Choice Question") {
       headers = mcq_headers;
-      uploadCsvToApi(headers);
-    } else if (selectedQuestionType == "Re-Arrange the Word") {
+    } else if (selectedQuestionType == "Fill in the blanks") {
+      headers = fill_in_the_blanks_headers;
+    }else if (selectedQuestionType == "Re-Arrange the Word") {
       headers = rearrange_headers;
       uploadCsvToApi(headers).whenComplete(() => _getAllQuestionsApiController);
     } else if (selectedQuestionType == "Complete the Word") {
@@ -251,7 +275,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = true_false_headers;
     } else if (selectedQuestionType == "Story") {
       headers = story_headers;
-      uploadCsvToApi(headers);
     } else if (selectedQuestionType == "Phrases") {
       headers = phrases_headers;
     } else if (selectedQuestionType == "Conversation") {
@@ -263,11 +286,16 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = learning_slide;
     } else if (selectedQuestionType == "Card Flip") {
       headers = cardFlip_headers;
-    } else if (selectedQuestionType == "Alphabets Example") {
+    } else if (selectedQuestionType == "Complete the paragraph") {
+      headers = complete_paragraph;
+    }else if (selectedQuestionType == "Match the pairs") {
+      headers = match_the_pairs_example;
+    }else if (selectedQuestionType == "Alphabets Example") {
       headers = alphabet_example;
-      uploadCsvToApi(headers);
     }
     rows.add(headers);
+    uploadCsvToApi(headers);
+    print(headers);
   }
 
   getData() async {
@@ -276,6 +304,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   }
 
   void _getAddedQuestion() {
+    _getAllQuestionsApiController.clearData();
     if (selectedQuestionType == "Multiple Choice Question") {
       _getAllQuestionsApiController.getAllMCQS(
           main_category_id: mainCategoryId,
@@ -309,7 +338,12 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           sub_category_id: subCategoryId,
           topic_id: topicId,sub_topic_id: subtopicId);
     } else if (selectedQuestionType == "Conversation") {
+      _getAllQuestionsApiController.getConversation(
+          main_category_id: mainCategoryId,
+          sub_category_id: subCategoryId,
+          topic_id: topicId,sub_topic_id: subtopicId);
     } else if (selectedQuestionType == "Learning Slide") {
+
     } else if (selectedQuestionType == "Card Flip") {}
 
     setState(() {
@@ -402,8 +436,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                             subcategory['sub_category'] == value)['_id'];
                     print(mainCategoryId.toString());
                     print(subCategoryId.toString());
-                    _controller
-                        .get_topic(
+                    _controller.get_topic(
                             categoryId: mainCategoryId.toString(),
                             sub_categoryId: subCategoryId.toString())
                         .then((_) {
@@ -448,6 +481,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                   topicId = _controller.topics
                       .firstWhere((t) => t['topic_name'] == value)['_id'];
                   _getAddedQuestion();
+                  // final List<Map<String, dynamic>> entries = (_controller.topics.value as List)
+                  //     .firstWhere((topic) => topic['topic_name'] == selectedTopic)['entries'];
                   _controller
                       .get_SubTopic(
                           topicId: topicId!,
@@ -490,6 +525,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         // Fetch subtopics based on the selected subtopic
                         subtopicId = _controller.sub_topics.firstWhere(
                             (t) => t['sub_topic_name'] == value)['_id'];
+                        _getAddedQuestion();
                         setState(() {});
                       });
                     },
@@ -606,7 +642,11 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
 
                                   if (selectedQuestionType ==
                                       "Complete the paragraph")
-                                    _buildQuestionsCompleteTheParagraphTable(), //// Show this widget for "Re-Arrange the Word"
+                                    _buildQuestionsCompleteTheParagraphTable(),
+
+                                  if (selectedQuestionType == "Alphabets Example" && selectedTopic!="")
+                                    _buildExampleTable(),
+                                  // Show this widget for "Re-Arrange the Word"
                                 ],
                               ),
                             ),
@@ -618,9 +658,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                   Row(
                                     children: [
                                       SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.18,
+                                        width: MediaQuery.of(context).size.width * 0.19,
                                         child: DropdownButtonFormField<String>(
                                           value: selectedQuestionType,
                                           dropdownColor: Colors.grey.shade50,
@@ -723,20 +761,16 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
             ),
             TextButton(
               onPressed: () {
-                if (mainCategoryId!.isNotEmpty && subCategoryId!.isNotEmpty
-                    // && topicId!.isNotEmpty
-                    ) {
+                if (selectedQuestionType != "Alphabets Example" &&
+                    mainCategoryId!.isNotEmpty && subCategoryId!.isNotEmpty && topicId!.isNotEmpty) {
                   _exportTableToCSV();
                   Navigator.pop(context); // Close the dialog
                 } else if (selectedQuestionType == "Alphabets Example" &&
-                    mainCategoryId!.isNotEmpty &&
-                    subCategoryId!.isNotEmpty) {
+                    mainCategoryId!.isNotEmpty && subCategoryId!.isNotEmpty) {
                   _exportTableToCSV();
                   Navigator.pop(context); // Close the dialog
                 } else {
-                  showSnackbar(
-                      message:
-                          "Please select category, subcategory, and topic.");
+                  showSnackbar(message: "Please select category, subcategory, and topic.");
                 }
               },
               child: const Text("Export"),
@@ -784,7 +818,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
 
       // Validate headers
       List<String> csvHeaders = rows.first.cast<String>();
-// Remove BOM from the first header if present
+
       if (csvHeaders.isNotEmpty && csvHeaders.first.startsWith('ï»¿')) {
         csvHeaders[0] = csvHeaders.first.substring(3);
         // Update the first header without BOM
@@ -830,28 +864,33 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       String apiUrl =
       selectedQuestionType == "Multiple Choice Question"
           ? ApiString.add_mcq:
-      selectedQuestionType == "Alphabets Example"
+
+          selectedQuestionType == "Alphabets Example"
           ? ApiString.add_topics
-          : selectedQuestionType == "Re-Arrange the Word"
-          ? ApiString.add_rearrange
-          : selectedQuestionType == "True/False"
-          ? ApiString.add_true_false
-          : selectedQuestionType == "Story"
-          ? ApiString.add_story
-          : selectedQuestionType == "Fill in the blanks"
-          ? ApiString.add_fill_blanks
-          : selectedQuestionType == "Phrases"
-          ? ApiString.add_story_phrases
-          : selectedQuestionType == "Conversation"
-          ? ApiString.add_conversation
-          : selectedQuestionType == "Card Flip"
-          ? ApiString.add_card_flipping
-          : selectedQuestionType == "Learning Slide"
-          ? ApiString.add_learning_slide
-          : selectedQuestionType == "Complete the Word"
-          ? ApiString.add_complete_the_word
-          : selectedQuestionType == "Complete the paragraph"
-          ? ApiString.add_complete_the_word: ApiString.add_fill_blanks;
+              : selectedQuestionType == "Re-Arrange the Word"
+                  ? ApiString.add_rearrange
+                  : selectedQuestionType == "True/False"
+                      ? ApiString.add_true_false
+                      : selectedQuestionType == "Story"
+                          ? ApiString.add_story
+                          : selectedQuestionType == "Fill in the blanks"
+                            ? ApiString.add_fill_blanks
+                            : selectedQuestionType == "Phrases"
+                              ? ApiString.add_story_phrases
+                              : selectedQuestionType == "Conversation"
+                                ? ApiString.add_conversation
+                                : selectedQuestionType == "Card Flip"
+                                  ? ApiString.add_card_flipping
+                                    : selectedQuestionType == "Learning Slide"
+                                      ? ApiString.add_learning_slide
+                                        : selectedQuestionType == "Complete the Word"
+                                            ? ApiString.add_complete_the_word
+                                              : selectedQuestionType == "Complete the paragraph"
+                                                ? ApiString.add_complete_the_paragraph:
+                              selectedQuestionType == "Match the pairs"?
+                              ApiString.add_match_pair_question:
+                                  ApiString.add_fill_blanks;
+
       print(apiUrl);
       for (var map in data) {
         // String payload = jsonEncode(map);
@@ -915,10 +954,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                       icon: Image.asset('assets/excel.png',
                           width: 24, height: 24),
                       onPressed: () {
-                        // print("categoryId " + mainCategoryId!);
-                        // print("subcategoryId " + subCategoryId!);
-                        // print("topicId " + topicId!);
-                        // print("subtopicId " + subtopicId!);
                         showImportExportDialog();
                       },
                     ),
@@ -932,7 +967,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 child: _getAllQuestionsApiController.isLoading.value
                     ? CircularProgressIndicator()
                     : (_getAllQuestionsApiController.getMcqslits.isEmpty
-                        ? Center(
+                        ? const Center(
                             child: Text(
                               'No data available',
                               style: TextStyle(
@@ -1000,7 +1035,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                                   row.points.toString() ?? ""),
                                               GestureDetector(
                                                 onTap: () => _showImagePopup(),
-                                                child: Text(
+                                                child: const Text(
                                                   "View",
                                                   style: TextStyle(
                                                     color: Colors.blue,
@@ -1211,14 +1246,15 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         print("subcategoryId " + subCategoryId!);
                         print("topicId " + topicId!);
                         print("subtopicId " + subtopicId!);
-                        if (mainCategoryId!.isNotEmpty &&
-                            subCategoryId!.isNotEmpty &&
-                            topicId!.isNotEmpty)
-                          _exportTableToCSV();
-                        else
-                          showSnackbar(
-                              message:
-                                  "Please select category,subcategory,topic,etc");
+                        showImportExportDialog();
+                        // if (mainCategoryId!.isNotEmpty &&
+                        //     subCategoryId!.isNotEmpty &&
+                        //     topicId!.isNotEmpty)
+                        //   _exportTableToCSV();
+                        // else
+                        //   showSnackbar(
+                        //       message:
+                        //           "Please select category,subcategory,topic,etc");
                       },
                     ),
                   ),
@@ -1322,14 +1358,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         print("subcategoryId " + subCategoryId!);
                         print("topicId " + topicId!);
                         print("subtopicId " + subtopicId!);
-                        if (mainCategoryId!.isNotEmpty &&
-                            subCategoryId!.isNotEmpty &&
-                            topicId!.isNotEmpty)
-                          _exportTableToCSV();
-                        else
-                          showSnackbar(
-                              message:
-                                  "Please select category,subcategory,topic,etc");
+                        showImportExportDialog();
                       },
                     ),
                   ),
@@ -1398,7 +1427,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                         row.points.toString() ?? ""),
                                     GestureDetector(
                                       onTap: () => _showImagePopup(),
-                                      child: Text(
+                                      child: const Text(
                                         "View",
                                         style: TextStyle(
                                           color: Colors.blue,
@@ -1460,7 +1489,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         if (mainCategoryId!.isNotEmpty &&
                             subCategoryId!.isNotEmpty &&
                             topicId!.isNotEmpty)
-                          _exportTableToCSV();
+                          showImportExportDialog();
                         else
                           showSnackbar(
                               message:
@@ -1593,7 +1622,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         if (mainCategoryId!.isNotEmpty &&
                             subCategoryId!.isNotEmpty &&
                             topicId!.isNotEmpty)
-                          _exportTableToCSV();
+                          showImportExportDialog();
                         else
                           showSnackbar(
                               message:
@@ -1711,7 +1740,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         if (mainCategoryId!.isNotEmpty &&
                             subCategoryId!.isNotEmpty &&
                             topicId!.isNotEmpty)
-                          _exportTableToCSV();
+                          showImportExportDialog();
                         else
                           showSnackbar(
                               message:
@@ -1810,7 +1839,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         if (mainCategoryId!.isNotEmpty &&
                             subCategoryId!.isNotEmpty &&
                             topicId!.isNotEmpty)
-                          _exportTableToCSV();
+                          showImportExportDialog();
                         else
                           showSnackbar(
                               message:
@@ -1836,7 +1865,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         color: Colors.grey),
                   ),
                 )
-                    : SingleChildScrollView(
+                    :
+                SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   controller: _scrollController,
                   child: ConstrainedBox(
@@ -1892,7 +1922,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                     _buildTableCell(row.points.toString() ?? ""),
                                     GestureDetector(
                                       onTap: () => _showImagePopup(),
-                                      child: Text(
+                                      child: const Text(
                                         "View",
                                         style: TextStyle(
                                           color: Colors.blue,
@@ -1954,7 +1984,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         if (mainCategoryId!.isNotEmpty &&
                             subCategoryId!.isNotEmpty &&
                             topicId!.isNotEmpty)
-                          _exportTableToCSV();
+                          showImportExportDialog();
                         else
                           showSnackbar(
                               message:
@@ -2053,7 +2083,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         if (mainCategoryId!.isNotEmpty &&
                             subCategoryId!.isNotEmpty &&
                             topicId!.isNotEmpty)
-                          _exportTableToCSV();
+                          showImportExportDialog();
                         else
                           showSnackbar(
                               message:
@@ -2140,6 +2170,95 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     );
   }
 
+  Widget _buildExampleTable() {
+    final List<dynamic> entries = (_controller.topics.value as List)
+        .firstWhere((topic) => topic['topic_name'] == selectedTopic,
+        orElse: () => {'entries': []}, )['entries'];
+    if (entries.isEmpty) {
+      return Center(
+        child: Text(selectedTopic == null
+            ? "No topic selected"
+            : "No entries found for Topic $selectedTopic"),
+      );
+    }
+    return Card(
+      elevation: 1.0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'Question Data',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Tooltip(
+                  message: 'Export to Excel',
+                  child: CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: IconButton(
+                      icon: Image.asset('assets/excel.png',
+                          width: 24, height: 24),
+                      onPressed: () {
+                        print("categoryId " + mainCategoryId!);
+                        print("subcategoryId " + subCategoryId!);
+                        print("topicId " + topicId!);
+                        print("subtopicId " + subtopicId!);
+                        if (mainCategoryId!.isNotEmpty &&
+                            subCategoryId!.isNotEmpty &&
+                            topicId!.isNotEmpty)
+                          _exportTableToCSV();
+                        else
+                          showSnackbar(
+                              message:
+                              "Please select category,subcategory,topic,etc");
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
+            selectedTopic!.isNotEmpty?
+            SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  columns: const [
+                    DataColumn(label: Text('Example')),
+                    DataColumn(label: Text('Image Name')),
+                    DataColumn(label: Text('Image')),
+                    DataColumn(label: Text('Remove')),
+                  ],
+                  rows: entries.map((entry) {
+                    return DataRow(
+                      cells: [
+                        //DataCell(Text(entry['_id'] ?? '')),
+                        DataCell(Text(entry['exg_name'] ?? '')),
+                        DataCell(InkWell(child:Text(entry['image_name'] ?? ''),onTap: (){})),
+                        DataCell(InkWell(child:Text(entry['image'] ?? ''),onTap: (){},)),
+                        DataCell(InkWell(child:Text("Delete",style: TextStyle(color: Colors.red),),onTap: (){},)),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            ):SizedBox(),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showImagePopup() {
     showDialog(
       context: context, // Ensure you pass a valid BuildContext
@@ -2148,11 +2267,11 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              const Text(
                 'Question Image',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Image.asset(
                 'assets/sample_image.png', // Replace with your image path
                 width: 200,

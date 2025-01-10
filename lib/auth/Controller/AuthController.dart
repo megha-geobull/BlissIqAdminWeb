@@ -31,7 +31,6 @@ class AuthController extends GetxController{
   var languagesController = TextEditingController();
   var introBio = TextEditingController();
 
-
   RxBool isLoading = false.obs;
   var formKey = GlobalKey<FormState>();
   RxBool passwordVisible = false.obs;
@@ -43,8 +42,6 @@ class AuthController extends GetxController{
   RxString userId = "".obs;
 
   RxList<AllAssignedMentorsData> allAssignMentorData = <AllAssignedMentorsData>[].obs;
-
-
 
   // Handle country code change
   void onCountryChange(CountryCode countryCode) {
@@ -70,8 +67,6 @@ class AuthController extends GetxController{
     qualificationController.clear();
     introBio.clear();
   }
-
-
 
 
   void handleSignUp(BuildContext context) {
@@ -126,6 +121,7 @@ class AuthController extends GetxController{
             prefKey: "user_id",
             stringData: userId,
           );
+
           await setDataToLocalStorage(
             dataType: "STRING",
             prefKey: "user_name",

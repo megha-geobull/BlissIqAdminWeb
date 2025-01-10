@@ -104,6 +104,11 @@ class ApiString {
   static const String delete_story = "${baseUrl}delete_story";
   static const String update_story = "${baseUrl}update_story";
 
+  static const String add_story_phrases = "${baseUrl}add_story_phrases";
+  static const String get_story_phrases = "${baseUrl}get_story_phrases";
+  static const String delete_story_phrases = "${baseUrl}delete_story_phrases";
+  static const String update_story_phrases = "${baseUrl}update_story_phrases";
+
   static const String add_rearrange = "${baseUrl}add_rearrange";
   static const String delete_rearrange = "${baseUrl}delete_rearrange";
   static const String get_rearrange = "${baseUrl}get_rearrange";
@@ -114,19 +119,28 @@ class ApiString {
   static const String delete_true_false = "${baseUrl}delete_true_false";
   static const String update_true_false = "${baseUrl}update_true_false";
 
+  static const String add_conversation = "${baseUrl}add_conversation";
+  static const String get_user_conversation = "${baseUrl}get_user_conversation";
+  static const String delete_conversation = "${baseUrl}delete_conversation";
+  static const String update_conversation = "${baseUrl}update_conversation";
+
+  static const String add_learning_slide = "${baseUrl}add_learning_slide";
+  static const String get_learning_slide = "${baseUrl}get_learning_slide";
+  static const String delete_learning_slide = "${baseUrl}delete_conversation";
+
   static const String add_complete_the_word = "${baseUrl}add_complete_the_word";
   static const String get_complete_the_word = "${baseUrl}get_complete_the_word";
   static const String delete_complete_the_word = "${baseUrl}delete_complete_the_word";
-  static const String update_complete_the_word = "${baseUrl}update_complete_the_word";
 
-
-
+  static const String add_complete_the_paragraph = "${baseUrl}add_complete_the_paragraph";
+  static const String get_complete_the_paragraph = "${baseUrl}get_complete_the_paragraph";
+  static const String delete_complete_the_paragraph = "${baseUrl}delete_complete_the_paragraph";
 
   /// Questions widgets
-  static const String add_story_phrases = "${baseUrl}add_story_phrases";
-  static const String add_match_pair_question = "${baseUrl}add_match_pair_question";
-  static const String get_story_phrases = "${baseUrl}get_story_phrases";
 
+  static const String add_match_pair_question = "${baseUrl}add_match_pair_question";
+  static const String get_match_pair_question = "${baseUrl}get_match_pair_question";
+  static const String delete_match_pair_question = "${baseUrl}delete_match_pair_question";
 
 
 

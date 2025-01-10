@@ -21,7 +21,8 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
     super.initState();
 
     Get.find<ProfileController>().checkLogin();
-    Timer(Duration(seconds: 2), () {
+    print(profileController.userId);
+    Timer(Duration(seconds: 3), () {
       profileController.userId.isNotEmpty?
       Get.to(HomePage()):
       Get.to(LoginScreen());

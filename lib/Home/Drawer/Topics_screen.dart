@@ -240,13 +240,12 @@ class _TopicsScreenState extends State<TopicsScreen> {
         content: title,
         yesText: 'Yes',
         noText: 'No', onYesPressed: () {
+        Navigator.pop(context);
         if(type=="topic") {
-          Navigator.pop(context);
           _controller.deleteTopic(
               categoryId: topic['main_category_id'], sub_categoryId: topic['sub_category_id'],topicId:topic['_id'] );
           _controller.topics.removeAt(index);
         }else{
-          Navigator.pop(context);
           _controller.deleteSub_Topic(
               categoryId: topic['main_category_id'], sub_categoryId: topic['sub_category_id'],topicId:topic['topic_id'],sub_topicId: subtopic_id );
           _controller.subtopicsMap[topic['topic_id']]?.removeAt(index);
@@ -310,7 +309,6 @@ class _TopicsScreenState extends State<TopicsScreen> {
                           for (var image in images) {
                             // Preload bytes for the image
                             final bytes = await image.bytes;
-
                             // Add to tempList with bytes
                             _controller.tempList.add(
                               ImageWithText(file: image, path: '', bytes: bytes,imageName:image.name ),
