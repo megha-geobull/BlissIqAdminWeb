@@ -16,7 +16,6 @@ class ApiString {
 
   static const String add_conversation = "${baseUrl}add_conversation";
   static const String add_learning_slide = "${baseUrl}add_learning_slide";
-  static const String add_complete_the_word = "${baseUrl}add_complete_the_word";
 
 
   ///mentor
@@ -128,8 +127,7 @@ class ApiString {
   static const String add_match_pair_question = "${baseUrl}add_match_pair_question";
   static const String get_story_phrases = "${baseUrl}get_story_phrases";
 
-  static const String add_conversation = "${baseUrl}add_conversation";
-  static const String add_learning_slide = "${baseUrl}add_learning_slide";
+
 
 
 }

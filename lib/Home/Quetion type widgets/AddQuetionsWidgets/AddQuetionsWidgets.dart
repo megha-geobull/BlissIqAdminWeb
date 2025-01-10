@@ -166,6 +166,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       });
     }
   }
+
   void _exportTableToCSV() async {
     List<List<dynamic>> rows = [];
 
@@ -178,7 +179,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     } else if (selectedQuestionType == "Fill in the blanks") {
       headers = fill_in_the_blanks_headers;
     } else if (selectedQuestionType == "Complete the Word") {
-      headers = rearrange_headers;
+      headers = complete_the_word_headers;
     } else if (selectedQuestionType == "True/False") {
       headers = true_false_headers;
     } else if (selectedQuestionType == "Story") {
@@ -244,7 +245,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = rearrange_headers;
       uploadCsvToApi(headers).whenComplete(() => _getAllQuestionsApiController);
     } else if (selectedQuestionType == "Complete the Word") {
-      headers = rearrange_headers;
+      headers = complete_the_word_headers;
+      uploadCsvToApi(headers);
     } else if (selectedQuestionType == "True/False") {
       headers = true_false_headers;
     } else if (selectedQuestionType == "Story") {
@@ -689,7 +691,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text("Import/Export CSV"),
-          content: SingleChildScrollView(
+          content: const SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2263,8 +2265,26 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           points: pointsValue.toString(),
           qImage: pathsFile,
           index: indexController.text);
-    } else if (selectedQuestionType == "Complete the Word") {
-    } else if (selectedQuestionType == "True/False") {
+    }
+    else if (selectedQuestionType == "Complete the Word") {
+      int pointsValue = int.tryParse(pointsController.text) ?? 0;
+      questionApiController.addCompleteWordApi(
+          mainCategoryId: mainCategoryId.toString(),
+          subCategoryId: subCategoryId.toString(),
+          topicId: topicId.toString(),
+          subTopicId: subtopicId.toString(),
+          questionType: selectedQuestionType.toString(),
+          title: titleController.text,
+          question: questionController.text,
+          answer: correctAnswerController.text,
+          optionA: optionControllers[0].text,
+          optionB: optionControllers[1].text,
+          optionC: optionControllers[2].text,
+          optionD: optionControllers[3].text,
+          points: pointsValue.toString(),
+          index: indexController.text, context: context);
+    }
+    else if (selectedQuestionType == "True/False") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
       questionApiController.addTrueFalseApi(
         mainCategoryId: mainCategoryId.toString(),
@@ -2278,7 +2298,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         qImage: pathsFile,
         index: indexController.text,
       );
-    } else if (selectedQuestionType == "Story") {
+    }
+    else if (selectedQuestionType == "Story") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
       questionApiController.addStoryApi(
         mainCategoryId: mainCategoryId.toString(),
@@ -2292,7 +2313,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         points: pointsValue.toString(),
         index: indexController.text,
       );
-    } else if (selectedQuestionType == "Phrases") {
+    }
+    else if (selectedQuestionType == "Phrases") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
       questionApiController.addStoryPhraseApi(
         mainCategoryId: mainCategoryId.toString(),
@@ -2304,7 +2326,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         index: indexController.text,
       );
 
-    } else if (selectedQuestionType == "Conversation") {
+    }
+
+    else if (selectedQuestionType == "Conversation") {
     } else if (selectedQuestionType == "Learning Slide") {
     } else if (selectedQuestionType == "Card Flip") {}
     else if (selectedQuestionType == "Card Flip") {
@@ -3087,11 +3111,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   }
 
   /// add complete the word
+
+  /// add complete the word
   Widget _buildCompleteWordContent() {
-// =======
-//   Widget _buildConversationContent() {
-//     // Implement the UI for "Conversation" question type
-// >>>>>>> main
     return DottedBorder(
       color: Colors.orange,
       strokeWidth: 1,
@@ -3106,18 +3128,65 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Enter conversation question',
+              'Enter index',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.08,
+              child: CustomTextField(
+                controller: indexController,
+                maxLines: 1,
+                labelText: "Enter index",
+              ),
+            ),
+            boxH10(),
+            const Text(
+              'Enter title',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: titleController,
+              maxLines: 1,
+              labelText: "Enter title",
+            ),
+            boxH10(),
+            const Text(
+              'Enter your question',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             boxH08(),
             CustomTextField(
               controller: questionController,
               maxLines: 1,
-              labelText: "Enter question",
+              labelText: "Enter your question (e.g:- C_t, Man_o)",
             ),
             boxH20(),
             const Text(
-              'Enter your question',
+              'Enter Options (e.g:- a, b, c)',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, // Number of items per row
+                crossAxisSpacing: 10.0, // Spacing between columns
+                mainAxisSpacing: 5.0, // Spacing between rows
+                childAspectRatio: 2.8, // Adjust height and width of grid items
+              ),
+              itemCount: optionControllers.length,
+              itemBuilder: (context, index) {
+                return CustomTextField(
+                  controller: optionControllers[index],
+                  labelText: "Option ${index + 1}",
+                );
+              },
+            ),
+            const Text(
+              'Enter correct answer',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             boxH08(),
@@ -3125,7 +3194,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
               controller: correctAnswerController,
               labelText: "Enter correct answer",
             ),
-            boxH20(),
+            const SizedBox(height: 20),
             CustomButton(
               label: "Add Question",
               onPressed: _submitQuestion,
