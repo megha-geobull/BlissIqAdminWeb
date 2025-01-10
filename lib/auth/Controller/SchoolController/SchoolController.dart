@@ -216,7 +216,7 @@ class SchoolController extends GetxController {
   }
 
 
-  assignSchoolApi({
+   assignSchoolApi({
     required String schoolId,
     required String companyId,
   }) async {
@@ -239,26 +239,42 @@ class SchoolController extends GetxController {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
-
-          if (kDebugMode) {
-            print("School assigned successfully");
-
-          }
+          print("School assigned successfully");
+          Fluttertoast.showToast(
+            msg: "School assigned successfully!",
+            backgroundColor: Colors.green,
+          );
         } else {
           Fluttertoast.showToast(
             msg: responseData['message'] ?? "Something went wrong!",
             backgroundColor: Colors.red,
           );
         }
+      } else if (response.statusCode == 400) {
+        // Handle 400 response status
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        Fluttertoast.showToast(
+          msg: responseData['message'] ?? "Bad Request!",
+          backgroundColor: Colors.orange,
+        );
+        print("Error 400: ${responseData['message']}");
+      } else {
+        Fluttertoast.showToast(
+          msg: "Unexpected error occurred. Please try again.",
+          backgroundColor: Colors.red,
+        );
+        print("Unexpected status: ${response.statusCode}, Body: ${response.body}");
       }
     } catch (e) {
       Fluttertoast.showToast(
         msg: "An error occurred: $e",
         backgroundColor: Colors.red,
       );
+      print("Exception: $e");
     } finally {
       isLoading.value = false;
     }
   }
+
 
 }

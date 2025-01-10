@@ -21,6 +21,7 @@ class ApiString {
   static const String get_all_mentors = "${baseUrl}get_all_mentors";
   static const String approve_mentor = "${baseUrl}approve_mentor";
   static const String assign_mentor = "${baseUrl}assign_mentor";
+  static const String get_assign_teachers = "${baseUrl}get_assign_teachers";
 
 
 
@@ -31,6 +32,9 @@ class ApiString {
   static const String get_all_schools = "${baseUrl}get_all_schools";
   static const String assign_school = "${baseUrl}assign_school";
 
+
+
+
   ///learner
   static const String get_all_learners = "${baseUrl}get_all_learners";
 
@@ -39,7 +43,9 @@ class ApiString {
   static const String companyBaseUrl = "http://65.0.211.122:4444/company_api/";
   static const String company_registration = "${companyBaseUrl}company_registration";
   static const String approve_company = "${baseUrl}approve_company";
-  static const String get_all_companies = "${companyBaseUrl}get_all_companies";
+  static const String get_all_companies = "${baseUrl}get_all_companies";
+  static const String get_assign_schools = "${baseUrl}get_assign_schools";
+
 
 
   /// Profile Endpoints
@@ -105,10 +111,18 @@ class ApiString {
   static const String delete_true_false = "${baseUrl}delete_true_false";
   static const String update_true_false = "${baseUrl}update_true_false";
 
+  static const String add_complete_the_word = "${baseUrl}add_complete_the_word";
+  static const String get_complete_the_word = "${baseUrl}get_complete_the_word";
+  static const String delete_complete_the_word = "${baseUrl}delete_complete_the_word";
+  static const String update_complete_the_word = "${baseUrl}update_complete_the_word";
+
 
 
   /// Questions widgets
   static const String add_story_phrases = "${baseUrl}add_story_phrases";
   static const String add_match_pair_question = "${baseUrl}add_match_pair_question";
+  static const String add_conversation = "${baseUrl}add_conversation";
+  static const String add_learning_slide = "${baseUrl}add_learning_slide";
+
 
 }
