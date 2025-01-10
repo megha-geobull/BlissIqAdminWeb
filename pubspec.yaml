@@ -87,6 +87,7 @@ dependencies:
   csv: ^5.0.1
   share_extend: ^2.0.0
   html:
+  syncfusion_flutter_datagrid:
 
 dev_dependencies:
   flutter_test:

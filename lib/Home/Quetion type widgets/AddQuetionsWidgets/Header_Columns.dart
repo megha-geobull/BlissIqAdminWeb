@@ -32,7 +32,7 @@ List<String> conversation_headers = ["id","main_category_id", "sub_category_id",
 List<String> alphabet_example =["main_category_id", "sub_category_id","topic_name","exg_name","image_name"];
 
 List<String> match_the_pairs_example =["main_category_id", "sub_category_id","topic_id", "sub_topic_id","question_type", "title",
-"question_format","question","question_img_name","answer","answer_img_name","points","index"];
+"question_format","question","question_img_name","answer_format","answer","answer_img_name","points","index"];
 
 List<String> complete_word =["main_category_id", "sub_category_id","topic_id", "sub_topic_id",
   "question_type", "question", "title", "option_a", "option_b", "option_c", "option_d",

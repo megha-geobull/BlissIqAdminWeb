@@ -21,6 +21,16 @@ class GetAllQuestionsApiController extends GetxController{
   RxList<PhrasesData> getStoryPhrasesList = <PhrasesData>[].obs;
   RxList<PhrasesData> getConversationList = <PhrasesData>[].obs;
 
+  clearData(){
+    getMcqslits.clear();
+    getReArrangeList.clear();
+    getTrueOrFalseList.clear();
+    getFillInTheBlanksList.clear();
+    getStoryDataList.clear();
+    getStoryPhrasesList.clear();
+    getConversationList.clear();
+  }
+
   getAllMCQS({
     required String main_category_id ,
     required String sub_category_id,
@@ -43,6 +53,7 @@ class GetAllQuestionsApiController extends GetxController{
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
+      print('Url: ${ApiString.get_mcq}');
 
       if (response.statusCode == 200) {
         var responseData = jsonDecode(response.body);
@@ -88,6 +99,7 @@ class GetAllQuestionsApiController extends GetxController{
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
+      print('Url: ${ApiString.get_rearrange}');
 
       if (response.statusCode == 200) {
         var responseData = jsonDecode(response.body);
@@ -134,6 +146,7 @@ class GetAllQuestionsApiController extends GetxController{
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
+      print('Url: ${ApiString.get_true_false}');
 
       if (response.statusCode == 200) {
         var responseData = jsonDecode(response.body);
