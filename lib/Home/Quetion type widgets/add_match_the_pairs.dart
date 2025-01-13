@@ -214,6 +214,7 @@ import 'dart:typed_data';
                       print("Main Category ID: ${widget.main_category_id}");
                       print("Sub Category ID: ${widget.sub_category_id}");
                       print("Sub Topic ID: ${widget.sub_topic_id}");
+                      print("Topic ID: ${widget.topic_id}");
                       print("Question Index: $questionIndex");
                       print("Question Title: $questionTitle");
                       print("Points: $points");
@@ -231,7 +232,7 @@ import 'dart:typed_data';
                         await addQuestionController.addMatchThePairs(
                           main_category_id: widget.main_category_id!,
                           sub_category_id: widget.sub_category_id!,
-                          topic_id: "njsdfk",
+                          topic_id: widget.topic_id!,
                           sub_topic_id: widget.sub_topic_id,
                           title: questionTitle,
                           index: questionIndex,
