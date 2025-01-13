@@ -8,6 +8,7 @@ import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_rearrange_m
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_story_model.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_story_phrases_model.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_trueOrfalse_model.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_mcqs.dart';
@@ -16,6 +17,8 @@ class GetAllQuestionsApiController extends GetxController{
 
   RxBool isLoading = false.obs;
   RxList<Mcqs> getMcqslits = <Mcqs>[].obs;
+  List<Mcqs> _filteredQuestionsMcq = []; // Filtered data for the table
+  int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   RxList<ReArrange> getReArrangeList = <ReArrange>[].obs;
   RxList<TrueOrFalse> getTrueOrFalseList = <TrueOrFalse>[].obs;
   RxList<FillInTheBlanks> getFillInTheBlanksList = <FillInTheBlanks>[].obs;
