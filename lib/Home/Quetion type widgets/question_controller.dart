@@ -101,109 +101,156 @@ class QuestionController extends GetxController {
   }
 
 
-      Future<void> addMatchThePairs({
-        required String main_category_id,
-        required String title,
-        required String sub_category_id,
-        required String topic_id,
-        String? sub_topic_id,
-        required String question_type,
-        required String question_format,
-        required String answer_format,
-        required String points,
-        required String questions,
-        required String questionImgNames,
-        required List<td.Uint8List> questionImages,
-        required String answers,
-        required String answerImgNames,
-        required List<td.Uint8List> answerImages,
-        required String index,
-        required BuildContext context,
-      }) async {
-        isLoading.value = true;
-        try {
-          final uri = Uri.parse(ApiString.add_match_pair_question);
+  Future<void> addMatchThePairs({
+    required String main_category_id,
+    required String title,
+    required String sub_category_id,
+    required String topic_id,
+    String? sub_topic_id,
+    required String question_type,
+    required String question_format,
+    required String answer_format,
+    required String points,
+    required String questions,
+    required String questionImgNames,
+    required List<td.Uint8List> questionImages,
+    required String answers,
+    required String answerImgNames,
+    required List<td.Uint8List> answerImages,
+    required String index,
+    required BuildContext context,
+  }) async {
+    isLoading.value = true;
+    try {
+      final uri = Uri.parse(ApiString.add_match_pair_question);
+      final request = http.MultipartRequest('POST', uri);
 
-          // Create a multipart request
-          final request = http.MultipartRequest('POST', uri);
+      // Add text fields
+      request.fields['main_category_id'] = main_category_id;
+      request.fields['sub_category_id'] = sub_category_id;
+      request.fields['topic_id'] = topic_id;
+      request.fields['sub_topic_id'] = sub_topic_id ?? '';
+      request.fields['question_type'] = question_type;
+      request.fields['title'] = title;
+      request.fields['index'] = index;
+      request.fields['question_format'] = question_format;
+      request.fields['answer_format'] = answer_format;
+      request.fields['points'] = points;
+      request.fields['question'] = questions;
+      request.fields['answer'] = answers;
+      request.fields['question_img_name'] = questionImgNames;
+      request.fields['answer_img_name'] = answerImgNames;
 
-          // Add text fields
-          request.fields['main_category_id'] = main_category_id;
-          request.fields['sub_category_id'] = sub_category_id;
-          request.fields['topic_id'] = topic_id;
-          request.fields['sub_topic_id'] = sub_topic_id ?? '';
-          request.fields['question_type'] = question_type;
-          request.fields['title'] = title;
-          request.fields['index'] = index;
-          request.fields['question_format'] = question_format;
-          request.fields['answer_format'] = answer_format;
-          request.fields['points'] = points;
-
-          // Concatenate questions, answers, image names with pipe separators
-          request.fields['question_img_name'] = questionImgNames;
-          request.fields['answer_img_name'] = answerImgNames;
-
-          if (questionImages.isNotEmpty) {
-            for (var i = 0; i < questionImages.length; i++) {
-              final image = questionImages[i];
-              request.files.add(
-                await http.MultipartFile.fromBytes('question_img[$i]', image),
-              );
-              print('Added Question Image $i: ${questionImgNames[i]}');
-            }
-          } else {
-            print('No Question Images to Add');
-          }
-
-  // Add answer images
-          if (answerImages.isNotEmpty) {
-            for (var i = 0; i < answerImages.length; i++) {
-              final image = answerImages[i];
-              request.files.add(
-                await http.MultipartFile.fromBytes('answer_img[$i]', image),
-              );
-              print('Added Answer Image $i: ${answerImgNames[i]}');
-            }
-          } else {
-            print('No Answer Images to Add');
-          }
-
-          // Print the request body before sending
-          print('Request Body:');
-          print('Text Fields:');
-          request.fields.forEach((key, value) {
-            print('$key: $value');
-          });
-          print('Files:');
-          for (var i = 0; i < questionImages.length; i++) {
-            print('Question Image $i: ${questionImgNames[i]}');
-          }
-          for (var i = 0; i < answerImages.length; i++) {
-            print('Answer Image $i: ${answerImgNames[i]}');
-          }
-          // Send the request
-          final response = await request.send();
-
-          // Check the response
-          if (response.statusCode == 201) {
-            final responseData = await response.stream.bytesToString();
-            final decodedResponse = jsonDecode(responseData);
-            if (decodedResponse['status'] == 1) {
-              showSnackbar(message: decodedResponse['message'] ?? 'Added successfully');
-              print('Added successfully');
-            } else {
-              showSnackbar(message: decodedResponse['message'] ?? 'Error occurred');
-            }
-          } else {
-            print('Error: ${response.reasonPhrase}');
-            showSnackbar(message: 'Error: ${response.reasonPhrase}');
-          }
-        } catch (e) {
-          print('An error occurred: $e');
-          showSnackbar(message: 'An error occurred: $e');
-        } finally {
-          isLoading.value = false;
-        }
+      // Add question images
+      for (int i = 0; i < questionImages.length; i++) {
+        final image = questionImages[i];
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'question_img',
+            image,
+            filename: 'question_$i.png',
+            contentType: MediaType('image', 'png'),
+          ),
+        );
       }
+
+      // Add answer images
+      for (int i = 0; i < answerImages.length; i++) {
+        final image = answerImages[i];
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'answer_img',
+            image,
+            filename: 'answer_$i.png',
+            contentType: MediaType('image', 'png'),
+          ),
+        );
+      }
+
+      // Send the request
+      final response = await request.send();
+
+      if (response.statusCode == 201) {
+        final responseData = await response.stream.bytesToString();
+        final decodedResponse = jsonDecode(responseData);
+        if (decodedResponse['status'] == 1) {
+          showSnackbar(message: decodedResponse['message'] ?? 'Added successfully');
+        } else {
+          showSnackbar(message: decodedResponse['message'] ?? 'Error occurred');
+        }
+      } else {
+        print('Error: ${response.reasonPhrase}');
+        showSnackbar(message: 'Error: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('An error occurred: $e');
+      showSnackbar(message: 'An error occurred: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> addFlipTheCard({
+    required String main_category_id,
+    String? title,
+    required String sub_category_id,
+    required String topic_id,
+    String? sub_topic_id,
+    required String points,
+    required String letters,
+    required List<td.Uint8List> images,
+    required String index,
+    required BuildContext context,
+  }) async {
+    isLoading.value = true;
+    try {
+      final uri = Uri.parse(ApiString.add_card_flipping);
+      final request = http.MultipartRequest('POST', uri);
+
+      // Add text fields
+      request.fields['main_category_id'] = main_category_id;
+      request.fields['sub_category_id'] = sub_category_id;
+      request.fields['topic_id'] = topic_id;
+      request.fields['sub_topic_id'] = sub_topic_id ?? '';
+     // request.fields['title'] = title;
+      request.fields['index'] = index;
+      request.fields['points'] = points;
+      request.fields['letters'] = letters;
+
+      // Add question images
+      for (int i = 0; i < images.length; i++) {
+        final image = images[i];
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'images',
+            image,
+            filename: 'image_$i.png',
+            contentType: MediaType('image', 'png'),
+          ),
+        );
+      }
+
+      // Send the request
+      final response = await request.send();
+
+      if (response.statusCode == 201) {
+        final responseData = await response.stream.bytesToString();
+        final decodedResponse = jsonDecode(responseData);
+        if (decodedResponse['status'] == 1) {
+          showSnackbar(message: decodedResponse['message'] ?? 'Added successfully');
+        } else {
+          showSnackbar(message: decodedResponse['message'] ?? 'Error occurred');
+        }
+      } else {
+        print('Error: ${response.reasonPhrase}');
+        showSnackbar(message: 'Error: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('An error occurred: $e');
+      showSnackbar(message: 'An error occurred: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
 }

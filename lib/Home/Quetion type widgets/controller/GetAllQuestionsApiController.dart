@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/common_snackbar.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_fill_in_the_blanks.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_match_the_pairs.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_rearrange_model.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_story_model.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_story_phrases_model.dart';
@@ -22,6 +23,7 @@ class GetAllQuestionsApiController extends GetxController{
 
   RxList<PhrasesData> getStoryPhrasesList = <PhrasesData>[].obs;
   RxList<PhrasesData> getConversationList = <PhrasesData>[].obs;
+  RxList<MatchPairs> getMatchPairsList = <MatchPairs>[].obs;
 
   clearData(){
     getMcqslits.clear();
@@ -357,6 +359,64 @@ class GetAllQuestionsApiController extends GetxController{
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching conversation: $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  getMatchPairs({
+    required String main_category_id,
+    required String sub_category_id,
+    required String topic_id,
+    String? sub_topic_id,
+  }) async {
+    isLoading.value = true;
+    print("main_category_id: $main_category_id");
+    print("sub_category_id: $sub_category_id");
+    print("topic_id: $topic_id");
+    print("sub_topic_id: $sub_topic_id");
+    getMatchPairsList.clear();
+
+    try {
+      // Constructing the query parameters
+      var queryParams = {
+        'main_category_id': main_category_id,
+        'sub_category_id': sub_category_id,
+        'topic_id': topic_id,
+        if (sub_topic_id != null) 'sub_topic_id': sub_topic_id,
+      };
+
+      // Constructing the full URI with query parameters
+      var uri = Uri.parse(ApiString.get_match_pair_question).replace(queryParameters: queryParams);
+
+      // Making the GET request
+      final response = await http.get(
+        uri,
+        headers: {"Content-Type": "application/json"},
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+
+        if (jsonResponse['status'] == 1) {
+          // Parse JSON data into a List of MatchPairs
+          getMatchPairsList.value = (jsonResponse["data"] as List)
+              .map((mcqJson) => MatchPairs.fromJson(mcqJson))
+              .toList();
+
+          print("Fetched ${getMatchPairsList.length} MatchPairs");
+        } else {
+          showSnackbar(message: jsonResponse['message'] ?? "Failed to fetch MatchPairs");
+        }
+      } else {
+        showSnackbar(message: "Failed to fetch MatchPairs. Status: ${response.statusCode}");
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetching MatchPairs: $e");
       log(e.toString());
     } finally {
       isLoading.value = false;

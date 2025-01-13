@@ -167,23 +167,23 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     }
   }
 
-  pickImage() async {
-    // Using FilePicker to allow the user to select an image
-    _paths = (await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowMultiple: false,
-      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
-      allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
-    ))
-        ?.files;
-
-    if (_paths != null && _paths!.isNotEmpty) {
-      setState(() {
-        pathsFile = _paths!.first.bytes!;
-        pathsFileName = _paths!.first.name;
-      });
-    }
-  }
+  // pickImage() async {
+  //   // Using FilePicker to allow the user to select an image
+  //   _paths = (await FilePicker.platform.pickFiles(
+  //     type: FileType.custom,
+  //     allowMultiple: false,
+  //     onFileLoading: (FilePickerStatus status) => print("status .... $status"),
+  //     allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
+  //   ))
+  //       ?.files;
+  //
+  //   if (_paths != null && _paths!.isNotEmpty) {
+  //     setState(() {
+  //       pathsFile = _paths!.first.bytes!;
+  //       pathsFileName = _paths!.first.name;
+  //     });
+  //   }
+  // }
 
   void _exportTableToCSV() async {
     List<List<dynamic>> rows = [];
@@ -342,9 +342,14 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           main_category_id: mainCategoryId,
           sub_category_id: subCategoryId,
           topic_id: topicId,sub_topic_id: subtopicId);
-    } else if (selectedQuestionType == "Learning Slide") {
+    } else if (selectedQuestionType == "Match the pairs") {
+      _getAllQuestionsApiController.getMatchPairs(
+          main_category_id: mainCategoryId,
+          sub_category_id: subCategoryId,
+          topic_id: topicId,sub_topic_id: subtopicId);
+    } else if (selectedQuestionType == "Card Flip") {
 
-    } else if (selectedQuestionType == "Card Flip") {}
+    }
 
     setState(() {
       questionController.clear();
@@ -639,6 +644,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
 
                                   if (selectedQuestionType == "Match the pairs")
                                     _buildQuestionsMatchthepairsTable(),
+
+                              if (selectedQuestionType == "Card Flip")
+                                _buildQuestionsFlipTheCardTable(),
 
                                   if (selectedQuestionType ==
                                       "Complete the paragraph")
@@ -1684,8 +1692,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                   children: [
                                     _buildTableCell(
                                         row.index.toString() ?? ""),
-                                    _buildTableCell(
-                                        row.phraseName ?? ""),
+                                    // _buildTableCell(
+                                    //     row.phraseName ?? ""),
                                     _buildTableCell(
                                         row.points.toString() ?? ""),
                                   ],
@@ -1997,52 +2005,241 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
             ),
             SizedBox(height: 10),
             // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal, // Horizontal scroll
-              child: Container(
-                constraints:
-                    BoxConstraints(maxWidth: 1200), // Max width constraint
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical, // Vertical scroll
-                  child: Table(
-                    border: TableBorder.all(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    columnWidths: const {
-                      0: FlexColumnWidth(1),
-                      1: FlexColumnWidth(2),
-                      2: FlexColumnWidth(2),
-                      3: FlexColumnWidth(1),
-                    },
-                    children: [
-                      TableRow(
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade100,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+            Obx(() {
+              return Center(
+                child: _getAllQuestionsApiController.isLoading.value
+                    ? CircularProgressIndicator()
+                    : (_getAllQuestionsApiController.getMatchPairsList.isEmpty
+                    ? Center(
+                  child: Text(
+                    'No data available',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey),
+                  ),
+                )
+                    :
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  controller: _scrollController,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                        minWidth: 1200, minHeight: 400),
+                    child: SizedBox(
+                      height: 400,
+                      width: 600,
+                      child: Column(
                         children: [
-                          _buildTableHeader("Question Type"),
-                          _buildTableHeader("Left Column"),
-                          _buildTableHeader("Right Column"),
-                          _buildTableHeader("Points"),
+                          // Table Header
+                          Container(
+                            color: Colors.orange.shade100,
+                            child: Row(
+                              children: [
+                                _buildTableHeader("Question Type"),
+                                // _buildTableHeader("Question Title"),
+                                _buildTableHeader("Left Column"),
+                                _buildTableHeader("Right Column"),
+                                _buildTableHeader("Points"),
+                              ],
+                            ),
+                          ),
+                          // Table Rows
+                          Expanded(
+                            child: ListView.builder(
+                              scrollDirection: Axis.vertical,
+                              itemCount: _getAllQuestionsApiController
+                                  .getMatchPairsList.length,
+                              itemBuilder: (context, index) {
+                                var row =
+                                _getAllQuestionsApiController
+                                    .getMatchPairsList[index];
+                                return Row(
+                                  children: [
+                                    _buildTableCell(row.questionType ?? ""),
+                                    // _buildTableCell(row.title ?? ""),
+                                    // _buildTableCell(row.questionType ?? ""),
+                                    GestureDetector(
+                                      onTap: () => _showImagePopup(),
+                                      child: const Text(
+                                        "View",
+                                        style: TextStyle(
+                                          color: Colors.blue,
+                                          decoration: TextDecoration
+                                              .underline,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () => _showImagePopup(),
+                                      child: const Text(
+                                        "View",
+                                        style: TextStyle(
+                                          color: Colors.blue,
+                                          decoration: TextDecoration
+                                              .underline,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                    _buildTableCell(row.points.toString() ?? ""),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
                         ],
                       ),
-                      // Dummy rows
-                      for (int i = 0; i < 5; i++)
-                        TableRow(
-                          children: [
-                            _buildTableCell("Match the Pairs"),
-                            _buildTableCell("Item A$i"),
-                            _buildTableCell("Item B$i"),
-                            _buildTableCell((10 + i * 5).toString()),
-                          ],
-                        ),
-                    ],
+                    ),
+                  ),
+                )),
+              );
+            })
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuestionsFlipTheCardTable() {
+    return Card(
+      elevation: 1.0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'Question Data',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Tooltip(
+                  message: 'Export to Excel',
+                  child: CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: IconButton(
+                      icon: Image.asset('assets/excel.png',
+                          width: 24, height: 24),
+                      onPressed: () {
+                        print("categoryId " + mainCategoryId!);
+                        print("subcategoryId " + subCategoryId!);
+                        print("topicId " + topicId!);
+                        print("subtopicId " + subtopicId!);
+                        if (mainCategoryId!.isNotEmpty &&
+                            subCategoryId!.isNotEmpty &&
+                            topicId!.isNotEmpty)
+                          showImportExportDialog();
+                        else
+                          showSnackbar(
+                              message:
+                              "Please select category,subcategory,topic,etc");
+                      },
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 10),
+            // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
+            Obx(() {
+              return Center(
+                child: _getAllQuestionsApiController.isLoading.value
+                    ? CircularProgressIndicator()
+                    : (_getAllQuestionsApiController.getMatchPairsList.isEmpty
+                    ? Center(
+                  child: Text(
+                    'No data available',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey),
+                  ),
+                )
+                    :
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  controller: _scrollController,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                        minWidth: 1200, minHeight: 400),
+                    child: SizedBox(
+                      height: 400,
+                      width: 600,
+                      child: Column(
+                        children: [
+                          // Table Header
+                          Container(
+                            color: Colors.orange.shade100,
+                            child: Row(
+                              children: [
+                                _buildTableHeader("Question Type"),
+                                // _buildTableHeader("Question Title"),
+                                _buildTableHeader("Left Column"),
+                                _buildTableHeader("Right Column"),
+                                _buildTableHeader("Points"),
+                              ],
+                            ),
+                          ),
+                          // Table Rows
+                          Expanded(
+                            child: ListView.builder(
+                              scrollDirection: Axis.vertical,
+                              itemCount: _getAllQuestionsApiController
+                                  .getMatchPairsList.length,
+                              itemBuilder: (context, index) {
+                                var row =
+                                _getAllQuestionsApiController
+                                    .getMatchPairsList[index];
+                                return Row(
+                                  children: [
+                                    _buildTableCell(row.questionType ?? ""),
+                                    // _buildTableCell(row.title ?? ""),
+                                    // _buildTableCell(row.questionType ?? ""),
+                                    GestureDetector(
+                                      onTap: () => _showImagePopup(),
+                                      child: const Text(
+                                        "View",
+                                        style: TextStyle(
+                                          color: Colors.blue,
+                                          decoration: TextDecoration
+                                              .underline,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () => _showImagePopup(),
+                                      child: const Text(
+                                        "View",
+                                        style: TextStyle(
+                                          color: Colors.blue,
+                                          decoration: TextDecoration
+                                              .underline,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                    _buildTableCell(row.points.toString() ?? ""),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )),
+              );
+            })
           ],
         ),
       ),
@@ -2446,11 +2643,11 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       );
 
     }
-
     else if (selectedQuestionType == "Conversation") {
     } else if (selectedQuestionType == "Learning Slide") {
-    } else if (selectedQuestionType == "Card Flip") {}
+    }
     else if (selectedQuestionType == "Card Flip") {
+
     }
     else if (selectedQuestionType == "Fill in the blanks") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
