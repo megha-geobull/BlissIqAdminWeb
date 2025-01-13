@@ -1195,7 +1195,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                                   row.points.toString() ?? ""),
                                               GestureDetector(
                                                 onTap: () => _showImagePopup(),
-                                                child: Text(
+                                                child: const Text(
                                                   "View",
                                                   style: TextStyle(
                                                     color: Colors.blue,
@@ -1647,7 +1647,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 child: _getAllQuestionsApiController.isLoading.value
                     ? CircularProgressIndicator()
                     : (_getAllQuestionsApiController.getStoryPhrasesList.isEmpty
-                    ? Center(
+                    ? const Center(
                   child: Text(
                     'No data available',
                     style: TextStyle(
@@ -2645,6 +2645,31 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     }
     else if (selectedQuestionType == "Conversation") {
     } else if (selectedQuestionType == "Learning Slide") {
+
+    } else if (selectedQuestionType == "Complete the paragraph") {
+      int pointsValue = int.tryParse(pointsController.text) ?? 0;
+    // questionApiController.addCompleteParagraphApi(
+    // mainCategoryId: mainCategoryId.toString(),
+    // subCategoryId: subCategoryId.toString(),
+    // topicId: topicId.toString(),
+    // subTopicId: subtopicId.toString(),
+    // questionType: selectedQuestionType.toString(),
+    // title: titleController.text,
+    // question: questionController.text,
+    // paragraphContent: questionController.text,
+    //
+    // answer: correctAnswerController.text,
+    // optionA: paragraphOptionControllers[0].text,
+    // optionB: paragraphOptionControllers[1].text,
+    // optionC: paragraphOptionControllers[2].text,
+    // optionD: paragraphOptionControllers[3].text,
+    // optionE: paragraphOptionControllers[4].text,
+    // optionF: paragraphOptionControllers[5].text,
+    // points: pointsValue.toString(),
+    // index: indexController.text,
+    // context: context,
+    // );
+
     }
     else if (selectedQuestionType == "Card Flip") {
 
@@ -3427,8 +3452,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   }
 
   /// add complete the word
-
-  /// add complete the word
   Widget _buildCompleteWordContent() {
     return DottedBorder(
       color: Colors.orange,
@@ -3568,11 +3591,11 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, // Number of items per row
-                  crossAxisSpacing: 10.0, // Spacing between columns
-                  mainAxisSpacing: 5.0, // Spacing between rows
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 10.0,
+                  mainAxisSpacing: 5.0,
                   childAspectRatio:
-                  2.8, // Adjust height and width of grid items
+                  2.8,
                 ),
                 itemCount: paragraphOptionControllers.length,
                 itemBuilder: (context, index) {
