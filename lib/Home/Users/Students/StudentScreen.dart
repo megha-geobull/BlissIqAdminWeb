@@ -6,7 +6,6 @@ import 'package:blissiqadmin/auth/Controller/StudentController.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-//import 'MentorListScreen.dart'; // Import the new Mentor List screen
 
 class StudentScreen extends StatefulWidget {
   const StudentScreen({super.key});
@@ -42,8 +41,8 @@ class _StudentScreenState extends State<StudentScreen> {
   }
 
 
-    void _showMentorBottomSheet(BuildContext context, String? sId) async {
-     selectedMentor = await showModalBottomSheet<String>(
+  void _showMentorBottomSheet(BuildContext context, String? sId) async {
+    selectedMentor = await showModalBottomSheet<String>(
       context: context,
       builder: (context) {
         String? studentID = sId;
@@ -81,9 +80,9 @@ class _StudentScreenState extends State<StudentScreen> {
                       appBar: isWideScreen
                           ? null
                           : AppBar(
-                              title: const Text('Dashboard'),
-                              backgroundColor: Colors.blue.shade100,
-                            ),
+                        title: const Text('Dashboard'),
+                        backgroundColor: Colors.blue.shade100,
+                      ),
                       body: Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8.0, vertical: 16),
@@ -192,7 +191,7 @@ class _StudentScreenState extends State<StudentScreen> {
         Padding(
           padding: EdgeInsets.all(12.0),
           child:
-              Text('Contact No', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text('Contact No', style: TextStyle(fontWeight: FontWeight.bold)),
         ),
         Padding(
           padding: EdgeInsets.all(12.0),
@@ -201,7 +200,7 @@ class _StudentScreenState extends State<StudentScreen> {
         Padding(
           padding: EdgeInsets.all(12.0),
           child:
-              Text('Language', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text('Language', style: TextStyle(fontWeight: FontWeight.bold)),
         ),
         Padding(
           padding: EdgeInsets.all(12.0),
@@ -283,8 +282,8 @@ class _StudentScreenState extends State<StudentScreen> {
           child: selectedMentor == null
               ? ElevatedButton(
             onPressed: () {
-              print("student.sId ${student.sId}");
-              _showMentorBottomSheet(context, student.sId);
+              print("student.sId ${student.id}");
+              _showMentorBottomSheet(context, student.id);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
@@ -322,4 +321,3 @@ class _StudentScreenState extends State<StudentScreen> {
 
 
 }
-

@@ -105,9 +105,13 @@ class _MentorListBottomSheetState extends State<MentorListBottomSheet> {
                             padding: const EdgeInsets.all(12.0),
                             child: ElevatedButton(
                               onPressed: () {
-                                mentorController.assignMentorApi(mentorId: mentor.sId.toString(), studentId: widget.studentID.toString());
+                                mentorController.assignMentorApi(
+                                    mentorId: mentor.sId?.toString() ?? '',
+                                    studentId: widget.studentID?.toString() ?? ''
+                                );
                                 Navigator.pop(context, mentor.fullName);
                               },
+
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.green,
                                 shape: const RoundedRectangleBorder(
