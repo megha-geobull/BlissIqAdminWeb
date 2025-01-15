@@ -25,6 +25,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:csv/csv.dart';
 import '../../../Global/constants/common_snackbar.dart';
+import 'FillTheBlanksDataTable.dart';
 import 'Header_Columns.dart';
 import 'MCQDataTable.dart';
 
@@ -763,7 +764,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.black),
                                      ),
                                      onPressed: () async {
-                                       showImportExportDialog();
+                                       showImportExportDialog("import");
                                      },
                                    ),
                                    SizedBox(width:10),
@@ -790,16 +791,13 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                  _buildTabs(),
                                  boxH20(),
                                  // Only show _buildQuestionsTable if selectedQuestionType is "Multiple Choice Question"
-                                 if (selectedQuestionType ==
-                                     "Multiple Choice Question")
+                                 if (selectedQuestionType == "Multiple Choice Question")
                                    _buildQuestionsTable(),
 
-                                 if (selectedQuestionType ==
-                                     "Re-Arrange the Word")
+                                 if (selectedQuestionType == "Re-Arrange the Word")
                                    _buildRearrangeTheWordQuestionsTable(),
 
-                                 if (selectedQuestionType ==
-                                     "Complete the Word")
+                                 if (selectedQuestionType == "Complete the Word")
                                    _buildQuestionsCompleteTheWordTable(),
 
                                  if (selectedQuestionType == "True/False")
@@ -814,23 +812,19 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                  if (selectedQuestionType == "Conversation")
                                    _buildQuestionsConversationTable(),
 
-                                 if (selectedQuestionType ==
-                                     "Fill in the blanks")
+                                 if (selectedQuestionType == "Fill in the blanks")
                                    _buildQuestionsFillInTheBlanksTable(),
 
-                                 if (selectedQuestionType ==
-                                     "Match the pairs")
+                                 if (selectedQuestionType == "Match the pairs")
                                    _buildQuestionsMatchthepairsTable(),
 
                                  if (selectedQuestionType == "Card Flip")
                                    _buildQuestionsFlipTheCardTable(),
 
-                                 if (selectedQuestionType ==
-                                     "Complete the paragraph")
+                                 if (selectedQuestionType == "Complete the paragraph")
                                    _buildQuestionsCompleteTheParagraphTable(),
 
-                                 if (selectedQuestionType ==
-                                     "Alphabets Example" &&
+                                 if (selectedQuestionType == "Alphabets Example" &&
                                      selectedTopic != "")
                                    _buildExampleTable(),
                                  // Show this widget for "Re-Arrange the Word"
@@ -921,10 +915,10 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
          );
        },
      ),
-              );
+    );
   }
 
-  void showImportExportDialog() {
+  void showImportExportDialog(String type) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -952,6 +946,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
             ),
           ),
           actions: [
+            type=="import"?
             TextButton(
               onPressed: () {
                 if (selectedQuestionType != "") {
@@ -959,7 +954,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 }
               },
               child: const Text("Import"),
-            ),
+            ):SizedBox(),
+            type=="export"?
             TextButton(
               onPressed: () {
                 if (selectedQuestionType != "Alphabets Example" &&
@@ -975,7 +971,13 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 }
               },
               child: const Text("Export"),
-            ),
+            ):SizedBox(),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Close"),
+            )
           ],
         );
       },
@@ -1234,7 +1236,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         print("subcategoryId " + subCategoryId!);
                         print("topicId " + topicId!);
                         print("subtopicId " + subtopicId!);
-                        showImportExportDialog();
+                        showImportExportDialog("export");
                       },
                     ),
                   ),
@@ -1361,7 +1363,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         print("subcategoryId " + subCategoryId!);
                         print("topicId " + topicId!);
                         print("subtopicId " + subtopicId!);
-                        showImportExportDialog();
+                        showImportExportDialog("export");
                         // if (mainCategoryId!.isNotEmpty &&
                         //     subCategoryId!.isNotEmpty &&
                         //     topicId!.isNotEmpty)
@@ -1473,7 +1475,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         print("subcategoryId " + subCategoryId!);
                         print("topicId " + topicId!);
                         print("subtopicId " + subtopicId!);
-                        showImportExportDialog();
+                        showImportExportDialog("export");
                       },
                     ),
                   ),
@@ -1604,7 +1606,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         if (mainCategoryId!.isNotEmpty &&
                             subCategoryId!.isNotEmpty &&
                             topicId!.isNotEmpty)
-                          showImportExportDialog();
+                          showImportExportDialog("export");
                         else
                           showSnackbar(
                               message:
@@ -1737,7 +1739,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         if (mainCategoryId!.isNotEmpty &&
                             subCategoryId!.isNotEmpty &&
                             topicId!.isNotEmpty)
-                          showImportExportDialog();
+                          showImportExportDialog("export");
                         else
                           showSnackbar(
                               message:
@@ -1855,7 +1857,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         if (mainCategoryId!.isNotEmpty &&
                             subCategoryId!.isNotEmpty &&
                             topicId!.isNotEmpty)
-                          showImportExportDialog();
+                          showImportExportDialog("export");
                         else
                           showSnackbar(
                               message:
@@ -1954,7 +1956,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         if (mainCategoryId!.isNotEmpty &&
                             subCategoryId!.isNotEmpty &&
                             topicId!.isNotEmpty)
-                          showImportExportDialog();
+                          showImportExportDialog("export");
                         else
                           showSnackbar(
                               message:
@@ -1971,7 +1973,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 child: _getAllQuestionsApiController.isLoading.value
                     ? CircularProgressIndicator()
                     : (_getAllQuestionsApiController.getFillInTheBlanksList.isEmpty
-                    ? Center(
+                    ? const Center(
                   child: Text(
                     'No data available',
                     style: TextStyle(
@@ -1981,83 +1983,10 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                   ),
                 )
                     :
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  controller: _scrollController,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                        minWidth: 1200, minHeight: 400),
-                    child: SizedBox(
-                      height: 400,
-                      width: 600,
-                      child: Column(
-                        children: [
-                          // Table Header
-                          Container(
-                            color: Colors.orange.shade100,
-                            child: Row(
-                              children: [
-                                _buildTableHeader("Question Type"),
-                                _buildTableHeader("Title"),
-                                _buildTableHeader("Question Language"),
-                                _buildTableHeader("Question"),
-                                _buildTableHeader("Option Language"),
-                                _buildTableHeader("Option 1"),
-                                _buildTableHeader("Option 2"),
-                                _buildTableHeader("Option 3"),
-                                _buildTableHeader("Option 4"),
-                                _buildTableHeader("Answer"),
-                                _buildTableHeader("Points"),
-                                _buildTableHeader("Question Image"),
-                              ],
-                            ),
-                          ),
-                          // Table Rows
-                          Expanded(
-                            child: ListView.builder(
-                              scrollDirection: Axis.vertical,
-                              itemCount: _getAllQuestionsApiController
-                                  .getFillInTheBlanksList.length,
-                              itemBuilder: (context, index) {
-                                var row =
-                                _getAllQuestionsApiController
-                                    .getFillInTheBlanksList[index];
-                                return Row(
-                                  children: [
-                                    _buildTableCell(row.questionType ?? ""),
-                                    _buildTableCell(row.title ?? ""),
-                                    _buildTableCell(row.questionLanguage ?? ""),
-                                    _buildTableCell(row.question ?? ""),
-                                    _buildTableCell(row.optionLanguage ?? ""),
-                                    _buildTableCell(row.optionA ?? ""),
-                                    _buildTableCell(row.optionB ?? ""),
-                                    _buildTableCell(row.optionC ?? ""),
-                                    _buildTableCell(row.optionD ?? ""),
-                                    _buildTableCell(row.answer ?? ""),
-                                    _buildTableCell(row.points.toString() ?? ""),
-                                    GestureDetector(
-                                      onTap: () => _showImagePopup(),
-                                      child: const Text(
-                                        "View",
-                                        style: TextStyle(
-                                          color: Colors.blue,
-                                          decoration: TextDecoration
-                                              .underline,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )),
-              );
+              FillTheBlanks_TableScreen(main_category_id: mainCategoryId,
+              sub_category_id: subCategoryId,
+              topic_id: topicId,sub_topic_id: subtopicId,
+              questionList: _getAllQuestionsApiController.getFillInTheBlanksList)));
             })
           ],
         ),
@@ -2099,7 +2028,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         if (mainCategoryId!.isNotEmpty &&
                             subCategoryId!.isNotEmpty &&
                             topicId!.isNotEmpty)
-                          showImportExportDialog();
+                          showImportExportDialog("export");
                         else
                           showSnackbar(
                               message:
@@ -2243,7 +2172,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         if (mainCategoryId!.isNotEmpty &&
                             subCategoryId!.isNotEmpty &&
                             topicId!.isNotEmpty)
-                          showImportExportDialog();
+                          showImportExportDialog("export");
                         else
                           showSnackbar(
                               message:
@@ -2380,18 +2309,17 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                       icon: Image.asset('assets/excel.png',
                           width: 24, height: 24),
                       onPressed: () {
-                        print("categoryId " + mainCategoryId!);
-                        print("subcategoryId " + subCategoryId!);
-                        print("topicId " + topicId!);
-                        print("subtopicId " + subtopicId!);
+                        // print("categoryId " + mainCategoryId!);
+                        // print("subcategoryId " + subCategoryId!);
+                        // print("topicId " + topicId!);
+                        // print("subtopicId " + subtopicId!);
                         if (mainCategoryId!.isNotEmpty &&
                             subCategoryId!.isNotEmpty &&
                             topicId!.isNotEmpty)
-                          showImportExportDialog();
-                        else
-                          showSnackbar(
-                              message:
-                                  "Please select category,subcategory,topic,etc");
+                          showImportExportDialog("export");
+                        else {
+                          showSnackbar(message: "Please select category,subcategory,topic,etc");
+                        }
                       },
                     ),
                   ),
@@ -2451,8 +2379,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                           children: [
                             _buildTableCell("Complete Paragraph"),
                             _buildTableCell("Title $i"),
-                            _buildTableCell(
-                                "This is a sample paragraph content $i for testing purposes."),
+                            _buildTableCell("This is a sample paragraph content $i for testing purposes."),
                             _buildTableCell("Option A$i"),
                             _buildTableCell("Option B$i"),
                             _buildTableCell("Option C$i"),
@@ -2550,7 +2477,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         DataCell(Text(entry['exg_name'] ?? '')),
                         DataCell(InkWell(child:Text(entry['image_name'] ?? ''),onTap: (){})),
                         DataCell(InkWell(child:Text(entry['image'] ?? ''),onTap: (){},)),
-                        DataCell(InkWell(child:Text("Delete",style: TextStyle(color: Colors.red),),onTap: (){},)),
+                        DataCell(InkWell(child:Text("Delete",style: TextStyle(color: Colors.red),),onTap: (){
+
+                        },)),
                       ],
                     );
                   }).toList(),

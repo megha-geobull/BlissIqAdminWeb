@@ -141,5 +141,8 @@ class ApiString {
   static const String get_my_learning_path = "${studentBaseUrl}get_my_learning_path";
 
 
+  static const String delete_topic_example = "${baseUrl}delete_topic_example";
+
+
 
 }

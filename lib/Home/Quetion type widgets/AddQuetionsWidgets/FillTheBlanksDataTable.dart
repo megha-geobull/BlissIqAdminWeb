@@ -2,29 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Global/constants/CustomAlertDialogue.dart';
 import '../controller/GetAllQuestionsApiController.dart';
-import '../model/get_mcqs.dart';
+import '../model/get_fill_in_the_blanks.dart';
 
-class MCQ_QuestionTableScreen extends StatefulWidget {
+class FillTheBlanks_TableScreen extends StatefulWidget {
   final String main_category_id;
   final String sub_category_id;
   final String topic_id;
   final String sub_topic_id;
-  final List<Mcqs> questionList;
+  final List<FillInTheBlanks> questionList;
 
-  MCQ_QuestionTableScreen(
+  FillTheBlanks_TableScreen(
       {required this.main_category_id,
-      required this.sub_category_id,
-      required this.topic_id,
-      required this.sub_topic_id,
-      required this.questionList});
+        required this.sub_category_id,
+        required this.topic_id,
+        required this.sub_topic_id,
+        required this.questionList});
 
   @override
   _QuestionTableScreenState createState() => _QuestionTableScreenState();
 }
 
-class _QuestionTableScreenState extends State<MCQ_QuestionTableScreen> {
+class _QuestionTableScreenState extends State<FillTheBlanks_TableScreen> {
   TextEditingController _searchController = TextEditingController();
-  List<Mcqs> _filteredQuestions = []; // Filtered data for the table
+  List<FillInTheBlanks> _filteredQuestions = []; // Filtered data for the table
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   final _verticalScrollController = ScrollController();
   final _horizontalScrollController = ScrollController();
@@ -77,24 +77,24 @@ class _QuestionTableScreenState extends State<MCQ_QuestionTableScreen> {
     // Convert the selected IDs string to a Set for efficient lookup
     final selectedIdsSet = _selectedQuestionIds.split('|').toSet();
     if(mounted){
-    setState(() {
+      setState(() {
 
-      // Remove matching items from the filtered list
-      _filteredQuestions.removeWhere((mcq) => selectedIdsSet.contains(mcq.id));
+        // Remove matching items from the filtered list
+        _filteredQuestions.removeWhere((mcq) => selectedIdsSet.contains(mcq.id));
 
-      // Clear selected IDs after deletion
-      _selectedQuestionIds = '';
+        // Clear selected IDs after deletion
+        _selectedQuestionIds = '';
 
-      // Update the data source with the updated filtered list
-      _dataSource = QuestionDataSource(
-        _filteredQuestions,
-            (selectedIds) {
-          setState(() {
-            _selectedQuestionIds = selectedIds;
-          });
-        },
-      );
-    });
+        // Update the data source with the updated filtered list
+        _dataSource = QuestionDataSource(
+          _filteredQuestions,
+              (selectedIds) {
+            setState(() {
+              _selectedQuestionIds = selectedIds;
+            });
+          },
+        );
+      });
     }
   }
 
@@ -169,7 +169,9 @@ class _QuestionTableScreenState extends State<MCQ_QuestionTableScreen> {
                           ),
                           DataColumn(label: Text("Question Type")),
                           DataColumn(label: Text("Title")),
+                          DataColumn(label: Text("Question Language")),
                           DataColumn(label: Text("Question")),
+                          DataColumn(label: Text("Option Language")),
                           DataColumn(label: Text("Option 1")),
                           DataColumn(label: Text("Option 2")),
                           DataColumn(label: Text("Option 3")),
@@ -177,6 +179,7 @@ class _QuestionTableScreenState extends State<MCQ_QuestionTableScreen> {
                           DataColumn(label: Text("Answer")),
                           DataColumn(label: Text("Points")),
                           DataColumn(label: Text("Question Image")),
+
                         ],
                         source: _dataSource,
                         rowsPerPage: _rowsPerPage,
@@ -198,7 +201,6 @@ class _QuestionTableScreenState extends State<MCQ_QuestionTableScreen> {
         content: title,
         yesText: 'Yes',
         noText: 'No', onYesPressed: () {
-          Navigator.pop(context);
         _getdeleteApiController.delete_Mcq(question_ids: _selectedQuestionIds);
         Future.delayed(const Duration(seconds: 2), () {
           _removeSelectedQuestions();
@@ -214,7 +216,7 @@ class _QuestionTableScreenState extends State<MCQ_QuestionTableScreen> {
 
 // DataTableSource for handling data in the DataTable
 class QuestionDataSource extends DataTableSource {
-  final List<Mcqs> questions;
+  final List<FillInTheBlanks> questions;
   final Function(String) onSelectionChanged; // Callback for selection
   final Set<String> selectedQuestionIds = {}; // Track selected question IDs
   bool isSelectAll = false; // Track "Select All" state
@@ -249,7 +251,9 @@ class QuestionDataSource extends DataTableSource {
         ),
         DataCell(Text(question.questionType ?? "")),
         DataCell(Text(question.title ?? "")),
+        DataCell(Text(question.questionLanguage ?? "")),
         DataCell(Text(question.question ?? "")),
+        DataCell(Text(question.optionLanguage ?? "")),
         DataCell(Text(question.optionA ?? "")),
         DataCell(Text(question.optionB ?? "")),
         DataCell(Text(question.optionC ?? "")),

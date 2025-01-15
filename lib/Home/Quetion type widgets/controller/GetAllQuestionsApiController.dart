@@ -457,5 +457,38 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
+  delete_example({required String example_ids}) async {
+    isLoading.value = true;
+
+    try {
+      final Map<String, dynamic> body = {
+        "topic_example_id": example_ids,
+      };
+
+      final response = await http.delete(
+        Uri.parse(ApiString.delete_topic_example),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      print('Response url: ${ApiString.delete_topic_example}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          showSnackbar(message: "Example deleted successfully");
+        } else {
+          showSnackbar(message: "Failed to delete Example");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while delete $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
 
 }

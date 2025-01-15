@@ -219,7 +219,8 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                     IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
                       onPressed: () {
-                        onDelete(_controller.categories[index]['_id'],index,"you want to delete this category?","category");
+                        onDelete(_controller.categories[index]['_id'],index,
+                            "you want to delete this category?","category");
                       },
                     ),
                   ],)
