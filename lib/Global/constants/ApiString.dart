@@ -136,6 +136,10 @@ class ApiString {
   static const String get_match_pair_question = "${baseUrl}get_match_pair_question";
   static const String delete_match_pair_question = "${baseUrl}delete_match_pair_question";
 
+  ///learning path
+  static const String studentBaseUrl = "http://65.0.211.122:4444/cust_api/";
+  static const String get_my_learning_path = "${studentBaseUrl}get_my_learning_path";
+
 
 
 }

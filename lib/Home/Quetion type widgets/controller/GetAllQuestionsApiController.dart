@@ -17,8 +17,6 @@ class GetAllQuestionsApiController extends GetxController{
 
   RxBool isLoading = false.obs;
   RxList<Mcqs> getMcqslits = <Mcqs>[].obs;
-  List<Mcqs> _filteredQuestionsMcq = []; // Filtered data for the table
-  int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   RxList<ReArrange> getReArrangeList = <ReArrange>[].obs;
   RxList<TrueOrFalse> getTrueOrFalseList = <TrueOrFalse>[].obs;
   RxList<FillInTheBlanks> getFillInTheBlanksList = <FillInTheBlanks>[].obs;
@@ -81,6 +79,39 @@ class GetAllQuestionsApiController extends GetxController{
     } catch (e) {
       showSnackbar(message: "Error while fetching mcqs: $e");
       log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  delete_Mcq({required String question_ids}) async {
+    isLoading.value = true;
+
+    try {
+      final Map<String, dynamic> body = {
+        "question_id": question_ids,
+      };
+
+      final response = await http.delete(
+        Uri.parse(ApiString.delete_mcq),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      print('Response url: ${ApiString.delete_mcq}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          showSnackbar(message: "MCQ deleted successfully");
+        } else {
+          showSnackbar(message: "Failed to delete MCQ");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while delete $e");
     } finally {
       isLoading.value = false;
     }
