@@ -14,7 +14,6 @@ class ApiString {
   static const String edit_profile = "${baseUrl}edit_profile";
   static const String get_profile = "${baseUrl}get_profile";
 
-
   ///mentor
   static const String mentorBaseUrl = "http://65.0.211.122:4444/mentor_api/";
   static const String mentor_registration = "${mentorBaseUrl}mentor_registration";
@@ -126,9 +125,13 @@ class ApiString {
   static const String get_complete_the_word = "${baseUrl}get_complete_the_word";
   static const String delete_complete_the_word = "${baseUrl}delete_complete_the_word";
 
+
+
   static const String add_complete_the_paragraph = "${baseUrl}add_complete_the_paragraph";
   static const String get_complete_the_paragraph = "${baseUrl}get_complete_the_paragraph";
-  static const String delete_complete_the_paragraph = "${baseUrl}delete_complete_the_paragraph";
+  static const String delete_complete_the_paragraph = "${baseUrl}delete_complete_the_word";
+
+
 
   /// Questions widgets
 
