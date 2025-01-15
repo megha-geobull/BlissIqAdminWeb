@@ -1,10 +1,16 @@
 import 'dart:developer';
+import 'package:csv/csv.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../Global/Widgets/ExampleModel.dart';
 import '../Global/constants/ApiString.dart';
 import '../Global/constants/common_snackbar.dart';
+import '../Global/utils/shared_preference/shared_preference_services.dart';
+import 'dart:html' as html;
+
+import '../Home/Quetion type widgets/model/AllDataModel.dart';
 
 class CategoryController extends GetxController {
   RxBool isLoading = false.obs;
@@ -13,6 +19,7 @@ class CategoryController extends GetxController {
   RxList sub_categories = [].obs;
   RxList topics = [].obs;
   RxList sub_topics = [].obs;
+  List<AllDatas> learningPath = [];
   RxList<ImageWithText> tempList = <ImageWithText>[].obs;
   var subtopicsMap = <String, List<dynamic>>{}.obs;
 
@@ -481,6 +488,147 @@ class CategoryController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  getUserId() async {
+    return await getDataFromLocalStorage(
+      dataType: "STRING",
+      prefKey: "user_id",
+    ) as String?;
+  }
+
+  getlearningPath() async {
+    isLoading.value = true;
+    learningPath.clear();
+    String? fetchedUserId = await getUserId();
+    try {
+      final Map<String, dynamic> body = {
+        "user_id": fetchedUserId,
+      };
+      final response = await http.post(
+        Uri.parse(ApiString.get_my_learning_path),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      //print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          learningPath = (responseData["data"] as List<dynamic>)
+              .map((item) => AllDatas.fromJson(item))
+              .toList();
+          exportToCSV(learningPath);
+        } else {
+          //showSnackbar(message: "Failed to fetch category");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetch learning path $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void exportToCSV(List<AllDatas> dataList) async {
+    print("inside csv generate");
+    List<List<String>> csvData = [
+      [
+        "Category ID",
+        "Category Name",
+        "Subcategory ID",
+        "Subcategory Name",
+        "Topic ID",
+        "Topic Name",
+        "Subtopic ID",
+        "Subtopic Name"
+      ]
+    ];
+
+    // Recursively process JSON data
+    void processCategory(AllDatas category) {
+      final categoryId = category.id;
+      final categoryName = category.categoryName;
+      final subCategories = category.subCategories ?? [];
+
+      for (final subCategory in subCategories) {
+        final subCategoryId = subCategory.id;
+        final subCategoryName = subCategory.subCategory;
+        final topics = subCategory.topics ?? [];
+
+        for (final topic in topics) {
+          final topicId = topic.id;
+          final topicName = topic.topicName;
+          final subTopics = topic.subTopics ?? [];
+
+          if (subTopics.isEmpty) {
+            // No subtopics, add row for topic only
+            csvData.add([
+              categoryId,
+              categoryName,
+              subCategoryId,
+              subCategoryName,
+              topicId,
+              topicName,
+              "",
+              ""
+            ]);
+          } else {
+            // Add rows for each subtopic
+            for (final subTopic in subTopics) {
+              final subTopicId = subTopic.id;
+              final subTopicName = subTopic.subTopicName;
+              csvData.add([
+                categoryId,
+                categoryName,
+                subCategoryId,
+                subCategoryName,
+                topicId,
+                topicName,
+                subTopicId,
+                subTopicName
+              ]);
+            }
+          }
+        }
+      }
+    }
+
+    // Process all categories
+    for (final category in dataList) {
+      print("First category"+categories.toString());
+      processCategory(category);
+    }
+
+    // Convert to CSV format
+    final csvConverter = const ListToCsvConverter();
+    final csvString = csvConverter.convert(csvData);
+    if (kIsWeb) {
+      log("Website file save");
+      final bytes = utf8.encode(csvString);
+      final blob = html.Blob([bytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+
+      final anchor = html.AnchorElement()
+        ..href = url
+        ..style.display = 'none'
+        ..download = 'All_ID_data.csv';
+
+      html.document.body!.children.add(anchor);
+      anchor.click();
+      html.document.body!.children.remove(anchor);
+
+      html.Url.revokeObjectUrl(url);
+    }
+    // Save CSV file
+    // final directory = await getTemporaryDirectory();
+    // final filePath = "${directory.path}/CategoryData.csv";
+    // final file = File(filePath)..writeAsStringSync(csvString);
+
+    //print("CSV file saved at: $filePath");
   }
 
 }

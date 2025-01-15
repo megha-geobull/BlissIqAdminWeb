@@ -7,6 +7,7 @@ import 'package:blissiqadmin/profile/ProfileController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'Global/MyCustomScrollBehaviour.dart';
 import 'auth/Controller/AuthController.dart';
 import 'auth/Signup/Splash.dart';
 import 'controller/CategoryController.dart';
@@ -42,6 +43,7 @@ class _BlissIQAppMyAppState extends State<MyApp> {
     return GetMaterialApp(
       title: 'BlissIq Admin Panel',
       debugShowCheckedModeBanner: false,
+      scrollBehavior: MyCustomScrollBehavior(),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,

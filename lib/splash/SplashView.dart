@@ -3,6 +3,7 @@ import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/controller/SplashController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../profile/ProfileController.dart';
 
@@ -22,22 +23,13 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController _controller;
   late Animation<double> _animation;
 
-  void navigateToHomeScreen() {
-    // Timer(Duration(seconds: 2), () {
-    //   Navigator.pushReplacement(
-    //     context,
-    //     MaterialPageRoute(builder: (context) => SignUpScreen()),
-    //   );
-    // });
-  }
 
   @override
   void initState() {
     super.initState();
     // splashController.generateFirebaseToken();
-    navigateToHomeScreen();
+    checkLogin();
     Get.find<ProfileController>().checkLogin();
-    goToScreen();
 
     // Initialize animation controller
     _controller = AnimationController(
@@ -51,6 +43,11 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.repeat(reverse: true); // Continuously scale up and down
   }
+
+  checkLogin() async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  print("Stored User ID:${prefs.getString('user_id')}");
+ }
 
   @override
   void dispose() {
@@ -99,12 +96,6 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  goToScreen() {
-    // Timer(
-    //    Duration(seconds: 3),
-    //       () => Get.to(SignUpScreen()),
-    // );
-  }
 }
 
 

@@ -14,8 +14,6 @@ class ApiString {
   static const String edit_profile = "${baseUrl}edit_profile";
   static const String get_profile = "${baseUrl}get_profile";
 
-
-
   ///mentor
   static const String mentorBaseUrl = "http://65.0.211.122:4444/mentor_api/";
   static const String mentor_registration = "${mentorBaseUrl}mentor_registration";
@@ -25,15 +23,12 @@ class ApiString {
   static const String get_assign_teachers = "${baseUrl}get_assign_teachers";
 
 
-
   ///school_registration
   static const String schoolBaseUrl = "http://65.0.211.122:4444/school_api/";
   static const String school_registration = "${schoolBaseUrl}school_registration";
   static const String approve_school = "${baseUrl}approve_school";
   static const String get_all_schools = "${baseUrl}get_all_schools";
   static const String assign_school = "${baseUrl}assign_school";
-
-
 
 
   ///learner
@@ -143,6 +138,10 @@ class ApiString {
   static const String add_match_pair_question = "${baseUrl}add_match_pair_question";
   static const String get_match_pair_question = "${baseUrl}get_match_pair_question";
   static const String delete_match_pair_question = "${baseUrl}delete_match_pair_question";
+
+  ///learning path
+  static const String studentBaseUrl = "http://65.0.211.122:4444/cust_api/";
+  static const String get_my_learning_path = "${studentBaseUrl}get_my_learning_path";
 
 
 

@@ -303,7 +303,6 @@ class QuestionApiController extends GetxController {
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
-
       if (response.statusCode == 201) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         print('Response status: ${responseData}');
