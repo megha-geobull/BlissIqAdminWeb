@@ -1,5 +1,6 @@
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/AppColor.dart';
+import 'package:blissiqadmin/Home/Assign/AssignedSchoolPage.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/Home/Users/Company/CompanyRegistrationPage.dart';
 import 'package:blissiqadmin/Home/Users/Company/CompnayListBottomSheet.dart';
@@ -151,7 +152,8 @@ class _CompanyScreenState extends State<CompanyScreen> {
             7: FlexColumnWidth(1.5),
             8: FlexColumnWidth(1.5),
             9: FlexColumnWidth(1.6),
-            10: FlexColumnWidth(1.5),
+            10: FlexColumnWidth(1.6),
+            11: FlexColumnWidth(1.5),
 
           },
           children: [
@@ -237,6 +239,38 @@ class _CompanyScreenState extends State<CompanyScreen> {
               style: const TextStyle(
                 color: Colors.black,fontWeight: FontWeight.bold,
                 fontSize: 12,
+              ),
+            ),
+          ),
+        ),
+
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.blueAccent,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: InkWell(
+              // onTap: () {
+              //   print("Company.Id ${company.id}");
+              //   _showSchoolBottomSheet(context, company.id);
+              // },
+              onTap: () {
+                Get.to(() => AssignedSchoolPage(companyID: company.id.toString()));
+                print(company.id);
+              },
+              borderRadius: BorderRadius.circular(10),
+              child: const Text(
+                'View',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  letterSpacing: 1,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -387,9 +421,12 @@ class _CompanyScreenState extends State<CompanyScreen> {
         ),
         Padding(
           padding: EdgeInsets.all(12.0),
+          child: Text('Schools', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
+        Padding(
+          padding: EdgeInsets.all(12.0),
           child: Text('Assign', style: TextStyle(fontWeight: FontWeight.bold)),
         ),
-
         Padding(
           padding: EdgeInsets.all(12.0),
           child: Text('Actions', style: TextStyle(fontWeight: FontWeight.bold)),

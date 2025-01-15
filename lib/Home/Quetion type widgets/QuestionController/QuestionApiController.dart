@@ -466,4 +466,137 @@ class QuestionApiController extends GetxController {
     }
   }
 
+  addCompleteParagraphApi({
+    required String mainCategoryId,
+    required String title,
+    required String subCategoryId,
+    required String topicId,
+    String? subTopicId,
+    required String questionType,
+    required String question,
+    required String paragraphContent,
+    required String index,
+    required String optionA,
+    required String optionB,
+    required String optionC,
+    required String optionD,
+    required String optionE,
+    required String optionF,
+    required String answer,
+    required String points,
+    required BuildContext context,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse(ApiString.add_complete_the_paragraph),
+      );
+      // Prepare the request body
+      request.fields.addAll({
+        'main_category_id': mainCategoryId,
+        'sub_category_id': subCategoryId,
+        'topic_id': topicId,
+        'sub_topic_id': subTopicId ?? "",
+        'question_type': questionType,
+        'question': question,
+        'paragraph_content': paragraphContent,
+        'title': title,
+        'index': index,
+        'option_a': optionA,
+        'option_b': optionB,
+        'option_c': optionC,
+        'option_d': optionD,
+        'option_e':optionE,
+        'option_f':optionF,
+        'points': points,
+        'answer': answer
+      });
+
+      final response = await request.send();
+      final responseData = jsonDecode(await response.stream.bytesToString());
+
+      print("Response Data: $responseData");
+
+      // Handle success and error responses
+      if (response.statusCode == 201 && responseData['status'] == 1) {
+        Fluttertoast.showToast(
+          msg: responseData['message'] ?? 'Added successfully',
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: responseData['message'] ?? 'Error occurred',
+        );
+      }
+    } catch (e, stacktrace) {
+      print('An error occurred: $e');
+      print('Stacktrace: $stacktrace');
+      Fluttertoast.showToast(
+        msg: 'An error occurred: $e',
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+  addLearningSlideApi({
+    required String mainCategoryId,
+    required String subCategoryId,
+    required String topicId,
+    String? subTopicId,
+    required String title,
+    required String question_type,
+    required String definition,
+    required String transcriptionOne,
+    required String grammarExamples,
+    required String transcriptionTwo,
+    required String index,
+    required String points,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse(ApiString.add_learning_slide),
+      );
+
+      request.fields.addAll({
+        'main_category_id': mainCategoryId,
+        'sub_category_id': subCategoryId,
+        'topic_id': topicId,
+        'sub_topic_id': subTopicId ?? "",
+        'question_type': question_type,
+        'title': title,
+        'index': index,
+        'definition': definition,
+        'transcription_one': transcriptionOne,
+        'grammar_examples': grammarExamples,
+        'transcription_two': transcriptionTwo,
+        'points': points,
+      });
+
+      final response = await request.send();
+      final responseData = jsonDecode(await response.stream.bytesToString());
+      print(responseData);
+      if (response.statusCode == 201 && responseData['status'] == 1) {
+        Fluttertoast.showToast(
+          msg: responseData['message'] ?? 'Slide content added successfully',
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: responseData['message'] ?? 'Failed to add slide content',
+        );
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: 'An error occurred: $e',
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
 }

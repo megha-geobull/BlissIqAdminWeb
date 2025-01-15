@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/common_snackbar.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/GetCompleteParagraphModel.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/GetCompleteWordModel.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/LearningSlideModel.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_fill_in_the_blanks.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_match_the_pairs.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_rearrange_model.dart';
@@ -26,6 +29,12 @@ class GetAllQuestionsApiController extends GetxController{
   RxList<PhrasesData> getConversationList = <PhrasesData>[].obs;
   RxList<MatchPairs> getMatchPairsList = <MatchPairs>[].obs;
 
+
+  RxList<LearningSlide> getLearningSlideData = <LearningSlide>[].obs;
+  RxList<CompleteWordData> getCompleteWordData = <CompleteWordData>[].obs;
+  RxList<CompleteParaData> getCompleteParaData = <CompleteParaData>[].obs;
+
+
   clearData(){
     getMcqslits.clear();
     getReArrangeList.clear();
@@ -34,8 +43,158 @@ class GetAllQuestionsApiController extends GetxController{
     getStoryDataList.clear();
     getStoryPhrasesList.clear();
     getConversationList.clear();
+    getLearningSlideData.clear();
+    getCompleteWordData.clear();
+    getCompleteParaData.clear();
   }
 
+
+
+
+  getCompleteWordApi({
+    required String main_category_id ,
+    required String sub_category_id,
+    required String topic_id,
+    String? sub_topic_id}) async {
+    isLoading.value = true;
+    getLearningSlideData.clear();
+    try {
+      var body = {
+        'main_category_id':main_category_id,
+        'sub_category_id':sub_category_id,
+        'topic_id':topic_id,
+        'sub_topic_id':sub_topic_id??''
+      };
+      final response = await http.post(
+          Uri.parse(ApiString.get_complete_the_word),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(body)
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      print('Url: ${ApiString.get_complete_the_word}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          // Parse each JSON object into a Data model
+          getCompleteWordData.value = (responseData["data"] as List)
+              .map((wordJson) => CompleteWordData.fromJson(wordJson))
+              .toList();
+          print("Fetched ${getCompleteWordData.length} complete word");
+        } else {
+          showSnackbar(message: responseData['message'] ?? "Failed to fetch complete word ");
+        }
+      } else {
+        showSnackbar(message: "Failed to fetch word. Status: ${response.statusCode}");
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetching complete word: $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  getCompleteParaApi({
+    required String main_category_id ,
+    required String sub_category_id,
+    required String topic_id,
+    String? sub_topic_id}) async {
+    isLoading.value = true;
+    getCompleteParaData.clear();
+    print("Hi Hellow");
+    try {
+      var body = {
+        'main_category_id':main_category_id,
+        'sub_category_id':sub_category_id,
+        'topic_id':topic_id,
+        'sub_topic_id':sub_topic_id??''
+      };
+      print(main_category_id);
+      print(sub_category_id);
+      print(topic_id);
+      print(sub_topic_id);
+
+
+      final response = await http.post(
+          Uri.parse(ApiString.get_complete_the_paragraph),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(body)
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      print('Url: ${ApiString.get_complete_the_paragraph}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          getCompleteParaData.value = (responseData["data"] as List)
+              .map((paraJson) => CompleteParaData.fromJson(paraJson))
+              .toList();
+          print("Fetched ${getCompleteParaData.length} Complete the para");
+        } else {
+          showSnackbar(message: responseData['message'] ?? "Failed to fetch Complete the para ");
+        }
+      } else {
+        showSnackbar(message: "Failed to fetch Complete the para. Status: ${response.statusCode}");
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetching Complete the para: $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+  getAllLearningSlideApi({
+    required String main_category_id ,
+    required String sub_category_id,
+    required String topic_id,
+    String? sub_topic_id}) async {
+    isLoading.value = true;
+    getLearningSlideData.clear();
+    try {
+      var body = {
+        'main_category_id':main_category_id,
+        'sub_category_id':sub_category_id,
+        'topic_id':topic_id,
+        'sub_topic_id':sub_topic_id??''
+      };
+      final response = await http.post(
+          Uri.parse(ApiString.get_learning_slide),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(body)
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      print('Url: ${ApiString.get_learning_slide}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          // Parse each JSON object into a Data model
+          getLearningSlideData.value = (responseData["data"] as List)
+              .map((slideJson) => LearningSlide.fromJson(slideJson))
+              .toList();
+          print("Fetched ${getLearningSlideData.length} learning slide");
+        } else {
+          showSnackbar(message: responseData['message'] ?? "Failed to fetch learning slide ");
+        }
+      } else {
+        showSnackbar(message: "Failed to fetch learning slide. Status: ${response.statusCode}");
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetching learning slide: $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   getAllMCQS({
     required String main_category_id ,
