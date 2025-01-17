@@ -18,6 +18,8 @@ import 'package:http/http.dart' as http;
 import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
 
+import '../../profile/ProfileController.dart';
+
 class AuthController extends GetxController{
 
   var nameController = TextEditingController();
@@ -128,7 +130,7 @@ class AuthController extends GetxController{
             stringData: userName,
           );
           print("User ID after set data: $userId");
-
+          Get.find<ProfileController>().checkLogin();
           bool isLoginSuccess = true;
           if (isLoginSuccess) {
             await Future.delayed(const Duration(seconds: 2));

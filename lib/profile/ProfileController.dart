@@ -30,21 +30,46 @@ class ProfileController extends GetxController {
   var formKey = GlobalKey<FormState>();
   var currentCountryCode = "IN-91".obs;
 
-  checkLogin() async {
-    print("checkLogin ");
+  // checkLogin() async {
+  //   print("checkLogin ");
+  //
+  //   String? fetchedUserId = await getUserId();
+  //   if (fetchedUserId != null) {
+  //     userId.value = fetchedUserId;
+  //   } else {
+  //     userId.value = ''; // Provide a fallback or log the error
+  //   }
+  //   isLogin = userId.value.isNotEmpty ?true:false;
+  //   print("userId.value   ${userId.value}  $isLogin");
+  //   if (userId.value.isNotEmpty) {
+  //     getProfile();
+  //   }
+  // }
 
-    String? fetchedUserId = await getUserId();
-    if (fetchedUserId != null) {
-      userId.value = fetchedUserId;
-    } else {
-      userId.value = ''; // Provide a fallback or log the error
-    }
-    isLogin = userId.value.isNotEmpty ?true:false;
-    print("userId.value   ${userId.value}  $isLogin");
-    if (userId.value.isNotEmpty) {
-      getProfile();
+  checkLogin() async {
+    print("Checking Login...");
+
+    try {
+      String? fetchedUserId = await getUserId();
+      if (fetchedUserId != null) {
+        userId.value = fetchedUserId;
+        print("Fetched User ID: $fetchedUserId");
+      } else {
+        userId.value = '';
+        print("No User ID Found");
+      }
+
+      isLogin = userId.value.isNotEmpty;
+      print("Login Status: $isLogin");
+
+      if (isLogin) {
+        await getProfile();
+      }
+    } catch (e) {
+      print("Error in checkLogin: $e");
     }
   }
+
 
   // Handle country code change
   void onCountryChange(CountryCode countryCode) {

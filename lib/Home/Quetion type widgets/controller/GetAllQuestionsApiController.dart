@@ -11,6 +11,7 @@ import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_rearrange_m
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_story_model.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_story_phrases_model.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_trueOrfalse_model.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_mcqs.dart';
@@ -237,6 +238,39 @@ class GetAllQuestionsApiController extends GetxController{
     } catch (e) {
       showSnackbar(message: "Error while fetching mcqs: $e");
       log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  delete_Mcq({required String question_ids}) async {
+    isLoading.value = true;
+
+    try {
+      final Map<String, dynamic> body = {
+        "question_id": question_ids,
+      };
+
+      final response = await http.delete(
+        Uri.parse(ApiString.delete_mcq),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      print('Response url: ${ApiString.delete_mcq}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          showSnackbar(message: "MCQ deleted successfully");
+        } else {
+          showSnackbar(message: "Failed to delete MCQ");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while delete $e");
     } finally {
       isLoading.value = false;
     }
