@@ -126,11 +126,9 @@ class ApiString {
   static const String delete_complete_the_word = "${baseUrl}delete_complete_the_word";
 
 
-
   static const String add_complete_the_paragraph = "${baseUrl}add_complete_the_paragraph";
   static const String get_complete_the_paragraph = "${baseUrl}get_complete_the_paragraph";
   static const String delete_complete_the_paragraph = "${baseUrl}delete_complete_the_word";
-
 
 
   /// Questions widgets
@@ -144,6 +142,7 @@ class ApiString {
   static const String get_my_learning_path = "${studentBaseUrl}get_my_learning_path";
 
 
+  static const String add_topic_example = "${baseUrl}add_topic_example";
   static const String delete_topic_example = "${baseUrl}delete_topic_example";
 
 

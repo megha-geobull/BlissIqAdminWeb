@@ -599,4 +599,64 @@ class QuestionApiController extends GetxController {
     }
   }
 
+  addExampleApi({
+    required String mainCategoryId,
+    required String subCategoryId,
+    required String topicId,
+    required String subTopicId,
+    required String questionType,
+    required String question,
+    Uint8List? qImage,
+    required String answer,
+    required String points,
+    required String index,
+  }) async {
+    isLoading.value = true;
+    var uri = Uri.parse(ApiString.add_topic_example);
+    try {
+      var request = http.MultipartRequest("POST", uri);
+      if (qImage != null) {
+        var mimeType = lookupMimeType('image') ?? 'image/jpeg';
+        var multipartFile = http.MultipartFile.fromBytes(
+          'image_name',
+          qImage,
+          filename: 'uploaded_image.jpg',
+          contentType: MediaType.parse(mimeType),
+        );
+        request.files.add(multipartFile);
+      }
+
+      request.fields['main_category_id'] = mainCategoryId;
+      request.fields['sub_category_id'] = subCategoryId;
+      request.fields['topic_id'] = topicId;
+      request.fields['sub_topic_id'] = subTopicId;
+      request.fields['question_type'] = questionType;
+      request.fields['question'] = question;
+      request.fields['answer'] = answer;
+      request.fields['points'] = points;
+      request.fields['index'] = index;
+
+      http.Response response = await http.Response.fromStream(await request.send());
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 201) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        print('Response status: ${responseData}');
+        if (responseData['status'] == 1) {
+          showSnackbar(message: "Question added successfully");
+        } else {
+          showSnackbar(message: "Failed to add question");
+        }
+      } else {
+        showSnackbar(message: "Failed to add question: ${response.reasonPhrase}");
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while adding question: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
 }

@@ -16,6 +16,8 @@ import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_mcqs.dart';
 
+import '../model/get_conversation.dart';
+
 class GetAllQuestionsApiController extends GetxController{
 
   RxBool isLoading = false.obs;
@@ -26,7 +28,7 @@ class GetAllQuestionsApiController extends GetxController{
   RxList<StoryData> getStoryDataList = <StoryData>[].obs;
 
   RxList<PhrasesData> getStoryPhrasesList = <PhrasesData>[].obs;
-  RxList<PhrasesData> getConversationList = <PhrasesData>[].obs;
+  RxList<Data> getConversationList = <Data>[].obs;
   RxList<MatchPairs> getMatchPairsList = <MatchPairs>[].obs;
 
 
@@ -533,14 +535,14 @@ class GetAllQuestionsApiController extends GetxController{
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
+      print('Response url: ${ApiString.get_user_conversation}');
 
       if (response.statusCode == 200) {
         var responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
           // Parse each JSON object into a Data model
-          getConversationList.clear();
           getConversationList.value = (responseData["data"] as List)
-              .map((mcqJson) => PhrasesData.fromJson(mcqJson))
+              .map((convoJson) => Data.fromJson(convoJson))
               .toList();
 
           print("Fetched ${getConversationList.length} conversation");
@@ -616,7 +618,7 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-  delete_example({required String example_ids}) async {
+   delete_example({required String example_ids}) async {
     isLoading.value = true;
 
     try {
@@ -638,8 +640,45 @@ class GetAllQuestionsApiController extends GetxController{
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
           showSnackbar(message: "Example deleted successfully");
+          return true;
         } else {
           showSnackbar(message: "Failed to delete Example");
+          return false;
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while delete $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  delete_conversation({required String conversation_id}) async {
+    isLoading.value = true;
+
+    try {
+      final Map<String, dynamic> body = {
+        "conversation_id": conversation_id,
+      };
+
+      final response = await http.delete(
+        Uri.parse(ApiString.delete_conversation),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      print('Response url: ${ApiString.delete_conversation}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          showSnackbar(message: "Conversation deleted successfully");
+          return true;
+        } else {
+          showSnackbar(message: "Failed to delete Conversation");
+          return false;
         }
       }
     } catch (e) {

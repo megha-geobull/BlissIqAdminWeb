@@ -253,4 +253,64 @@ class QuestionController extends GetxController {
     }
   }
 
+  Future<void> editConversation({
+    required String conversation_id,
+    required String main_category_id,
+    required String sub_category_id,
+    required String topic_id,
+    String? sub_topic_id,
+    required String question_type,
+    required String title,
+    required String bot_conversation,
+    required String user_conversation,
+    required String user_conversation_type,
+    required String option,
+    required String answer,
+    required String points,
+    required String index,
+  }) async {
+    isLoading.value = true;
+    try {
+      final uri = Uri.parse(ApiString.add_card_flipping);
+      final request = http.MultipartRequest('POST', uri);
+///conversation_id,main_category_id, sub_category_id, topic_id, sub_topic_id,question_type,title,bot_conversation,
+      ///user_conversation,user_conversation_type(Text/Question),options(pipe separated values),answer
+      // Add text fields
+      request.fields['main_category_id'] = main_category_id;
+      request.fields['sub_category_id'] = sub_category_id;
+      request.fields['topic_id'] = topic_id;
+      request.fields['sub_topic_id'] = sub_topic_id ?? '';
+      request.fields['title'] = title;
+      request.fields['question_type'] = question_type;
+      request.fields['bot_conversation'] = bot_conversation;
+      request.fields['user_conversation'] = user_conversation;
+      request.fields['user_conversation_type'] = user_conversation_type;
+      request.fields['options'] = option;
+      request.fields['answer'] = answer;
+      request.fields['index'] = index;
+      request.fields['points'] = points;
+
+      // Send the request
+      final response = await request.send();
+
+      if (response.statusCode == 201) {
+        final responseData = await response.stream.bytesToString();
+        final decodedResponse = jsonDecode(responseData);
+        if (decodedResponse['status'] == 1) {
+          showSnackbar(message: decodedResponse['message'] ?? 'Added successfully');
+        } else {
+          showSnackbar(message: decodedResponse['message'] ?? 'Error occurred');
+        }
+      } else {
+        print('Error: ${response.reasonPhrase}');
+        showSnackbar(message: 'Error: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('An error occurred: $e');
+      showSnackbar(message: 'An error occurred: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
 }

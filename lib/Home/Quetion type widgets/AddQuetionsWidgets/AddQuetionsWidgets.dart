@@ -25,6 +25,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:csv/csv.dart';
 import '../../../Global/constants/common_snackbar.dart';
+import 'ConversationTable.dart';
 import 'FillTheBlanksDataTable.dart';
 import 'Header_Columns.dart';
 import 'MCQDataTable.dart';
@@ -38,6 +39,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   final TextEditingController questionController = TextEditingController();
   final List<TextEditingController> optionControllers =
       List.generate(4, (_) => TextEditingController());
+  final List<TextEditingController> convo_optionControllers =
+  List.generate(2, (_) => TextEditingController());
   final List<TextEditingController> paragraphOptionControllers =
       List.generate(6, (_) => TextEditingController());
   TextEditingController correctAnswerController = TextEditingController();
@@ -133,6 +136,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
 
   final GetAllQuestionsApiController _getAllQuestionsApiController = Get.find();
   ScrollController _scrollController = ScrollController();
+  final List<String> _selectedIds = [];
+  bool _selectAll = false;
+  List<dynamic> entries=[];
 
 
   @override
@@ -528,169 +534,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     return Scaffold(
      backgroundColor: Colors.grey.shade200,
      body:
-     // LayoutBuilder(
-     //    builder: (context, constraints) {
-     //      bool isWideScreen = constraints.maxWidth > 800;
-     //      return Row(
-     //        crossAxisAlignment: CrossAxisAlignment.stretch,
-     //        children: [
-     //          if (isWideScreen)
-     // Container(
-     //   width: 250,
-     //   color: Colors.orange.shade100,
-     //   child: const MyDrawer(),
-     // ),
-     //          Expanded(
-     // child: Scaffold(
-     //   backgroundColor: Colors.grey.shade100,
-     //   appBar: isWideScreen
-     //       ? null
-     //       : AppBar(
-     //     title: const Text('Dashboard'),
-     //     backgroundColor: Colors.blue.shade100,
-     //   ),
-     //   drawer: isWideScreen
-     //       ? null
-     //       : Drawer(
-     //     child: const MyDrawer(),
-     //   ),
-     //   body: Center(
-     //     child: SingleChildScrollView(
-     //       child: ConstrainedBox(
-     //         constraints: BoxConstraints(
-     //           maxWidth: MediaQuery.of(context).size.width * 0.9,
-     //           maxHeight: MediaQuery.of(context).size.width * 0.9,
-     //         ),
-     //         child: Row(
-     //           crossAxisAlignment: CrossAxisAlignment.start,
-     //           children: [
-     //             Expanded(
-     //               flex: 2,
-     //               child: Column(
-     //                 crossAxisAlignment: CrossAxisAlignment.start,
-     //                 children: [
-     //                   Row(children: [
-     //                     Text(
-     //                       'Add Data',
-     //                       style: TextStyle(
-     //                         fontSize: 24,
-     //                         fontWeight: FontWeight.bold,
-     //                         color: Colors.orange.shade800,
-     //                       ),
-     //                     ),
-     //
-     //                     ElevatedButton.icon(
-     //                       style: ElevatedButton.styleFrom(
-     //                         backgroundColor: Colors.orange.shade100, // Button color
-     //                         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12), // Padding
-     //                         shape: RoundedRectangleBorder(
-     //                           borderRadius: BorderRadius.circular(8), // Rounded corners
-     //                         ),
-     //                       ),
-     //                       icon: const Icon(Icons.file_upload, size: 20, color: Colors.black), // Icon
-     //                       label: const Text(
-     //                         "Import Data",
-     //                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.black),
-     //                       ),
-     //                       onPressed: () async {
-     //                         showImportExportDialog();
-     //                       },
-     //                     ),
-     //                     SizedBox(width:10),
-     //                     ElevatedButton.icon(
-     //                       style: ElevatedButton.styleFrom(
-     //                         backgroundColor: Colors.orange.shade100, // Button color
-     //                         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12), // Padding
-     //                         shape: RoundedRectangleBorder(
-     //                           borderRadius: BorderRadius.circular(8), // Rounded corners
-     //                         ),
-     //                       ),
-     //                       icon: const Icon(Icons.file_download, size: 20, color: Colors.black), // Icon
-     //                       label: const Text(
-     //                         "Export All",
-     //                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.black),
-     //                       ),
-     //                       onPressed: () async {
-     //                         await _controller.getlearningPath();
-     //                       },
-     //                     ),
-     //                   ]),
-     //                   SizedBox(height: 16),
-     //                   _buildTabs(),
-     //                   boxH20(),
-     //                   if (selectedQuestionType == "Multiple Choice Question")
-     //                     _buildQuestionsTable(),
-     //                 ],
-     //               ),
-     //             ),
-     //             const SizedBox(width: 20),
-     //             Expanded(
-     //               flex: 1,
-     //               child: Column(
-     //                 children: [
-     //                   Row(
-     //                     children: [
-     //                       SizedBox(
-     //                         width:
-     //                         MediaQuery.of(context).size.width * 0.19,
-     //                         child: DropdownButtonFormField<String>(
-     //                           value: selectedQuestionType,
-     //                           dropdownColor: Colors.grey.shade50,
-     //                           decoration: InputDecoration(
-     //                             labelText: "Select Question Type",
-     //                             border: OutlineInputBorder(
-     //                               borderRadius:
-     //                               BorderRadius.circular(10),
-     //                             ),
-     //                             filled: true,
-     //                             fillColor: Colors.white,
-     //                           ),
-     //                           items: questionTypes
-     //                               .map((type) => DropdownMenuItem(
-     //                             value: type,
-     //                             child: Text(type),
-     //                           ))
-     //                               .toList(),
-     //                           onChanged: (value) {
-     //                             setState(() {
-     //                               selectedQuestionType = value!;
-     //                             });
-     //                           },
-     //                         ),
-     //                       ),
-     //                       const Spacer(),
-     //                       SizedBox(
-     //                         width:
-     //                         MediaQuery.of(context).size.width * 0.06,
-     //                         child: CustomTextField(
-     //                           controller: pointsController,
-     //                           maxLines: 1,
-     //                           labelText: "Points",
-     //                         ),
-     //                       ),
-     //                     ],
-     //                   ),
-     //                   boxH10(),
-     //                   SizedBox(
-     //                     width: MediaQuery.of(context).size.width * 0.4,
-     //                     height: MediaQuery.of(context).size.width * 0.4,
-     //                     child: _buildQuestionTypeContent(),
-     //                   ),
-     //                 ],
-     //               ),
-     //             ),
-     //           ],
-     //         ),
-     //       ),
-     //     ),
-     //   ),
-     // ),
-     //          ),
-     //        ],
-     //      );
-     //    },
-     // )
-
       LayoutBuilder(
        builder: (context, constraints) {
          bool isWideScreen = constraints.maxWidth > 800;
@@ -739,17 +582,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                        color: Colors.orange.shade800,
                                      ),
                                    ),
-                                   // CircleAvatar(
-                                   //   backgroundColor: Colors.orange.shade100,
-                                   //   child: IconButton(
-                                   //     icon: Image.asset('assets/excel.png',
-                                   //         width: 24, height: 24),
-                                   //     onPressed: () {
-                                   //       showImportExportDialog();
-                                   //     },
-                                   //     tooltip: 'Export to Excel',
-                                   //   ),
-                                   // ),
                                    ElevatedButton.icon(
                                      style: ElevatedButton.styleFrom(
                                        backgroundColor: Colors.orange.shade100, // Button color
@@ -1113,6 +945,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           print('Failed to upload row: ${response.body}');
         }
       }
+      _getAddedQuestion();
       showSnackbar(message: "$selectedQuestionType added successfully");
       Navigator.pop(context);
     } catch (e) {
@@ -1869,57 +1702,71 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
               ],
             ),
             SizedBox(height: 10),
-            // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal, // Horizontal scroll
-              child: Container(
-                constraints:
-                    BoxConstraints(maxWidth: 1200), // Max width constraint
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical, // Vertical scroll
-                  child: Table(
-                    border: TableBorder.all(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    columnWidths: const {
-                      0: FlexColumnWidth(1),
-                      1: FlexColumnWidth(2),
-                      2: FlexColumnWidth(1),
-                      3: FlexColumnWidth(1),
-                    },
-                    children: [
-                      TableRow(
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade100,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        children: [
-                          _buildTableHeader("Question Type"),
-                          _buildTableHeader("Question"),
-                          _buildTableHeader("Answer"),
-                          _buildTableHeader("Points"),
-                        ],
-                      ),
-                      // Dummy rows
-                      for (int i = 0; i < 5; i++)
-                        TableRow(
-                          children: [
-                            _buildTableCell("Conversation"),
-                            _buildTableCell("What is the response for '$i'?"),
-                            _buildTableCell("Answer $i"),
-                            _buildTableCell((10 + i * 5).toString()),
-                          ],
-                        ),
-                    ],
-                  ),
+        Obx(() {
+          return Center(
+              child: _getAllQuestionsApiController.isLoading.value
+                  ? CircularProgressIndicator()
+                  : (_getAllQuestionsApiController.getConversationList.isEmpty
+                  ? const Center(
+                child: Text(
+                  'No data available',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey),
                 ),
-              ),
-            ),
+              ) :
+              ConversationTableScreen(main_category_id: mainCategoryId,
+                  sub_category_id: subCategoryId,
+                  topic_id: topicId,
+                  sub_topic_id: subtopicId,
+                  questionList: _getAllQuestionsApiController
+                      .getConversationList,
+                  onEditCallback: EditQuestion,)
+              )
+          );
+        })
           ],
         ),
       ),
     );
+  }
+
+  EditQuestion(int index){
+    if(selectedQuestionType=="Conversation"){
+        addQuestionController.editConversation(
+            conversation_id:_getAllQuestionsApiController.getConversationList[index].id,
+            main_category_id: _getAllQuestionsApiController.getConversationList[index].mainCategoryId!,
+            sub_category_id: _getAllQuestionsApiController.getConversationList[index].subCategoryId!,
+            sub_topic_id: _getAllQuestionsApiController.getConversationList[index].subTopicId!,
+            topic_id: _getAllQuestionsApiController.getConversationList[index].topicId!,
+            question_type: _getAllQuestionsApiController.getConversationList[index].questionType!,
+            title: titleController.text,
+            bot_conversation: _getAllQuestionsApiController.getConversationList[index].botConversation,
+            user_conversation: _getAllQuestionsApiController.getConversationList[index].userConversation,
+            user_conversation_type: _getAllQuestionsApiController.getConversationList[index].userConversationType,
+            option: _getAllQuestionsApiController.getConversationList[index].options,
+            answer: _getAllQuestionsApiController.getConversationList[index].answer,
+            index: indexController.text,
+            points: pointsController.text);
+      // pointsController.text=_getAllQuestionsApiController.getConversationList[index].points.toString();
+      // indexController.text=_getAllQuestionsApiController.getConversationList[index].index.toString();
+      // titleController.text=_getAllQuestionsApiController.getConversationList[index].title;
+      // botConversationController.text=_getAllQuestionsApiController.getConversationList[index].botConversation.toString();
+      // userConversationController.text=_getAllQuestionsApiController.getConversationList[index].userConversation.toString();
+      // correctAnswerController.text=_getAllQuestionsApiController.getConversationList[index].answer.toString();
+      // String optionString = _getAllQuestionsApiController.getConversationList[index].options;
+      // List<String> options = optionString.split('|');
+      // convo_optionControllers.clear(); // Clear existing controllers if needed
+      // for (var option in options) {
+      //   convo_optionControllers.add(TextEditingController(text: option));
+      //
+      // }
+      // setState(() {
+      //   selectedUserConversationType  = _getAllQuestionsApiController.getConversationList[index].userConversationType.toString();;
+      // });
+
+    }
   }
 
   Widget _buildQuestionsFillInTheBlanksTable() {
@@ -2402,9 +2249,12 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   }
 
   Widget _buildExampleTable() {
-    final List<dynamic> entries = (_controller.topics.value as List)
-        .firstWhere((topic) => topic['topic_name'] == selectedTopic,
-        orElse: () => {'entries': []}, )['entries'];
+    entries = (_controller.topics.value as List)
+        .firstWhere(
+          (topic) => topic['topic_name'] == selectedTopic,
+      orElse: () => {'entries': []},
+    )['entries'];
+
     if (entries.isEmpty) {
       return Center(
         child: Text(selectedTopic == null
@@ -2412,6 +2262,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
             : "No entries found for Topic $selectedTopic"),
       );
     }
+
     return Card(
       elevation: 1.0,
       color: Colors.white,
@@ -2438,58 +2289,116 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                       icon: Image.asset('assets/excel.png',
                           width: 24, height: 24),
                       onPressed: () {
-                        print("categoryId " + mainCategoryId!);
-                        print("subcategoryId " + subCategoryId!);
-                        print("topicId " + topicId!);
-                        print("subtopicId " + subtopicId!);
                         if (mainCategoryId!.isNotEmpty &&
                             subCategoryId!.isNotEmpty &&
-                            topicId!.isNotEmpty)
+                            topicId!.isNotEmpty) {
                           _exportTableToCSV();
-                        else
+                        } else {
                           showSnackbar(
                               message:
                               "Please select category,subcategory,topic,etc");
+                        }
                       },
                     ),
                   ),
                 ),
+                if (_selectedIds.isNotEmpty)
+                  ElevatedButton(
+                    onPressed: _deleteSelectedExamples,
+                    child: const Text('Delete Selected'),
+                  ),
               ],
             ),
-            SizedBox(height: 10),
-            // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
-            selectedTopic!.isNotEmpty?
-            SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columns: const [
-                    DataColumn(label: Text('Example')),
-                    DataColumn(label: Text('Image Name')),
-                    DataColumn(label: Text('Image')),
-                    DataColumn(label: Text('Remove')),
-                  ],
-                  rows: entries.map((entry) {
-                    return DataRow(
-                      cells: [
-                        //DataCell(Text(entry['_id'] ?? '')),
-                        DataCell(Text(entry['exg_name'] ?? '')),
-                        DataCell(InkWell(child:Text(entry['image_name'] ?? ''),onTap: (){})),
-                        DataCell(InkWell(child:Text(entry['image'] ?? ''),onTap: (){},)),
-                        DataCell(InkWell(child:Text("Delete",style: TextStyle(color: Colors.red),),onTap: (){
-
-                        },)),
-                      ],
-                    );
-                  }).toList(),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Checkbox(
+                  value: _selectAll,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      _selectAll = value ?? false;
+                      _selectedIds.clear();
+                      if (_selectAll) {
+                        _selectedIds.addAll(entries.map((entry) => entry['_id'].toString()));
+                      }
+                    });
+                  },
                 ),
-              ),
-            ):SizedBox(),
+                const Text('Select All'),
+              ],
+            ),
+            if (selectedTopic!.isNotEmpty)
+              SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: DataTable(
+                    columns: const [
+                      DataColumn(label: Text('Example')),
+                      DataColumn(label: Text('Image Name')),
+                      DataColumn(label: Text('Image')),
+                      DataColumn(label: Text('Select')),
+                    ],
+                    rows: entries.map((entry) {
+                      final id = entry['_id'].toString();
+                      return DataRow(
+                        cells: [
+                          DataCell(Text(entry['exg_name'] ?? '')),
+                          DataCell(InkWell(
+                              child: Text(entry['image_name'] ?? ''),
+                              onTap: () {})),
+                          DataCell(InkWell(
+                              child: Text(entry['image'] ?? ''),
+                              onTap: () {})),
+                          DataCell(
+                            Checkbox(
+                              value: _selectedIds.contains(id),
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  if (value == true) {
+                                    _selectedIds.add(id);
+                                  } else {
+                                    _selectedIds.remove(id);
+                                  }
+                                  _selectAll = _selectedIds.length == entries.length;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ),
+              )
           ],
         ),
       ),
     );
+  }
+
+  void _deleteSelectedExamples() {
+    final idsToDelete = _selectedIds.join('|');
+    print("Deleting IDs: $idsToDelete");
+
+    // Call the API or perform the delete action here
+    _getAllQuestionsApiController.delete_example(example_ids: idsToDelete).then((success) {
+      if (success) {
+          // Remove deleted entries from the list
+          entries.removeWhere((entry) => _selectedIds.contains(entry['_id'].toString()));
+          print(entries.length);
+        showSnackbar(message: "Selected entries deleted successfully");
+      } else {
+        showSnackbar(message: "Failed to delete entries");
+      }
+    });
+    if(mounted) {
+      setState(() {
+      entries;
+      _selectedIds.clear();
+      _selectAll = false;
+    });
+    }
   }
 
   void _showImagePopup() {
@@ -2561,6 +2470,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           topic_id: topicId,
           sub_category_id: subCategoryId,
           main_category_id: mainCategoryId,
+          question_type: selectedQuestionType,
         );
       case "Card Flip":
         return BuildCardFlipContent(
@@ -2711,6 +2621,27 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
 
     }
     else if (selectedQuestionType == "Fill in the blanks") {
+      int pointsValue = int.tryParse(pointsController.text) ?? 0;
+      questionApiController.addFillBlanksApi(
+        mainCategoryId: mainCategoryId.toString(),
+        subCategoryId: subCategoryId.toString(),
+        topicId: topicId.toString(),
+        subTopicId: subtopicId.toString(),
+        questionType: selectedQuestionType.toString(),
+        title: titleController.text,
+        question: questionController.text,
+        answer: correctAnswerController.text,
+        points: pointsValue.toString(),
+        index: indexController.text,
+        optionLanguage: optLangController.text,
+        questionLanguage: queLangController.text,
+        optionA: optionControllers[0].text,
+        optionB: optionControllers[1].text,
+        optionC: optionControllers[2].text,
+        optionD: optionControllers[3].text,
+      );
+    }
+    else if (selectedQuestionType == "Alphabets Example") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
       questionApiController.addFillBlanksApi(
         mainCategoryId: mainCategoryId.toString(),
@@ -3456,10 +3387,10 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                   mainAxisSpacing: 5.0,
                   childAspectRatio: 2.8,
                 ),
-                itemCount: optionControllers.length,
+                itemCount: convo_optionControllers.length,
                 itemBuilder: (context, index) {
                   return CustomTextField(
-                    controller: optionControllers[index],
+                    controller: convo_optionControllers[index],
                     labelText: "Option ${index + 1}",
                   );
                 },
