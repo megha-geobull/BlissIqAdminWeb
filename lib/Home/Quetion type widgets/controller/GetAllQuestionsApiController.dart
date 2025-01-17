@@ -24,7 +24,7 @@ class GetAllQuestionsApiController extends GetxController{
   RxList<FillInTheBlanks> getFillInTheBlanksList = <FillInTheBlanks>[].obs;
   RxList<StoryData> getStoryDataList = <StoryData>[].obs;
 
-  RxList<PhrasesData> getStoryPhrasesList = <PhrasesData>[].obs;
+  RxList<StoryPhrases> getStoryPhrasesList = <StoryPhrases>[].obs;
   RxList<PhrasesData> getConversationList = <PhrasesData>[].obs;
   RxList<MatchPairs> getMatchPairsList = <MatchPairs>[].obs;
 
@@ -459,7 +459,7 @@ class GetAllQuestionsApiController extends GetxController{
           // Parse each JSON object into a Data model
           getStoryPhrasesList.clear();
           getStoryPhrasesList.value = (responseData["data"] as List)
-              .map((mcqJson) => PhrasesData.fromJson(mcqJson))
+              .map((mcqJson) => StoryPhrases.fromJson(mcqJson))
               .toList();
 
           print("Fetched ${getStoryPhrasesList.length} phrases");
