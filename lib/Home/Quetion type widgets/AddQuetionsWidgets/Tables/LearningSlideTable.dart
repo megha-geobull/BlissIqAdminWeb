@@ -221,6 +221,7 @@ class _LearningSlideTableState extends State<LearningSlideTable> {
                         const DataColumn(label: Text("Transcription Two")),
                         const DataColumn(label: Text("Index")),
                         const DataColumn(label: Text("Points")),
+                        const DataColumn(label: Text("Edit")),
                       ],
                       source: _dataSource,
                     ),
@@ -279,9 +280,24 @@ class QuestionDataSource extends DataTableSource {
         DataCell(Text(question.transcriptionTwo ?? "")),
         DataCell(Text(question.index.toString() ?? "")),
         DataCell(Text(question.points.toString())),
+        DataCell(
+          GestureDetector(
+            onTap: () {
+
+            },
+            child: const Text(
+              "Edit",
+              style: TextStyle(
+                color: Colors.blue,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
+
 
   @override
   bool get isRowCountApproximate => false;

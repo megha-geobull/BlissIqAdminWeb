@@ -102,107 +102,11 @@ class _QuestionTableScreenState extends State<MCQ_QuestionTableScreen> {
 
 
   @override
-  // Widget build(BuildContext context) {
-  //   return SizedBox(
-  //       width: MediaQuery.of(context).size.width * 0.54,
-  //       height: MediaQuery.of(context).size.width * 0.42,
-  //
-  //       child: Column(children: [
-  //         Row(children: [
-  //           SizedBox(
-  //             width: 300,
-  //             child: Padding(
-  //               padding: const EdgeInsets.all(8.0),
-  //               child: TextField(
-  //                 controller: _searchController,
-  //                 onChanged: _filterQuestions,
-  //                 decoration: const InputDecoration(
-  //                   labelText: "Search by Question",
-  //                   border: OutlineInputBorder(),
-  //                   prefixIcon: Icon(Icons.search),
-  //                 ),
-  //               ),
-  //             ),
-  //           ),
-  //           _selectedQuestionIds.isNotEmpty?
-  //           ElevatedButton.icon(
-  //             style: ElevatedButton.styleFrom(
-  //               backgroundColor: Colors.red.shade100, // Button color
-  //               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12), // Padding
-  //               shape: RoundedRectangleBorder(
-  //                 borderRadius: BorderRadius.circular(8), // Rounded corners
-  //               ),
-  //             ),
-  //             icon: const Icon(Icons.delete, size: 20, color: Colors.black), // Icon
-  //             label: const Text(
-  //               "Delete",
-  //               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.black),
-  //             ),
-  //             onPressed: () async {
-  //               print("selected Ids - "+_selectedQuestionIds);
-  //               //_getdeleteApiController.delete_Mcq(question_ids: _selectedQuestionIds);
-  //               Future.delayed(const Duration(seconds: 1), () {
-  //                 _removeSelectedQuestions();
-  //                 _getdeleteApiController.getAllMCQS(main_category_id:widget.main_category_id,
-  //                     sub_category_id: widget.sub_category_id,
-  //                     topic_id: widget.topic_id,sub_topic_id: widget.sub_topic_id);
-  //               });
-  //             },
-  //           ):SizedBox(),
-  //         ],),
-  //         Scrollbar(
-  //             thumbVisibility: true,
-  //             controller: _verticalScrollController,
-  //             child: SingleChildScrollView(
-  //                 controller: _verticalScrollController,
-  //                 scrollDirection: Axis.vertical,
-  //                 child: Scrollbar(
-  //                     thumbVisibility: true,
-  //                     scrollbarOrientation: ScrollbarOrientation.bottom,
-  //                     controller: _horizontalScrollController,
-  //                     child: PaginatedDataTable(
-  //                       columns: [
-  //                         DataColumn(
-  //                           label: Row(
-  //                             children: [
-  //                               Checkbox(
-  //                                 value: _dataSource.isSelectAll, // Use the data source's select-all state
-  //                                 onChanged: (bool? value) {
-  //                                   _dataSource.toggleSelectAll(value!);
-  //                                   setState(() {}); // Update UI
-  //                                 },
-  //                               ),
-  //                               Text("Select All"),
-  //                             ],
-  //                           ),
-  //                         ),
-  //                         DataColumn(label: Text("Question Type")),
-  //                         DataColumn(label: Text("Title")),
-  //                         DataColumn(label: Text("Question")),
-  //                         DataColumn(label: Text("Option 1")),
-  //                         DataColumn(label: Text("Option 2")),
-  //                         DataColumn(label: Text("Option 3")),
-  //                         DataColumn(label: Text("Option 4")),
-  //                         DataColumn(label: Text("Answer")),
-  //                         DataColumn(label: Text("Points")),
-  //                         DataColumn(label: Text("Question Image")),
-  //                       ],
-  //                       source: _dataSource,
-  //                       rowsPerPage: _rowsPerPage,
-  //                       onRowsPerPageChanged: (value) {
-  //                         setState(() {
-  //                           _rowsPerPage = value!;
-  //                         });
-  //                       },
-  //                     )
-  //                 )))
-  //       ]));
-  // }
   Widget build(BuildContext context) {
     return Center(
       child: Container(
         width: MediaQuery.of(context).size.width * 0.54,
-        height: MediaQuery.of(context).size.width * 0.42,
+        height: MediaQuery.of(context).size.width * 0.32,
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -320,6 +224,8 @@ class _QuestionTableScreenState extends State<MCQ_QuestionTableScreen> {
                         const DataColumn(label: Text("Answer")),
                         const DataColumn(label: Text("Points")),
                         const DataColumn(label: Text("Question Image")),
+                        const DataColumn(label: Text("Edit")),
+
                       ],
                       source: _dataSource,
                     ),
@@ -382,10 +288,24 @@ class QuestionDataSource extends DataTableSource {
         DataCell(
           GestureDetector(
             onTap: () {
-              // Implement image popup
+
             },
             child: const Text(
               "View",
+              style: TextStyle(
+                color: Colors.blue,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ),
+        DataCell(
+          GestureDetector(
+            onTap: () {
+
+            },
+            child: const Text(
+              "Edit",
               style: TextStyle(
                 color: Colors.blue,
                 decoration: TextDecoration.underline,

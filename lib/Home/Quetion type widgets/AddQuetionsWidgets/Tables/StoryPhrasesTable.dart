@@ -1,37 +1,38 @@
+
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/controller/GetAllQuestionsApiController.dart';
-import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_fill_in_the_blanks.dart';
-import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_mcqs.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_story_phrases_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class FillBlanksTable extends StatefulWidget {
+
+class StoryPhrasesTable extends StatefulWidget {
   final String main_category_id;
   final String sub_category_id;
   final String topic_id;
   final String sub_topic_id;
-  final List<FillInTheBlanks> questionList;
+  final List<StoryPhrases> questionList;
 
-  FillBlanksTable(
+  StoryPhrasesTable(
       {required this.main_category_id,
-      required this.sub_category_id,
-      required this.topic_id,
-      required this.sub_topic_id,
-      required this.questionList});
+        required this.sub_category_id,
+        required this.topic_id,
+        required this.sub_topic_id,
+        required this.questionList});
 
   @override
-  _FillBlanksTableState createState() => _FillBlanksTableState();
+  _StoryPhrasesTableState createState() => _StoryPhrasesTableState();
 }
 
-class _FillBlanksTableState extends State<FillBlanksTable> {
+class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
   TextEditingController _searchController = TextEditingController();
-  List<FillInTheBlanks> _filteredQuestions = []; // Filtered data for the table
+  List<StoryPhrases> _filteredQuestions = []; // Filtered data for the table
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   final _verticalScrollController = ScrollController();
   final _horizontalScrollController = ScrollController();
   String _selectedQuestionIds = "";
-  bool isSelectAll = false;
-  List<String> selected_question_ids = [];
+  bool isSelectAll=false;
+  List<String> selected_question_ids=[];
   late QuestionDataSource _dataSource;
   final GetAllQuestionsApiController _getdeleteApiController = Get.find();
 
@@ -41,7 +42,7 @@ class _FillBlanksTableState extends State<FillBlanksTable> {
     // Initialize with API data
     _dataSource = QuestionDataSource(
       widget.questionList,
-      (selectedIds) {
+          (selectedIds) {
         setState(() {
           _selectedQuestionIds = selectedIds;
         });
@@ -58,14 +59,14 @@ class _FillBlanksTableState extends State<FillBlanksTable> {
       } else {
         _filteredQuestions = widget.questionList
             .where((question) =>
-                question.question != null &&
-                question.question!.toLowerCase().contains(query.toLowerCase()))
+        question.phraseName != null &&
+            question.phraseName!.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
       // Update the data source with the filtered questions
       _dataSource = QuestionDataSource(
         _filteredQuestions,
-        (selectedIds) {
+            (selectedIds) {
           setState(() {
             _selectedQuestionIds = selectedIds;
           });
@@ -77,13 +78,12 @@ class _FillBlanksTableState extends State<FillBlanksTable> {
   void _removeSelectedQuestions() {
     // Convert the selected IDs string to a Set for efficient lookup
     final selectedIdsSet = _selectedQuestionIds.split('|').toSet();
-    if (mounted) {
+    if(mounted){
       setState(() {
         // Remove matching items from the main list
 
         // Remove matching items from the filtered list
-        _filteredQuestions
-            .removeWhere((mcq) => selectedIdsSet.contains(mcq.id));
+        _filteredQuestions.removeWhere((mcq) => selectedIdsSet.contains(mcq.id));
 
         // Clear selected IDs after deletion
         _selectedQuestionIds = '';
@@ -91,15 +91,15 @@ class _FillBlanksTableState extends State<FillBlanksTable> {
         // Update the data source with the updated filtered list
         _dataSource = QuestionDataSource(
           _filteredQuestions,
-          (selectedIds) {
+              (selectedIds) {
             setState(() {
               _selectedQuestionIds = selectedIds;
             });
           },
         );
-      });
-    }
+      });}
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -130,18 +130,19 @@ class _FillBlanksTableState extends State<FillBlanksTable> {
                 Expanded(
                   child: Padding(
                       padding: const EdgeInsets.only(right: 16.0),
-                      child: CustomTextField(
+                      child:
+                      CustomTextField(
                         controller: _searchController,
                         labelText: "Search by Question",
                         onChanged: _filterQuestions,
-                      )),
+                      )
+                  ),
                 ),
                 if (_selectedQuestionIds.isNotEmpty)
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red.shade100,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -158,7 +159,7 @@ class _FillBlanksTableState extends State<FillBlanksTable> {
                       print("Selected Ids - $_selectedQuestionIds");
                       Future.delayed(const Duration(seconds: 1), () {
                         _removeSelectedQuestions();
-                        _getdeleteApiController.getFillInTheBlanks(
+                        _getdeleteApiController.getStoryPhrases(
                           main_category_id: widget.main_category_id,
                           sub_category_id: widget.sub_category_id,
                           topic_id: widget.topic_id,
@@ -213,18 +214,9 @@ class _FillBlanksTableState extends State<FillBlanksTable> {
                             ],
                           ),
                         ),
-                        const DataColumn(label: Text("Question Type")),
-                        const DataColumn(label: Text("Title")),
-                        const DataColumn(label: Text("Question")),
-                        const DataColumn(label: Text("Option 1")),
-                        const DataColumn(label: Text("Option 2")),
-                        const DataColumn(label: Text("Option 3")),
-                        const DataColumn(label: Text("Option 4")),
-                        const DataColumn(label: Text("Answer")),
-                        const DataColumn(label: Text("Points")),
-                        const DataColumn(label: Text("Question Image")),
-                        const DataColumn(label: Text("Edit")),
-
+                        DataColumn(label: Text("Index")),
+                        DataColumn(label: Text("Points")),
+                        DataColumn(label: Text("Phrase name")),
                       ],
                       source: _dataSource,
                     ),
@@ -237,11 +229,12 @@ class _FillBlanksTableState extends State<FillBlanksTable> {
       ),
     );
   }
+
 }
 
 // DataTableSource for handling data in the DataTable
 class QuestionDataSource extends DataTableSource {
-  final List<FillInTheBlanks> questions;
+  final List<StoryPhrases> questions;
   final Function(String) onSelectionChanged; // Callback for selection
   final Set<String> selectedQuestionIds = {}; // Track selected question IDs
   bool isSelectAll = false; // Track "Select All" state
@@ -274,41 +267,9 @@ class QuestionDataSource extends DataTableSource {
             },
           ),
         ),
-        DataCell(Text(question.questionType ?? "")),
-        DataCell(Text(question.title ?? "")),
-        DataCell(Text(question.question ?? "")),
-        DataCell(Text(question.optionA ?? "")),
-        DataCell(Text(question.optionB ?? "")),
-        DataCell(Text(question.optionC ?? "")),
-        DataCell(Text(question.optionD ?? "")),
-        DataCell(Text(question.answer ?? "")),
+        DataCell(Text(question.index.toString() ?? "")),
         DataCell(Text(question.points.toString())),
-        DataCell(
-          GestureDetector(
-            onTap: () {},
-            child: const Text(
-              "View",
-              style: TextStyle(
-                color: Colors.blue,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ),
-        ),
-        DataCell(
-          GestureDetector(
-            onTap: () {
-            //  _editQuestion(question);
-            },
-            child: const Text(
-              "Edit",
-              style: TextStyle(
-                color: Colors.blue,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ),
-        ),
+        DataCell(Text(question.phraseName ?? "")),
       ],
     );
   }
@@ -339,3 +300,5 @@ class QuestionDataSource extends DataTableSource {
     notifyListeners(); // Update UI
   }
 }
+
+

@@ -31,7 +31,16 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
       type: FileType.custom,
       allowMultiple: false,
       onFileLoading: (FilePickerStatus status) => print("status .... $status"),
-      allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
+      allowedExtensions: [
+        'bmp', 'dib', 'gif', 'jfif', 'jpe', 'jpg', 'jpeg', 'pbm', 'pgm',
+        'ppm', 'pnm', 'pfm', 'png', 'apng', 'blp', 'bufr', 'cur', 'pcx',
+        'dcx', 'dds', 'ps', 'eps', 'fit', 'fits', 'fli', 'flc', 'ftc',
+        'ftu', 'gbr', 'grib', 'h5', 'hdf', 'jp2', 'j2k', 'jpc', 'jpf',
+        'jpx', 'j2c', 'icns', 'ico', 'im', 'iim', 'mpg', 'mpeg', 'tif',
+        'tiff', 'mpo', 'msp', 'palm', 'pcd', 'pdf', 'pxr', 'psd', 'qoi',
+        'bw', 'rgb', 'rgba', 'sgi', 'ras', 'tga', 'icb', 'vda', 'vst',
+        'webp', 'wmf', 'emf', 'xbm', 'xpm'
+      ],
     );
 
     if (result != null && result.files.isNotEmpty) {
@@ -44,6 +53,7 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
       print('No file selected');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -128,25 +138,40 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
                           boxH10(),
 
                           GestureDetector(
-                              onTap: () {
-                                pickFile();
-                              },
-                              child: CircleAvatar(
-                                radius: 50,
-                                backgroundImage: pathsFile != null
-                                    ? MemoryImage(pathsFile!)
-                                    : AssetImage("assets/icons/mentor.png")
-                                        as ImageProvider,
-                                child: const Align(
-                                  alignment: Alignment.bottomRight,
-                                  child: CircleAvatar(
-                                    backgroundColor: Colors.orange,
-                                    radius: 15,
-                                    child: Icon(Icons.add,
-                                        size: 18, color: Colors.black),
-                                  ),
+                            onTap: () {
+                              pickFile();
+                            },
+                            child: pathsFile != null
+                                ? CircleAvatar(
+                              radius: 50,
+                              backgroundImage: MemoryImage(pathsFile!),
+                              child: const Align(
+                                alignment: Alignment.bottomRight,
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.orange,
+                                  radius: 15,
+                                  child: Icon(Icons.add, size: 18, color: Colors.black),
                                 ),
-                              )),
+                              ),
+                            )
+                                : Container(
+                              width: 100,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.grey[200],
+                              ),
+                              child: const Align(
+                                alignment: Alignment.bottomRight,
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.orange,
+                                  radius: 15,
+                                  child: Icon(Icons.add, size: 18, color: Colors.black),
+                                ),
+                              ),
+                            ),
+                          ),
+
                         ],
                       ),
                     ),
@@ -235,7 +260,7 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
                                 return null;
                               },
                               keyboardType: TextInputType.phone,
-                              controller: companyController.phNoController,
+                              controller: companyController.contactNumberController,
                               cursorColor: Colors.black,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
@@ -257,7 +282,7 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
 
                     // Experience TextField
                     CustomTextField(
-                      controller: companyController.panCardNo,
+                      controller: companyController.panCardController,
                       labelText: 'PanCard No (optional)',
                       keyboardType: TextInputType.number,
                       prefixIcon: const Icon(Icons.work_outline),
@@ -266,7 +291,7 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
 
                     // Qualification TextField
                     CustomTextField(
-                      controller: companyController.gstNumber,
+                      controller: companyController.gstNumberController,
                       labelText: 'Gst Number',
                       keyboardType: TextInputType.text,
                       prefixIcon: Icon(Icons.school_outlined),
@@ -275,7 +300,7 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
 
                     // Bio/Introduction TextField
                     CustomTextField(
-                      controller: companyController.cinNumber,
+                      controller: companyController.cinNumberController,
                       labelText: 'Cin Numer',
                       prefixIcon: Icon(Icons.person_outline),
                     ),
@@ -317,13 +342,14 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
                                       companyName: companyController.companyNameController.text,
                                       ownerName:  companyController.ownerNameController.text,
                                       email: companyController.emailController.text,
-                                      contactNo: companyController.phNoController.text,
+                                      contactNo: companyController.contactNumberController.text,
                                       password: companyController.passwordController.text,
                                       context: context,
                                       profileImageBytes: pathsFile,
-                                      panCardNo: companyController.panCardNo.text,
-                                      cinNumber: companyController.cinNumber.text,
-                                      gstNumber: companyController.gstNumber.text,
+                                      profileImageName: pathsFileName,
+                                      panCardNo: companyController.panCardController.text,
+                                      cinNumber: companyController.cinNumberController.text,
+                                      gstNumber: companyController.gstNumberController.text,
                                     );
                                   }
                                 },
