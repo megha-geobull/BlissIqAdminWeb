@@ -213,7 +213,6 @@ class _LearningSlideTableState extends State<LearningSlideTable> {
                             ],
                           ),
                         ),
-                        const DataColumn(label: Text("Question Type")),
                         const DataColumn(label: Text("Title")),
                         const DataColumn(label: Text("Defintion")),
                         const DataColumn(label: Text("Transcription One")),
@@ -237,14 +236,25 @@ class _LearningSlideTableState extends State<LearningSlideTable> {
 
 }
 
-// DataTableSource for handling data in the DataTable
+
+
 class QuestionDataSource extends DataTableSource {
   final List<LearningSlide> questions;
   final Function(String) onSelectionChanged; // Callback for selection
   final Set<String> selectedQuestionIds = {}; // Track selected question IDs
   bool isSelectAll = false; // Track "Select All" state
+  int? editingRowIndex; // Track which row is being edited
+  List<TextEditingController> editingControllers = []; // Controllers for editing text
 
-  QuestionDataSource(this.questions, this.onSelectionChanged);
+  final GetAllQuestionsApiController updateQueApiController = Get.find();
+
+
+  QuestionDataSource(this.questions, this.onSelectionChanged) {
+    // Initialize controllers for each question
+    for (var question in questions) {
+      editingControllers.add(TextEditingController(text: question.title));
+    }
+  }
 
   @override
   DataRow? getRow(int index) {
@@ -272,18 +282,140 @@ class QuestionDataSource extends DataTableSource {
             },
           ),
         ),
-        DataCell(Text(question.questionType ?? "")),
-        DataCell(Text(question.title ?? "")),
-        DataCell(Text(question.definition ?? "")),
-        DataCell(Text(question.transcriptionOne ?? "")),
-        DataCell(Text(question.grammarExamples ?? "")),
-        DataCell(Text(question.transcriptionTwo ?? "")),
-        DataCell(Text(question.index.toString() ?? "")),
-        DataCell(Text(question.points.toString())),
-        DataCell(
-          GestureDetector(
-            onTap: () {
 
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: editingControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              // Update the question with the new value
+              question.title = editingControllers[index].text;
+              // Optionally call the API here
+              _updateQuestion(question);
+              editingRowIndex = null; // Exit edit mode
+              notifyListeners(); // Update UI
+            },
+          )
+              : Text(question.title ?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: TextEditingController(text: question.definition),
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              question.definition = value; // Update definition
+              _updateQuestion(question); // Call API
+              notifyListeners(); // Update UI
+            },
+          )
+              : Text(question.definition ?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: TextEditingController(text: question.transcriptionOne),
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              question.transcriptionOne = value; // Update definition
+              _updateQuestion(question); // Call API
+              notifyListeners(); // Update UI
+            },
+          )
+              : Text(question.transcriptionOne ?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: TextEditingController(text: question.grammarExamples),
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              question.grammarExamples = value; // Update definition
+              _updateQuestion(question); // Call API
+              notifyListeners(); // Update UI
+            },
+          )
+              : Text(question.grammarExamples ?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: TextEditingController(text: question.transcriptionTwo),
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              question.transcriptionTwo = value; // Update definition
+              _updateQuestion(question); // Call API
+              notifyListeners(); // Update UI
+            },
+          )
+              : Text(question.transcriptionTwo ?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: TextEditingController(text: question.index.toString()),
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              question.index = int.tryParse(value) ?? 0;
+              _updateQuestion(question); // Call API
+              notifyListeners(); // Update UI
+            },
+          )
+              : Text(question.index.toString() ?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: TextEditingController(text: question.points.toString()),
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              question.points = int.tryParse(value) ?? 0;
+              _updateQuestion(question); // Call API
+              notifyListeners(); // Update UI
+            },
+          )
+              : Text(question.points.toString() ?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? ElevatedButton(
+            onPressed: () {
+              // Call the API to update the question
+              _updateQuestion(question);
+              editingRowIndex = null; // Exit edit mode
+              notifyListeners(); // Update UI
+            },
+            child: Text("Update"),
+          )
+              : GestureDetector(
+            onTap: () {
+              if (editingRowIndex == null) {
+                // Start editing
+                editingRowIndex = index;
+                notifyListeners(); // Update UI
+              }
             },
             child: const Text(
               "Edit",
@@ -298,6 +430,10 @@ class QuestionDataSource extends DataTableSource {
     );
   }
 
+  Future<void> _updateQuestion(LearningSlide question) async {
+    await updateQueApiController.updateLearningTableQuestionApi(question);
+    // await ApiService.updateQuestion(question);
+  }
 
   @override
   bool get isRowCountApproximate => false;
@@ -321,9 +457,99 @@ class QuestionDataSource extends DataTableSource {
       selectedQuestionIds.clear();
     }
 
-    onSelectionChanged(selectedQuestionIds.join('|'));
+    onSelectionChanged(selectedQuestionIds.join ('|'));
     notifyListeners(); // Update UI
   }
 }
+
+/// DataTableSource for handling data in the DataTable
+// class QuestionDataSource extends DataTableSource {
+//   final List<LearningSlide> questions;
+//   final Function(String) onSelectionChanged; // Callback for selection
+//   final Set<String> selectedQuestionIds = {}; // Track selected question IDs
+//   bool isSelectAll = false; // Track "Select All" state
+//
+//   QuestionDataSource(this.questions, this.onSelectionChanged);
+//
+//   @override
+//   DataRow? getRow(int index) {
+//     if (index >= questions.length) return null;
+//     final question = questions[index];
+//     final isSelected = selectedQuestionIds.contains(question.id);
+//
+//     return DataRow(
+//       selected: isSelected,
+//       cells: [
+//         DataCell(
+//           Checkbox(
+//             value: isSelected,
+//             onChanged: (bool? value) {
+//               if (value == true) {
+//                 selectedQuestionIds.add(question.id!);
+//               } else {
+//                 selectedQuestionIds.remove(question.id);
+//               }
+//               isSelectAll = selectedQuestionIds.length == questions.length;
+//               onSelectionChanged(
+//                 selectedQuestionIds.join('|'), // Pipe-separated IDs
+//               );
+//               notifyListeners(); // Update UI
+//             },
+//           ),
+//         ),
+//         DataCell(
+//             Text(question.questionType ?? "")),
+//         DataCell(Text(question.title ?? "")),
+//         DataCell(Text(question.definition ?? "")),
+//         DataCell(Text(question.transcriptionOne ?? "")),
+//         DataCell(Text(question.grammarExamples ?? "")),
+//         DataCell(Text(question.transcriptionTwo ?? "")),
+//         DataCell(Text(question.index.toString() ?? "")),
+//         DataCell(Text(question.points.toString())),
+//         DataCell(
+//           GestureDetector(
+//             onTap: () {
+//
+//             },
+//             child: const Text(
+//               "Edit",
+//               style: TextStyle(
+//                 color: Colors.blue,
+//                 decoration: TextDecoration.underline,
+//               ),
+//             ),
+//           ),
+//         ),
+//       ],
+//     );
+//   }
+//
+//
+//   @override
+//   bool get isRowCountApproximate => false;
+//
+//   @override
+//   int get rowCount => questions.length;
+//
+//   @override
+//   int get selectedRowCount => selectedQuestionIds.length;
+//
+//   void toggleSelectAll(bool value) {
+//     isSelectAll = value;
+//
+//     if (isSelectAll) {
+//       // Select all IDs
+//       selectedQuestionIds.addAll(
+//         questions.map((question) => question.id!).toList(),
+//       );
+//     } else {
+//       // Clear all selections
+//       selectedQuestionIds.clear();
+//     }
+//
+//     onSelectionChanged(selectedQuestionIds.join('|'));
+//     notifyListeners(); // Update UI
+//   }
+// }
 
 

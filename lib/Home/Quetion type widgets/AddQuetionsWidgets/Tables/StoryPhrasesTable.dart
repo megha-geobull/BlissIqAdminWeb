@@ -46,7 +46,7 @@ class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
         setState(() {
           _selectedQuestionIds = selectedIds;
         });
-      },
+      },context,
     );
     //_questions = widget.questionList;
     _filteredQuestions = widget.questionList;
@@ -70,7 +70,7 @@ class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
           setState(() {
             _selectedQuestionIds = selectedIds;
           });
-        },
+        },context,
       );
     });
   }
@@ -95,7 +95,7 @@ class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
             setState(() {
               _selectedQuestionIds = selectedIds;
             });
-          },
+          },context,
         );
       });}
   }
@@ -157,8 +157,12 @@ class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
                     ),
                     onPressed: () async {
                       print("Selected Ids - $_selectedQuestionIds");
-                      Future.delayed(const Duration(seconds: 1), () {
-                        _removeSelectedQuestions();
+                      Future.delayed(const Duration(seconds: 1), () async {
+                        //_removeSelectedQuestions();
+                        bool confirmed = await _dataSource._showConfirmationDialog(context);
+                        if(confirmed){
+                          _dataSource._deleteSelectedQuestions();
+                        }
                         _getdeleteApiController.getStoryPhrases(
                           main_category_id: widget.main_category_id,
                           sub_category_id: widget.sub_category_id,
@@ -207,7 +211,7 @@ class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
                                 value: _dataSource.isSelectAll,
                                 onChanged: (bool? value) {
                                   _dataSource.toggleSelectAll(value!);
-                                  setState(() {});
+                                  setState(() async {});
                                 },
                               ),
                               const Text("Select All"),
@@ -215,8 +219,9 @@ class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
                           ),
                         ),
                         DataColumn(label: Text("Index")),
-                        DataColumn(label: Text("Points")),
                         DataColumn(label: Text("Phrase name")),
+                        DataColumn(label: Text("Points")),
+                        DataColumn(label: Text("Edit")),
                       ],
                       source: _dataSource,
                     ),
@@ -232,14 +237,29 @@ class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
 
 }
 
-// DataTableSource for handling data in the DataTable
+
 class QuestionDataSource extends DataTableSource {
   final List<StoryPhrases> questions;
   final Function(String) onSelectionChanged; // Callback for selection
   final Set<String> selectedQuestionIds = {}; // Track selected question IDs
   bool isSelectAll = false; // Track "Select All" state
+  BuildContext context;
 
-  QuestionDataSource(this.questions, this.onSelectionChanged);
+  int? editingRowIndex; // Track which row is being edited
+  List<TextEditingController> phraseNameControllers = [];
+  List<TextEditingController> indexControllers = [];
+  List<TextEditingController> pointsControllers = [];
+
+  final GetAllQuestionsApiController updateQueApiController = Get.find();
+
+  QuestionDataSource(this.questions, this.onSelectionChanged, this.context) {
+    // Initialize controllers for each question
+    for (var question in questions) {
+      phraseNameControllers.add(TextEditingController(text: question.phraseName));
+      indexControllers.add(TextEditingController(text: question.index.toString()));
+      pointsControllers.add(TextEditingController(text: question.points.toString()));
+    }
+  }
 
   @override
   DataRow? getRow(int index) {
@@ -253,7 +273,7 @@ class QuestionDataSource extends DataTableSource {
         DataCell(
           Checkbox(
             value: isSelected,
-            onChanged: (bool? value) {
+            onChanged: (bool? value) async{
               if (value == true) {
                 selectedQuestionIds.add(question.id!);
               } else {
@@ -263,15 +283,135 @@ class QuestionDataSource extends DataTableSource {
               onSelectionChanged(
                 selectedQuestionIds.join('|'), // Pipe-separated IDs
               );
-              notifyListeners(); // Update UI
+              // if (!isSelected) {
+              //   bool confirmed = await _showConfirmationDialog(context);
+              //   if(confirmed){
+              //     _deleteSelectedQuestions();
+              //   }
+              // }
+              notifyListeners();
             },
           ),
         ),
-        DataCell(Text(question.index.toString() ?? "")),
-        DataCell(Text(question.points.toString())),
-        DataCell(Text(question.phraseName ?? "")),
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: indexControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(index, phraseNameControllers[index].text, value, pointsControllers[index].text);
+            },
+          )
+              : Text(question.index.toString() ?? ""),
+        ),
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: phraseNameControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(index, value, indexControllers[index].text, pointsControllers[index].text);
+            },
+          )
+              : Text(question.phraseName ?? ""),
+        ),
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: pointsControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(index, phraseNameControllers[index].text, indexControllers[index].text, value);
+            },
+          )
+              : Text(question.points.toString() ?? ""),
+        ),
+        DataCell(
+          editingRowIndex == index
+              ? ElevatedButton(
+            onPressed: () {
+              _updateQuestion(index, phraseNameControllers[index].text, indexControllers[index].text, pointsControllers[index].text);
+              editingRowIndex = null; // Exit edit mode
+              notifyListeners(); // Update UI
+            },
+            child: Text("Update"),
+          )
+              : GestureDetector(
+            onTap: () {
+              if (editingRowIndex == null) {
+                // Start editing
+                editingRowIndex = index;
+                notifyListeners(); // Update UI
+              }
+            },
+            child: const Text(
+              "Edit",
+              style: TextStyle(
+                color: Colors.blue,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ),
       ],
     );
+  }
+
+  /// call the update the story phrases api here
+  _updateQuestion(int index, String phraseName, String indexValue, String pointsValue) async {
+    final updatedQuestion = StoryPhrases(
+      id: questions[index].id, // Keep the same ID
+      phraseName: phraseName,
+      index: int.tryParse(indexValue) ?? questions[index].index, // Update index
+      points: int.tryParse(pointsValue) ?? questions[index].points, // Update points
+      mainCategoryId: questions[index].mainCategoryId,
+      subCategoryId: questions[index].subCategoryId,
+      topicId: questions[index].topicId,
+      subTopicId: questions[index].subTopicId,
+    );
+
+    questions[index] = updatedQuestion;
+    await updateQueApiController.updateStoryPhrasesTableQuestionApi(updatedQuestion);
+    notifyListeners();
+  }
+
+  /// call delete the story phrases api here
+  /// multiple deletions
+  _deleteSelectedQuestions() async {
+    final deleteApiController = Get.find<GetAllQuestionsApiController>();
+
+    if (selectedQuestionIds.isNotEmpty) {
+      try {
+        await deleteApiController.deleteStoryPhraseAPI(
+          main_category_id: questions[0].mainCategoryId.toString(),
+          sub_category_id: questions[0].subCategoryId.toString(),
+          topic_id: questions[0].topicId.toString(),
+          sub_topic_id: questions[0].subTopicId.toString(),
+          phrase_ids: selectedQuestionIds.join('|'), // Pipe-separated IDs
+        );
+
+        // Optionally, refresh the list of questions after deletion
+        await deleteApiController.getStoryPhrases(
+          main_category_id: questions[0].mainCategoryId.toString(),
+          sub_category_id: questions[0].subCategoryId.toString(),
+          topic_id: questions[0].topicId.toString(),
+          sub_topic_id: questions[0].subTopicId.toString(),
+        );
+
+        // Remove the deleted questions from the local list
+        questions.removeWhere((question) => selectedQuestionIds.contains(question.id));
+        selectedQuestionIds.clear(); // Clear the selected IDs after deletion
+        notifyListeners(); // Update UI
+      } catch (e) {
+        print('Error deleting questions: $e');
+      }
+    }
   }
 
   @override
@@ -283,7 +423,7 @@ class QuestionDataSource extends DataTableSource {
   @override
   int get selectedRowCount => selectedQuestionIds.length;
 
-  void toggleSelectAll(bool value) {
+   toggleSelectAll(bool value) async {
     isSelectAll = value;
 
     if (isSelectAll) {
@@ -292,13 +432,115 @@ class QuestionDataSource extends DataTableSource {
         questions.map((question) => question.id!).toList(),
       );
     } else {
-      // Clear all selections
+      bool confirmed = await _showConfirmationDialog(context);
+      if(confirmed){
+        _deleteSelectedQuestions();
+      }
       selectedQuestionIds.clear();
     }
 
     onSelectionChanged(selectedQuestionIds.join('|'));
     notifyListeners(); // Update UI
   }
+
+ _showConfirmationDialog(BuildContext context) async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Deletion'),
+          content: const Text('Do you really want to delete the selected phrases?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false); // User pressed "No"
+              },
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true); // User pressed "Yes"
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    ) ?? false; // Default to false if dialog is dismissed
+  }
+
+
 }
+
+
+/// DataTableSource for handling data in the DataTable
+// class QuestionDataSource extends DataTableSource {
+//   final List<StoryPhrases> questions;
+//   final Function(String) onSelectionChanged; // Callback for selection
+//   final Set<String> selectedQuestionIds = {}; // Track selected question IDs
+//   bool isSelectAll = false; // Track "Select All" state
+//
+//   QuestionDataSource(this.questions, this.onSelectionChanged);
+//
+//   @override
+//   DataRow? getRow(int index) {
+//     if (index >= questions.length) return null;
+//     final question = questions[index];
+//     final isSelected = selectedQuestionIds.contains(question.id);
+//
+//     return DataRow(
+//       selected: isSelected,
+//       cells: [
+//         DataCell(
+//           Checkbox(
+//             value: isSelected,
+//             onChanged: (bool? value) {
+//               if (value == true) {
+//                 selectedQuestionIds.add(question.id!);
+//               } else {
+//                 selectedQuestionIds.remove(question.id);
+//               }
+//               isSelectAll = selectedQuestionIds.length == questions.length;
+//               onSelectionChanged(
+//                 selectedQuestionIds.join('|'), // Pipe-separated IDs
+//               );
+//               notifyListeners(); // Update UI
+//             },
+//           ),
+//         ),
+//
+//         DataCell(Text(question.index.toString() ?? "")),
+//         DataCell(Text(question.points.toString())),
+//         DataCell(Text(question.phraseName ?? "")),
+//       ],
+//     );
+//   }
+//
+//   @override
+//   bool get isRowCountApproximate => false;
+//
+//   @override
+//   int get rowCount => questions.length;
+//
+//   @override
+//   int get selectedRowCount => selectedQuestionIds.length;
+//
+//   void toggleSelectAll(bool value) {
+//     isSelectAll = value;
+//
+//     if (isSelectAll) {
+//       // Select all IDs
+//       selectedQuestionIds.addAll(
+//         questions.map((question) => question.id!).toList(),
+//       );
+//     } else {
+//       // Clear all selections
+//       selectedQuestionIds.clear();
+//     }
+//
+//     onSelectionChanged(selectedQuestionIds.join('|'));
+//     notifyListeners(); // Update UI
+//   }
+// }
 
 
