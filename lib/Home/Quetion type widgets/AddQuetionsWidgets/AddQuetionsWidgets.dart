@@ -1531,7 +1531,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 )),
               );
             })
-
           ],
         ),
       ),
@@ -1733,40 +1732,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   }
 
   EditQuestion(int index){
-    if(selectedQuestionType=="Conversation"){
-        addQuestionController.editConversation(
-            conversation_id:_getAllQuestionsApiController.getConversationList[index].id,
-            main_category_id: _getAllQuestionsApiController.getConversationList[index].mainCategoryId!,
-            sub_category_id: _getAllQuestionsApiController.getConversationList[index].subCategoryId!,
-            sub_topic_id: _getAllQuestionsApiController.getConversationList[index].subTopicId!,
-            topic_id: _getAllQuestionsApiController.getConversationList[index].topicId!,
-            question_type: _getAllQuestionsApiController.getConversationList[index].questionType!,
-            title: titleController.text,
-            bot_conversation: _getAllQuestionsApiController.getConversationList[index].botConversation,
-            user_conversation: _getAllQuestionsApiController.getConversationList[index].userConversation,
-            user_conversation_type: _getAllQuestionsApiController.getConversationList[index].userConversationType,
-            option: _getAllQuestionsApiController.getConversationList[index].options,
-            answer: _getAllQuestionsApiController.getConversationList[index].answer,
-            index: indexController.text,
-            points: pointsController.text);
-      // pointsController.text=_getAllQuestionsApiController.getConversationList[index].points.toString();
-      // indexController.text=_getAllQuestionsApiController.getConversationList[index].index.toString();
-      // titleController.text=_getAllQuestionsApiController.getConversationList[index].title;
-      // botConversationController.text=_getAllQuestionsApiController.getConversationList[index].botConversation.toString();
-      // userConversationController.text=_getAllQuestionsApiController.getConversationList[index].userConversation.toString();
-      // correctAnswerController.text=_getAllQuestionsApiController.getConversationList[index].answer.toString();
-      // String optionString = _getAllQuestionsApiController.getConversationList[index].options;
-      // List<String> options = optionString.split('|');
-      // convo_optionControllers.clear(); // Clear existing controllers if needed
-      // for (var option in options) {
-      //   convo_optionControllers.add(TextEditingController(text: option));
-      //
-      // }
-      // setState(() {
-      //   selectedUserConversationType  = _getAllQuestionsApiController.getConversationList[index].userConversationType.toString();;
-      // });
-
-    }
+    _getAddedQuestion();
   }
 
   Widget _buildQuestionsFillInTheBlanksTable() {

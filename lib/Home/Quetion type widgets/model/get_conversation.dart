@@ -49,14 +49,14 @@ class Data {
   late final String subTopicId;
   late final String topicId;
   late final String questionType;
-  late final String title;
-  late final String botConversation;
-  late final String userConversation;
-  late final String userConversationType;
-  late final String options;
-  late final String answer;
-  late final int points;
-  late final int index;
+  late String title;
+  late String botConversation;
+  late String userConversation;
+  late String userConversationType;
+  late String options;
+  late String answer;
+  late int points;
+  late int index;
   late bool isEditing;
 
   Data.fromJson(Map<String, dynamic> json){
@@ -66,12 +66,12 @@ class Data {
     subTopicId = json['sub_topic_id'];
     topicId = json['topic_id'];
     questionType = json['question_type'];
-    title = json['title'];
-    botConversation = json['bot_conversation'];
-    userConversation = json['user_conversation'];
-    userConversationType = json['user_conversation_type'];
-    options = json['options'];
-    answer = json['answer'];
+    title = json['title']??'';
+    botConversation = json['bot_conversation']??'';
+    userConversation = json['user_conversation']??'';
+    userConversationType = json['user_conversation_type']??'';
+    options = json['options']??'';
+    answer = json['answer']??'';
     points = json['points'];
     index = json['index'];
     isEditing=false;

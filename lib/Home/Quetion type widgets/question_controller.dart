@@ -271,11 +271,11 @@ class QuestionController extends GetxController {
   }) async {
     isLoading.value = true;
     try {
-      final uri = Uri.parse(ApiString.add_card_flipping);
+      final uri = Uri.parse(ApiString.update_conversation);
       final request = http.MultipartRequest('POST', uri);
-///conversation_id,main_category_id, sub_category_id, topic_id, sub_topic_id,question_type,title,bot_conversation,
-      ///user_conversation,user_conversation_type(Text/Question),options(pipe separated values),answer
+
       // Add text fields
+      request.fields['conversation_id'] = conversation_id;
       request.fields['main_category_id'] = main_category_id;
       request.fields['sub_category_id'] = sub_category_id;
       request.fields['topic_id'] = topic_id;
@@ -290,11 +290,14 @@ class QuestionController extends GetxController {
       request.fields['index'] = index;
       request.fields['points'] = points;
 
+      print(request.fields.toString());
+
       // Send the request
       final response = await request.send();
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         final responseData = await response.stream.bytesToString();
+        print(responseData.toString());
         final decodedResponse = jsonDecode(responseData);
         if (decodedResponse['status'] == 1) {
           showSnackbar(message: decodedResponse['message'] ?? 'Added successfully');

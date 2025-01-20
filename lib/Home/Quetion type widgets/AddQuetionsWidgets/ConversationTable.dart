@@ -4,6 +4,7 @@ import '../../../Global/constants/CustomAlertDialogue.dart';
 import '../controller/GetAllQuestionsApiController.dart';
 import '../model/get_conversation.dart';
 import '../model/get_mcqs.dart';
+import '../question_controller.dart';
 
 typedef OnEditCallback = void Function(int index);
 class ConversationTableScreen extends StatefulWidget {
@@ -228,8 +229,13 @@ class QuestionDataSource extends DataTableSource {
   final Function(int) onEditCallback;// Track "Select All" state
 
   QuestionDataSource(this.questions, this.onSelectionChanged, this.onEditCallback,);
-
-  @override
+  TextEditingController? titleController;
+  TextEditingController? botConversationController;
+  TextEditingController? userConversationController;
+  TextEditingController? userConversationTypeController;
+  TextEditingController? optionsController;
+  TextEditingController? answerController;
+  QuestionController addQuestionController = Get.find();
   @override
   DataRow? getRow(int index) {
     if (index >= questions.length) return null;
@@ -257,28 +263,13 @@ class QuestionDataSource extends DataTableSource {
         ),
         // Editable Question Type Cell
         DataCell(
-          question.isEditing
-              ? TextField(
-            controller: TextEditingController(text: question.questionType),
-            onSubmitted: (value) {
-              question.questionType = value;
-              question.isEditing = false;
-              notifyListeners(); // Update UI
-            },
-          )
-              : GestureDetector(
-            onTap: () {
-              question.isEditing = true;
-              notifyListeners(); // Update UI
-            },
-            child: Text(question.questionType ?? ""),
-          ),
+           Text(question.questionType ?? ""),
         ),
         // Editable Title Cell
         DataCell(
           question.isEditing
               ? TextField(
-            controller: TextEditingController(text: question.title),
+            controller: titleController??=TextEditingController(text: question.title),
             onSubmitted: (value) {
               question.title = value;
               question.isEditing = false;
@@ -297,18 +288,18 @@ class QuestionDataSource extends DataTableSource {
         DataCell(
           question.isEditing
               ? TextField(
-            controller:
+            controller:botConversationController??=
             TextEditingController(text: question.botConversation),
             onSubmitted: (value) {
               question.botConversation = value;
               question.isEditing = false;
-              notifyListeners();
+              //notifyListeners();
             },
           )
               : GestureDetector(
             onTap: () {
               question.isEditing = true;
-              notifyListeners();
+              //notifyListeners();
             },
             child: Text(question.botConversation ?? ""),
           ),
@@ -317,18 +308,18 @@ class QuestionDataSource extends DataTableSource {
         DataCell(
           question.isEditing
               ? TextField(
-            controller:
+            controller:userConversationController??=
             TextEditingController(text: question.userConversation),
             onSubmitted: (value) {
               question.userConversation = value;
               question.isEditing = false;
-              notifyListeners();
+              //notifyListeners();
             },
           )
               : GestureDetector(
             onTap: () {
               question.isEditing = true;
-              notifyListeners();
+              //notifyListeners();
             },
             child: Text(question.userConversation ?? ""),
           ),
@@ -337,18 +328,18 @@ class QuestionDataSource extends DataTableSource {
         DataCell(
           question.isEditing
               ? TextField(
-            controller:
+            controller:userConversationTypeController??=
             TextEditingController(text: question.userConversationType),
             onSubmitted: (value) {
               question.userConversationType = value;
               question.isEditing = false;
-              notifyListeners();
+              //notifyListeners();
             },
           )
               : GestureDetector(
             onTap: () {
               question.isEditing = true;
-              notifyListeners();
+              //notifyListeners();
             },
             child: Text(question.userConversationType ?? ""),
           ),
@@ -357,17 +348,17 @@ class QuestionDataSource extends DataTableSource {
         DataCell(
           question.isEditing
               ? TextField(
-            controller: TextEditingController(text: question.options),
+            controller: optionsController??=TextEditingController(text: question.options),
             onSubmitted: (value) {
               question.options = value;
               question.isEditing = false;
-              notifyListeners();
+              //notifyListeners();
             },
           )
               : GestureDetector(
             onTap: () {
               question.isEditing = true;
-              notifyListeners();
+              //notifyListeners();
             },
             child: Text(question.options ?? ""),
           ),
@@ -376,17 +367,17 @@ class QuestionDataSource extends DataTableSource {
         DataCell(
           question.isEditing
               ? TextField(
-            controller: TextEditingController(text: question.answer),
+            controller: answerController??=TextEditingController(text: question.answer),
             onSubmitted: (value) {
               question.answer = value;
               question.isEditing = false;
-              notifyListeners();
+              //notifyListeners();
             },
           )
               : GestureDetector(
             onTap: () {
               question.isEditing = true;
-              notifyListeners();
+              //notifyListeners();
             },
             child: Text(question.answer ?? ""),
           ),
@@ -402,6 +393,21 @@ class QuestionDataSource extends DataTableSource {
               if(question.isEditing == true) {
                 question.isEditing=false;
                 notifyListeners();
+                addQuestionController.editConversation(
+                    conversation_id:question.id,
+                    main_category_id: question.mainCategoryId!,
+                    sub_category_id: question.subCategoryId!,
+                    sub_topic_id: question.subTopicId!,
+                    topic_id: question.topicId!,
+                    question_type: question.questionType!,
+                    title: titleController!.text,
+                    bot_conversation: botConversationController!.text,
+                    user_conversation: userConversationController!.text,
+                    user_conversation_type: userConversationTypeController!.text,
+                    option: optionsController!.text,
+                    answer: answerController!.text,
+                    index: question.index.toString(),
+                    points: question.points.toString());
                 onEditCallback(index);
               }else{
                 question.isEditing=true;
@@ -409,10 +415,10 @@ class QuestionDataSource extends DataTableSource {
               }
             },
             child:question.isEditing
-                ?Text(
+                ?const Text(
               'Save',
               style: TextStyle(color: Colors.blue),
-            ): Text(
+            ): const Text(
               'Click Here to edit',
               style: TextStyle(color: Colors.blue),
             ),
