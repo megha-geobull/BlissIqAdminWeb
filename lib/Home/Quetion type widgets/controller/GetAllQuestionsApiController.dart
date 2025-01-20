@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/common_snackbar.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Header_Columns.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/GetCompleteParagraphModel.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/GetCompleteWordModel.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/LearningSlideModel.dart';
@@ -25,7 +26,7 @@ class GetAllQuestionsApiController extends GetxController{
   RxList<FillInTheBlanks> getFillInTheBlanksList = <FillInTheBlanks>[].obs;
   RxList<StoryData> getStoryDataList = <StoryData>[].obs;
 
-  RxList<PhrasesData> getStoryPhrasesList = <PhrasesData>[].obs;
+  RxList<StoryPhrases> getStoryPhrasesList = <StoryPhrases>[].obs;
   RxList<PhrasesData> getConversationList = <PhrasesData>[].obs;
   RxList<MatchPairs> getMatchPairsList = <MatchPairs>[].obs;
 
@@ -154,7 +155,7 @@ class GetAllQuestionsApiController extends GetxController{
     required String main_category_id ,
     required String sub_category_id,
     required String topic_id,
-    String? sub_topic_id}) async {
+    required sub_topic_id}) async {
     isLoading.value = true;
     getLearningSlideData.clear();
     try {
@@ -468,7 +469,7 @@ class GetAllQuestionsApiController extends GetxController{
     required String main_category_id ,
     required String sub_category_id,
     required String topic_id,
-    String? sub_topic_id}) async {
+    required String sub_topic_id}) async {
     isLoading.value = true;
     getStoryPhrasesList.clear();
     try {
@@ -493,7 +494,7 @@ class GetAllQuestionsApiController extends GetxController{
           // Parse each JSON object into a Data model
           getStoryPhrasesList.clear();
           getStoryPhrasesList.value = (responseData["data"] as List)
-              .map((mcqJson) => PhrasesData.fromJson(mcqJson))
+              .map((mcqJson) => StoryPhrases.fromJson(mcqJson))
               .toList();
 
           print("Fetched ${getStoryPhrasesList.length} phrases");
@@ -616,5 +617,106 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
+
+   updateLearningTableQuestionApi(LearningSlide question) async {
+    isLoading.value = true;
+    try {
+      final response = await http.post(
+        Uri.parse(ApiString.update_learning_slide),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'learning_slide_id':question.id,
+          'main_category_id':question.mainCategoryId,
+          'sub_category_id':question.subCategoryId,
+          'topic_id': question.topicId,
+          'sub_topic_id':question.subTopicId,
+          'title': question.title,
+          'definition': question.definition,
+          'transcriptionOne': question.transcriptionOne,
+          'grammarExamples': question.grammarExamples,
+          'transcriptionTwo': question.transcriptionTwo,
+          'index': question.index,
+          'points': question.points,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        await getAllLearningSlideApi(
+          main_category_id: question.mainCategoryId,
+          sub_category_id: question.subCategoryId,
+          topic_id: question.topicId,
+          sub_topic_id: question.subTopicId,);
+      } else {
+        print('Failed to update question: ${response.body}');
+      }
+    } catch (e) {
+      print('Error updating question: $e');
+    } finally {
+      isLoading.value = false; // Set loading state to false
+    }
+  }
+
+  updateStoryPhrasesTableQuestionApi(StoryPhrases question) async {
+    isLoading.value = true;
+    try {
+      final response = await http.post(
+        Uri.parse(ApiString.update_story_phrases),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'story_phrases_id':question.id,
+          'main_category_id':question.mainCategoryId,
+          'sub_category_id':question.subCategoryId,
+          'topic_id': question.topicId,
+          'sub_topic_id':question.subTopicId,
+          'phrase_name': question.phraseName,
+          'index': question.index,
+          'points': question.points,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        await getStoryPhrases(main_category_id: question.mainCategoryId.toString(), sub_category_id: question.subCategoryId.toString(),
+            topic_id: question.topicId.toString(), sub_topic_id: question.subTopicId.toString()
+        );
+      } else {
+        print('Failed to update question: ${response.body}');
+      }
+    } catch (e) {
+      print('Error updating question: $e');
+    } finally {
+      isLoading.value = false; // Set loading state to false
+    }
+  }
+
+
+  deleteStoryPhraseAPI({
+    required String main_category_id,
+    required String sub_category_id,
+    required String topic_id,
+    required String sub_topic_id,
+    required String phrase_ids,
+  }) async {
+    final response = await http.delete(
+      Uri.parse(ApiString.delete_story_phrases),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'main_category_id': main_category_id,
+        'sub_category_id': sub_category_id,
+        'topic_id': topic_id,
+        'sub_topic_id': sub_topic_id,
+        'phrase_id': phrase_ids,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete phrase: ${response.body}');
+    }
+  }
 
 }

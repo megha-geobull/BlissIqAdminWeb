@@ -37,14 +37,16 @@ class QuestionApiController extends GetxController {
       var request = http.MultipartRequest("POST", uri);
       if (qImage != null) {
         var mimeType = lookupMimeType('image') ?? 'image/jpeg';
+        var timestamp = DateTime.now().millisecondsSinceEpoch;
         var multipartFile = http.MultipartFile.fromBytes(
-            'q_image',
-            qImage,
-            filename: 'uploaded_image.jpg',
-            contentType: MediaType.parse(mimeType)
+          'q_image',
+          qImage,
+          filename: 'image_$timestamp.jpg',
+          contentType: MediaType.parse(mimeType),
         );
         request.files.add(multipartFile);
       }
+
 
       request.fields['main_category_id'] = mainCategoryId;
       request.fields['sub_category_id'] = subCategoryId;

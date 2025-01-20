@@ -9,6 +9,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:scrollable_table_view/scrollable_table_view.dart';
 
 import '../Models/GetAllCompanyModel.dart';
 
@@ -31,6 +32,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
     });
 
   }
+
 
   void _toggleStatus(String companyId) async {
     bool? confirmation = await showDialog(
@@ -168,6 +170,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
       ),
     );
   }
+
 
   TableRow _buildTableRow(Data company, int index) {
     return TableRow(
