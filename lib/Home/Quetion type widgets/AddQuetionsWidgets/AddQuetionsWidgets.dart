@@ -859,11 +859,11 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           print('Error: sub_category_id is missing for row: $row');
           return;
         }
-        if (selectedQuestionType!="Alphabets Example" && row['topic_id'] == null || row['topic_id'].isEmpty) {
+        if (selectedQuestionType!="Alphabets Example" && (row['topic_id'] == null || row['topic_id'].isEmpty)) {
           print('Error: topic_id is missing for row: $row');
           return;
         }
-        if (selectedQuestionType=="Alphabets Example" && (row['topic_name'] == null || row['topic_name'].isEmpty)) {
+        if (selectedQuestionType=="Alphabets Example" && (row['topic_name'] == null)) {
           print('Error: topic_name is missing for row: $row');
           return;
         }
@@ -2645,9 +2645,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     }
     else if (selectedQuestionType == "Conversation") {
     } else if (selectedQuestionType == "Learning Slide") {
-    }
-    else if (selectedQuestionType == "Card Flip") {
-
     }
     else if (selectedQuestionType == "Fill in the blanks") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;

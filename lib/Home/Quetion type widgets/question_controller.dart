@@ -203,6 +203,9 @@ class QuestionController extends GetxController {
     required BuildContext context,
   }) async {
     isLoading.value = true;
+    print(main_category_id);
+    print(sub_category_id);
+    print(topic_id);
     try {
       final uri = Uri.parse(ApiString.add_card_flipping);
       final request = http.MultipartRequest('POST', uri);
@@ -217,7 +220,7 @@ class QuestionController extends GetxController {
       request.fields['points'] = points;
       request.fields['letters'] = letters;
 
-      // Add question images
+      // Add images
       for (int i = 0; i < images.length; i++) {
         final image = images[i];
         request.files.add(
