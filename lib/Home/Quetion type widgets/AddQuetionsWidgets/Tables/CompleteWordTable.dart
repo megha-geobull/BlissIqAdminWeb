@@ -47,7 +47,7 @@ class _CompleteWordTableState extends State<CompleteWordTable> {
         setState(() {
           _selectedQuestionIds = selectedIds;
         });
-      },
+      }, context,
     );
     //_questions = widget.questionList;
     _filteredQuestions = widget.questionList;
@@ -71,7 +71,7 @@ class _CompleteWordTableState extends State<CompleteWordTable> {
           setState(() {
             _selectedQuestionIds = selectedIds;
           });
-        },
+        },context,
       );
     });
   }
@@ -96,7 +96,7 @@ class _CompleteWordTableState extends State<CompleteWordTable> {
             setState(() {
               _selectedQuestionIds = selectedIds;
             });
-          },
+          },context,
         );
       });}
   }
@@ -226,7 +226,7 @@ class _CompleteWordTableState extends State<CompleteWordTable> {
 
                         const DataColumn(label: Text("Answer")),
                         const DataColumn(label: Text("Points")),
-                        const DataColumn(label: Text("Question Image")),
+                        const DataColumn(label: Text("Edit")),
                       ],
                       source: _dataSource,
                     ),
@@ -242,14 +242,40 @@ class _CompleteWordTableState extends State<CompleteWordTable> {
 
 }
 
-// DataTableSource for handling data in the DataTable
 class QuestionDataSource extends DataTableSource {
   final List<CompleteWordData> questions;
   final Function(String) onSelectionChanged; // Callback for selection
   final Set<String> selectedQuestionIds = {}; // Track selected question IDs
   bool isSelectAll = false; // Track "Select All" state
+  BuildContext context;
 
-  QuestionDataSource(this.questions, this.onSelectionChanged);
+  int? editingRowIndex; // Track which row is being edited
+  List<TextEditingController> indexControllers = [];
+  List<TextEditingController> pointsControllers = [];
+  List<TextEditingController> titleControllers = [];
+  List<TextEditingController> questionControllers = [];
+  List<TextEditingController> optionAControllers = [];
+  List<TextEditingController> optionBControllers = [];
+  List<TextEditingController> optionCControllers = [];
+  List<TextEditingController> optionDControllers = [];
+  List<TextEditingController> answerControllers = [];
+
+  final GetAllQuestionsApiController updateQueApiController = Get.find();
+
+  QuestionDataSource(this.questions, this.onSelectionChanged, this.context) {
+    // Initialize controllers for each question
+    for (var question in questions) {
+      indexControllers.add(TextEditingController(text: question.index.toString()));
+      pointsControllers.add(TextEditingController(text: question.points.toString()));
+      titleControllers.add(TextEditingController(text: question.title));
+      questionControllers.add(TextEditingController(text: question.question));
+      optionAControllers.add(TextEditingController(text: question.optionA));
+      optionBControllers.add(TextEditingController(text: question.optionB));
+      optionCControllers.add(TextEditingController(text: question.optionC));
+      optionDControllers.add(TextEditingController(text: question.optionD));
+      answerControllers.add(TextEditingController(text: question.answer));
+    }
+  }
 
   @override
   DataRow? getRow(int index) {
@@ -270,41 +296,170 @@ class QuestionDataSource extends DataTableSource {
                 selectedQuestionIds.remove(question.id);
               }
               isSelectAll = selectedQuestionIds.length == questions.length;
-              onSelectionChanged(
-                selectedQuestionIds.join('|'), // Pipe-separated IDs
-              );
+              onSelectionChanged(selectedQuestionIds.join('|'));
               notifyListeners(); // Update UI
             },
           ),
         ),
+
         DataCell(Text(question.questionType ?? "")),
-        DataCell(Text(question.index.toString()?? "")),
-        DataCell(Text(question.title ?? "")),
-        DataCell(Text(question.question ?? "")),
 
-        DataCell(Text(question.optionA.toString()?? "")),
-        DataCell(Text(question.optionB.toString()?? "")),
-        DataCell(Text(question.optionC.toString()?? "")),
-        DataCell(Text(question.optionD.toString()?? "")),
-
-        DataCell(Text(question.answer ?? "")),
-        DataCell(Text(question.points.toString())),
-        // DataCell(Text(question.qImage ?? "")),
         DataCell(
-          GestureDetector(
+          editingRowIndex == index
+              ? TextField(
+            controller: indexControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(index, indexControllers[index].text, value, pointsControllers[index].text);
+            },
+          )
+              : Text(question.index.toString()),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: titleControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+          )
+              : Text(question.title ?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: questionControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+          )
+              : Text(question.question ?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: optionAControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+          )
+              : Text(question.optionA ?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: optionBControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+          )
+              : Text(question.optionB ?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: optionCControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+          )
+              : Text(question.optionC ?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: optionDControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+          )
+              : Text(question.optionD ?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: answerControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+          )
+              : Text(question.answer ?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: pointsControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(index, indexControllers[index].text, indexControllers[index].text, value);
+            },
+          )
+              : Text(question.points.toString()),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? ElevatedButton(
+            onPressed: () {
+              _updateQuestion(index, indexControllers[index].text, indexControllers[index].text, pointsControllers[index].text);
+              editingRowIndex = null; // Exit edit mode
+              notifyListeners();
+            },
+            child: const Text("Update"),
+          )
+              : GestureDetector(
             onTap: () {
+              if (editingRowIndex == null) {
+                editingRowIndex = index; // Start editing
+                notifyListeners(); // Update UI
+              }
             },
             child: const Text(
-              "View",
-              style: TextStyle(
-                color: Colors.blue,
-                decoration: TextDecoration.underline,
-              ),
+              "Edit",
+              style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
             ),
           ),
         ),
       ],
     );
+  }
+
+
+  /// Update question API call
+  _updateQuestion(int index, String phraseName, String indexValue, String pointsValue) async {
+    final updatedQuestion = CompleteWordData(
+      id: questions[index].id,
+      mainCategoryId: questions[index].mainCategoryId,
+      subCategoryId: questions[index].subCategoryId,
+      topicId: questions[index].topicId,
+      subTopicId: questions[index].subTopicId,
+      questionType: phraseName,
+      question: questionControllers[index].text,
+      title: titleControllers[index].text,
+      optionA: optionAControllers[index].text,
+      optionB: optionBControllers[index].text,
+      optionC: optionCControllers[index].text,
+      optionD: optionDControllers[index].text,
+      answer: answerControllers[index].text,
+      index: int.tryParse(indexValue) ?? questions[index].index,
+      points: int.tryParse(pointsValue) ?? questions[index].points,
+    );
+
+    questions[index] = updatedQuestion;
+    await updateQueApiController.updateCompleteWordTableQuestionApi(updatedQuestion);
+    notifyListeners();
   }
 
   @override
@@ -318,19 +473,13 @@ class QuestionDataSource extends DataTableSource {
 
   void toggleSelectAll(bool value) {
     isSelectAll = value;
-
     if (isSelectAll) {
-      // Select all IDs
-      selectedQuestionIds.addAll(
-        questions.map((question) => question.id!).toList(),
-      );
+      selectedQuestionIds.addAll(questions.map((question) => question.id!).toList());
     } else {
-      // Clear all selections
       selectedQuestionIds.clear();
     }
-
     onSelectionChanged(selectedQuestionIds.join('|'));
-    notifyListeners(); // Update UI
+    notifyListeners();
   }
 }
 

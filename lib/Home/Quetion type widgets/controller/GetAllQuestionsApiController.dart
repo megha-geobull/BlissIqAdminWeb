@@ -17,8 +17,7 @@ import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_mcqs.dart';
 
-class GetAllQuestionsApiController extends GetxController{
-
+class GetAllQuestionsApiController extends GetxController {
   RxBool isLoading = false.obs;
   RxList<Mcqs> getMcqslits = <Mcqs>[].obs;
   RxList<ReArrange> getReArrangeList = <ReArrange>[].obs;
@@ -30,13 +29,11 @@ class GetAllQuestionsApiController extends GetxController{
   RxList<PhrasesData> getConversationList = <PhrasesData>[].obs;
   RxList<MatchPairs> getMatchPairsList = <MatchPairs>[].obs;
 
-
   RxList<LearningSlide> getLearningSlideData = <LearningSlide>[].obs;
   RxList<CompleteWordData> getCompleteWordData = <CompleteWordData>[].obs;
   RxList<CompleteParaData> getCompleteParaData = <CompleteParaData>[].obs;
 
-
-  clearData(){
+  clearData() {
     getMcqslits.clear();
     getReArrangeList.clear();
     getTrueOrFalseList.clear();
@@ -49,28 +46,24 @@ class GetAllQuestionsApiController extends GetxController{
     getCompleteParaData.clear();
   }
 
-
-
-
-  getCompleteWordApi({
-    required String main_category_id ,
-    required String sub_category_id,
-    required String topic_id,
-    String? sub_topic_id}) async {
+  getCompleteWordApi(
+      {required String main_category_id,
+      required String sub_category_id,
+      required String topic_id,
+      String? sub_topic_id}) async {
     isLoading.value = true;
     getLearningSlideData.clear();
     try {
       var body = {
-        'main_category_id':main_category_id,
-        'sub_category_id':sub_category_id,
-        'topic_id':topic_id,
-        'sub_topic_id':sub_topic_id??''
+        'main_category_id': main_category_id,
+        'sub_category_id': sub_category_id,
+        'topic_id': topic_id,
+        'sub_topic_id': sub_topic_id ?? ''
       };
       final response = await http.post(
           Uri.parse(ApiString.get_complete_the_word),
           headers: {"Content-Type": "application/json"},
-          body: jsonEncode(body)
-      );
+          body: jsonEncode(body));
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -85,10 +78,13 @@ class GetAllQuestionsApiController extends GetxController{
               .toList();
           print("Fetched ${getCompleteWordData.length} complete word");
         } else {
-          showSnackbar(message: responseData['message'] ?? "Failed to fetch complete word ");
+          showSnackbar(
+              message:
+                  responseData['message'] ?? "Failed to fetch complete word ");
         }
       } else {
-        showSnackbar(message: "Failed to fetch word. Status: ${response.statusCode}");
+        showSnackbar(
+            message: "Failed to fetch word. Status: ${response.statusCode}");
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching complete word: $e");
@@ -98,32 +94,30 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-  getCompleteParaApi({
-    required String main_category_id ,
-    required String sub_category_id,
-    required String topic_id,
-    String? sub_topic_id}) async {
+  getCompleteParaApi(
+      {required String main_category_id,
+      required String sub_category_id,
+      required String topic_id,
+      String? sub_topic_id}) async {
     isLoading.value = true;
     getCompleteParaData.clear();
     print("Hi Hellow");
     try {
       var body = {
-        'main_category_id':main_category_id,
-        'sub_category_id':sub_category_id,
-        'topic_id':topic_id,
-        'sub_topic_id':sub_topic_id??''
+        'main_category_id': main_category_id,
+        'sub_category_id': sub_category_id,
+        'topic_id': topic_id,
+        'sub_topic_id': sub_topic_id ?? ''
       };
       print(main_category_id);
       print(sub_category_id);
       print(topic_id);
       print(sub_topic_id);
 
-
       final response = await http.post(
           Uri.parse(ApiString.get_complete_the_paragraph),
           headers: {"Content-Type": "application/json"},
-          body: jsonEncode(body)
-      );
+          body: jsonEncode(body));
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -137,10 +131,14 @@ class GetAllQuestionsApiController extends GetxController{
               .toList();
           print("Fetched ${getCompleteParaData.length} Complete the para");
         } else {
-          showSnackbar(message: responseData['message'] ?? "Failed to fetch Complete the para ");
+          showSnackbar(
+              message: responseData['message'] ??
+                  "Failed to fetch Complete the para ");
         }
       } else {
-        showSnackbar(message: "Failed to fetch Complete the para. Status: ${response.statusCode}");
+        showSnackbar(
+            message:
+                "Failed to fetch Complete the para. Status: ${response.statusCode}");
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching Complete the para: $e");
@@ -150,26 +148,23 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-
-  getAllLearningSlideApi({
-    required String main_category_id ,
-    required String sub_category_id,
-    required String topic_id,
-    required sub_topic_id}) async {
+  getAllLearningSlideApi(
+      {required String main_category_id,
+      required String sub_category_id,
+      required String topic_id,
+      required sub_topic_id}) async {
     isLoading.value = true;
     getLearningSlideData.clear();
     try {
       var body = {
-        'main_category_id':main_category_id,
-        'sub_category_id':sub_category_id,
-        'topic_id':topic_id,
-        'sub_topic_id':sub_topic_id??''
+        'main_category_id': main_category_id,
+        'sub_category_id': sub_category_id,
+        'topic_id': topic_id,
+        'sub_topic_id': sub_topic_id ?? ''
       };
-      final response = await http.post(
-          Uri.parse(ApiString.get_learning_slide),
+      final response = await http.post(Uri.parse(ApiString.get_learning_slide),
           headers: {"Content-Type": "application/json"},
-          body: jsonEncode(body)
-      );
+          body: jsonEncode(body));
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -184,10 +179,14 @@ class GetAllQuestionsApiController extends GetxController{
               .toList();
           print("Fetched ${getLearningSlideData.length} learning slide");
         } else {
-          showSnackbar(message: responseData['message'] ?? "Failed to fetch learning slide ");
+          showSnackbar(
+              message:
+                  responseData['message'] ?? "Failed to fetch learning slide ");
         }
       } else {
-        showSnackbar(message: "Failed to fetch learning slide. Status: ${response.statusCode}");
+        showSnackbar(
+            message:
+                "Failed to fetch learning slide. Status: ${response.statusCode}");
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching learning slide: $e");
@@ -197,25 +196,23 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-  getAllMCQS({
-    required String main_category_id ,
-    required String sub_category_id,
-    required String topic_id,
-    String? sub_topic_id}) async {
+  getAllMCQS(
+      {required String main_category_id,
+      required String sub_category_id,
+      required String topic_id,
+      String? sub_topic_id}) async {
     isLoading.value = true;
     getMcqslits.clear();
     try {
       var body = {
-        'main_category_id':main_category_id,
-        'sub_category_id':sub_category_id,
-        'topic_id':topic_id,
-        'sub_topic_id':sub_topic_id??''
+        'main_category_id': main_category_id,
+        'sub_category_id': sub_category_id,
+        'topic_id': topic_id,
+        'sub_topic_id': sub_topic_id ?? ''
       };
-      final response = await http.post(
-          Uri.parse(ApiString.get_mcq),
+      final response = await http.post(Uri.parse(ApiString.get_mcq),
           headers: {"Content-Type": "application/json"},
-          body: jsonEncode(body)
-      );
+          body: jsonEncode(body));
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -231,10 +228,12 @@ class GetAllQuestionsApiController extends GetxController{
 
           print("Fetched ${getMcqslits.length} mcqs");
         } else {
-          showSnackbar(message: responseData['message'] ?? "Failed to fetch mcqs ");
+          showSnackbar(
+              message: responseData['message'] ?? "Failed to fetch mcqs ");
         }
       } else {
-        showSnackbar(message: "Failed to fetch mcqs. Status: ${response.statusCode}");
+        showSnackbar(
+            message: "Failed to fetch mcqs. Status: ${response.statusCode}");
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching mcqs: $e");
@@ -244,6 +243,7 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
+  /// delete mcq
   delete_Mcq({required String question_ids}) async {
     isLoading.value = true;
 
@@ -277,24 +277,23 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-  getAllRe_Arrange({
-    required String main_category_id ,
-    required String sub_category_id,
-    required String topic_id,
-    String? sub_topic_id}) async {
+  /// get all re-arrange api
+  getAllRe_Arrange(
+      {required String main_category_id,
+      required String sub_category_id,
+      required String topic_id,
+      String? sub_topic_id}) async {
     isLoading.value = true;
     try {
       var body = {
-        'main_category_id':main_category_id,
-        'sub_category_id':sub_category_id,
-        'topic_id':topic_id,
-        'sub_topic_id':sub_topic_id??''
+        'main_category_id': main_category_id,
+        'sub_category_id': sub_category_id,
+        'topic_id': topic_id,
+        'sub_topic_id': sub_topic_id ?? ''
       };
-      final response = await http.post(
-          Uri.parse(ApiString.get_rearrange),
+      final response = await http.post(Uri.parse(ApiString.get_rearrange),
           headers: {"Content-Type": "application/json"},
-          body: jsonEncode(body)
-      );
+          body: jsonEncode(body));
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -311,10 +310,12 @@ class GetAllQuestionsApiController extends GetxController{
 
           print("Fetched ${getReArrangeList.length} mcqs");
         } else {
-          showSnackbar(message: responseData['message'] ?? "Failed to fetch mcqs ");
+          showSnackbar(
+              message: responseData['message'] ?? "Failed to fetch mcqs ");
         }
       } else {
-        showSnackbar(message: "Failed to fetch mcqs. Status: ${response.statusCode}");
+        showSnackbar(
+            message: "Failed to fetch mcqs. Status: ${response.statusCode}");
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching mcqs: $e");
@@ -324,24 +325,23 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-  getTrueORFalse({
-    required String main_category_id ,
-    required String sub_category_id,
-    required String topic_id,
-    String? sub_topic_id}) async {
+  /// get true false api
+  getTrueORFalse(
+      {required String main_category_id,
+      required String sub_category_id,
+      required String topic_id,
+      String? sub_topic_id}) async {
     isLoading.value = true;
     try {
       var body = {
-        'main_category_id':main_category_id,
-        'sub_category_id':sub_category_id,
-        'topic_id':topic_id,
-        'sub_topic_id':sub_topic_id??''
+        'main_category_id': main_category_id,
+        'sub_category_id': sub_category_id,
+        'topic_id': topic_id,
+        'sub_topic_id': sub_topic_id ?? ''
       };
-      final response = await http.post(
-          Uri.parse(ApiString.get_true_false),
+      final response = await http.post(Uri.parse(ApiString.get_true_false),
           headers: {"Content-Type": "application/json"},
-          body: jsonEncode(body)
-      );
+          body: jsonEncode(body));
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -358,10 +358,12 @@ class GetAllQuestionsApiController extends GetxController{
 
           print("Fetched ${getTrueOrFalseList.length} mcqs");
         } else {
-          showSnackbar(message: responseData['message'] ?? "Failed to fetch mcqs ");
+          showSnackbar(
+              message: responseData['message'] ?? "Failed to fetch mcqs ");
         }
       } else {
-        showSnackbar(message: "Failed to fetch mcqs. Status: ${response.statusCode}");
+        showSnackbar(
+            message: "Failed to fetch mcqs. Status: ${response.statusCode}");
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching mcqs: $e");
@@ -371,25 +373,24 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-  getFillInTheBlanks({
-    required String main_category_id ,
-    required String sub_category_id,
-    required String topic_id,
-    String? sub_topic_id}) async {
+  /// get fill in the blanks api
+  getFillInTheBlanks(
+      {required String main_category_id,
+      required String sub_category_id,
+      required String topic_id,
+      String? sub_topic_id}) async {
     isLoading.value = true;
     getFillInTheBlanksList.clear();
     try {
       var body = {
-        'main_category_id':main_category_id,
-        'sub_category_id':sub_category_id,
-        'topic_id':topic_id,
-        'sub_topic_id':sub_topic_id??''
+        'main_category_id': main_category_id,
+        'sub_category_id': sub_category_id,
+        'topic_id': topic_id,
+        'sub_topic_id': sub_topic_id ?? ''
       };
-      final response = await http.post(
-          Uri.parse(ApiString.get_fill_blanks),
+      final response = await http.post(Uri.parse(ApiString.get_fill_blanks),
           headers: {"Content-Type": "application/json"},
-          body: jsonEncode(body)
-      );
+          body: jsonEncode(body));
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -405,10 +406,12 @@ class GetAllQuestionsApiController extends GetxController{
 
           print("Fetched ${getTrueOrFalseList.length} mcqs");
         } else {
-          showSnackbar(message: responseData['message'] ?? "Failed to fetch mcqs ");
+          showSnackbar(
+              message: responseData['message'] ?? "Failed to fetch mcqs ");
         }
       } else {
-        showSnackbar(message: "Failed to fetch mcqs. Status: ${response.statusCode}");
+        showSnackbar(
+            message: "Failed to fetch mcqs. Status: ${response.statusCode}");
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching mcqs: $e");
@@ -418,25 +421,24 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-   getStoryData({
-    required String main_category_id ,
-    required String sub_category_id,
-    required String topic_id,
-    String? sub_topic_id}) async {
+  /// get story data api
+  getStoryData(
+      {required String main_category_id,
+      required String sub_category_id,
+      required String topic_id,
+      String? sub_topic_id}) async {
     isLoading.value = true;
     getStoryDataList.clear();
     try {
       var body = {
-        'main_category_id':main_category_id,
-        'sub_category_id':sub_category_id,
-        'topic_id':topic_id,
-        'sub_topic_id':sub_topic_id??''
+        'main_category_id': main_category_id,
+        'sub_category_id': sub_category_id,
+        'topic_id': topic_id,
+        'sub_topic_id': sub_topic_id ?? ''
       };
-      final response = await http.post(
-          Uri.parse(ApiString.get_story),
+      final response = await http.post(Uri.parse(ApiString.get_story),
           headers: {"Content-Type": "application/json"},
-          body: jsonEncode(body)
-      );
+          body: jsonEncode(body));
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -452,10 +454,12 @@ class GetAllQuestionsApiController extends GetxController{
 
           print("Fetched ${getTrueOrFalseList.length} mcqs");
         } else {
-          showSnackbar(message: responseData['message'] ?? "Failed to fetch mcqs ");
+          showSnackbar(
+              message: responseData['message'] ?? "Failed to fetch mcqs ");
         }
       } else {
-        showSnackbar(message: "Failed to fetch mcqs. Status: ${response.statusCode}");
+        showSnackbar(
+            message: "Failed to fetch mcqs. Status: ${response.statusCode}");
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching mcqs: $e");
@@ -465,25 +469,23 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-  getStoryPhrases({
-    required String main_category_id ,
-    required String sub_category_id,
-    required String topic_id,
-    required String sub_topic_id}) async {
+  getStoryPhrases(
+      {required String main_category_id,
+      required String sub_category_id,
+      required String topic_id,
+      required String sub_topic_id}) async {
     isLoading.value = true;
     getStoryPhrasesList.clear();
     try {
       var body = {
-        'main_category_id':main_category_id,
-        'sub_category_id':sub_category_id,
-        'topic_id':topic_id,
-        'sub_topic_id':sub_topic_id??''
+        'main_category_id': main_category_id,
+        'sub_category_id': sub_category_id,
+        'topic_id': topic_id,
+        'sub_topic_id': sub_topic_id ?? ''
       };
-      final response = await http.post(
-          Uri.parse(ApiString.get_story_phrases),
+      final response = await http.post(Uri.parse(ApiString.get_story_phrases),
           headers: {"Content-Type": "application/json"},
-          body: jsonEncode(body)
-      );
+          body: jsonEncode(body));
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -499,10 +501,12 @@ class GetAllQuestionsApiController extends GetxController{
 
           print("Fetched ${getStoryPhrasesList.length} phrases");
         } else {
-          showSnackbar(message: responseData['message'] ?? "Failed to fetch phrases ");
+          showSnackbar(
+              message: responseData['message'] ?? "Failed to fetch phrases ");
         }
       } else {
-        showSnackbar(message: "Failed to fetch phrases. Status: ${response.statusCode}");
+        showSnackbar(
+            message: "Failed to fetch phrases. Status: ${response.statusCode}");
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching phrases: $e");
@@ -512,25 +516,24 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-  getConversation({
-    required String main_category_id ,
-    required String sub_category_id,
-    required String topic_id,
-    String? sub_topic_id}) async {
+  getConversation(
+      {required String main_category_id,
+      required String sub_category_id,
+      required String topic_id,
+      String? sub_topic_id}) async {
     isLoading.value = true;
     getConversationList.clear();
     try {
       var body = {
-        'main_category_id':main_category_id,
-        'sub_category_id':sub_category_id,
-        'topic_id':topic_id,
-        'sub_topic_id':sub_topic_id??''
+        'main_category_id': main_category_id,
+        'sub_category_id': sub_category_id,
+        'topic_id': topic_id,
+        'sub_topic_id': sub_topic_id ?? ''
       };
       final response = await http.post(
           Uri.parse(ApiString.get_user_conversation),
           headers: {"Content-Type": "application/json"},
-          body: jsonEncode(body)
-      );
+          body: jsonEncode(body));
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -546,10 +549,13 @@ class GetAllQuestionsApiController extends GetxController{
 
           print("Fetched ${getConversationList.length} conversation");
         } else {
-          showSnackbar(message: responseData['message'] ?? "Failed to fetch phrases ");
+          showSnackbar(
+              message: responseData['message'] ?? "Failed to fetch phrases ");
         }
       } else {
-        showSnackbar(message: "Failed to fetch conversation. Status: ${response.statusCode}");
+        showSnackbar(
+            message:
+                "Failed to fetch conversation. Status: ${response.statusCode}");
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching conversation: $e");
@@ -582,7 +588,8 @@ class GetAllQuestionsApiController extends GetxController{
       };
 
       // Constructing the full URI with query parameters
-      var uri = Uri.parse(ApiString.get_match_pair_question).replace(queryParameters: queryParams);
+      var uri = Uri.parse(ApiString.get_match_pair_question)
+          .replace(queryParameters: queryParams);
 
       // Making the GET request
       final response = await http.get(
@@ -604,10 +611,13 @@ class GetAllQuestionsApiController extends GetxController{
 
           print("Fetched ${getMatchPairsList.length} MatchPairs");
         } else {
-          showSnackbar(message: jsonResponse['message'] ?? "Failed to fetch MatchPairs");
+          showSnackbar(
+              message: jsonResponse['message'] ?? "Failed to fetch MatchPairs");
         }
       } else {
-        showSnackbar(message: "Failed to fetch MatchPairs. Status: ${response.statusCode}");
+        showSnackbar(
+            message:
+                "Failed to fetch MatchPairs. Status: ${response.statusCode}");
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching MatchPairs: $e");
@@ -617,8 +627,7 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-
-   updateLearningTableQuestionApi(LearningSlide question) async {
+  updateLearningTableQuestionApi(LearningSlide question) async {
     isLoading.value = true;
     try {
       final response = await http.post(
@@ -627,11 +636,11 @@ class GetAllQuestionsApiController extends GetxController{
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'learning_slide_id':question.id,
-          'main_category_id':question.mainCategoryId,
-          'sub_category_id':question.subCategoryId,
+          'learning_slide_id': question.id,
+          'main_category_id': question.mainCategoryId,
+          'sub_category_id': question.subCategoryId,
           'topic_id': question.topicId,
-          'sub_topic_id':question.subTopicId,
+          'sub_topic_id': question.subTopicId,
           'title': question.title,
           'definition': question.definition,
           'transcriptionOne': question.transcriptionOne,
@@ -647,40 +656,7 @@ class GetAllQuestionsApiController extends GetxController{
           main_category_id: question.mainCategoryId,
           sub_category_id: question.subCategoryId,
           topic_id: question.topicId,
-          sub_topic_id: question.subTopicId,);
-      } else {
-        print('Failed to update question: ${response.body}');
-      }
-    } catch (e) {
-      print('Error updating question: $e');
-    } finally {
-      isLoading.value = false; // Set loading state to false
-    }
-  }
-
-  updateStoryPhrasesTableQuestionApi(StoryPhrases question) async {
-    isLoading.value = true;
-    try {
-      final response = await http.post(
-        Uri.parse(ApiString.update_story_phrases),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'story_phrases_id':question.id,
-          'main_category_id':question.mainCategoryId,
-          'sub_category_id':question.subCategoryId,
-          'topic_id': question.topicId,
-          'sub_topic_id':question.subTopicId,
-          'phrase_name': question.phraseName,
-          'index': question.index,
-          'points': question.points,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        await getStoryPhrases(main_category_id: question.mainCategoryId.toString(), sub_category_id: question.subCategoryId.toString(),
-            topic_id: question.topicId.toString(), sub_topic_id: question.subTopicId.toString()
+          sub_topic_id: question.subTopicId,
         );
       } else {
         print('Failed to update question: ${response.body}');
@@ -692,7 +668,44 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
+  ///update Story Phrases Table Question Api
+  updateStoryPhrasesTableQuestionApi(StoryPhrases question) async {
+    isLoading.value = true;
+    try {
+      final response = await http.post(
+        Uri.parse(ApiString.update_story_phrases),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'story_phrases_id': question.id,
+          'main_category_id': question.mainCategoryId,
+          'sub_category_id': question.subCategoryId,
+          'topic_id': question.topicId,
+          'sub_topic_id': question.subTopicId,
+          'phrase_name': question.phraseName,
+          'index': question.index,
+          'points': question.points,
+        }),
+      );
 
+      if (response.statusCode == 200) {
+        await getStoryPhrases(
+            main_category_id: question.mainCategoryId.toString(),
+            sub_category_id: question.subCategoryId.toString(),
+            topic_id: question.topicId.toString(),
+            sub_topic_id: question.subTopicId.toString());
+      } else {
+        print('Failed to update question: ${response.body}');
+      }
+    } catch (e) {
+      print('Error updating question: $e');
+    } finally {
+      isLoading.value = false; // Set loading state to false
+    }
+  }
+
+  ///delete Story Phrases Table Question Api
   deleteStoryPhraseAPI({
     required String main_category_id,
     required String sub_category_id,
@@ -718,5 +731,194 @@ class GetAllQuestionsApiController extends GetxController{
       throw Exception('Failed to delete phrase: ${response.body}');
     }
   }
+
+  ///update Complete Word Table Question Api
+  updateCompleteWordTableQuestionApi(CompleteWordData question) async {
+    isLoading.value = true;
+    try {
+      final response = await http.post(
+        Uri.parse(ApiString.update_complete_word),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'word_id': question.id,
+          'main_category_id': question.mainCategoryId,
+          'sub_category_id': question.subCategoryId,
+          'topic_id': question.topicId,
+          'sub_topic_id': question.subTopicId,
+          'question_type': question.questionType,
+          'question': question.question,
+          'title': question.title,
+          'option_a': question.optionA,
+          'option_b': question.optionB,
+          'option_c': question.optionC,
+          'option_d': question.optionD,
+          'answer': question.answer,
+          'index': question.index,
+          'points': question.points,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        await getStoryPhrases(
+            main_category_id: question.mainCategoryId.toString(),
+            sub_category_id: question.subCategoryId.toString(),
+            topic_id: question.topicId.toString(),
+            sub_topic_id: question.subTopicId.toString());
+      } else {
+        print('Failed to update question: ${response.body}');
+      }
+    } catch (e) {
+      print('Error updating question: $e');
+    } finally {
+      isLoading.value = false; // Set loading state to false
+    }
+  }
+
+  /// update true false api
+  updateTrueFalseQuestionAPI(TrueOrFalse question) async {
+    isLoading.value = true;
+    try {
+      print(question.topicId);
+      final response = await http.post(
+        Uri.parse(ApiString.update_true_false),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'true_false_id': question.id,
+          'main_category_id': question.mainCategoryId,
+          'sub_category_id': question.subCategoryId,
+          'topic_id': question.topicId,
+          'sub_topic_id': question.subTopicId,
+          'question_type': question.questionType,
+          'question': question.question,
+          'answer': question.answer,
+          'index': question.index,
+          'points': question.points,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        await getTrueORFalse(
+            main_category_id: question.mainCategoryId.toString(),
+            sub_category_id: question.subCategoryId.toString(),
+            topic_id: question.topicId.toString(),
+            sub_topic_id: question.subTopicId.toString());
+      } else {
+        print('Failed to update question: ${response.body}');
+      }
+    } catch (e) {
+      print('Error updating question: $e');
+    } finally {
+      isLoading.value = false; // Set loading state to false
+    }
+  }
+
+  /// delete true false api
+  deleteTrueFalseAPI({
+    required String main_category_id,
+    required String sub_category_id,
+    required String topic_id,
+    required String sub_topic_id,
+    required String truefalse_ids,
+  }) async {
+    final response = await http.delete(
+      Uri.parse(ApiString.delete_true_false),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'main_category_id': main_category_id,
+        'sub_category_id': sub_category_id,
+        'topic_id': topic_id,
+        'sub_topic_id': sub_topic_id,
+        'question_id': truefalse_ids,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete phrase: ${response.body}');
+    }
+  }
+
+  /// update Mcq api
+  updateMcqQuestionAPI(Mcqs question) async {
+    isLoading.value = true;
+    try {
+      print(question.topicId);
+      final response = await http.post(
+        Uri.parse(ApiString.update_mcq),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'mcq_id': question.id,
+          'main_category_id': question.mainCategoryId,
+          'sub_category_id': question.subCategoryId,
+          'topic_id': question.topicId,
+          'sub_topic_id': question.subTopicId,
+          'question_type': question.questionType,
+          'question': question.question,
+          'title': question.title,
+          'option_a': question.optionA,
+          'option_b': question.optionB,
+          'option_c': question.optionC,
+          'option_d': question.optionD,
+          'answer': question.answer,
+          'index': question.index,
+          'points': question.points,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        await getAllMCQS(
+            main_category_id: question.mainCategoryId.toString(),
+            sub_category_id: question.subCategoryId.toString(),
+            topic_id: question.topicId.toString(),
+            sub_topic_id: question.subTopicId.toString());
+      } else {
+        print('Failed to update question: ${response.body}');
+      }
+    } catch (e) {
+      print('Error updating question: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// delete mcq api
+  // deleteMcqAPI({
+  //   required String main_category_id,
+  //   required String sub_category_id,
+  //   required String topic_id,
+  //   required String sub_topic_id,
+  //   required String question_id,
+  // }) async {
+  //   final response = await http.delete(
+  //     Uri.parse(ApiString.delete_mcq),
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: jsonEncode({
+  //       'main_category_id': main_category_id,
+  //       'sub_category_id': sub_category_id,
+  //       'topic_id': topic_id,
+  //       'sub_topic_id': sub_topic_id,
+  //       'question_id': question_id,
+  //     }),
+  //   );
+  //
+  //   if (response.statusCode != 200) {
+  //     throw Exception('Failed to delete phrase: ${response.body}');
+  //   }
+  // }
+
+
+  /// update true false api
+
+
+
 
 }
