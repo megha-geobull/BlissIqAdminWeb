@@ -255,10 +255,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = fill_in_the_blanks_headers;
     }else if (selectedQuestionType == "Re-Arrange the Word") {
       headers = rearrange_headers;
-      //uploadCsvToApi(headers).whenComplete(() => _getAllQuestionsApiController);
     } else if (selectedQuestionType == "Complete the Word") {
       headers = complete_the_word_headers;
-      uploadCsvToApi(headers);
     } else if (selectedQuestionType == "True/False") {
       headers = true_false_headers;
     } else if (selectedQuestionType == "Story") {
@@ -582,23 +580,23 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                        color: Colors.orange.shade800,
                                      ),
                                    ),
-                                   ElevatedButton.icon(
-                                     style: ElevatedButton.styleFrom(
-                                       backgroundColor: Colors.orange.shade100, // Button color
-                                       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12), // Padding
-                                       shape: RoundedRectangleBorder(
-                                         borderRadius: BorderRadius.circular(8), // Rounded corners
-                                       ),
-                                     ),
-                                     icon: const Icon(Icons.file_upload, size: 20, color: Colors.black), // Icon
-                                     label: const Text(
-                                       "Import Data",
-                                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.black),
-                                     ),
-                                     onPressed: () async {
-                                       showImportExportDialog("import");
-                                     },
-                                   ),
+                                   // ElevatedButton.icon(
+                                   //   style: ElevatedButton.styleFrom(
+                                   //     backgroundColor: Colors.orange.shade100, // Button color
+                                   //     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12), // Padding
+                                   //     shape: RoundedRectangleBorder(
+                                   //       borderRadius: BorderRadius.circular(8), // Rounded corners
+                                   //     ),
+                                   //   ),
+                                   //   icon: const Icon(Icons.file_upload, size: 20, color: Colors.black), // Icon
+                                   //   label: const Text(
+                                   //     "Import Data",
+                                   //     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.black),
+                                   //   ),
+                                   //   onPressed: () async {
+                                   //     showImportExportDialog("import");
+                                   //   },
+                                   // ),
                                    SizedBox(width:10),
                                    ElevatedButton.icon(
                                      style: ElevatedButton.styleFrom(
@@ -674,9 +672,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                        width: MediaQuery
                                            .of(context)
                                            .size
-                                           .width * 0.19,
-                                       child: DropdownButtonFormField<
-                                           String>(
+                                           .width * 0.16,
+                                       child: DropdownButtonFormField<String>(
                                          value: selectedQuestionType,
                                          dropdownColor: Colors.grey.shade50,
                                          decoration: InputDecoration(
@@ -702,14 +699,24 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                          },
                                        ),
                                      ),
+                                     SizedBox(width: 2,),
+                                     Tooltip(
+                                       message: 'Export to Excel',
+                                       child: CircleAvatar(
+                                         backgroundColor: Colors.orange.shade100,
+                                         child: IconButton(
+                                           icon: Image.asset('assets/excel.png',
+                                               width: 22, height: 22),
+                                           onPressed: () {
+                                               showImportExportDialog("import");
+                                           },
+                                         ),
+                                       ),
+                                     ),
                                      const Spacer(),
                                      SizedBox(
                                        width:
-                                       MediaQuery
-                                           .of(context)
-                                           .size
-                                           .width *
-                                           0.06,
+                                       MediaQuery.of(context).size.width * 0.05,
                                        child: CustomTextField(
                                          controller: pointsController,
                                          maxLines: 1,
@@ -721,16 +728,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                  boxH10(),
                                  // Display the appropriate question type UI based on selection
                                  SizedBox(
-                                   width:
-                                   MediaQuery
-                                       .of(context)
-                                       .size
-                                       .width * 0.4,
-                                   height:
-                                   MediaQuery
-                                       .of(context)
-                                       .size
-                                       .width * 0.4,
+                                   width: MediaQuery.of(context).size.width * 0.4,
+                                   height: MediaQuery.of(context).size.width * 0.4,
                                    child: _buildQuestionTypeContent(),
                                  ),
                                ],
@@ -1690,10 +1689,11 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                             subCategoryId!.isNotEmpty &&
                             topicId!.isNotEmpty)
                           showImportExportDialog("export");
-                        else
+                        else {
                           showSnackbar(
                               message:
                                   "Please select category,subcategory,topic,etc");
+                        }
                       },
                     ),
                   ),
@@ -1906,8 +1906,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                 return Row(
                                   children: [
                                     _buildTableCell(row.questionType ?? ""),
-                                    // _buildTableCell(row.title ?? ""),
-                                    // _buildTableCell(row.questionType ?? ""),
                                     GestureDetector(
                                       onTap: () => _showImagePopup(),
                                       child: const Text(
@@ -1986,10 +1984,11 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                             subCategoryId!.isNotEmpty &&
                             topicId!.isNotEmpty)
                           showImportExportDialog("export");
-                        else
+                        else {
                           showSnackbar(
                               message:
                               "Please select category,subcategory,topic,etc");
+                        }
                       },
                     ),
                   ),
