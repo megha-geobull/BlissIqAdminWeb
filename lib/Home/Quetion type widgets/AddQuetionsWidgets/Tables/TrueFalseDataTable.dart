@@ -5,7 +5,6 @@ import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_trueOrfalse
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-
 class TrueFalseDataTable extends StatefulWidget {
   final String main_category_id;
   final String sub_category_id;
@@ -15,10 +14,10 @@ class TrueFalseDataTable extends StatefulWidget {
 
   TrueFalseDataTable(
       {required this.main_category_id,
-        required this.sub_category_id,
-        required this.topic_id,
-        required this.sub_topic_id,
-        required this.questionList});
+      required this.sub_category_id,
+      required this.topic_id,
+      required this.sub_topic_id,
+      required this.questionList});
 
   @override
   _TrueFalseDataTableState createState() => _TrueFalseDataTableState();
@@ -31,22 +30,23 @@ class _TrueFalseDataTableState extends State<TrueFalseDataTable> {
   final _verticalScrollController = ScrollController();
   final _horizontalScrollController = ScrollController();
   String _selectedQuestionIds = "";
-  bool isSelectAll=false;
-  List<String> selected_question_ids=[];
-  late QuestionDataSource _dataSource;
+  bool isSelectAll = false;
+  List<String> selected_question_ids = [];
+  late TrueFalseDataSource _dataSource;
   final GetAllQuestionsApiController _getdeleteApiController = Get.find();
 
   @override
   void initState() {
     super.initState();
     // Initialize with API data
-    _dataSource = QuestionDataSource(
+    _dataSource = TrueFalseDataSource(
       widget.questionList,
-          (selectedIds) {
+      (selectedIds) {
         setState(() {
           _selectedQuestionIds = selectedIds;
         });
       },
+      context,
     );
     //_questions = widget.questionList;
     _filteredQuestions = widget.questionList;
@@ -59,18 +59,19 @@ class _TrueFalseDataTableState extends State<TrueFalseDataTable> {
       } else {
         _filteredQuestions = widget.questionList
             .where((question) =>
-        question.question != null &&
-            question.question!.toLowerCase().contains(query.toLowerCase()))
+                question.question != null &&
+                question.question!.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
       // Update the data source with the filtered questions
-      _dataSource = QuestionDataSource(
+      _dataSource = TrueFalseDataSource(
         _filteredQuestions,
-            (selectedIds) {
+        (selectedIds) {
           setState(() {
             _selectedQuestionIds = selectedIds;
           });
         },
+        context,
       );
     });
   }
@@ -78,28 +79,30 @@ class _TrueFalseDataTableState extends State<TrueFalseDataTable> {
   void _removeSelectedQuestions() {
     // Convert the selected IDs string to a Set for efficient lookup
     final selectedIdsSet = _selectedQuestionIds.split('|').toSet();
-    if(mounted){
+    if (mounted) {
       setState(() {
         // Remove matching items from the main list
 
         // Remove matching items from the filtered list
-        _filteredQuestions.removeWhere((mcq) => selectedIdsSet.contains(mcq.id));
+        _filteredQuestions
+            .removeWhere((mcq) => selectedIdsSet.contains(mcq.id));
 
         // Clear selected IDs after deletion
         _selectedQuestionIds = '';
 
         // Update the data source with the updated filtered list
-        _dataSource = QuestionDataSource(
+        _dataSource = TrueFalseDataSource(
           _filteredQuestions,
-              (selectedIds) {
+          (selectedIds) {
             setState(() {
               _selectedQuestionIds = selectedIds;
             });
           },
+          context,
         );
-      });}
+      });
+    }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -129,19 +132,18 @@ class _TrueFalseDataTableState extends State<TrueFalseDataTable> {
                 Expanded(
                   child: Padding(
                       padding: const EdgeInsets.only(right: 16.0),
-                      child:
-                      CustomTextField(
+                      child: CustomTextField(
                         controller: _searchController,
                         labelText: "Search by Question",
                         onChanged: _filterQuestions,
-                      )
-                  ),
+                      )),
                 ),
                 if (_selectedQuestionIds.isNotEmpty)
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red.shade100,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -213,12 +215,13 @@ class _TrueFalseDataTableState extends State<TrueFalseDataTable> {
                             ],
                           ),
                         ),
-                        const DataColumn(label: Text("Question Type")),
                         const DataColumn(label: Text("Index")),
+                        const DataColumn(label: Text("Question Type")),
                         const DataColumn(label: Text("Question")),
                         const DataColumn(label: Text("Answer")),
                         const DataColumn(label: Text("Points")),
                         const DataColumn(label: Text("Question Image")),
+                        const DataColumn(label: Text("Edit")),
                       ],
                       source: _dataSource,
                     ),
@@ -231,17 +234,38 @@ class _TrueFalseDataTableState extends State<TrueFalseDataTable> {
       ),
     );
   }
-
 }
 
 // DataTableSource for handling data in the DataTable
-class QuestionDataSource extends DataTableSource {
+class TrueFalseDataSource extends DataTableSource {
   final List<TrueOrFalse> questions;
   final Function(String) onSelectionChanged; // Callback for selection
   final Set<String> selectedQuestionIds = {}; // Track selected question IDs
   bool isSelectAll = false; // Track "Select All" state
+  BuildContext context;
 
-  QuestionDataSource(this.questions, this.onSelectionChanged);
+  int? editingRowIndex; // Track which row is being edited
+  List<TextEditingController> questionTypeControllers = [];
+  List<TextEditingController> questionControllers = [];
+  List<TextEditingController> answerControllers = [];
+  List<TextEditingController> pointsControllers = [];
+  List<TextEditingController> indexControllers = [];
+
+  final GetAllQuestionsApiController updateQueApiController = Get.find();
+
+  TrueFalseDataSource(this.questions, this.onSelectionChanged, this.context) {
+    // Initialize controllers for each question
+    for (var question in questions) {
+      questionTypeControllers
+          .add(TextEditingController(text: question.questionType));
+      questionControllers.add(TextEditingController(text: question.question));
+      answerControllers.add(TextEditingController(text: question.answer));
+      pointsControllers
+          .add(TextEditingController(text: question.points.toString()));
+      indexControllers
+          .add(TextEditingController(text: question.index.toString()));
+    }
+  }
 
   @override
   DataRow? getRow(int index) {
@@ -263,33 +287,170 @@ class QuestionDataSource extends DataTableSource {
               }
               isSelectAll = selectedQuestionIds.length == questions.length;
               onSelectionChanged(
-                selectedQuestionIds.join('|'), // Pipe-separated IDs
-              );
-              notifyListeners(); // Update UI
+                  selectedQuestionIds.join('|')); // Pipe-separated IDs
+              notifyListeners();
             },
           ),
         ),
-        DataCell(Text(question.questionType ?? "")),
-        DataCell(Text(question.index.toString()?? "")),
-        DataCell(Text(question.question ?? "")),
-        DataCell(Text(question.answer ?? "")),
-        DataCell(Text(question.points.toString())),
-        // DataCell(Text(question.qImage ?? "")),
+
+        _editableDataCell(
+          index: index,
+          controller: indexControllers[index],
+          initialValue: question.index.toString(),
+          onSubmit: (value) {
+            _updateQuestion(
+              index,
+              questionTypeControllers[index].text,
+              questionControllers[index].text,
+              answerControllers[index].text,
+              pointsControllers[index].text,
+              value,
+            );
+          },
+        ),
+
+        _editableDataCell(
+          index: index,
+          controller: questionTypeControllers[index],
+          initialValue: question.questionType.toString(),
+          onSubmit: (value) {
+            _updateQuestion(
+              index,
+              value,
+              questionControllers[index].text,
+              answerControllers[index].text,
+              pointsControllers[index].text,
+              indexControllers[index].text,
+            );
+          },
+        ),
+
+        _editableDataCell(
+          index: index,
+          controller: questionControllers[index],
+          initialValue: question.question.toString(),
+          onSubmit: (value) {
+            _updateQuestion(
+              index,
+              questionTypeControllers[index].text,
+              value,
+              answerControllers[index].text,
+              pointsControllers[index].text,
+              indexControllers[index].text,
+            );
+          },
+        ),
+
+        _editableDataCell(
+          index: index,
+          controller: answerControllers[index],
+          initialValue: question.answer.toString(),
+          onSubmit: (value) {
+            _updateQuestion(
+              index,
+              questionTypeControllers[index].text,
+              questionControllers[index].text,
+              value,
+              pointsControllers[index].text,
+              indexControllers[index].text,
+            );
+          },
+        ),
+
+        _editableDataCell(
+          index: index,
+          controller: pointsControllers[index],
+          initialValue: question.points.toString(),
+          onSubmit: (value) {
+            _updateQuestion(
+              index,
+              questionTypeControllers[index].text,
+              questionControllers[index].text,
+              answerControllers[index].text,
+              value,
+              indexControllers[index].text,
+            );
+          },
+        ),
+
+        DataCell(TextButton(onPressed: () {}, child: Text('View'))),
+
         DataCell(
-          GestureDetector(
-            onTap: () {
-            },
-            child: const Text(
-              "View",
-              style: TextStyle(
-                color: Colors.blue,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ),
+          editingRowIndex == index
+              ? ElevatedButton(
+                  onPressed: () {
+                    _updateQuestion(
+                      index,
+                      questionTypeControllers[index].text,
+                      questionControllers[index].text,
+                      answerControllers[index].text,
+                      pointsControllers[index].text,
+                      indexControllers[index].text,
+                    );
+                    editingRowIndex = null; // Exit edit mode
+                    notifyListeners();
+                  },
+                  child: Text("Update"),
+                )
+              : GestureDetector(
+                  onTap: () {
+                    if (editingRowIndex == null) {
+                      editingRowIndex = index; // Start editing
+                      notifyListeners();
+                    }
+                  },
+                  child: const Text(
+                    "Edit",
+                    style: TextStyle(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
         ),
       ],
     );
+  }
+
+  /// Helper for creating editable data cells
+  DataCell _editableDataCell({
+    required int index,
+    required TextEditingController controller,
+    required String initialValue,
+    required Function(String) onSubmit,
+  }) {
+    return DataCell(
+      editingRowIndex == index
+          ? TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+              ),
+              onSubmitted: onSubmit,
+            )
+          : Text(initialValue),
+    );
+  }
+
+  /// Update the question's data
+  _updateQuestion(int index, String questionType, String question, String answer, String points, String indexValue) async {
+    final updatedQuestion = TrueOrFalse(
+      id: questions[index].id, // Keep the same ID
+      mainCategoryId: questions[index].mainCategoryId,
+      subCategoryId: questions[index].subCategoryId,
+      topicId: questions[index].topicId,
+      subTopicId: questions[index].subTopicId,
+      questionType: questionType,
+      question: question,
+      answer: answer,
+      points: int.tryParse(points) ?? questions[index].points,
+      index: int.tryParse(indexValue) ?? questions[index].index,
+    );
+
+    questions[index] = updatedQuestion;
+    await updateQueApiController
+        .updateTrueFalseQuestionAPI(updatedQuestion); // API call to update
+    notifyListeners();
   }
 
   @override
@@ -301,7 +462,7 @@ class QuestionDataSource extends DataTableSource {
   @override
   int get selectedRowCount => selectedQuestionIds.length;
 
-  void toggleSelectAll(bool value) {
+  toggleSelectAll(bool value) async {
     isSelectAll = value;
 
     if (isSelectAll) {
@@ -310,13 +471,75 @@ class QuestionDataSource extends DataTableSource {
         questions.map((question) => question.id!).toList(),
       );
     } else {
-      // Clear all selections
+      bool confirmed = await _showConfirmationDialog(context);
+      if (confirmed) {
+        _deleteSelectedQuestions();
+      }
       selectedQuestionIds.clear();
     }
 
     onSelectionChanged(selectedQuestionIds.join('|'));
     notifyListeners(); // Update UI
   }
+
+  _deleteSelectedQuestions() async {
+    final deleteApiController = Get.find<GetAllQuestionsApiController>();
+
+    if (selectedQuestionIds.isNotEmpty) {
+      try {
+        await deleteApiController.deleteTrueFalseAPI(
+          main_category_id: questions[0].mainCategoryId.toString(),
+          sub_category_id: questions[0].subCategoryId.toString(),
+          topic_id: questions[0].topicId.toString(),
+          sub_topic_id: questions[0].subTopicId.toString(),
+          truefalse_ids: selectedQuestionIds.join('|'), // Pipe-separated IDs
+        );
+
+        // Optionally, refresh the list of questions after deletion
+        await deleteApiController.getTrueORFalse(
+          main_category_id: questions[0].mainCategoryId.toString(),
+          sub_category_id: questions[0].subCategoryId.toString(),
+          topic_id: questions[0].topicId.toString(),
+          sub_topic_id: questions[0].subTopicId.toString(),
+        );
+
+        // Remove the deleted questions from the local list
+        questions.removeWhere(
+            (question) => selectedQuestionIds.contains(question.id));
+        selectedQuestionIds.clear(); // Clear the selected IDs after deletion
+        notifyListeners(); // Update UI
+      } catch (e) {
+        print('Error deleting questions: $e');
+      }
+    }
+  }
+
+  _showConfirmationDialog(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Confirm Deletion'),
+              content: const Text(
+                  'Do you really want to delete the selected true false question ?'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false); // User pressed "No"
+                  },
+                  child: const Text('No'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(true); // User pressed "Yes"
+                  },
+                  child: const Text('Yes'),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+  }
+
 }
-
-
