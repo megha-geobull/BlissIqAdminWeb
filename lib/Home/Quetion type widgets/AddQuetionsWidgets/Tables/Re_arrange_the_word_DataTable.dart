@@ -1,30 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../Global/constants/CustomAlertDialogue.dart';
-import '../controller/GetAllQuestionsApiController.dart';
-import '../model/get_mcqs.dart';
+import '../../controller/GetAllQuestionsApiController.dart';
+import '../../model/get_mcqs.dart';
+import '../../model/get_rearrange_model.dart';
+import '../AddQuetionsWidgets.dart';
 
-class MCQ_QuestionTableScreen extends StatefulWidget {
+class Re_Arrange_QuestionTableScreen extends StatefulWidget {
   final String main_category_id;
   final String sub_category_id;
   final String topic_id;
   final String sub_topic_id;
-  final List<Mcqs> questionList;
+  final List<ReArrange> questionList;
 
-  MCQ_QuestionTableScreen(
+  Re_Arrange_QuestionTableScreen(
       {required this.main_category_id,
-      required this.sub_category_id,
-      required this.topic_id,
-      required this.sub_topic_id,
-      required this.questionList});
+        required this.sub_category_id,
+        required this.topic_id,
+        required this.sub_topic_id,
+        required this.questionList});
 
   @override
   _QuestionTableScreenState createState() => _QuestionTableScreenState();
 }
 
-class _QuestionTableScreenState extends State<MCQ_QuestionTableScreen> {
+class _QuestionTableScreenState extends State<Re_Arrange_QuestionTableScreen> {
   TextEditingController _searchController = TextEditingController();
-  List<Mcqs> _filteredQuestions = []; // Filtered data for the table
+  List<ReArrange> _filteredQuestions = []; // Filtered data for the table
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   final _verticalScrollController = ScrollController();
   final _horizontalScrollController = ScrollController();
@@ -53,12 +54,12 @@ class _QuestionTableScreenState extends State<MCQ_QuestionTableScreen> {
   void _filterQuestions(String query) {
     setState(() {
       if (query.isEmpty) {
-        _filteredQuestions = widget.questionList;
+        _filteredQuestions = widget.questionList.cast<ReArrange>();
       } else {
         _filteredQuestions = widget.questionList
             .where((question) =>
         question.question != null &&
-            question.question!.toLowerCase().contains(query.toLowerCase()))
+            question.question!.toLowerCase().contains(query.toLowerCase())).cast<ReArrange>()
             .toList();
       }
       // Update the data source with the filtered questions
@@ -77,33 +78,33 @@ class _QuestionTableScreenState extends State<MCQ_QuestionTableScreen> {
     // Convert the selected IDs string to a Set for efficient lookup
     final selectedIdsSet = _selectedQuestionIds.split('|').toSet();
     if(mounted){
-    setState(() {
+      setState(() {
+        // Remove matching items from the main list
 
-      // Remove matching items from the filtered list
-      _filteredQuestions.removeWhere((mcq) => selectedIdsSet.contains(mcq.id));
+        // Remove matching items from the filtered list
+        _filteredQuestions.removeWhere((ReArrange) => selectedIdsSet.contains(ReArrange.id));
 
-      // Clear selected IDs after deletion
-      _selectedQuestionIds = '';
+        // Clear selected IDs after deletion
+        _selectedQuestionIds = '';
 
-      // Update the data source with the updated filtered list
-      _dataSource = QuestionDataSource(
-        _filteredQuestions,
-            (selectedIds) {
-          setState(() {
-            _selectedQuestionIds = selectedIds;
-          });
-        },
-      );
-    });
-    }
+        // Update the data source with the updated filtered list
+        _dataSource = QuestionDataSource(
+          _filteredQuestions.cast<ReArrange>(),
+              (selectedIds) {
+            setState(() {
+              _selectedQuestionIds = selectedIds;
+            });
+          },
+        );
+      });}
   }
 
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-        width: MediaQuery.of(context).size.width * 0.8,
-        height: MediaQuery.of(context).size.height * 0.9,
+        width: 600,
+        height: 670,
         child: Column(children: [
           Row(children: [
             SizedBox(
@@ -137,7 +138,13 @@ class _QuestionTableScreenState extends State<MCQ_QuestionTableScreen> {
               ),
               onPressed: () async {
                 print("selected Ids - "+_selectedQuestionIds);
-                onDelete("you want to delete this MCQ?");
+                _getdeleteApiController.delete_Mcq(question_ids: _selectedQuestionIds);
+                Future.delayed(const Duration(seconds: 1), () {
+                  _removeSelectedQuestions();
+                  _getdeleteApiController.getAllRe_Arrange(main_category_id:widget.main_category_id,
+                      sub_category_id: widget.sub_category_id,
+                      topic_id: widget.topic_id,sub_topic_id: widget.sub_topic_id);
+                });
               },
             ):SizedBox(),
           ],),
@@ -169,12 +176,7 @@ class _QuestionTableScreenState extends State<MCQ_QuestionTableScreen> {
                           ),
                           DataColumn(label: Text("Question Type")),
                           DataColumn(label: Text("Title")),
-                          DataColumn(label: Text("Question")),
-                          DataColumn(label: Text("Option 1")),
-                          DataColumn(label: Text("Option 2")),
-                          DataColumn(label: Text("Option 3")),
-                          DataColumn(label: Text("Option 4")),
-                          DataColumn(label: Text("Answer")),
+                          DataColumn(label: Text("Re_Arrange Word")),
                           DataColumn(label: Text("Points")),
                           DataColumn(label: Text("Question Image")),
                         ],
@@ -189,32 +191,11 @@ class _QuestionTableScreenState extends State<MCQ_QuestionTableScreen> {
                   )))
         ]));
   }
-
-  void onDelete(String title) {
-    showDialog(
-      context: context,
-      builder: (context) => CustomAlertDialog(
-        title: 'Are you sure',
-        content: title,
-        yesText: 'Yes',
-        noText: 'No', onYesPressed: () {
-          Navigator.pop(context);
-        _getdeleteApiController.delete_Mcq(question_ids: _selectedQuestionIds);
-        Future.delayed(const Duration(seconds: 2), () {
-          _removeSelectedQuestions();
-          _getdeleteApiController.getAllMCQS(main_category_id:widget.main_category_id,
-              sub_category_id: widget.sub_category_id,
-              topic_id: widget.topic_id,sub_topic_id: widget.sub_topic_id);
-        });
-      },
-      ),
-    );
-  }
 }
 
 // DataTableSource for handling data in the DataTable
 class QuestionDataSource extends DataTableSource {
-  final List<Mcqs> questions;
+  final List<ReArrange> questions;
   final Function(String) onSelectionChanged; // Callback for selection
   final Set<String> selectedQuestionIds = {}; // Track selected question IDs
   bool isSelectAll = false; // Track "Select All" state
@@ -249,11 +230,6 @@ class QuestionDataSource extends DataTableSource {
         ),
         DataCell(Text(question.questionType ?? "")),
         DataCell(Text(question.title ?? "")),
-        DataCell(Text(question.question ?? "")),
-        DataCell(Text(question.optionA ?? "")),
-        DataCell(Text(question.optionB ?? "")),
-        DataCell(Text(question.optionC ?? "")),
-        DataCell(Text(question.optionD ?? "")),
         DataCell(Text(question.answer ?? "")),
         DataCell(Text(question.points.toString())),
         DataCell(
