@@ -281,6 +281,40 @@ class AuthController extends GetxController{
     }
   }
 
+  delete_mentors(String user_id) async {
+    isLoading.value = true;
+
+    try {
+      final Map<String, dynamic> body = {
+        "mentor_id": user_id,
+      };
+
+      final response = await http.delete(
+        Uri.parse(ApiString.delete_mentors),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+
+        if (responseData['status'] == 1) {
+          // Parse each JSON object into a Data model
+          showSnackbar(message: "Deleted successfully");
+        } else {
+          showSnackbar(message: "Failed to delete mentor");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while deleting mentor $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   getAssignedMentorsApi(String schoolID) async {
     isLoading.value = true;

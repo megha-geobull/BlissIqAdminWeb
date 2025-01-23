@@ -8,6 +8,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../Global/constants/CustomAlertDialogue.dart';
+import '../../../auth/Controller/StudentController.dart';
+
 class MentorScreen extends StatefulWidget {
   const MentorScreen({super.key});
 
@@ -223,12 +226,33 @@ class _MentorScreenState extends State<MentorScreen> {
           padding: const EdgeInsets.all(12.0),
           child: IconButton(
             icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () => _removeMentor(index),
+            onPressed: () {
+              onDelete("You want to delete mentor ?",index,mentor.sId!);
+            },
           ),
         ),
       ],
     );
   }
+
+  void onDelete(String title,int index,String mentor_id) {
+    showDialog(
+      context: context,
+      builder: (context) => CustomAlertDialog(
+        title: 'Are you sure',
+        content: title,
+        yesText: 'Yes',
+        noText: 'No', onYesPressed: () {
+        Navigator.pop(context);
+        mentorController.delete_mentors(mentor_id);
+        Future.delayed(const Duration(seconds: 2), () {
+          _removeMentor(index);
+        });
+      },
+      ),
+    );
+  }
+
   Color _getButtonColor(String? approvalStatus) {
     switch (approvalStatus) {
       case "Approved":

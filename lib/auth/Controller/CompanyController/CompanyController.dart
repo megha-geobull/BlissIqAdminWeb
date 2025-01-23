@@ -313,6 +313,41 @@ class CompanyController extends GetxController{
     }
   }
 
+  delete_company(String user_id) async {
+    isLoading.value = true;
+
+    try {
+      final Map<String, dynamic> body = {
+        "company_id": user_id,
+      };
+
+      final response = await http.delete(
+        Uri.parse(ApiString.delete_companies),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+
+        if (responseData['status'] == 1) {
+          // Parse each JSON object into a Data model
+          showSnackbar(message: "Deleted successfully");
+        } else {
+          showSnackbar(message: "Failed to delete company");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while deleting company $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   // Get user ID from local storage
   getUserId() async {
     return await getDataFromLocalStorage(

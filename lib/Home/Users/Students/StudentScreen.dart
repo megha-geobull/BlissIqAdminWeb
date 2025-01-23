@@ -6,6 +6,7 @@ import 'package:blissiqadmin/auth/Controller/StudentController.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../Global/constants/CustomAlertDialogue.dart';
 
 class StudentScreen extends StatefulWidget {
   const StudentScreen({super.key});
@@ -31,8 +32,6 @@ class _StudentScreenState extends State<StudentScreen> {
       }
     });
   }
-
-
 
   void _removeStudent(int index) {
     setState(() {
@@ -312,12 +311,31 @@ class _StudentScreenState extends State<StudentScreen> {
           padding: const EdgeInsets.all(12.0),
           child: IconButton(
             icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () => _removeStudent(index),
+            onPressed: (){
+              onDelete("You want to delete learner ?",index,student.id);
+              } ,
           ),
         ),
       ],
     );
   }
 
-
+  void onDelete(String title,int index,String learner_id) {
+    showDialog(
+      context: context,
+      builder: (context) => CustomAlertDialog(
+        title: 'Are you sure',
+        content: title,
+        yesText: 'Yes',
+        noText: 'No', onYesPressed: () {
+        Navigator.pop(context);
+        studentController.delete_Learners(learner_id);
+        Future.delayed(const Duration(seconds: 2), () {
+          _removeStudent(index);
+          //studentController.getAllLearners();
+        });
+      },
+      ),
+    );
+  }
 }

@@ -18,6 +18,7 @@ class ApiString {
   static const String mentorBaseUrl = "http://65.0.211.122:4444/mentor_api/";
   static const String mentor_registration = "${mentorBaseUrl}mentor_registration";
   static const String get_all_mentors = "${baseUrl}get_all_mentors";
+  static const String delete_mentors = "${baseUrl}delete_mentors";
   static const String approve_mentor = "${baseUrl}approve_mentor";
   static const String assign_mentor = "${baseUrl}assign_mentor";
   static const String get_assign_teachers = "${baseUrl}get_assign_teachers";
@@ -29,10 +30,11 @@ class ApiString {
   static const String approve_school = "${baseUrl}approve_school";
   static const String get_all_schools = "${baseUrl}get_all_schools";
   static const String assign_school = "${baseUrl}assign_school";
-
+  static const String delete_schools = "${baseUrl}delete_schools";
 
   ///learner
   static const String get_all_learners = "${baseUrl}get_all_learners";
+  static const String delete_students = "${baseUrl}delete_students";
 
 
   ///company registration
@@ -40,6 +42,7 @@ class ApiString {
   static const String company_registration = "${companyBaseUrl}company_registration";
   static const String approve_company = "${baseUrl}approve_company";
   static const String get_all_companies = "${baseUrl}get_all_companies";
+  static const String delete_companies = "${baseUrl}delete_companies";
   static const String get_assign_schools = "${baseUrl}get_assign_schools";
 
 
