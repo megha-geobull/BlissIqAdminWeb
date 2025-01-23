@@ -28,12 +28,12 @@ class Data {
     required this.id,
     required this.userName,
     required this.email,
-    this.profileImage,
+    required this.profileImage,
     required this.token,
     required this.contactNo,
     required this.status,
     required this.mentorId,
-    this.schoolId,
+    required this.schoolId,
     required this.school,
     required this.stdClass,
     required this.language,
@@ -41,44 +41,44 @@ class Data {
     required this.purpose,
     required this.score,
     required this.rank,
-    this.boardName,
+    required this.boardName,
   });
   late final String id;
   late final String userName;
   late final String email;
-  late final String? profileImage;
+  late final String profileImage;
   late final String token;
-  late final int contactNo;
+  late final String contactNo;
   late final String status;
   late final String mentorId;
-  late final Null schoolId;
+  late final String schoolId;
   late final String school;
   late final String stdClass;
   late final String language;
   late final String ageGroup;
   late final String purpose;
-  late final int score;
-  late final int rank;
+  late final String score;
+  late final String rank;
   late final String? boardName;
 
   Data.fromJson(Map<String, dynamic> json){
     id = json['_id'];
-    userName = json['user_name'];
-    email = json['email'];
-    profileImage = null;
-    token = json['token'];
-    contactNo = json['contact_no'];
-    status = json['status'];
-    mentorId = json['mentor_id'];
-    schoolId = null;
-    school = json['school'];
-    stdClass = json['std_class'];
-    language = json['language'];
-    ageGroup = json['age_group'];
-    purpose = json['purpose'];
-    score = json['score'];
-    rank = json['rank'];
-    boardName = null;
+    userName = json['user_name']??"";
+    email = json['email']??"";
+    profileImage = json['profile_image'].toString()!="null"?json['profile_image']:'';
+    token = json['token']??"";
+    contactNo = json['contact_no'].toString()??"";
+    status = json['status']??'';
+    mentorId = json['mentor_id']??"";
+    schoolId = json['school_id']??'';
+    school = json['school']??"";
+    stdClass = json['std_class']??"";
+    language = json['language']??"";
+    ageGroup = json['age_group']??"";
+    purpose = json['purpose']??'';
+    score = json['score'].toString()??"";
+    rank = json['rank'].toString()??'';
+    boardName = json['board_name']??'';
   }
 
   Map<String, dynamic> toJson() {

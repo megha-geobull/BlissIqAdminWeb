@@ -1,16 +1,14 @@
-import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/AppColor.dart';
-import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Home/Assign/AssignedMentorPage.dart';
 import 'package:blissiqadmin/Home/Assign/AssignedStudentPage.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
-import 'package:blissiqadmin/Home/Users/Mentor/MentorRegistration.dart';
 import 'package:blissiqadmin/Home/Users/Models/AllSchoolModel.dart';
 import 'package:blissiqadmin/Home/Users/School/SchoolRegistration.dart';
 import 'package:blissiqadmin/auth/Controller/SchoolController/SchoolController.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../../Global/constants/CustomAlertDialogue.dart';
 
 class SchoolScreen extends StatefulWidget {
   const SchoolScreen({super.key});
@@ -269,10 +267,30 @@ class _SchoolScreenState extends State<SchoolScreen> {
           padding: const EdgeInsets.all(12.0),
           child: IconButton(
             icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () => _removeSchool(index),
+            onPressed: () {
+              onDelete("You want to delete this school ?",index,school.id!);
+              },
           ),
         ),
       ],
+    );
+  }
+
+  void onDelete(String title,int index,String school_id) {
+    showDialog(
+      context: context,
+      builder: (context) => CustomAlertDialog(
+        title: 'Are you sure',
+        content: title,
+        yesText: 'Yes',
+        noText: 'No', onYesPressed: () {
+        Navigator.pop(context);
+        schoolController.delete_school(school_id);
+        Future.delayed(const Duration(seconds: 2), () {
+          _removeSchool(index);
+        });
+      },
+      ),
     );
   }
 

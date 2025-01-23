@@ -9,8 +9,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:scrollable_table_view/scrollable_table_view.dart';
 
+import '../../../Global/constants/CustomAlertDialogue.dart';
 import '../Models/GetAllCompanyModel.dart';
 
 class CompanyScreen extends StatefulWidget {
@@ -311,10 +311,30 @@ class _CompanyScreenState extends State<CompanyScreen> {
           padding: const EdgeInsets.all(12.0),
           child: IconButton(
             icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () => _removeCompany(index),
+            onPressed: () {
+              onDelete("You want to delete this company ?",index,company.id!);
+            },
           ),
         ),
       ],
+    );
+  }
+
+  void onDelete(String title,int index,String school_id) {
+    showDialog(
+      context: context,
+      builder: (context) => CustomAlertDialog(
+        title: 'Are you sure',
+        content: title,
+        yesText: 'Yes',
+        noText: 'No', onYesPressed: () {
+        Navigator.pop(context);
+        companyController.delete_company(school_id);
+        Future.delayed(const Duration(seconds: 2), () {
+          _removeCompany(index);
+        });
+      },
+      ),
     );
   }
 

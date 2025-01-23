@@ -35,19 +35,7 @@ class SchoolController extends GetxController {
   final approvalStatusController = TextEditingController();
   final statusController = TextEditingController();
 
-
-
-
-
   RxBool isLoading = false.obs;
-
-  // // Dropdown values
-  // final schoolType = ''.obs;
-  // final affiliatedCompany = ''.obs;
-  //
-  // // List of options for com.blissiq.school type and affiliated companies
-  // final schoolTypes = ['Primary', 'Secondary', 'High School'];
-  // final affiliatedCompanies = ['Company A', 'Company B', 'Company C'];
 
   // Password visibility toggle
   final isPasswordVisible = false.obs;
@@ -171,6 +159,41 @@ class SchoolController extends GetxController {
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching school data $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  delete_school(String user_id) async {
+    isLoading.value = true;
+
+    try {
+      final Map<String, dynamic> body = {
+        "school_id": user_id,
+      };
+
+      final response = await http.delete(
+        Uri.parse(ApiString.delete_schools),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+
+        if (responseData['status'] == 1) {
+          // Parse each JSON object into a Data model
+          showSnackbar(message: "Deleted successfully");
+        } else {
+          showSnackbar(message: "Failed to delete school");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while deleting school $e");
       log(e.toString());
     } finally {
       isLoading.value = false;

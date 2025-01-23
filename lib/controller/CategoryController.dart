@@ -254,7 +254,6 @@ class CategoryController extends GetxController {
             http.MultipartFile.fromBytes(
               'image',
               examples[0].bytes,
-              //contentType: MediaType('application', 'x-tar'),
               filename: examples[0].imageName,
             ),
           );
