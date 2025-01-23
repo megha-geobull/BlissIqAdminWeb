@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'package:blissiqadmin/Global/MyCustomScrollBehaviour.dart';
 import 'package:blissiqadmin/Home/HomePage.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/controller/GetAllQuestionsApiController.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/question_controller.dart';
 import 'package:blissiqadmin/auth/login/login.dart';
 import 'package:blissiqadmin/profile/ProfileController.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Global/MyCustomScrollBehaviour.dart';
@@ -19,6 +21,7 @@ void main() {
   Get.put(AuthController());
   Get.put(QuestionController());
   Get.put(GetAllQuestionsApiController());
+ // debugPaintSizeEnabled = true;
   runApp(const MyApp());
 }
 

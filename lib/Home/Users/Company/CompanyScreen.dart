@@ -33,6 +33,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
 
   }
 
+
   void _toggleStatus(String companyId) async {
     bool? confirmation = await showDialog(
       context: context,
@@ -169,6 +170,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
       ),
     );
   }
+
 
   TableRow _buildTableRow(Data company, int index) {
     return TableRow(

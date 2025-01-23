@@ -88,6 +88,7 @@ dependencies:
   share_extend: ^2.0.0
   html:
   syncfusion_flutter_datagrid:
+  scrollable_table_view:
 
 dev_dependencies:
   flutter_test:

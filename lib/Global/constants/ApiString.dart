@@ -122,12 +122,13 @@ class ApiString {
 
   static const String add_learning_slide = "${baseUrl}add_learning_slide";
   static const String get_learning_slide = "${baseUrl}get_learning_slide";
-  static const String delete_learning_slide = "${baseUrl}delete_conversation";
+  static const String update_learning_slide = "${baseUrl}update_learning_slide";
+  static const String delete_learning_slide = "${baseUrl}delete_learning_slide";
 
   static const String add_complete_the_word = "${baseUrl}add_complete_the_word";
   static const String get_complete_the_word = "${baseUrl}get_complete_the_word";
   static const String delete_complete_the_word = "${baseUrl}delete_complete_the_word";
-
+  static const String update_complete_word = "${baseUrl}update_complete_word";
 
   static const String add_complete_the_paragraph = "${baseUrl}add_complete_the_paragraph";
   static const String get_complete_the_paragraph = "${baseUrl}get_complete_the_paragraph";

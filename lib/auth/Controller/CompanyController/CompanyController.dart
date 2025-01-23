@@ -20,19 +20,22 @@ import '../../../Home/Users/Models/GetAllCompanyModel.dart';
 
 class CompanyController extends GetxController{
 
+
+
   var ownerNameController = TextEditingController();
   var companyNameController = TextEditingController();
   var emailController = TextEditingController();
-  var phNoController = TextEditingController();
-
+  var panCardController = TextEditingController();
+  var cinNumberController = TextEditingController();
+  var gstNumberController = TextEditingController();
+  var contactNumberController = TextEditingController();
   var passwordController = TextEditingController();
+  var oldPasswordController = TextEditingController();
+  var newPasswordController = TextEditingController();
   var confirmPasswordController = TextEditingController();
-  var cinNumber = TextEditingController();
-  var panCardNo = TextEditingController();
-  var gstNumber = TextEditingController();
-
 
   RxBool isLoading = false.obs;
+
   var formKey = GlobalKey<FormState>();
   RxBool passwordVisible = false.obs;
   RxBool confirmPasswordVisible = false.obs;
@@ -66,7 +69,7 @@ class CompanyController extends GetxController{
     emailController.clear();
     passwordController.clear();
     confirmPasswordController.clear();
-    phNoController.clear();
+    contactNumberController.clear();
 
   }
 
@@ -185,6 +188,7 @@ class CompanyController extends GetxController{
     required String password,
     required BuildContext context,
     List<int>? profileImageBytes,
+    String? profileImageName,
   }) async {
     isLoading.value = true;
 
@@ -195,27 +199,30 @@ class CompanyController extends GetxController{
       );
 
       // Prepare the request body
-      request.fields.addAll({
-        'owner_name': ownerName,
-        'company_name': companyName,
-        'email': email,
-        'contact_no': contactNo,
-        'password': password,
-        'gst_number':gstNumber,
-        'cin_number':cinNumber,
-        'pan_card': '',
-        'token':''
-      });
+      // Adding fields
+      request.fields['owner_name'] = ownerName;
+      request.fields['company_name'] = companyName;
+      request.fields['email'] = email;
+      request.fields['password'] = password;
+      request.fields['cin_number'] = cinNumber;
+      request.fields['gst_number'] = gstNumber;
+      request.fields['contact_no'] = contactNo;
+      request.fields['token'] = '';
 
       // Attach profile image if selected
       if (profileImageBytes != null) {
+        final mimeType = lookupMimeType(profileImageName!); // Get MIME type
+        final mimeTypeParts = mimeType?.split('/') ?? ['application', 'octet-stream'];
+
         final multipartFile = http.MultipartFile.fromBytes(
-          'profile_pic', profileImageBytes,
-          filename: 'profile_pic',
-          contentType: MediaType('image', 'jpeg'),
+          'profile_pic',
+          profileImageBytes,
+          filename: profileImageName, // Pass file name
+          contentType: MediaType(mimeTypeParts[0], mimeTypeParts[1]),
         );
         request.files.add(multipartFile);
       }
+
 
 
       final response = await request.send();
@@ -226,7 +233,6 @@ class CompanyController extends GetxController{
           SnackBar(content: Text(responseData['message'])),
         );
         clearControllers();
-        Get.toNamed(AppRoutes.mentorPage);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(responseData['message'] ?? 'Error occurred')),
@@ -240,6 +246,8 @@ class CompanyController extends GetxController{
       isLoading.value = false;
     }
   }
+
+
 
   getAllCompany() async {
     isLoading.value = true;
