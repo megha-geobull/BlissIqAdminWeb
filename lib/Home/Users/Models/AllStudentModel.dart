@@ -1,80 +1,76 @@
 class AllStudentModel {
-  int? status;
-  String? message;
-  List<Data>? data;
+  AllStudentModel({
+    required this.status,
+    required this.message,
+    required this.data,
+  });
+  late final int status;
+  late final String message;
+  late final List<Data> data;
 
-  AllStudentModel({this.status, this.message, this.data});
-
-  AllStudentModel.fromJson(Map<String, dynamic> json) {
+  AllStudentModel.fromJson(Map<String, dynamic> json){
     status = json['status'];
     message = json['message'];
-    if (json['data'] != null) {
-      data = <Data>[];
-      json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
-      });
-    }
+    data = List.from(json['data']).map((e)=>Data.fromJson(e)).toList();
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
-    if (this.data != null) {
-      data['data'] = this.data!.map((v) => v.toJson()).toList();
-    }
-    return data;
+    final _data = <String, dynamic>{};
+    _data['status'] = status;
+    _data['message'] = message;
+    _data['data'] = data.map((e)=>e.toJson()).toList();
+    return _data;
   }
 }
 
 class Data {
-  String? sId;
-  String? userName;
-  String? email;
-  String? profileImage;
-  String? token;
-  int? contactNo;
-  String? status;
-  String? mentorId;
-  Null? schoolId;
-  String? school;
-  String? stdClass;
-  String? language;
-  String? ageGroup;
-  String? purpose;
-  String? score;
-  String? rank;
-  String? boardName;
+  Data({
+    required this.id,
+    required this.userName,
+    required this.email,
+    this.profileImage,
+    required this.token,
+    required this.contactNo,
+    required this.status,
+    required this.mentorId,
+    this.schoolId,
+    required this.school,
+    required this.stdClass,
+    required this.language,
+    required this.ageGroup,
+    required this.purpose,
+    required this.score,
+    required this.rank,
+    this.boardName,
+  });
+  late final String id;
+  late final String userName;
+  late final String email;
+  late final String? profileImage;
+  late final String token;
+  late final int contactNo;
+  late final String status;
+  late final String mentorId;
+  late final Null schoolId;
+  late final String school;
+  late final String stdClass;
+  late final String language;
+  late final String ageGroup;
+  late final String purpose;
+  late final int score;
+  late final int rank;
+  late final String? boardName;
 
-  Data(
-      {this.sId,
-        this.userName,
-        this.email,
-        this.profileImage,
-        this.token,
-        this.contactNo,
-        this.status,
-        this.mentorId,
-        this.schoolId,
-        this.school,
-        this.stdClass,
-        this.language,
-        this.ageGroup,
-        this.purpose,
-        this.score,
-        this.rank,
-        this.boardName});
-
-  Data.fromJson(Map<String, dynamic> json) {
-    sId = json['_id'];
+  Data.fromJson(Map<String, dynamic> json){
+    id = json['_id'];
     userName = json['user_name'];
     email = json['email'];
-    profileImage = json['profile_image'];
+    profileImage = null;
     token = json['token'];
     contactNo = json['contact_no'];
     status = json['status'];
     mentorId = json['mentor_id'];
-    schoolId = json['school_id'];
+    schoolId = null;
     school = json['school'];
     stdClass = json['std_class'];
     language = json['language'];
@@ -82,28 +78,28 @@ class Data {
     purpose = json['purpose'];
     score = json['score'];
     rank = json['rank'];
-    boardName = json['board_name'];
+    boardName = null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['_id'] = this.sId;
-    data['user_name'] = this.userName;
-    data['email'] = this.email;
-    data['profile_image'] = this.profileImage;
-    data['token'] = this.token;
-    data['contact_no'] = this.contactNo;
-    data['status'] = this.status;
-    data['mentor_id'] = this.mentorId;
-    data['school_id'] = this.schoolId;
-    data['school'] = this.school;
-    data['std_class'] = this.stdClass;
-    data['language'] = this.language;
-    data['age_group'] = this.ageGroup;
-    data['purpose'] = this.purpose;
-    data['score'] = this.score;
-    data['rank'] = this.rank;
-    data['board_name'] = this.boardName;
-    return data;
+    final _data = <String, dynamic>{};
+    _data['_id'] = id;
+    _data['user_name'] = userName;
+    _data['email'] = email;
+    _data['profile_image'] = profileImage;
+    _data['token'] = token;
+    _data['contact_no'] = contactNo;
+    _data['status'] = status;
+    _data['mentor_id'] = mentorId;
+    _data['school_id'] = schoolId;
+    _data['school'] = school;
+    _data['std_class'] = stdClass;
+    _data['language'] = language;
+    _data['age_group'] = ageGroup;
+    _data['purpose'] = purpose;
+    _data['score'] = score;
+    _data['rank'] = rank;
+    _data['board_name'] = boardName;
+    return _data;
   }
 }

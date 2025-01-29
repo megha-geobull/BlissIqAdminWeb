@@ -18,6 +18,7 @@ class StudentController extends GetxController {
   var selectedUserType = 'Mentor'.obs;
   RxList<Data> allLearnerData = <Data>[].obs;
 
+
   getAllLearners() async {
     isLoading.value = true;
     allLearnerData.clear();
