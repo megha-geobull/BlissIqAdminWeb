@@ -6,6 +6,7 @@ import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/MCQDataTable.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/BuildAlphabetExContent.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/BuildCardFlipContent.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/BuildLearningSlideContent.dart';
@@ -28,7 +29,6 @@ import '../../../Global/constants/common_snackbar.dart';
 import 'ConversationTable.dart';
 import 'FillTheBlanksDataTable.dart';
 import 'Header_Columns.dart';
-import 'MCQDataTable.dart';
 
 class AddQuestionsWidgets extends StatefulWidget {
   @override
@@ -1001,7 +1001,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                   color: Colors.grey),
                             ),
                           ):
-                          MCQ_QuestionTableScreen(main_category_id: mainCategoryId,
+                MCQ_QuestionTableScreen(main_category_id: mainCategoryId,
                             sub_category_id: subCategoryId,
                             topic_id: topicId,sub_topic_id: subtopicId,
                             questionList: _getAllQuestionsApiController.getMcqslits)
@@ -1707,7 +1707,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           return Center(
               child: _getAllQuestionsApiController.isLoading.value
                   ? CircularProgressIndicator()
-                  : (_getAllQuestionsApiController.getConversationList.isEmpty
+                  : (_getAllQuestionsApiController.getStoryPhrasesList.isEmpty
                   ? const Center(
                 child: Text(
                   'No data available',
@@ -1716,14 +1716,13 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                       fontWeight: FontWeight.w500,
                       color: Colors.grey),
                 ),
-              ) :
-              ConversationTableScreen(main_category_id: mainCategoryId,
-                  sub_category_id: subCategoryId,
-                  topic_id: topicId,
-                  sub_topic_id: subtopicId,
-                  questionList: _getAllQuestionsApiController
-                      .getConversationList,
-                  onEditCallback: EditQuestion,)
+              ) : Container()
+              // ConversationTableScreen(main_category_id: mainCategoryId,
+              //     sub_category_id: subCategoryId,
+              //     topic_id: topicId,
+              //     sub_topic_id: subtopicId,
+              //     questionList: _getAllQuestionsApiController.getStoryPhrasesList, ///getConversationList
+              //     onEditCallback: EditQuestion,)
               )
           );
         })
