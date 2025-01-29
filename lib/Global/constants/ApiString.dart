@@ -17,14 +17,15 @@ class ApiString {
   static const String add_learning_slide = "${baseUrl}add_learning_slide";
 
 
+
   ///mentor
   static const String mentorBaseUrl = "http://65.0.211.122:4444/mentor_api/";
   static const String mentor_registration = "${mentorBaseUrl}mentor_registration";
   static const String get_all_mentors = "${baseUrl}get_all_mentors";
+  static const String delete_mentors = "${baseUrl}delete_mentors";
   static const String approve_mentor = "${baseUrl}approve_mentor";
   static const String assign_mentor = "${baseUrl}assign_mentor";
   static const String get_assign_teachers = "${baseUrl}get_assign_teachers";
-
 
 
   ///school_registration
@@ -33,12 +34,11 @@ class ApiString {
   static const String approve_school = "${baseUrl}approve_school";
   static const String get_all_schools = "${baseUrl}get_all_schools";
   static const String assign_school = "${baseUrl}assign_school";
-
-
-
+  static const String delete_schools = "${baseUrl}delete_schools";
 
   ///learner
   static const String get_all_learners = "${baseUrl}get_all_learners";
+  static const String delete_students = "${baseUrl}delete_students";
 
 
   ///company registration
@@ -46,6 +46,7 @@ class ApiString {
   static const String company_registration = "${companyBaseUrl}company_registration";
   static const String approve_company = "${baseUrl}approve_company";
   static const String get_all_companies = "${baseUrl}get_all_companies";
+  static const String delete_companies = "${baseUrl}delete_companies";
   static const String get_assign_schools = "${baseUrl}get_assign_schools";
 
 
@@ -124,15 +125,18 @@ class ApiString {
   static const String update_conversation = "${baseUrl}update_conversation";
 
   static const String get_learning_slide = "${baseUrl}get_learning_slide";
-  static const String delete_learning_slide = "${baseUrl}delete_conversation";
+  static const String update_learning_slide = "${baseUrl}update_learning_slide";
+  static const String delete_learning_slide = "${baseUrl}delete_learning_slide";
 
   static const String add_complete_the_word = "${baseUrl}add_complete_the_word";
   static const String get_complete_the_word = "${baseUrl}get_complete_the_word";
   static const String delete_complete_the_word = "${baseUrl}delete_complete_the_word";
+  static const String update_complete_word = "${baseUrl}update_complete_word";
 
   static const String add_complete_the_paragraph = "${baseUrl}add_complete_the_paragraph";
   static const String get_complete_the_paragraph = "${baseUrl}get_complete_the_paragraph";
-  static const String delete_complete_the_paragraph = "${baseUrl}delete_complete_the_paragraph";
+  static const String delete_complete_the_paragraph = "${baseUrl}delete_complete_the_word";
+
 
   /// Questions widgets
 
@@ -140,6 +144,16 @@ class ApiString {
   static const String get_match_pair_question = "${baseUrl}get_match_pair_question";
   static const String delete_match_pair_question = "${baseUrl}delete_match_pair_question";
 
+  ///learning path
+  static const String studentBaseUrl = "http://65.0.211.122:4444/cust_api/";
+  static const String get_my_learning_path = "${studentBaseUrl}get_my_learning_path";
 
+
+  static const String add_topic_example = "${baseUrl}add_topic_example";
+  static const String delete_topic_example = "${baseUrl}delete_topic_example";
+
+
+
+  static const String delete_students = "${baseUrl}delete_students";
 
 }

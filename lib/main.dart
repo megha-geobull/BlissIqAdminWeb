@@ -1,12 +1,15 @@
 import 'dart:async';
+import 'package:blissiqadmin/Global/MyCustomScrollBehaviour.dart';
 import 'package:blissiqadmin/Home/HomePage.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/controller/GetAllQuestionsApiController.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/question_controller.dart';
 import 'package:blissiqadmin/auth/login/login.dart';
 import 'package:blissiqadmin/profile/ProfileController.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'Global/MyCustomScrollBehaviour.dart';
 import 'auth/Controller/AuthController.dart';
 import 'auth/Signup/Splash.dart';
 import 'controller/CategoryController.dart';
@@ -18,6 +21,7 @@ void main() {
   Get.put(AuthController());
   Get.put(QuestionController());
   Get.put(GetAllQuestionsApiController());
+ // debugPaintSizeEnabled = true;
   runApp(const MyApp());
 }
 
@@ -42,6 +46,7 @@ class _BlissIQAppMyAppState extends State<MyApp> {
     return GetMaterialApp(
       title: 'BlissIq Admin Panel',
       debugShowCheckedModeBanner: false,
+      scrollBehavior: MyCustomScrollBehavior(),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,

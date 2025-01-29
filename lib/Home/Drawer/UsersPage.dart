@@ -119,13 +119,13 @@ Widget _buildMainContent(BoxConstraints constraints,BuildContext context,) {
                   backgroundColor: const Color(0xFFF7F3FF),
                   onTap: () => _navigateToPage(context, 'Mentor'),
                 ),
-                UserCategoryTile(
-                  title: 'Teacher',
-                  icon: Icons.person_pin_rounded,
-                  color: Colors.blue,
-                  backgroundColor: const Color(0xFFEAF2FF),
-                  onTap: () => _navigateToPage(context, 'Teacher'),
-                ),
+                // UserCategoryTile(
+                //   title: 'Teacher',
+                //   icon: Icons.person_pin_rounded,
+                //   color: Colors.blue,
+                //   backgroundColor: const Color(0xFFEAF2FF),
+                //   onTap: () => _navigateToPage(context, 'Teacher'),
+                // ),
                 UserCategoryTile(
                   title: 'Student',
                   icon: Icons.person_2,
@@ -159,9 +159,9 @@ _navigateToPage(BuildContext context, String userType) {
     case 'Company':
       nextScreen = CompanyScreen();
       break;
-    case 'Teacher':
-      nextScreen = TeacherScreen();
-      break;
+    // case 'Teacher':
+    //   nextScreen = TeacherScreen();
+    //   break;
   }
 
   Navigator.push(

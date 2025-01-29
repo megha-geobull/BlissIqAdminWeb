@@ -37,14 +37,16 @@ class QuestionApiController extends GetxController {
       var request = http.MultipartRequest("POST", uri);
       if (qImage != null) {
         var mimeType = lookupMimeType('image') ?? 'image/jpeg';
+        var timestamp = DateTime.now().millisecondsSinceEpoch;
         var multipartFile = http.MultipartFile.fromBytes(
-            'q_image',
-            qImage,
-            filename: 'uploaded_image.jpg',
-            contentType: MediaType.parse(mimeType)
+          'q_image',
+          qImage,
+          filename: 'image_$timestamp.jpg',
+          contentType: MediaType.parse(mimeType),
         );
         request.files.add(multipartFile);
       }
+
 
       request.fields['main_category_id'] = mainCategoryId;
       request.fields['sub_category_id'] = subCategoryId;
@@ -303,7 +305,6 @@ class QuestionApiController extends GetxController {
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
-
       if (response.statusCode == 201) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         print('Response status: ${responseData}');
@@ -462,6 +463,199 @@ class QuestionApiController extends GetxController {
       Fluttertoast.showToast(
         msg: 'An error occurred: $e',
       );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  addCompleteParagraphApi({
+    required String mainCategoryId,
+    required String title,
+    required String subCategoryId,
+    required String topicId,
+    String? subTopicId,
+    required String questionType,
+    required String question,
+    required String paragraphContent,
+    required String index,
+    required String optionA,
+    required String optionB,
+    required String optionC,
+    required String optionD,
+    required String optionE,
+    required String optionF,
+    required String answer,
+    required String points,
+    required BuildContext context,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse(ApiString.add_complete_the_paragraph),
+      );
+      // Prepare the request body
+      request.fields.addAll({
+        'main_category_id': mainCategoryId,
+        'sub_category_id': subCategoryId,
+        'topic_id': topicId,
+        'sub_topic_id': subTopicId ?? "",
+        'question_type': questionType,
+        'question': question,
+        'paragraph_content': paragraphContent,
+        'title': title,
+        'index': index,
+        'option_a': optionA,
+        'option_b': optionB,
+        'option_c': optionC,
+        'option_d': optionD,
+        'option_e':optionE,
+        'option_f':optionF,
+        'points': points,
+        'answer': answer
+      });
+
+      final response = await request.send();
+      final responseData = jsonDecode(await response.stream.bytesToString());
+
+      print("Response Data: $responseData");
+
+      // Handle success and error responses
+      if (response.statusCode == 201 && responseData['status'] == 1) {
+        Fluttertoast.showToast(
+          msg: responseData['message'] ?? 'Added successfully',
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: responseData['message'] ?? 'Error occurred',
+        );
+      }
+    } catch (e, stacktrace) {
+      print('An error occurred: $e');
+      print('Stacktrace: $stacktrace');
+      Fluttertoast.showToast(
+        msg: 'An error occurred: $e',
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+  addLearningSlideApi({
+    required String mainCategoryId,
+    required String subCategoryId,
+    required String topicId,
+    String? subTopicId,
+    required String title,
+    required String question_type,
+    required String definition,
+    required String transcriptionOne,
+    required String grammarExamples,
+    required String transcriptionTwo,
+    required String index,
+    required String points,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse(ApiString.add_learning_slide),
+      );
+
+      request.fields.addAll({
+        'main_category_id': mainCategoryId,
+        'sub_category_id': subCategoryId,
+        'topic_id': topicId,
+        'sub_topic_id': subTopicId ?? "",
+        'question_type': question_type,
+        'title': title,
+        'index': index,
+        'definition': definition,
+        'transcription_one': transcriptionOne,
+        'grammar_examples': grammarExamples,
+        'transcription_two': transcriptionTwo,
+        'points': points,
+      });
+
+      final response = await request.send();
+      final responseData = jsonDecode(await response.stream.bytesToString());
+      print(responseData);
+      if (response.statusCode == 201 && responseData['status'] == 1) {
+        Fluttertoast.showToast(
+          msg: responseData['message'] ?? 'Slide content added successfully',
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: responseData['message'] ?? 'Failed to add slide content',
+        );
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: 'An error occurred: $e',
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  addExampleApi({
+    required String mainCategoryId,
+    required String subCategoryId,
+    required String topicId,
+    required String subTopicId,
+    required String questionType,
+    required String question,
+    Uint8List? qImage,
+    required String answer,
+    required String points,
+    required String index,
+  }) async {
+    isLoading.value = true;
+    var uri = Uri.parse(ApiString.add_topic_example);
+    try {
+      var request = http.MultipartRequest("POST", uri);
+      if (qImage != null) {
+        var mimeType = lookupMimeType('image') ?? 'image/jpeg';
+        var multipartFile = http.MultipartFile.fromBytes(
+          'image_name',
+          qImage,
+          filename: 'uploaded_image.jpg',
+          contentType: MediaType.parse(mimeType),
+        );
+        request.files.add(multipartFile);
+      }
+
+      request.fields['main_category_id'] = mainCategoryId;
+      request.fields['sub_category_id'] = subCategoryId;
+      request.fields['topic_id'] = topicId;
+      request.fields['sub_topic_id'] = subTopicId;
+      request.fields['question_type'] = questionType;
+      request.fields['question'] = question;
+      request.fields['answer'] = answer;
+      request.fields['points'] = points;
+      request.fields['index'] = index;
+
+      http.Response response = await http.Response.fromStream(await request.send());
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 201) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        print('Response status: ${responseData}');
+        if (responseData['status'] == 1) {
+          showSnackbar(message: "Question added successfully");
+        } else {
+          showSnackbar(message: "Failed to add question");
+        }
+      } else {
+        showSnackbar(message: "Failed to add question: ${response.reasonPhrase}");
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while adding question: $e");
     } finally {
       isLoading.value = false;
     }
