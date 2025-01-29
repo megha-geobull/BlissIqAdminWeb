@@ -34,6 +34,8 @@ class _BuildCardFlipContentState extends State<BuildCardFlipContent> {
   final QuestionController _questionController = Get.find();
   final List<Uint8List?> _imagesBytes = List.filled(6, null);
   final TextEditingController indexController = TextEditingController();
+  final TextEditingController titleController = TextEditingController();
+  final List<String> imageNames = [];
 
   @override
   Widget build(BuildContext context) {
@@ -69,12 +71,12 @@ class _BuildCardFlipContentState extends State<BuildCardFlipContent> {
                 'Enter title',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
-              // boxH08(),
-              // CustomTextField(
-              //   controller: TextEditingController(),
-              //   maxLines: 1,
-              //   labelText: "Enter title",
-              // ),
+              boxH08(),
+              CustomTextField(
+                controller: titleController,
+                maxLines: 1,
+                labelText: "Enter title",
+              ),
               boxH10(),
               const Text(
                 'Upload Images and Corresponding Text',
@@ -134,8 +136,13 @@ class _BuildCardFlipContentState extends State<BuildCardFlipContent> {
                     main_category_id: widget.main_category_id!,
                     sub_category_id: widget.sub_category_id!,
                     topic_id: widget.topic_id!,
+                    sub_topic_id: widget.sub_topic_id!,
+                    title: titleController.text,
                     points: widget.pointsController.text,
                     letters: _textControllers.map((controller) => controller.text).join('|'),
+                    image_name: imageNames.isNotEmpty
+                        ? imageNames.join("|")
+                        : "",
                     images: validImages,
                     index: indexController.text,
                     context: context,
@@ -159,9 +166,20 @@ class _BuildCardFlipContentState extends State<BuildCardFlipContent> {
 
     if (pickedFile != null && pickedFile.files.isNotEmpty) {
       setState(() {
+        // Generate a unique name using timestamp
+        final imageName = 'image_${DateTime.now().millisecondsSinceEpoch}_$index.png';
+
+        // Ensure the imageNames list has the same length as _imagesBytes
+        if (imageNames.length <= index) {
+          imageNames.addAll(List.filled(index - imageNames.length + 1, ''));
+        }
+        imageNames[index] = imageName;
+
+        // Store the image bytes
         _imagesBytes[index] = pickedFile.files.first.bytes;
       });
     }
   }
+
 }
 

@@ -14,7 +14,6 @@ class ApiString {
   static const String edit_profile = "${baseUrl}edit_profile";
   static const String get_profile = "${baseUrl}get_profile";
 
-  static const String add_conversation = "${baseUrl}add_conversation";
   static const String add_learning_slide = "${baseUrl}add_learning_slide";
 
 
@@ -124,7 +123,6 @@ class ApiString {
   static const String delete_conversation = "${baseUrl}delete_conversation";
   static const String update_conversation = "${baseUrl}update_conversation";
 
-  static const String add_learning_slide = "${baseUrl}add_learning_slide";
   static const String get_learning_slide = "${baseUrl}get_learning_slide";
   static const String delete_learning_slide = "${baseUrl}delete_conversation";
 
