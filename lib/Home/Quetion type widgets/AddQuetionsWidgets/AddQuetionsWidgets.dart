@@ -891,7 +891,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           print('Error: topic_id is missing for row: $row');
           return;
         }
-        if (selectedQuestionType=="Alphabets Example" && row['topic_name'] == null ) {
+        if (selectedQuestionType=="Alphabets Example" && (row['topic_name'] == null)) {
+
           print('Error: topic_name is missing for row: $row');
           return;
         }
@@ -2582,9 +2583,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     // index: indexController.text,
     // context: context,
     // );
-
-    }
-    else if (selectedQuestionType == "Card Flip") {
 
     }
     else if (selectedQuestionType == "Fill in the blanks") {
