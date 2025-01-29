@@ -151,4 +151,6 @@ class ApiString {
 
 
 
+  static const String delete_students = "${baseUrl}delete_students";
+
 }

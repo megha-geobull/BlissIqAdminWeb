@@ -17,7 +17,8 @@ class StudentScreen extends StatefulWidget {
 
 class _StudentScreenState extends State<StudentScreen> {
   final StudentController studentController = Get.put(StudentController());
-  String? selectedMentor;
+  //String? selectedMentor;
+  Map<String, String?> assignedMentors = {};
 
   @override
   void initState() {
@@ -39,16 +40,23 @@ class _StudentScreenState extends State<StudentScreen> {
     });
   }
 
+  // void _removeStudent(String? index) {
+  //   setState(() {
+  //     studentController.deleteStudentAPI(studentID: index.toString());
+  //   });
+  // }
 
-  void _showMentorBottomSheet(BuildContext context, String? sId) async {
-    selectedMentor = await showModalBottomSheet<String>(
+  void _showMentorBottomSheet(BuildContext context, String? studentId) async {
+    String? selectedMentor = await showModalBottomSheet<String>(
       context: context,
       builder: (context) {
-        String? studentID = sId;
-        return MentorListBottomSheet(studentID);
+        return MentorListBottomSheet(studentId);
       },
     );
     if (selectedMentor != null) {
+      setState(() {
+        assignedMentors[studentId!] = selectedMentor;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Assigned to $selectedMentor')),
       );
@@ -142,8 +150,7 @@ class _StudentScreenState extends State<StudentScreen> {
       ),
     );
   }
-
-
+  
   Widget _buildHeader() {
     return Container(
       decoration: BoxDecoration(
@@ -207,7 +214,7 @@ class _StudentScreenState extends State<StudentScreen> {
         ),
         Padding(
           padding: EdgeInsets.all(12.0),
-          child: Text('Assign', style: TextStyle(fontWeight: FontWeight.bold)),
+          child: Text('Mentor', style: TextStyle(fontWeight: FontWeight.bold)),
         ),
         Padding(
           padding: EdgeInsets.all(12.0),
@@ -278,18 +285,16 @@ class _StudentScreenState extends State<StudentScreen> {
         // Mentor Assignment
         Padding(
           padding: const EdgeInsets.all(12.0),
-          child: selectedMentor == null
+          child: assignedMentors[student.id] == null
               ? ElevatedButton(
-            onPressed: () {
-              print("student.sId ${student.id}");
-              _showMentorBottomSheet(context, student.id);
-            },
+            onPressed: () => _showMentorBottomSheet(context, student.id),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(10)),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              padding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             ),
             child: const Text(
               'Assign',
@@ -302,11 +307,10 @@ class _StudentScreenState extends State<StudentScreen> {
             ),
           )
               : Text(
-            'Assigned to ${selectedMentor ?? "Unknown"}',
+            '${assignedMentors[student.id]}',
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           ),
         ),
-        // Delete Button
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: IconButton(
