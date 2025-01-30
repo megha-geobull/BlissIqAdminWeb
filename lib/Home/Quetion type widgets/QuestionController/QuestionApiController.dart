@@ -25,10 +25,11 @@ class QuestionApiController extends GetxController {
     required String questionType,
     required String title,
     required String question,
-    Uint8List? qImage,
+    List<int>? qImage,
     required String answer,
     required String points,
     required String index,
+    String? profileImageName,
   }) async {
     isLoading.value = true;
     var uri = Uri.parse(ApiString.add_rearrange);
@@ -47,6 +48,18 @@ class QuestionApiController extends GetxController {
         request.files.add(multipartFile);
       }
 
+      if (qImage != null) {
+        final mimeType = lookupMimeType(profileImageName!); // Get MIME type
+        final mimeTypeParts = mimeType?.split('/') ?? ['application', 'octet-stream'];
+
+        final multipartFile = http.MultipartFile.fromBytes(
+          'profile_pic',
+          qImage,
+          filename: profileImageName, // Pass file name
+          contentType: MediaType(mimeTypeParts[0], mimeTypeParts[1]),
+        );
+        request.files.add(multipartFile);
+      }
 
       request.fields['main_category_id'] = mainCategoryId;
       request.fields['sub_category_id'] = subCategoryId;
