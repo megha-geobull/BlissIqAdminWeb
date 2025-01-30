@@ -1913,8 +1913,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                               sub_category_id: subCategoryId,
                               topic_id: topicId,
                               sub_topic_id: subtopicId,
-                              questionList: _getAllQuestionsApiController
-                                  .getFillInTheBlanksList)));
+                              questionList: _getAllQuestionsApiController.getFillInTheBlanksList)));
             })
           ],
         ),
@@ -3363,14 +3362,14 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
             ),
             boxH10(),
             const Text(
-              'Enter the re-arrange word/sentence',
+              'Enter the re-arrange word',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             boxH08(),
             CustomTextField(
               controller: questionController,
               maxLines: 1,
-              labelText: "Enter the re-arrange word/sentence",
+              labelText: "Enter the re-arrange word",
             ),
             boxH10(),
             const Text(
@@ -3398,14 +3397,14 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         borderRadius: BorderRadius.circular(10),
                         child: Image.memory(
                           pathsFile!,
-                          width: 140,
-                          height: 140,
+                          width: 120,
+                          height: 120,
                           fit: BoxFit.cover,
                         ),
                       )
                     : Container(
-                        width: 140,
-                        height: 140,
+                        width: 120,
+                        height: 120,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           color: Colors.grey[200],
@@ -3430,7 +3429,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           ],
         ),
       ),
-    ); // Placeholder for the actual implementation
+    );
   }
 
   /// add Conversation
