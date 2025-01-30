@@ -1097,25 +1097,24 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
             SizedBox(height: 10),
             Obx(() {
               return Center(
-                  child: _getAllQuestionsApiController.isLoading.value
-                      ? CircularProgressIndicator()
-                      : (_getAllQuestionsApiController.getMcqslits.isEmpty
-                          ? const Center(
-                              child: Text(
-                                'No data available',
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.grey),
-                              ),
-                            )
-                          : MCQ_QuestionTableScreen(
-                              main_category_id: mainCategoryId,
-                              sub_category_id: subCategoryId,
-                              topic_id: topicId,
-                              sub_topic_id: subtopicId,
-                              questionList:
-                                  _getAllQuestionsApiController.getMcqslits)));
+                child: _getAllQuestionsApiController.isLoading.value
+                    ? CircularProgressIndicator()
+                    : (_getAllQuestionsApiController.getMcqslits.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'No data available',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey),
+                            ),
+                          ):
+                MCQ_QuestionTableScreen(main_category_id: mainCategoryId,
+                            sub_category_id: subCategoryId,
+                            topic_id: topicId,sub_topic_id: subtopicId,
+                            questionList: _getAllQuestionsApiController.getMcqslits)
+                )
+              );
             }),
           ],
         ),
@@ -1813,6 +1812,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
               ],
             ),
             SizedBox(height: 10),
+
+
             Obx(() {
               return Center(
                   child: _getAllQuestionsApiController.isLoading.value
