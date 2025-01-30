@@ -40,7 +40,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   final List<TextEditingController> optionControllers =
       List.generate(4, (_) => TextEditingController());
   final List<TextEditingController> convo_optionControllers =
-  List.generate(2, (_) => TextEditingController());
+      List.generate(2, (_) => TextEditingController());
   final List<TextEditingController> paragraphOptionControllers =
       List.generate(6, (_) => TextEditingController());
   TextEditingController correctAnswerController = TextEditingController();
@@ -132,16 +132,14 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
 
   final CategoryController _controller = Get.put(CategoryController());
 
-  final QuestionApiController questionApiController = Get.put(QuestionApiController());
-
+  final QuestionApiController questionApiController =
+      Get.put(QuestionApiController());
 
   final GetAllQuestionsApiController _getAllQuestionsApiController = Get.find();
   ScrollController _scrollController = ScrollController();
   final List<String> _selectedIds = [];
   bool _selectAll = false;
-  List<dynamic> entries=[];
-
-
+  List<dynamic> entries = [];
 
   @override
   void initState() {
@@ -161,14 +159,83 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       type: FileType.custom,
       allowMultiple: false,
       onFileLoading: (FilePickerStatus status) => print("status .... $status"),
-      allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
+      allowedExtensions: [
+        'bmp',
+        'dib',
+        'gif',
+        'jfif',
+        'jpe',
+        'jpg',
+        'jpeg',
+        'pbm',
+        'pgm',
+        'ppm',
+        'pnm',
+        'pfm',
+        'png',
+        'apng',
+        'blp',
+        'bufr',
+        'cur',
+        'pcx',
+        'dcx',
+        'dds',
+        'ps',
+        'eps',
+        'fit',
+        'fits',
+        'fli',
+        'flc',
+        'ftc',
+        'ftu',
+        'gbr',
+        'grib',
+        'h5',
+        'hdf',
+        'jp2',
+        'j2k',
+        'jpc',
+        'jpf',
+        'jpx',
+        'j2c',
+        'icns',
+        'ico',
+        'im',
+        'iim',
+        'mpg',
+        'mpeg',
+        'tif',
+        'tiff',
+        'mpo',
+        'msp',
+        'palm',
+        'pcd',
+        'pdf',
+        'pxr',
+        'psd',
+        'qoi',
+        'bw',
+        'rgb',
+        'rgba',
+        'sgi',
+        'ras',
+        'tga',
+        'icb',
+        'vda',
+        'vst',
+        'webp',
+        'wmf',
+        'emf',
+        'xbm',
+        'xpm'
+      ],
     );
 
     if (result != null && result.files.isNotEmpty) {
       setState(() {
         _paths = result.files;
-        pathsFile = _paths!.first.bytes;
-        pathsFileName = _paths!.first.name;
+        pathsFile = _paths!.first.bytes; // Store the bytes
+        pathsFileName = _paths!.first.name; // Store the file name
       });
     } else {
       print('No file selected');
@@ -184,7 +251,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = mcq_headers;
     } else if (selectedQuestionType == "Fill in the blanks") {
       headers = fill_in_the_blanks_headers;
-    }else if (selectedQuestionType == "Re-Arrange the Word") {
+    } else if (selectedQuestionType == "Re-Arrange the Word") {
       headers = rearrange_headers;
     } else if (selectedQuestionType == "Complete the Word") {
       headers = complete_the_word_headers;
@@ -202,9 +269,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = cardFlip_headers;
     } else if (selectedQuestionType == "Complete the paragraph") {
       headers = complete_paragraph;
-    }else if (selectedQuestionType == "Match the pairs") {
+    } else if (selectedQuestionType == "Match the pairs") {
       headers = match_the_pairs_example;
-    }else if (selectedQuestionType == "Alphabets Example") {
+    } else if (selectedQuestionType == "Alphabets Example") {
       headers = alphabet_example;
     }
 
@@ -255,7 +322,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = mcq_headers;
     } else if (selectedQuestionType == "Fill in the blanks") {
       headers = fill_in_the_blanks_headers;
-    }else if (selectedQuestionType == "Re-Arrange the Word") {
+    } else if (selectedQuestionType == "Re-Arrange the Word") {
       headers = rearrange_headers;
     } else if (selectedQuestionType == "Complete the Word") {
       headers = complete_the_word_headers;
@@ -267,7 +334,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = phrases_headers;
     } else if (selectedQuestionType == "Conversation") {
       headers = conversation_headers;
-    }else if (selectedQuestionType == "Fill in the blanks") {
+    } else if (selectedQuestionType == "Fill in the blanks") {
       headers = fill_in_the_blanks_headers;
     } else if (selectedQuestionType == "Learning Slide") {
       headers = learning_slide;
@@ -275,9 +342,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = cardFlip_headers;
     } else if (selectedQuestionType == "Complete the paragraph") {
       headers = complete_paragraph;
-    }else if (selectedQuestionType == "Match the pairs") {
+    } else if (selectedQuestionType == "Match the pairs") {
       headers = match_the_pairs_example;
-    }else if (selectedQuestionType == "Alphabets Example") {
+    } else if (selectedQuestionType == "Alphabets Example") {
       headers = alphabet_example;
     }
     rows.add(headers);
@@ -296,47 +363,53 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       _getAllQuestionsApiController.getAllMCQS(
           main_category_id: mainCategoryId,
           sub_category_id: subCategoryId,
-          topic_id: topicId,sub_topic_id: subtopicId);
+          topic_id: topicId,
+          sub_topic_id: subtopicId);
     } else if (selectedQuestionType == "Re-Arrange the Word") {
       _getAllQuestionsApiController.getAllRe_Arrange(
           main_category_id: mainCategoryId,
           sub_category_id: subCategoryId,
-          topic_id: topicId,sub_topic_id: subtopicId);
+          topic_id: topicId,
+          sub_topic_id: subtopicId);
     } else if (selectedQuestionType == "Complete the Word") {
       ///
     } else if (selectedQuestionType == "True/False") {
       _getAllQuestionsApiController.getTrueORFalse(
           main_category_id: mainCategoryId,
           sub_category_id: subCategoryId,
-          topic_id: topicId,sub_topic_id: subtopicId);
-    }else if (selectedQuestionType == "Story") {
+          topic_id: topicId,
+          sub_topic_id: subtopicId);
+    } else if (selectedQuestionType == "Story") {
       _getAllQuestionsApiController.getStoryData(
           main_category_id: mainCategoryId,
           sub_category_id: subCategoryId,
-          topic_id: topicId,sub_topic_id: subtopicId);
+          topic_id: topicId,
+          sub_topic_id: subtopicId);
     } else if (selectedQuestionType == "Fill in the blanks") {
       _getAllQuestionsApiController.getFillInTheBlanks(
           main_category_id: mainCategoryId,
           sub_category_id: subCategoryId,
-          topic_id: topicId,sub_topic_id: subtopicId);
+          topic_id: topicId,
+          sub_topic_id: subtopicId);
     } else if (selectedQuestionType == "Phrases") {
       _getAllQuestionsApiController.getStoryPhrases(
           main_category_id: mainCategoryId,
           sub_category_id: subCategoryId,
-          topic_id: topicId,sub_topic_id: subtopicId);
+          topic_id: topicId,
+          sub_topic_id: subtopicId);
     } else if (selectedQuestionType == "Conversation") {
       _getAllQuestionsApiController.getConversation(
           main_category_id: mainCategoryId,
           sub_category_id: subCategoryId,
-          topic_id: topicId,sub_topic_id: subtopicId);
+          topic_id: topicId,
+          sub_topic_id: subtopicId);
     } else if (selectedQuestionType == "Match the pairs") {
       _getAllQuestionsApiController.getMatchPairs(
           main_category_id: mainCategoryId,
           sub_category_id: subCategoryId,
-          topic_id: topicId,sub_topic_id: subtopicId);
-    } else if (selectedQuestionType == "Card Flip") {
-
-    }
+          topic_id: topicId,
+          sub_topic_id: subtopicId);
+    } else if (selectedQuestionType == "Card Flip") {}
 
     setState(() {
       questionController.clear();
@@ -428,7 +501,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                             subcategory['sub_category'] == value)['_id'];
                     print(mainCategoryId.toString());
                     print(subCategoryId.toString());
-                    _controller.get_topic(
+                    _controller
+                        .get_topic(
                             categoryId: mainCategoryId.toString(),
                             sub_categoryId: subCategoryId.toString())
                         .then((_) {
@@ -532,222 +606,240 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     backgroundColor: Colors.grey.shade200,
-     body:
-      LayoutBuilder(
-       builder: (context, constraints) {
-         bool isWideScreen = constraints.maxWidth > 800;
-         return Row(
-           crossAxisAlignment: CrossAxisAlignment.stretch,
-           children: [
-             if (isWideScreen)
-               Container(
-                 width: 250,
-                 color: Colors.orange.shade100,
-                 child: const MyDrawer(),
-               ),
-             Expanded(
-               child: Scaffold(
-                 backgroundColor: Colors.grey.shade100,
-                 appBar: isWideScreen
-                     ? null
-                     : AppBar(
-                   title: const Text('Dashboard'),
-                   backgroundColor: Colors.blue.shade100,
-                 ),
-                 drawer: isWideScreen ? null : Drawer(
-                     child: const MyDrawer()),
-                 body: Center(
-                   child:
-                   SingleChildScrollView(
-                     padding: const EdgeInsets.all(16.0),
-                     child: ConstrainedBox(
-                       constraints: BoxConstraints(
-                         maxWidth: MediaQuery.of(context).size.width * 0.9,
-                       ),
-                       child: Row(
-                         crossAxisAlignment: CrossAxisAlignment.start,
-                         children: [
-                           Expanded(
-                             flex: 2,
-                             child: Column(
-                               crossAxisAlignment: CrossAxisAlignment.start,
-                               children: [
-                                 Row(children: [
-                                   Text(
-                                     'Add questions and other data',
-                                     style: TextStyle(
-                                       fontSize: 24,
-                                       fontWeight: FontWeight.bold,
-                                       color: Colors.orange.shade800,
-                                     ),
-                                   ),
-                                   // ElevatedButton.icon(
-                                   //   style: ElevatedButton.styleFrom(
-                                   //     backgroundColor: Colors.orange.shade100, // Button color
-                                   //     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12), // Padding
-                                   //     shape: RoundedRectangleBorder(
-                                   //       borderRadius: BorderRadius.circular(8), // Rounded corners
-                                   //     ),
-                                   //   ),
-                                   //   icon: const Icon(Icons.file_upload, size: 20, color: Colors.black), // Icon
-                                   //   label: const Text(
-                                   //     "Import Data",
-                                   //     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.black),
-                                   //   ),
-                                   //   onPressed: () async {
-                                   //     showImportExportDialog("import");
-                                   //   },
-                                   // ),
-                                   SizedBox(width:10),
-                                   ElevatedButton.icon(
-                                     style: ElevatedButton.styleFrom(
-                                       backgroundColor: Colors.orange.shade100, // Button color
-                                       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12), // Padding
-                                       shape: RoundedRectangleBorder(
-                                         borderRadius: BorderRadius.circular(8), // Rounded corners
-                                       ),
-                                     ),
-                                     icon: const Icon(Icons.file_download, size: 20, color: Colors.black), // Icon
-                                     label: const Text(
-                                       "Export All",
-                                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.black),
-                                     ),
-                                     onPressed: () async {
-                                       await _controller.getlearningPath();
-                                     },
-                                   ),
-                                 ]),
+      backgroundColor: Colors.grey.shade200,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          bool isWideScreen = constraints.maxWidth > 800;
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (isWideScreen)
+                Container(
+                  width: 250,
+                  color: Colors.orange.shade100,
+                  child: const MyDrawer(),
+                ),
+              Expanded(
+                child: Scaffold(
+                  backgroundColor: Colors.grey.shade100,
+                  appBar: isWideScreen
+                      ? null
+                      : AppBar(
+                          title: const Text('Dashboard'),
+                          backgroundColor: Colors.blue.shade100,
+                        ),
+                  drawer: isWideScreen ? null : Drawer(child: const MyDrawer()),
+                  body: Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16.0),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.9,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(children: [
+                                    Text(
+                                      'Add questions and other data',
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.orange.shade800,
+                                      ),
+                                    ),
+                                    // ElevatedButton.icon(
+                                    //   style: ElevatedButton.styleFrom(
+                                    //     backgroundColor: Colors.orange.shade100, // Button color
+                                    //     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12), // Padding
+                                    //     shape: RoundedRectangleBorder(
+                                    //       borderRadius: BorderRadius.circular(8), // Rounded corners
+                                    //     ),
+                                    //   ),
+                                    //   icon: const Icon(Icons.file_upload, size: 20, color: Colors.black), // Icon
+                                    //   label: const Text(
+                                    //     "Import Data",
+                                    //     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.black),
+                                    //   ),
+                                    //   onPressed: () async {
+                                    //     showImportExportDialog("import");
+                                    //   },
+                                    // ),
+                                    SizedBox(width: 10),
+                                    ElevatedButton.icon(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors
+                                            .orange.shade100, // Button color
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                            vertical: 12), // Padding
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              8), // Rounded corners
+                                        ),
+                                      ),
+                                      icon: const Icon(Icons.file_download,
+                                          size: 20,
+                                          color: Colors.black), // Icon
+                                      label: const Text(
+                                        "Export All",
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black),
+                                      ),
+                                      onPressed: () async {
+                                        await _controller.getlearningPath();
+                                      },
+                                    ),
+                                  ]),
 
-                                 SizedBox(height: 16),
-                                 _buildTabs(),
-                                 boxH20(),
-                                 // Only show _buildQuestionsTable if selectedQuestionType is "Multiple Choice Question"
-                                 if (selectedQuestionType == "Multiple Choice Question")
-                                   _buildQuestionsTable(),
+                                  SizedBox(height: 16),
+                                  _buildTabs(),
+                                  boxH20(),
+                                  // Only show _buildQuestionsTable if selectedQuestionType is "Multiple Choice Question"
+                                  if (selectedQuestionType ==
+                                      "Multiple Choice Question")
+                                    _buildQuestionsTable(),
 
-                                 if (selectedQuestionType == "Re-Arrange the Word")
-                                   _buildRearrangeTheWordQuestionsTable(),
+                                  if (selectedQuestionType ==
+                                      "Re-Arrange the Word")
+                                    _buildRearrangeTheWordQuestionsTable(),
 
-                                 if (selectedQuestionType == "Complete the Word")
-                                   _buildQuestionsCompleteTheWordTable(),
+                                  if (selectedQuestionType ==
+                                      "Complete the Word")
+                                    _buildQuestionsCompleteTheWordTable(),
 
-                                 if (selectedQuestionType == "True/False")
-                                   _buildQuestionsTrueFalseTable(),
+                                  if (selectedQuestionType == "True/False")
+                                    _buildQuestionsTrueFalseTable(),
 
-                                 if (selectedQuestionType == "Story")
-                                   _buildQuestionsStoryTable(),
+                                  if (selectedQuestionType == "Story")
+                                    _buildQuestionsStoryTable(),
 
-                                 if (selectedQuestionType == "Phrases")
-                                   _buildQuestionsPhrasesTable(),
+                                  if (selectedQuestionType == "Phrases")
+                                    _buildQuestionsPhrasesTable(),
 
-                                 if (selectedQuestionType == "Conversation")
-                                   _buildQuestionsConversationTable(),
+                                  if (selectedQuestionType == "Conversation")
+                                    _buildQuestionsConversationTable(),
 
-                                 if (selectedQuestionType == "Fill in the blanks")
-                                   _buildQuestionsFillInTheBlanksTable(),
+                                  if (selectedQuestionType ==
+                                      "Fill in the blanks")
+                                    _buildQuestionsFillInTheBlanksTable(),
 
-                                 if (selectedQuestionType == "Match the pairs")
-                                   _buildQuestionsMatchthepairsTable(),
+                                  if (selectedQuestionType == "Match the pairs")
+                                    _buildQuestionsMatchthepairsTable(),
 
-                                 if (selectedQuestionType == "Card Flip")
-                                   _buildQuestionsFlipTheCardTable(),
+                                  if (selectedQuestionType == "Card Flip")
+                                    _buildQuestionsFlipTheCardTable(),
 
-                                 if (selectedQuestionType == "Complete the paragraph")
-                                   _buildQuestionsCompleteTheParagraphTable(),
+                                  if (selectedQuestionType ==
+                                      "Complete the paragraph")
+                                    _buildQuestionsCompleteTheParagraphTable(),
 
-                                 if (selectedQuestionType == "Alphabets Example" &&
-                                     selectedTopic != "")
-                                   _buildExampleTable(),
-                                 // Show this widget for "Re-Arrange the Word"
-                               ],
-                             ),
-                           ),
-                           const SizedBox(width: 20),
-                           Expanded(
-                             flex: 1,
-                             child: Column(
-                               children: [
-                                 Row(
-                                   children: [
-                                     SizedBox(
-                                       width: MediaQuery
-                                           .of(context)
-                                           .size
-                                           .width * 0.16,
-                                       child: DropdownButtonFormField<String>(
-                                         value: selectedQuestionType,
-                                         dropdownColor: Colors.grey.shade50,
-                                         decoration: InputDecoration(
-                                           labelText: "Select Question Type",
-                                           border: OutlineInputBorder(
-                                             borderRadius:
-                                             BorderRadius.circular(10),
-                                           ),
-                                           filled: true,
-                                           fillColor: Colors.white,
-                                         ),
-                                         items: questionTypes
-                                             .map((type) =>
-                                             DropdownMenuItem(
-                                               value: type,
-                                               child: Text(type),
-                                             ))
-                                             .toList(),
-                                         onChanged: (value) {
-                                           setState(() {
-                                             selectedQuestionType = value;
-                                           });
-                                         },
-                                       ),
-                                     ),
-                                     SizedBox(width: 2,),
-                                     Tooltip(
-                                       message: 'Export to Excel',
-                                       child: CircleAvatar(
-                                         backgroundColor: Colors.orange.shade100,
-                                         child: IconButton(
-                                           icon: Image.asset('assets/excel.png',
-                                               width: 22, height: 22),
-                                           onPressed: () {
-                                               showImportExportDialog("import");
-                                           },
-                                         ),
-                                       ),
-                                     ),
-                                     const Spacer(),
-                                     SizedBox(
-                                       width:
-                                       MediaQuery.of(context).size.width * 0.05,
-                                       child: CustomTextField(
-                                         controller: pointsController,
-                                         maxLines: 1,
-                                         labelText: "Points",
-                                       ),
-                                     ),
-                                   ],
-                                 ),
-                                 boxH10(),
-                                 // Display the appropriate question type UI based on selection
-                                 SizedBox(
-                                   width: MediaQuery.of(context).size.width * 0.4,
-                                   height: MediaQuery.of(context).size.width * 0.4,
-                                   child: _buildQuestionTypeContent(),
-                                 ),
-                               ],
-                             ),
-                           ),
-                         ],
-                       ),
-                     ),
-                   ),
-                 ),
-               ),
-             ),
-           ],
-         );
-       },
-     ),
+                                  if (selectedQuestionType ==
+                                          "Alphabets Example" &&
+                                      selectedTopic != "")
+                                    _buildExampleTable(),
+                                  // Show this widget for "Re-Arrange the Word"
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            Expanded(
+                              flex: 1,
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.16,
+                                        child: DropdownButtonFormField<String>(
+                                          value: selectedQuestionType,
+                                          dropdownColor: Colors.grey.shade50,
+                                          decoration: InputDecoration(
+                                            labelText: "Select Question Type",
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            filled: true,
+                                            fillColor: Colors.white,
+                                          ),
+                                          items: questionTypes
+                                              .map((type) => DropdownMenuItem(
+                                                    value: type,
+                                                    child: Text(type),
+                                                  ))
+                                              .toList(),
+                                          onChanged: (value) {
+                                            setState(() {
+                                              selectedQuestionType = value;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 2,
+                                      ),
+                                      Tooltip(
+                                        message: 'Export to Excel',
+                                        child: CircleAvatar(
+                                          backgroundColor:
+                                              Colors.orange.shade100,
+                                          child: IconButton(
+                                            icon: Image.asset(
+                                                'assets/excel.png',
+                                                width: 22,
+                                                height: 22),
+                                            onPressed: () {
+                                              showImportExportDialog("import");
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.05,
+                                        child: CustomTextField(
+                                          controller: pointsController,
+                                          maxLines: 1,
+                                          labelText: "Points",
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  boxH10(),
+                                  // Display the appropriate question type UI based on selection
+                                  SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.4,
+                                    height:
+                                        MediaQuery.of(context).size.width * 0.4,
+                                    child: _buildQuestionTypeContent(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -779,32 +871,39 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
             ),
           ),
           actions: [
-            type=="import"?
-            TextButton(
-              onPressed: () {
-                if (selectedQuestionType != "") {
-                  _importTableToCSV();
-                }
-              },
-              child: const Text("Import"),
-            ):SizedBox(),
-            type=="export"?
-            TextButton(
-              onPressed: () {
-                if (selectedQuestionType != "Alphabets Example" &&
-                    mainCategoryId!.isNotEmpty && subCategoryId!.isNotEmpty && topicId!.isNotEmpty) {
-                  _exportTableToCSV();
-                  Navigator.pop(context); // Close the dialog
-                } else if (selectedQuestionType == "Alphabets Example" &&
-                    mainCategoryId!.isNotEmpty && subCategoryId!.isNotEmpty) {
-                  _exportTableToCSV();
-                  Navigator.pop(context); // Close the dialog
-                } else {
-                  showSnackbar(message: "Please select category, subcategory, and topic.");
-                }
-              },
-              child: const Text("Export"),
-            ):SizedBox(),
+            type == "import"
+                ? TextButton(
+                    onPressed: () {
+                      if (selectedQuestionType != "") {
+                        _importTableToCSV();
+                      }
+                    },
+                    child: const Text("Import"),
+                  )
+                : SizedBox(),
+            type == "export"
+                ? TextButton(
+                    onPressed: () {
+                      if (selectedQuestionType != "Alphabets Example" &&
+                          mainCategoryId!.isNotEmpty &&
+                          subCategoryId!.isNotEmpty &&
+                          topicId!.isNotEmpty) {
+                        _exportTableToCSV();
+                        Navigator.pop(context); // Close the dialog
+                      } else if (selectedQuestionType == "Alphabets Example" &&
+                          mainCategoryId!.isNotEmpty &&
+                          subCategoryId!.isNotEmpty) {
+                        _exportTableToCSV();
+                        Navigator.pop(context); // Close the dialog
+                      } else {
+                        showSnackbar(
+                            message:
+                                "Please select category, subcategory, and topic.");
+                      }
+                    },
+                    child: const Text("Export"),
+                  )
+                : SizedBox(),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
@@ -879,30 +978,30 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
 
       // Validate and clean data
       for (var row in data) {
-        if (row['main_category_id'] == null ) {
+        if (row['main_category_id'] == null) {
           print('Error: main_category_id is missing for row: $row');
           return;
         }
-        if (row['sub_category_id'] == null ) {
+        if (row['sub_category_id'] == null) {
           print('Error: sub_category_id is missing for row: $row');
           return;
         }
-        if (selectedQuestionType!="Alphabets Example" && (row['topic_id'] == null || row['topic_id'].isEmpty)) {
+        if (selectedQuestionType != "Alphabets Example" &&
+            (row['topic_id'] == null || row['topic_id'].isEmpty)) {
           print('Error: topic_id is missing for row: $row');
           return;
         }
-        if (selectedQuestionType=="Alphabets Example" && (row['topic_name'] == null)) {
-
+        if (selectedQuestionType == "Alphabets Example" &&
+            (row['topic_name'] == null)) {
           print('Error: topic_name is missing for row: $row');
           return;
         }
       }
       // Make API call
-      String apiUrl =
-      selectedQuestionType == "Multiple Choice Question"
-          ? ApiString.add_mcq:
-          selectedQuestionType == "Alphabets Example"
-          ? ApiString.add_topics
+      String apiUrl = selectedQuestionType == "Multiple Choice Question"
+          ? ApiString.add_mcq
+          : selectedQuestionType == "Alphabets Example"
+              ? ApiString.add_topics
               : selectedQuestionType == "Re-Arrange the Word"
                   ? ApiString.add_rearrange
                   : selectedQuestionType == "True/False"
@@ -910,22 +1009,30 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                       : selectedQuestionType == "Story"
                           ? ApiString.add_story
                           : selectedQuestionType == "Fill in the blanks"
-                            ? ApiString.add_fill_blanks
-                            : selectedQuestionType == "Phrases"
-                              ? ApiString.add_story_phrases
-                              : selectedQuestionType == "Conversation"
-                                ? ApiString.add_conversation
-                                : selectedQuestionType == "Card Flip"
-                                  ? ApiString.add_card_flipping
-                                    : selectedQuestionType == "Learning Slide"
-                                      ? ApiString.add_learning_slide
-                                        : selectedQuestionType == "Complete the Word"
-                                            ? ApiString.add_complete_the_word
-                                              : selectedQuestionType == "Complete the paragraph"
-                                                ? ApiString.add_complete_the_paragraph:
-                              selectedQuestionType == "Match the pairs"?
-                              ApiString.add_match_pair_question:
-                                  ApiString.add_fill_blanks;
+                              ? ApiString.add_fill_blanks
+                              : selectedQuestionType == "Phrases"
+                                  ? ApiString.add_story_phrases
+                                  : selectedQuestionType == "Conversation"
+                                      ? ApiString.add_conversation
+                                      : selectedQuestionType == "Card Flip"
+                                          ? ApiString.add_card_flipping
+                                          : selectedQuestionType ==
+                                                  "Learning Slide"
+                                              ? ApiString.add_learning_slide
+                                              : selectedQuestionType ==
+                                                      "Complete the Word"
+                                                  ? ApiString
+                                                      .add_complete_the_word
+                                                  : selectedQuestionType ==
+                                                          "Complete the paragraph"
+                                                      ? ApiString
+                                                          .add_complete_the_paragraph
+                                                      : selectedQuestionType ==
+                                                              "Match the pairs"
+                                                          ? ApiString
+                                                              .add_match_pair_question
+                                                          : ApiString
+                                                              .add_fill_blanks;
 
       print(apiUrl);
       for (var map in data) {
@@ -1318,87 +1425,87 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
               ],
             ),
             SizedBox(height: 10),
-
             Obx(() {
               return Center(
                 child: _getAllQuestionsApiController.isLoading.value
                     ? CircularProgressIndicator()
                     : (_getAllQuestionsApiController.getTrueOrFalseList.isEmpty
-                    ? Center(
-                  child: Text(
-                    'No data available',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey),
-                  ),
-                )
-                    : SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  controller: _scrollController,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                        minWidth: 1200, minHeight: 400),
-                    child: SizedBox(
-                      height: 400,
-                      width: 600,
-                      child: Column(
-                        children: [
-                          // Table Header
-                          Container(
-                            color: Colors.orange.shade100,
-                            child: Row(
-                              children: [
-                                _buildTableHeader("Question Type"),
-                                _buildTableHeader("Question"),
-                                _buildTableHeader("Answer"),
-                                _buildTableHeader("Points"),
-                                _buildTableHeader("Question Image"),
-                              ],
+                        ? Center(
+                            child: Text(
+                              'No data available',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey),
                             ),
-                          ),
-                          // Table Rows
-                          Expanded(
-                            child: ListView.builder(
-                              scrollDirection: Axis.vertical,
-                              itemCount: _getAllQuestionsApiController
-                                  .getTrueOrFalseList.length,
-                              itemBuilder: (context, index) {
-                                var row =
-                                _getAllQuestionsApiController
-                                    .getTrueOrFalseList[index];
-                                return Row(
+                          )
+                        : SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            controller: _scrollController,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                  minWidth: 1200, minHeight: 400),
+                              child: SizedBox(
+                                height: 400,
+                                width: 600,
+                                child: Column(
                                   children: [
-                                    _buildTableCell(
-                                        row.questionType ?? ""),
-                                    _buildTableCell(row.question ?? ""),
-                                    _buildTableCell(
-                                        row.question ?? ""),
-                                    _buildTableCell(row.answer ?? ""),
-                                    _buildTableCell(
-                                        row.points.toString() ?? ""),
-                                    GestureDetector(
-                                      onTap: () => _showImagePopup(),
-                                      child: const Text(
-                                        "View",
-                                        style: TextStyle(
-                                          color: Colors.blue,
-                                          decoration: TextDecoration
-                                              .underline,
-                                        ),
-                                        textAlign: TextAlign.center,
+                                    // Table Header
+                                    Container(
+                                      color: Colors.orange.shade100,
+                                      child: Row(
+                                        children: [
+                                          _buildTableHeader("Question Type"),
+                                          _buildTableHeader("Question"),
+                                          _buildTableHeader("Answer"),
+                                          _buildTableHeader("Points"),
+                                          _buildTableHeader("Question Image"),
+                                        ],
+                                      ),
+                                    ),
+                                    // Table Rows
+                                    Expanded(
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.vertical,
+                                        itemCount: _getAllQuestionsApiController
+                                            .getTrueOrFalseList.length,
+                                        itemBuilder: (context, index) {
+                                          var row =
+                                              _getAllQuestionsApiController
+                                                  .getTrueOrFalseList[index];
+                                          return Row(
+                                            children: [
+                                              _buildTableCell(
+                                                  row.questionType ?? ""),
+                                              _buildTableCell(
+                                                  row.question ?? ""),
+                                              _buildTableCell(
+                                                  row.question ?? ""),
+                                              _buildTableCell(row.answer ?? ""),
+                                              _buildTableCell(
+                                                  row.points.toString() ?? ""),
+                                              GestureDetector(
+                                                onTap: () => _showImagePopup(),
+                                                child: const Text(
+                                                  "View",
+                                                  style: TextStyle(
+                                                    color: Colors.blue,
+                                                    decoration: TextDecoration
+                                                        .underline,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
                                       ),
                                     ),
                                   ],
-                                );
-                              },
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )),
+                          )),
               );
             })
           ],
@@ -1458,79 +1565,80 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 child: _getAllQuestionsApiController.isLoading.value
                     ? CircularProgressIndicator()
                     : (_getAllQuestionsApiController.getStoryDataList.isEmpty
-                    ? Center(
-                  child: Text(
-                    'No data available',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey),
-                  ),
-                )
-                    : SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  controller: _scrollController,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                        minWidth: 1200, minHeight: 400),
-                    child: SizedBox(
-                      height: 400,
-                      width: 600,
-                      child: Column(
-                        children: [
-                          // Table Header
-                          Container(
-                            color: Colors.orange.shade100,
-                            child: Row(
-                              children: [
-                                _buildTableHeader("Story Title"),
-                                _buildTableHeader("Story Content"),
-                                _buildTableHeader("Points"),
-                                _buildTableHeader("Story Image"),
-                              ],
+                        ? Center(
+                            child: Text(
+                              'No data available',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey),
                             ),
-                          ),
-                          // Table Rows
-                          Expanded(
-                            child: ListView.builder(
-                              scrollDirection: Axis.vertical,
-                              itemCount: _getAllQuestionsApiController
-                                  .getStoryDataList.length,
-                              itemBuilder: (context, index) {
-                                var row =
-                                _getAllQuestionsApiController
-                                    .getStoryDataList[index];
-                                return Row(
+                          )
+                        : SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            controller: _scrollController,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                  minWidth: 1200, minHeight: 400),
+                              child: SizedBox(
+                                height: 400,
+                                width: 600,
+                                child: Column(
                                   children: [
-                                    _buildTableCell(
-                                        row.storyTitle ?? ""),
-                                    _buildTableCell(row.content ?? ""),
-                                    _buildTableCell(
-                                        row.highlightWord ?? ""),
-                                    _buildTableCell(
-                                        row.points.toString() ?? ""),
-                                    GestureDetector(
-                                      onTap: () => _showImagePopup(),
-                                      child: const Text(
-                                        "View",
-                                        style: TextStyle(
-                                          color: Colors.blue,
-                                          decoration: TextDecoration
-                                              .underline,
-                                        ),
-                                        textAlign: TextAlign.center,
+                                    // Table Header
+                                    Container(
+                                      color: Colors.orange.shade100,
+                                      child: Row(
+                                        children: [
+                                          _buildTableHeader("Story Title"),
+                                          _buildTableHeader("Story Content"),
+                                          _buildTableHeader("Points"),
+                                          _buildTableHeader("Story Image"),
+                                        ],
+                                      ),
+                                    ),
+                                    // Table Rows
+                                    Expanded(
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.vertical,
+                                        itemCount: _getAllQuestionsApiController
+                                            .getStoryDataList.length,
+                                        itemBuilder: (context, index) {
+                                          var row =
+                                              _getAllQuestionsApiController
+                                                  .getStoryDataList[index];
+                                          return Row(
+                                            children: [
+                                              _buildTableCell(
+                                                  row.storyTitle ?? ""),
+                                              _buildTableCell(
+                                                  row.content ?? ""),
+                                              _buildTableCell(
+                                                  row.highlightWord ?? ""),
+                                              _buildTableCell(
+                                                  row.points.toString() ?? ""),
+                                              GestureDetector(
+                                                onTap: () => _showImagePopup(),
+                                                child: const Text(
+                                                  "View",
+                                                  style: TextStyle(
+                                                    color: Colors.blue,
+                                                    decoration: TextDecoration
+                                                        .underline,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
                                       ),
                                     ),
                                   ],
-                                );
-                              },
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )),
+                          )),
               );
             })
           ],
@@ -1590,65 +1698,65 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 child: _getAllQuestionsApiController.isLoading.value
                     ? CircularProgressIndicator()
                     : (_getAllQuestionsApiController.getStoryPhrasesList.isEmpty
-                    ? const Center(
-                  child: Text(
-                    'No data available',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey),
-                  ),
-                )
-                    : SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  controller: _scrollController,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                        minWidth: 1200, minHeight: 400),
-                    child: SizedBox(
-                      height: 400,
-                      width: 600,
-                      child: Column(
-                        children: [
-                          // Table Header
-                          Container(
-                            color: Colors.orange.shade100,
-                            child: Row(
-                              children: [
-                                _buildTableHeader("Index"),
-                                _buildTableHeader("Phrase"),
-                                _buildTableHeader("Points"),
-                              ],
+                        ? const Center(
+                            child: Text(
+                              'No data available',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey),
                             ),
-                          ),
-                          // Table Rows
-                          Expanded(
-                            child: ListView.builder(
-                              scrollDirection: Axis.vertical,
-                              itemCount: _getAllQuestionsApiController
-                                  .getStoryPhrasesList.length,
-                              itemBuilder: (context, index) {
-                                var row =
-                                _getAllQuestionsApiController
-                                    .getStoryPhrasesList[index];
-                                return Row(
+                          )
+                        : SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            controller: _scrollController,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                  minWidth: 1200, minHeight: 400),
+                              child: SizedBox(
+                                height: 400,
+                                width: 600,
+                                child: Column(
                                   children: [
-                                    _buildTableCell(
-                                        row.index.toString() ?? ""),
-                                    // _buildTableCell(
-                                    //     row.phraseName ?? ""),
-                                    _buildTableCell(
-                                        row.points.toString() ?? ""),
+                                    // Table Header
+                                    Container(
+                                      color: Colors.orange.shade100,
+                                      child: Row(
+                                        children: [
+                                          _buildTableHeader("Index"),
+                                          _buildTableHeader("Phrase"),
+                                          _buildTableHeader("Points"),
+                                        ],
+                                      ),
+                                    ),
+                                    // Table Rows
+                                    Expanded(
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.vertical,
+                                        itemCount: _getAllQuestionsApiController
+                                            .getStoryPhrasesList.length,
+                                        itemBuilder: (context, index) {
+                                          var row =
+                                              _getAllQuestionsApiController
+                                                  .getStoryPhrasesList[index];
+                                          return Row(
+                                            children: [
+                                              _buildTableCell(
+                                                  row.index.toString() ?? ""),
+                                              // _buildTableCell(
+                                              //     row.phraseName ?? ""),
+                                              _buildTableCell(
+                                                  row.points.toString() ?? ""),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                    ),
                                   ],
-                                );
-                              },
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )),
+                          )),
               );
             })
           ],
@@ -1704,36 +1812,39 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
               ],
             ),
             SizedBox(height: 10),
-        Obx(() {
-          return Center(
-              child: _getAllQuestionsApiController.isLoading.value
-                  ? CircularProgressIndicator()
-                  : (_getAllQuestionsApiController.getStoryPhrasesList.isEmpty
-                  ? const Center(
-                child: Text(
-                  'No data available',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey),
-                ),
-              ) : Container()
-              // ConversationTableScreen(main_category_id: mainCategoryId,
-              //     sub_category_id: subCategoryId,
-              //     topic_id: topicId,
-              //     sub_topic_id: subtopicId,
-              //     questionList: _getAllQuestionsApiController.getStoryPhrasesList, ///getConversationList
-              //     onEditCallback: EditQuestion,)
-              )
-          );
-        })
+
+
+            Obx(() {
+              return Center(
+                  child: _getAllQuestionsApiController.isLoading.value
+                      ? CircularProgressIndicator()
+                      : (_getAllQuestionsApiController
+                              .getStoryPhrasesList.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'No data available',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey),
+                              ),
+                            )
+                          : Container()
+                      // ConversationTableScreen(main_category_id: mainCategoryId,
+                      //     sub_category_id: subCategoryId,
+                      //     topic_id: topicId,
+                      //     sub_topic_id: subtopicId,
+                      //     questionList: _getAllQuestionsApiController.getStoryPhrasesList, ///getConversationList
+                      //     onEditCallback: EditQuestion,)
+                      ));
+            })
           ],
         ),
       ),
     );
   }
 
-  EditQuestion(int index){
+  EditQuestion(int index) {
     _getAddedQuestion();
   }
 
@@ -1785,23 +1896,26 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
             SizedBox(height: 10),
             Obx(() {
               return Center(
-                child: _getAllQuestionsApiController.isLoading.value
-                    ? CircularProgressIndicator()
-                    : (_getAllQuestionsApiController.getFillInTheBlanksList.isEmpty
-                    ? const Center(
-                  child: Text(
-                    'No data available',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey),
-                  ),
-                )
-                    :
-              FillTheBlanks_TableScreen(main_category_id: mainCategoryId,
-              sub_category_id: subCategoryId,
-              topic_id: topicId,sub_topic_id: subtopicId,
-              questionList: _getAllQuestionsApiController.getFillInTheBlanksList)));
+                  child: _getAllQuestionsApiController.isLoading.value
+                      ? CircularProgressIndicator()
+                      : (_getAllQuestionsApiController
+                              .getFillInTheBlanksList.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'No data available',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey),
+                              ),
+                            )
+                          : FillTheBlanks_TableScreen(
+                              main_category_id: mainCategoryId,
+                              sub_category_id: subCategoryId,
+                              topic_id: topicId,
+                              sub_topic_id: subtopicId,
+                              questionList: _getAllQuestionsApiController
+                                  .getFillInTheBlanksList)));
             })
           ],
         ),
@@ -1861,88 +1975,89 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 child: _getAllQuestionsApiController.isLoading.value
                     ? CircularProgressIndicator()
                     : (_getAllQuestionsApiController.getMatchPairsList.isEmpty
-                    ? Center(
-                  child: Text(
-                    'No data available',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey),
-                  ),
-                )
-                    :
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  controller: _scrollController,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                        minWidth: 1200, minHeight: 400),
-                    child: SizedBox(
-                      height: 400,
-                      width: 600,
-                      child: Column(
-                        children: [
-                          // Table Header
-                          Container(
-                            color: Colors.orange.shade100,
-                            child: Row(
-                              children: [
-                                _buildTableHeader("Question Type"),
-                                // _buildTableHeader("Question Title"),
-                                _buildTableHeader("Left Column"),
-                                _buildTableHeader("Right Column"),
-                                _buildTableHeader("Points"),
-                              ],
+                        ? Center(
+                            child: Text(
+                              'No data available',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey),
                             ),
-                          ),
-                          // Table Rows
-                          Expanded(
-                            child: ListView.builder(
-                              scrollDirection: Axis.vertical,
-                              itemCount: _getAllQuestionsApiController
-                                  .getMatchPairsList.length,
-                              itemBuilder: (context, index) {
-                                var row =
-                                _getAllQuestionsApiController
-                                    .getMatchPairsList[index];
-                                return Row(
+                          )
+                        : SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            controller: _scrollController,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                  minWidth: 1200, minHeight: 400),
+                              child: SizedBox(
+                                height: 400,
+                                width: 600,
+                                child: Column(
                                   children: [
-                                    _buildTableCell(row.questionType ?? ""),
-                                    GestureDetector(
-                                      onTap: () => _showImagePopup(),
-                                      child: const Text(
-                                        "View",
-                                        style: TextStyle(
-                                          color: Colors.blue,
-                                          decoration: TextDecoration
-                                              .underline,
-                                        ),
-                                        textAlign: TextAlign.center,
+                                    // Table Header
+                                    Container(
+                                      color: Colors.orange.shade100,
+                                      child: Row(
+                                        children: [
+                                          _buildTableHeader("Question Type"),
+                                          // _buildTableHeader("Question Title"),
+                                          _buildTableHeader("Left Column"),
+                                          _buildTableHeader("Right Column"),
+                                          _buildTableHeader("Points"),
+                                        ],
                                       ),
                                     ),
-                                    GestureDetector(
-                                      onTap: () => _showImagePopup(),
-                                      child: const Text(
-                                        "View",
-                                        style: TextStyle(
-                                          color: Colors.blue,
-                                          decoration: TextDecoration
-                                              .underline,
-                                        ),
-                                        textAlign: TextAlign.center,
+                                    // Table Rows
+                                    Expanded(
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.vertical,
+                                        itemCount: _getAllQuestionsApiController
+                                            .getMatchPairsList.length,
+                                        itemBuilder: (context, index) {
+                                          var row =
+                                              _getAllQuestionsApiController
+                                                  .getMatchPairsList[index];
+                                          return Row(
+                                            children: [
+                                              _buildTableCell(
+                                                  row.questionType ?? ""),
+                                              GestureDetector(
+                                                onTap: () => _showImagePopup(),
+                                                child: const Text(
+                                                  "View",
+                                                  style: TextStyle(
+                                                    color: Colors.blue,
+                                                    decoration: TextDecoration
+                                                        .underline,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                              GestureDetector(
+                                                onTap: () => _showImagePopup(),
+                                                child: const Text(
+                                                  "View",
+                                                  style: TextStyle(
+                                                    color: Colors.blue,
+                                                    decoration: TextDecoration
+                                                        .underline,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                              _buildTableCell(
+                                                  row.points.toString() ?? ""),
+                                            ],
+                                          );
+                                        },
                                       ),
                                     ),
-                                    _buildTableCell(row.points.toString() ?? ""),
                                   ],
-                                );
-                              },
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )),
+                          )),
               );
             })
           ],
@@ -1989,7 +2104,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         else {
                           showSnackbar(
                               message:
-                              "Please select category,subcategory,topic,etc");
+                                  "Please select category,subcategory,topic,etc");
                         }
                       },
                     ),
@@ -2004,90 +2119,91 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 child: _getAllQuestionsApiController.isLoading.value
                     ? CircularProgressIndicator()
                     : (_getAllQuestionsApiController.getMatchPairsList.isEmpty
-                    ? Center(
-                  child: Text(
-                    'No data available',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey),
-                  ),
-                )
-                    :
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  controller: _scrollController,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                        minWidth: 1200, minHeight: 400),
-                    child: SizedBox(
-                      height: 400,
-                      width: 600,
-                      child: Column(
-                        children: [
-                          // Table Header
-                          Container(
-                            color: Colors.orange.shade100,
-                            child: Row(
-                              children: [
-                                _buildTableHeader("Question Type"),
-                                // _buildTableHeader("Question Title"),
-                                _buildTableHeader("Left Column"),
-                                _buildTableHeader("Right Column"),
-                                _buildTableHeader("Points"),
-                              ],
+                        ? Center(
+                            child: Text(
+                              'No data available',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey),
                             ),
-                          ),
-                          // Table Rows
-                          Expanded(
-                            child: ListView.builder(
-                              scrollDirection: Axis.vertical,
-                              itemCount: _getAllQuestionsApiController
-                                  .getMatchPairsList.length,
-                              itemBuilder: (context, index) {
-                                var row =
-                                _getAllQuestionsApiController
-                                    .getMatchPairsList[index];
-                                return Row(
+                          )
+                        : SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            controller: _scrollController,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                  minWidth: 1200, minHeight: 400),
+                              child: SizedBox(
+                                height: 400,
+                                width: 600,
+                                child: Column(
                                   children: [
-                                    _buildTableCell(row.questionType ?? ""),
-                                    // _buildTableCell(row.title ?? ""),
-                                    // _buildTableCell(row.questionType ?? ""),
-                                    GestureDetector(
-                                      onTap: () => _showImagePopup(),
-                                      child: const Text(
-                                        "View",
-                                        style: TextStyle(
-                                          color: Colors.blue,
-                                          decoration: TextDecoration
-                                              .underline,
-                                        ),
-                                        textAlign: TextAlign.center,
+                                    // Table Header
+                                    Container(
+                                      color: Colors.orange.shade100,
+                                      child: Row(
+                                        children: [
+                                          _buildTableHeader("Question Type"),
+                                          // _buildTableHeader("Question Title"),
+                                          _buildTableHeader("Left Column"),
+                                          _buildTableHeader("Right Column"),
+                                          _buildTableHeader("Points"),
+                                        ],
                                       ),
                                     ),
-                                    GestureDetector(
-                                      onTap: () => _showImagePopup(),
-                                      child: const Text(
-                                        "View",
-                                        style: TextStyle(
-                                          color: Colors.blue,
-                                          decoration: TextDecoration
-                                              .underline,
-                                        ),
-                                        textAlign: TextAlign.center,
+                                    // Table Rows
+                                    Expanded(
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.vertical,
+                                        itemCount: _getAllQuestionsApiController
+                                            .getMatchPairsList.length,
+                                        itemBuilder: (context, index) {
+                                          var row =
+                                              _getAllQuestionsApiController
+                                                  .getMatchPairsList[index];
+                                          return Row(
+                                            children: [
+                                              _buildTableCell(
+                                                  row.questionType ?? ""),
+                                              // _buildTableCell(row.title ?? ""),
+                                              // _buildTableCell(row.questionType ?? ""),
+                                              GestureDetector(
+                                                onTap: () => _showImagePopup(),
+                                                child: const Text(
+                                                  "View",
+                                                  style: TextStyle(
+                                                    color: Colors.blue,
+                                                    decoration: TextDecoration
+                                                        .underline,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                              GestureDetector(
+                                                onTap: () => _showImagePopup(),
+                                                child: const Text(
+                                                  "View",
+                                                  style: TextStyle(
+                                                    color: Colors.blue,
+                                                    decoration: TextDecoration
+                                                        .underline,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                              _buildTableCell(
+                                                  row.points.toString() ?? ""),
+                                            ],
+                                          );
+                                        },
                                       ),
                                     ),
-                                    _buildTableCell(row.points.toString() ?? ""),
                                   ],
-                                );
-                              },
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )),
+                          )),
               );
             })
           ],
@@ -2132,7 +2248,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                             topicId!.isNotEmpty)
                           showImportExportDialog("export");
                         else {
-                          showSnackbar(message: "Please select category,subcategory,topic,etc");
+                          showSnackbar(
+                              message:
+                                  "Please select category,subcategory,topic,etc");
                         }
                       },
                     ),
@@ -2193,7 +2311,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                           children: [
                             _buildTableCell("Complete Paragraph"),
                             _buildTableCell("Title $i"),
-                            _buildTableCell("This is a sample paragraph content $i for testing purposes."),
+                            _buildTableCell(
+                                "This is a sample paragraph content $i for testing purposes."),
                             _buildTableCell("Option A$i"),
                             _buildTableCell("Option B$i"),
                             _buildTableCell("Option C$i"),
@@ -2216,9 +2335,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   }
 
   Widget _buildExampleTable() {
-    entries = (_controller.topics.value as List)
-        .firstWhere(
-          (topic) => topic['topic_name'] == selectedTopic,
+    entries = (_controller.topics.value as List).firstWhere(
+      (topic) => topic['topic_name'] == selectedTopic,
       orElse: () => {'entries': []},
     )['entries'];
 
@@ -2263,7 +2381,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                         } else {
                           showSnackbar(
                               message:
-                              "Please select category,subcategory,topic,etc");
+                                  "Please select category,subcategory,topic,etc");
                         }
                       },
                     ),
@@ -2286,7 +2404,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                       _selectAll = value ?? false;
                       _selectedIds.clear();
                       if (_selectAll) {
-                        _selectedIds.addAll(entries.map((entry) => entry['_id'].toString()));
+                        _selectedIds.addAll(
+                            entries.map((entry) => entry['_id'].toString()));
                       }
                     });
                   },
@@ -2315,8 +2434,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                               child: Text(entry['image_name'] ?? ''),
                               onTap: () {})),
                           DataCell(InkWell(
-                              child: Text(entry['image'] ?? ''),
-                              onTap: () {})),
+                              child: Text(entry['image'] ?? ''), onTap: () {})),
                           DataCell(
                             Checkbox(
                               value: _selectedIds.contains(id),
@@ -2327,7 +2445,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                   } else {
                                     _selectedIds.remove(id);
                                   }
-                                  _selectAll = _selectedIds.length == entries.length;
+                                  _selectAll =
+                                      _selectedIds.length == entries.length;
                                 });
                               },
                             ),
@@ -2349,22 +2468,25 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     print("Deleting IDs: $idsToDelete");
 
     // Call the API or perform the delete action here
-    _getAllQuestionsApiController.delete_example(example_ids: idsToDelete).then((success) {
+    _getAllQuestionsApiController
+        .delete_example(example_ids: idsToDelete)
+        .then((success) {
       if (success) {
-          // Remove deleted entries from the list
-          entries.removeWhere((entry) => _selectedIds.contains(entry['_id'].toString()));
-          print(entries.length);
+        // Remove deleted entries from the list
+        entries.removeWhere(
+            (entry) => _selectedIds.contains(entry['_id'].toString()));
+        print(entries.length);
         showSnackbar(message: "Selected entries deleted successfully");
       } else {
         showSnackbar(message: "Failed to delete entries");
       }
     });
-    if(mounted) {
+    if (mounted) {
       setState(() {
-      entries;
-      _selectedIds.clear();
-      _selectAll = false;
-    });
+        entries;
+        _selectedIds.clear();
+        _selectAll = false;
+      });
     }
   }
 
@@ -2402,6 +2524,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     );
   }
 
+  /// all question type content
   Widget _buildQuestionTypeContent() {
     switch (selectedQuestionType) {
       case "Multiple Choice Question":
@@ -2460,6 +2583,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     }
   }
 
+  /// submit question
   void _submitQuestion() {
     if (selectedQuestionType == "Multiple Choice Question") {
       addQuestionController.addMCQ(
@@ -2479,8 +2603,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           points: pointsController.text,
           q_image: pathsFile,
           context: context);
-    }
-    else if (selectedQuestionType == "Re-Arrange the Word") {
+    } else if (selectedQuestionType == "Re-Arrange the Word") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
       questionApiController.addRearrangeApi(
           mainCategoryId: mainCategoryId.toString(),
@@ -2493,9 +2616,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           answer: correctAnswerController.text,
           points: pointsValue.toString(),
           qImage: pathsFile,
+          profileImageName: pathsFileName,
           index: indexController.text);
-    }
-    else if (selectedQuestionType == "Complete the Word") {
+    } else if (selectedQuestionType == "Complete the Word") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
       questionApiController.addCompleteWordApi(
           mainCategoryId: mainCategoryId.toString(),
@@ -2511,9 +2634,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           optionC: optionControllers[2].text,
           optionD: optionControllers[3].text,
           points: pointsValue.toString(),
-          index: indexController.text, context: context);
-    }
-    else if (selectedQuestionType == "True/False") {
+          index: indexController.text,
+          context: context);
+    } else if (selectedQuestionType == "True/False") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
       questionApiController.addTrueFalseApi(
         mainCategoryId: mainCategoryId.toString(),
@@ -2527,8 +2650,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         qImage: pathsFile,
         index: indexController.text,
       );
-    }
-    else if (selectedQuestionType == "Story") {
+    } else if (selectedQuestionType == "Story") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
       questionApiController.addStoryApi(
         mainCategoryId: mainCategoryId.toString(),
@@ -2542,8 +2664,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         points: pointsValue.toString(),
         index: indexController.text,
       );
-    }
-    else if (selectedQuestionType == "Phrases") {
+    } else if (selectedQuestionType == "Phrases") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
       questionApiController.addStoryPhraseApi(
         mainCategoryId: mainCategoryId.toString(),
@@ -2554,35 +2675,31 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         points: pointsValue.toString(),
         index: indexController.text,
       );
-
-    }
-    else if (selectedQuestionType == "Conversation") {
+    } else if (selectedQuestionType == "Conversation") {
     } else if (selectedQuestionType == "Learning Slide") {
-
     } else if (selectedQuestionType == "Complete the paragraph") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
-    // questionApiController.addCompleteParagraphApi(
-    // mainCategoryId: mainCategoryId.toString(),
-    // subCategoryId: subCategoryId.toString(),
-    // topicId: topicId.toString(),
-    // subTopicId: subtopicId.toString(),
-    // questionType: selectedQuestionType.toString(),
-    // title: titleController.text,
-    // question: questionController.text,
-    // paragraphContent: questionController.text,
-    //
-    // answer: correctAnswerController.text,
-    // optionA: paragraphOptionControllers[0].text,
-    // optionB: paragraphOptionControllers[1].text,
-    // optionC: paragraphOptionControllers[2].text,
-    // optionD: paragraphOptionControllers[3].text,
-    // optionE: paragraphOptionControllers[4].text,
-    // optionF: paragraphOptionControllers[5].text,
-    // points: pointsValue.toString(),
-    // index: indexController.text,
-    // context: context,
-    // );
 
+      questionApiController.addCompleteParagraphApi(
+        mainCategoryId: mainCategoryId.toString(),
+        subCategoryId: subCategoryId.toString(),
+        topicId: topicId.toString(),
+        subTopicId: subtopicId.toString(),
+        questionType: selectedQuestionType.toString(),
+        title: titleController.text,
+        question: questionController.text,
+        paragraphContent: questionController.text,
+        answer: correctAnswerController.text,
+        optionA: paragraphOptionControllers[0].text,
+        optionB: paragraphOptionControllers[1].text,
+        optionC: paragraphOptionControllers[2].text,
+        optionD: paragraphOptionControllers[3].text,
+        optionE: paragraphOptionControllers[4].text,
+        optionF: paragraphOptionControllers[5].text,
+        points: pointsValue.toString(),
+        index: indexController.text,
+        context: context,
+      );
     }
     else if (selectedQuestionType == "Fill in the blanks") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
@@ -2604,8 +2721,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         optionC: optionControllers[2].text,
         optionD: optionControllers[3].text,
       );
-    }
-    else if (selectedQuestionType == "Alphabets Example") {
+    } else if (selectedQuestionType == "Alphabets Example") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
       questionApiController.addFillBlanksApi(
         mainCategoryId: mainCategoryId.toString(),
@@ -2637,6 +2753,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       phraseNameController.clear();
       indexController.clear();
 
+      pathsFile = null;
     });
   }
 
@@ -2649,6 +2766,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     );
   }
 
+  /// multiple choice question content
   Widget _buildMultipleChoiceQueContent() {
     return DottedBorder(
       color: Colors.orange,
@@ -2701,32 +2819,39 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              GestureDetector(
-                onTap: pickFile,
-                child: DottedBorder(
-                  color: Colors.grey,
-                  strokeWidth: 1,
-                  dashPattern: [4, 4],
-                  child: Container(
-                    width: double.infinity,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Center(
-                      child: pathsFile == null
-                          ? const Text(
-                        "Tap to upload image",
-                        style: TextStyle(color: Colors.grey),
-                      )
-                          : Image.memory(
-                        pathsFile!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                      ),
-                    ),
-                  ),
+              Center(
+                child: GestureDetector(
+                  onTap: () {
+                    pickFile();
+                  },
+                  child: pathsFile != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.memory(
+                            pathsFile!,
+                            width: 140,
+                            height: 140,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Container(
+                          width: 140,
+                          height: 140,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey, width: 0.8),
+                            color: Colors.grey[200],
+                          ),
+                          child: const Align(
+                            alignment: Alignment.bottomRight,
+                            child: CircleAvatar(
+                              backgroundColor: Colors.orange,
+                              radius: 15,
+                              child: Icon(Icons.add,
+                                  size: 18, color: Colors.black),
+                            ),
+                          ),
+                        ),
                 ),
               ),
               boxH15(),
@@ -2743,7 +2868,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                   crossAxisSpacing: 10.0, // Spacing between columns
                   mainAxisSpacing: 5.0, // Spacing between rows
                   childAspectRatio:
-                  2.8, // Adjust height and width of grid items
+                      2.8, // Adjust height and width of grid items
                 ),
                 itemCount: optionControllers.length,
                 itemBuilder: (context, index) {
@@ -2780,6 +2905,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     );
   }
 
+  /// true false content
   Widget _buildTrueFalseContent() {
     // Implement the UI for "True/False" question type
     return DottedBorder(
@@ -2808,36 +2934,42 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
             ),
             boxH20(),
             const Text(
-              'Upload Story Image',
+              'Upload Image (Optional)',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            GestureDetector(
-              onTap: pickImage,
-              child: DottedBorder(
-                color: Colors.grey,
-                strokeWidth: 1,
-                dashPattern: [4, 4],
-                child: Container(
-                  width: double.infinity,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: selectedImage == null
-                        ? const Text(
-                      "Tap to upload story image",
-                      style: TextStyle(color: Colors.grey),
-                    )
-                        : Image.memory(
-                      selectedImage!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
-                  ),
-                ),
+            Center(
+              child: GestureDetector(
+                onTap: () {
+                  pickFile();
+                },
+                child: pathsFile != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.memory(
+                          pathsFile!,
+                          width: 140,
+                          height: 140,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Container(
+                        width: 140,
+                        height: 140,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.grey[200],
+                        ),
+                        child: const Align(
+                          alignment: Alignment.bottomRight,
+                          child: CircleAvatar(
+                            backgroundColor: Colors.orange,
+                            radius: 15,
+                            child:
+                                Icon(Icons.add, size: 18, color: Colors.black),
+                          ),
+                        ),
+                      ),
               ),
             ),
             boxH20(),
@@ -2856,6 +2988,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     );
   }
 
+  /// Story content
   Widget _buildStoryContent() {
     // Implement the UI for "Story" question type
     return DottedBorder(
@@ -2899,31 +3032,42 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
               ),
               boxH20(),
               const Text(
-                'Upload Story Image',
+                'Upload Image',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              GestureDetector(
-                onTap: pickImage,
-                child: DottedBorder(
-                  color: Colors.grey,
-                  strokeWidth: 1,
-                  dashPattern: [4, 4],
-                  child: Container(
-                    width: double.infinity,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: pathsFile != null
-                        ? Image.memory(
-                      pathsFile!,
-                      height: 80,
-                      width: 100,
-                      fit: BoxFit.fitHeight,
-                    )
-                        : Container(),
-                  ),
+              Center(
+                child: GestureDetector(
+                  onTap: () {
+                    pickFile();
+                  },
+                  child: pathsFile != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.memory(
+                            pathsFile!,
+                            width: 140,
+                            height: 140,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Container(
+                          width: 140,
+                          height: 140,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.grey[200],
+                          ),
+                          child: const Align(
+                            alignment: Alignment.bottomRight,
+                            child: CircleAvatar(
+                              backgroundColor: Colors.orange,
+                              radius: 15,
+                              child: Icon(Icons.add,
+                                  size: 18, color: Colors.black),
+                            ),
+                          ),
+                        ),
                 ),
               ),
               boxH15(),
@@ -3029,27 +3173,38 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               boxH08(),
-              GestureDetector(
-                onTap: pickImage,
-                child: DottedBorder(
-                  color: Colors.grey,
-                  strokeWidth: 1,
-                  dashPattern: [4, 4],
-                  child: Container(
-                    width: double.infinity,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: pathsFile != null
-                        ? Image.memory(
-                      pathsFile!,
-                      height: 100,
-                      width: 100,
-                      fit: BoxFit.fitHeight,
-                    )
-                        : Container(),
-                  ),
+              Center(
+                child: GestureDetector(
+                  onTap: () {
+                    pickFile();
+                  },
+                  child: pathsFile != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.memory(
+                            pathsFile!,
+                            width: 140,
+                            height: 140,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Container(
+                          width: 140,
+                          height: 140,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.grey[200],
+                          ),
+                          child: const Align(
+                            alignment: Alignment.bottomRight,
+                            child: CircleAvatar(
+                              backgroundColor: Colors.orange,
+                              radius: 15,
+                              child: Icon(Icons.add,
+                                  size: 18, color: Colors.black),
+                            ),
+                          ),
+                        ),
                 ),
               ),
               boxH05(),
@@ -3168,6 +3323,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     ); // Placeholder for the actual implementation
   }
 
+  /// re-arrange the word
   Widget _reArrangeWord() {
     return DottedBorder(
       color: Colors.orange,
@@ -3182,6 +3338,20 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Text(
+              'Enter index',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.08,
+              child: CustomTextField(
+                controller: indexController,
+                maxLines: 1,
+                labelText: "Enter index",
+              ),
+            ),
+            boxH10(),
             const Text(
               'Enter title',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
@@ -3199,42 +3369,58 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
             ),
             boxH08(),
             CustomTextField(
-              controller: phraseNameController,
+              controller: questionController,
               maxLines: 1,
               labelText: "Enter the re-arrange word/sentence",
             ),
             boxH10(),
             const Text(
-              'Upload Story Image',
+              'Correct answer',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: correctAnswerController,
+              labelText: "Enter correct answer",
+            ),
+            boxH10(),
+            const Text(
+              'Upload Image',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            GestureDetector(
-              onTap: pickImage,
-              child: DottedBorder(
-                color: Colors.grey,
-                strokeWidth: 1,
-                dashPattern: [4, 4],
-                child: Container(
-                  width: double.infinity,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: selectedImage == null
-                        ? const Text(
-                      "Tap to upload story image",
-                      style: TextStyle(color: Colors.grey),
-                    )
-                        : Image.memory(
-                      selectedImage!,
-                      fit: BoxFit.fill,
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
-                  ),
-                ),
+            Center(
+              child: GestureDetector(
+                onTap: () {
+                  pickFile();
+                },
+                child: pathsFile != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.memory(
+                          pathsFile!,
+                          width: 140,
+                          height: 140,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Container(
+                        width: 140,
+                        height: 140,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.grey[200],
+                        ),
+                        child: const Align(
+                          alignment: Alignment.bottomRight,
+                          child: CircleAvatar(
+                            backgroundColor: Colors.orange,
+                            radius: 15,
+                            child:
+                                Icon(Icons.add, size: 18, color: Colors.black),
+                          ),
+                        ),
+                      ),
               ),
             ),
             boxH50(),
@@ -3322,9 +3508,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 value: selectedUserConversationType,
                 items: userConversationTypes
                     .map((type) => DropdownMenuItem(
-                  value: type,
-                  child: Text(type),
-                ))
+                          value: type,
+                          child: Text(type),
+                        ))
                     .toList(),
                 onChanged: (value) {
                   setState(() {
@@ -3524,8 +3710,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                   crossAxisCount: 2,
                   crossAxisSpacing: 10.0,
                   mainAxisSpacing: 5.0,
-                  childAspectRatio:
-                  2.8,
+                  childAspectRatio: 2.8,
                 ),
                 itemCount: paragraphOptionControllers.length,
                 itemBuilder: (context, index) {
