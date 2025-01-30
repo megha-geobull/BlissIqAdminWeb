@@ -26,7 +26,9 @@ class GetAllQuestionsApiController extends GetxController {
   RxList<StoryData> getStoryDataList = <StoryData>[].obs;
 
   RxList<StoryPhrases> getStoryPhrasesList = <StoryPhrases>[].obs;
-  RxList<PhrasesData> getConversationList = <PhrasesData>[].obs;
+
+  RxList<LearningSlide> getConversationList = <LearningSlide>[].obs;
+
   RxList<MatchPairs> getMatchPairsList = <MatchPairs>[].obs;
 
   RxList<LearningSlide> getLearningSlideData = <LearningSlide>[].obs;
@@ -516,6 +518,7 @@ class GetAllQuestionsApiController extends GetxController {
     }
   }
 
+  /// Conversation list get, update, delete
   getConversation(
       {required String main_category_id,
       required String sub_category_id,
@@ -543,9 +546,9 @@ class GetAllQuestionsApiController extends GetxController {
         if (responseData['status'] == 1) {
           // Parse each JSON object into a Data model
           getConversationList.clear();
-          getConversationList.value = (responseData["data"] as List)
-              .map((mcqJson) => PhrasesData.fromJson(mcqJson))
-              .toList();
+          // getConversationList.value = (responseData["data"] as List)
+          //     .map((mcqJson) => PhrasesData.fromJson(mcqJson))
+          //     .toList();
 
           print("Fetched ${getConversationList.length} conversation");
         } else {
@@ -562,6 +565,39 @@ class GetAllQuestionsApiController extends GetxController {
       log(e.toString());
     } finally {
       isLoading.value = false;
+    }
+  }
+
+   delete_conversation({required String conversation_id}) async {
+    final response = await http.delete(
+      Uri.parse(ApiString.delete_conversation),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'conversation_id': conversation_id,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete conversation: ${response.body}');
+    }
+  }
+
+
+  delete_example({required String example_ids}) async {
+    final response = await http.delete(
+      Uri.parse(ApiString.delete_conversation),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'example_ids': example_ids,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete conversation: ${response.body}');
     }
   }
 
@@ -915,10 +951,5 @@ class GetAllQuestionsApiController extends GetxController {
   //   }
   // }
 
-
   /// update true false api
-
-
-
-
 }
