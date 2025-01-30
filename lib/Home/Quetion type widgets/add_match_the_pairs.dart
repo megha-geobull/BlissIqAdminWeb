@@ -169,29 +169,16 @@ import 'dart:typed_data';
 
                       // Collecting data for left and right pairs
                       final leftPairs = leftColumnPairs.map((pair) {
-                        return pair.type == PairType.text
+                        return (pair.type == PairType.text || pair.type == PairType.sound)
                             ? pair.textController.text.trim()
                             : '';
                       }).join('|');
 
                       final rightPairs = rightColumnPairs.map((pair) {
-                        return pair.type == PairType.text
+                        return (pair.type == PairType.text || pair.type == PairType.sound)
                             ? pair.textController.text.trim()
                             : '';
                       }).join('|');
-
-                      // Images for left and right pairs
-                      final leftImages = leftColumnPairs
-                          .where((pair) =>
-                      pair.type == PairType.image && pair.imageBytes != null)
-                          .map((pair) => pair.imageBytes!)
-                          .toList();
-
-                      final rightImages = rightColumnPairs
-                          .where((pair) =>
-                      pair.type == PairType.image && pair.imageBytes != null)
-                          .map((pair) => pair.imageBytes!)
-                          .toList();
 
                       if (questionIndex.isEmpty ||
                           questionTitle.isEmpty ||
@@ -220,8 +207,8 @@ import 'dart:typed_data';
                       print("Points: $points");
                       print("Left Pairs: $leftPairs");
                       print("Right Pairs: $rightPairs");
-                      print("Left Images Count: ${leftImages.length}");
-                      print("Right Images Count: ${rightImages.length}");
+                      // print("Left Images Count: ${leftImages.length}");
+                      // print("Right Images Count: ${rightImages.length}");
                       print("Question Type: Match Pairs");
                       print("Question Format: ${leftColumnType.name}");
                       print("Answer Format: ${rightColumnType.name}");

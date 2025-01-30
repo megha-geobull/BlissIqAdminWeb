@@ -1,9 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:blissiqadmin/Global/Widgets/Button/CustomButton.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/question_controller.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class BuildCardFlipContent extends StatefulWidget {
   final String? main_category_id;
@@ -26,10 +30,12 @@ class BuildCardFlipContent extends StatefulWidget {
 }
 
 class _BuildCardFlipContentState extends State<BuildCardFlipContent> {
-  List<PlatformFile?> _images =
-      List.filled(6, null); // List to hold uploaded images
-  List<TextEditingController> _textControllers =
-      List.generate(6, (_) => TextEditingController()); // List for text fields
+  List<TextEditingController> _textControllers = List.generate(6, (_) => TextEditingController());
+  final QuestionController _questionController = Get.find();
+  final List<Uint8List?> _imagesBytes = List.filled(6, null);
+  final TextEditingController indexController = TextEditingController();
+  final TextEditingController titleController = TextEditingController();
+  final List<String> imageNames = [];
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +61,7 @@ class _BuildCardFlipContentState extends State<BuildCardFlipContent> {
               SizedBox(
                 width: MediaQuery.of(context).size.width * 0.08,
                 child: CustomTextField(
-                  controller: TextEditingController(),
+                  controller: indexController,
                   maxLines: 1,
                   labelText: "Enter index",
                 ),
@@ -67,7 +73,7 @@ class _BuildCardFlipContentState extends State<BuildCardFlipContent> {
               ),
               boxH08(),
               CustomTextField(
-                controller: TextEditingController(),
+                controller: titleController,
                 maxLines: 1,
                 labelText: "Enter title",
               ),
@@ -92,14 +98,14 @@ class _BuildCardFlipContentState extends State<BuildCardFlipContent> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: _images[i] != null
+                            child: _imagesBytes[i] != null
                                 ? Center(
-                                    child: Image.memory(
-                                      _images[i]!.bytes!,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  )
-                                : Center(child: const Text('Upload Image')),
+                              child: Image.memory(
+                                _imagesBytes[i]!,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                                : const Center(child: Text('Upload Image')),
                           ),
                         ),
                       ),
@@ -119,8 +125,31 @@ class _BuildCardFlipContentState extends State<BuildCardFlipContent> {
               boxH15(),
               CustomButton(
                 label: "Add Question",
-                onPressed: () {},
+                onPressed: () async {
+                  // Filter out null values and convert to List<Uint8List>
+                  List<Uint8List> validImages = _imagesBytes
+                      .where((image) => image != null)
+                      .cast<Uint8List>()
+                      .toList();
+
+                  _questionController.addFlipTheCard(
+                    main_category_id: widget.main_category_id!,
+                    sub_category_id: widget.sub_category_id!,
+                    topic_id: widget.topic_id!,
+                    sub_topic_id: widget.sub_topic_id!,
+                    title: titleController.text,
+                    points: widget.pointsController.text,
+                    letters: _textControllers.map((controller) => controller.text).join('|'),
+                    image_name: imageNames.isNotEmpty
+                        ? imageNames.join("|")
+                        : "",
+                    images: validImages,
+                    index: indexController.text,
+                    context: context,
+                  );
+                },
               ),
+
             ],
           ),
         ),
@@ -137,8 +166,20 @@ class _BuildCardFlipContentState extends State<BuildCardFlipContent> {
 
     if (pickedFile != null && pickedFile.files.isNotEmpty) {
       setState(() {
-        _images[index] = pickedFile.files.first; // Store the picked image
+        // Generate a unique name using timestamp
+        final imageName = 'image_${DateTime.now().millisecondsSinceEpoch}_$index.png';
+
+        // Ensure the imageNames list has the same length as _imagesBytes
+        if (imageNames.length <= index) {
+          imageNames.addAll(List.filled(index - imageNames.length + 1, ''));
+        }
+        imageNames[index] = imageName;
+
+        // Store the image bytes
+        _imagesBytes[index] = pickedFile.files.first.bytes;
       });
     }
   }
+
 }
+

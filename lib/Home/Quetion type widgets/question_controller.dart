@@ -200,9 +200,11 @@ class QuestionController extends GetxController {
     required String letters,
     required List<td.Uint8List> images,
     required String index,
+    required String image_name,
     required BuildContext context,
   }) async {
     isLoading.value = true;
+
     try {
       final uri = Uri.parse(ApiString.add_card_flipping);
       final request = http.MultipartRequest('POST', uri);
@@ -212,17 +214,22 @@ class QuestionController extends GetxController {
       request.fields['sub_category_id'] = sub_category_id;
       request.fields['topic_id'] = topic_id;
       request.fields['sub_topic_id'] = sub_topic_id ?? '';
-     // request.fields['title'] = title;
+      request.fields['title'] = title ?? '';
+      request.fields['question_type'] = 'Card Flip';
       request.fields['index'] = index;
       request.fields['points'] = points;
-      request.fields['letters'] = letters;
+      request.fields['letter'] = letters;
+      request.fields['image_name'] = image_name;
 
-      // Add question images
+      // Print request body (fields)
+      print("Request Fields: ${request.fields}");
+
+      // Add images
       for (int i = 0; i < images.length; i++) {
         final image = images[i];
         request.files.add(
           http.MultipartFile.fromBytes(
-            'images',
+            'image',
             image,
             filename: 'image_$i.png',
             contentType: MediaType('image', 'png'),
@@ -233,25 +240,29 @@ class QuestionController extends GetxController {
       // Send the request
       final response = await request.send();
 
-      if (response.statusCode == 201) {
-        final responseData = await response.stream.bytesToString();
-        final decodedResponse = jsonDecode(responseData);
-        if (decodedResponse['status'] == 1) {
-          showSnackbar(message: decodedResponse['message'] ?? 'Added successfully');
-        } else {
-          showSnackbar(message: decodedResponse['message'] ?? 'Error occurred');
-        }
+      // Print response status code
+      print("Response Status Code: ${response.statusCode}");
+
+      // Convert response stream to a string and print
+      final responseData = await response.stream.bytesToString();
+      print("Response Body: $responseData");
+
+      // Decode and handle the response
+      final decodedResponse = jsonDecode(responseData);
+      if (response.statusCode == 201 && decodedResponse['status'] == 1) {
+        showSnackbar(message: decodedResponse['message'] ?? 'Added successfully');
       } else {
-        print('Error: ${response.reasonPhrase}');
-        showSnackbar(message: 'Error: ${response.reasonPhrase}');
+        showSnackbar(message: decodedResponse['message'] ?? 'Error occurred');
       }
     } catch (e) {
+      // Print any exceptions that occur
       print('An error occurred: $e');
       showSnackbar(message: 'An error occurred: $e');
     } finally {
       isLoading.value = false;
     }
   }
+
 
   Future<void> editConversation({
     required String conversation_id,
