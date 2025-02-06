@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Global/constants/CustomAlertDialogue.dart';
 import '../controller/GetAllQuestionsApiController.dart';
-import '../model/get_fill_in_the_blanks.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_fill_in_the_blanks.dart';
 
 class FillTheBlanks_TableScreen extends StatefulWidget {
   final String main_category_id;

@@ -114,6 +114,8 @@ class ApiString {
   static const String get_rearrange = "${baseUrl}get_rearrange";
   static const String update_rearrange = "${baseUrl}update_rearrange";
 
+  static const String add_complete_sentence = "${baseUrl}add_complete_sentence";
+
   static const String add_true_false = "${baseUrl}add_true_false";
   static const String get_true_false = "${baseUrl}get_true_false";
   static const String delete_true_false = "${baseUrl}delete_true_false";
