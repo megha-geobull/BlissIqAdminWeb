@@ -2678,7 +2678,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     } else if (selectedQuestionType == "Learning Slide") {
     } else if (selectedQuestionType == "Complete the paragraph") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
-
       questionApiController.addCompleteParagraphApi(
         mainCategoryId: mainCategoryId.toString(),
         subCategoryId: subCategoryId.toString(),
@@ -2720,7 +2719,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         optionC: optionControllers[2].text,
         optionD: optionControllers[3].text,
       );
-    } else if (selectedQuestionType == "Alphabets Example") {
+    }
+    else if (selectedQuestionType == "Alphabets Example") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
       questionApiController.addFillBlanksApi(
         mainCategoryId: mainCategoryId.toString(),
@@ -2922,8 +2922,22 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             const Text(
+              'Enter index',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.08,
+              child: CustomTextField(
+                controller: indexController,
+                maxLines: 1,
+                labelText: "Enter index",
+              ),
+            ),
+            boxH10(),
+            const Text(
               'Enter true false question:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             boxH20(),
             CustomTextField(
@@ -2972,6 +2986,11 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
               ),
             ),
             boxH20(),
+            const Text(
+              'Enter correct answer',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
             CustomTextField(
               controller: correctAnswerController,
               labelText: "Enter correct answer",
@@ -3675,6 +3694,20 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const Text(
+                'Enter index',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              boxH08(),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.08,
+                child: CustomTextField(
+                  controller: indexController,
+                  maxLines: 1,
+                  labelText: "Enter index",
+                ),
+              ),
+              boxH10(),
               const Text(
                 'Question title',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
