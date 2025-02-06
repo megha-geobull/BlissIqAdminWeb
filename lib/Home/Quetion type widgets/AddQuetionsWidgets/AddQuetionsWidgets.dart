@@ -111,13 +111,16 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   List<PlatformFile>? _paths;
   var pathsFile;
   var pathsFileName;
-
+  late String selectedFormat = "Sound";
   String? selectedQuestionType = "Multiple Choice Question";
 
   List<String> questionTypes = [
     "Multiple Choice Question",
     "Re-Arrange the Word",
+    "Re-Arrange Sentence",
     "Complete the Word",
+    "Guess The Image",
+    'Image Letter Match' ,
     "True/False",
     "Story",
     "Phrases",
@@ -710,6 +713,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                   if (selectedQuestionType ==
                                       "Re-Arrange the Word")
                                     _buildRearrangeTheWordQuestionsTable(),
+   if (selectedQuestionType ==
+                                      "Re-Arrange Sentence")
+                                    _buildRearrangeTheSentenceQuestionsTable(),
 
                                   if (selectedQuestionType ==
                                       "Complete the Word")
@@ -1004,6 +1010,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
               ? ApiString.add_topics
               : selectedQuestionType == "Re-Arrange the Word"
                   ? ApiString.add_rearrange
+          : selectedQuestionType == "Re-Arrange Sentence"
+          ? ApiString.add_complete_sentence
                   : selectedQuestionType == "True/False"
                       ? ApiString.add_true_false
                       : selectedQuestionType == "Story"
@@ -1256,6 +1264,131 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                                   textAlign: TextAlign.center,
                                                 ),
                                               ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )),
+              );
+            })
+          ],
+        ),
+      ),
+    );
+  }
+Widget _buildRearrangeTheSentenceQuestionsTable() {
+    return Card(
+      elevation: 1.0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'Question Data',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Tooltip(
+                  message: 'Export to Excel',
+                  child: CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: IconButton(
+                      icon: Image.asset('assets/excel.png',
+                          width: 24, height: 24),
+                      onPressed: () {
+                        print("categoryId " + mainCategoryId!);
+                        print("subcategoryId " + subCategoryId!);
+                        print("topicId " + topicId!);
+                        print("subtopicId " + subtopicId!);
+                        showImportExportDialog("export");
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            Obx(() {
+              return Center(
+                child: _getAllQuestionsApiController.isLoading.value
+                    ? const CircularProgressIndicator()
+                    : (_getAllQuestionsApiController.getReArrangeList.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'No data available',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey),
+                            ),
+                          )
+                        : SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            controller: _scrollController,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                  minWidth: 1200, minHeight: 400),
+                              child: SizedBox(
+                                height: 400,
+                                width: 600,
+                                child: Column(
+                                  children: [
+                                    // Table Header
+                                    Container(
+                                      color: Colors.orange.shade100,
+                                      child: Row(
+                                        children: [
+                                          _buildTableHeader("Question Type"),
+                                          _buildTableHeader("Title"),
+                                          _buildTableHeader("Re-Arrange Sentence"),
+                                          _buildTableHeader("Points"),
+                                        ],
+                                      ),
+                                    ),
+                                    // Table Rows
+                                    Expanded(
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.vertical,
+                                        itemCount: _getAllQuestionsApiController
+                                            .getReArrangeList.length,
+                                        itemBuilder: (context, index) {
+                                          var row =
+                                              _getAllQuestionsApiController
+                                                  .getReArrangeList[index];
+                                          return Row(
+                                            children: [
+                                              _buildTableCell(
+                                                  row.questionType ?? ""),
+                                              _buildTableCell(row.title ?? ""),
+                                              _buildTableCell(
+                                                  row.question ?? ""),
+                                              _buildTableCell(row.answer ?? ""),
+                                              _buildTableCell(
+                                                  row.points.toString() ?? ""),
+                                              // GestureDetector(
+                                              //   onTap: () => _showImagePopup(),
+                                              //   child: const Text(
+                                              //     "View",
+                                              //     style: TextStyle(
+                                              //       color: Colors.blue,
+                                              //       decoration: TextDecoration
+                                              //           .underline,
+                                              //     ),
+                                              //     textAlign: TextAlign.center,
+                                              //   ),
+                                              // ),
                                             ],
                                           );
                                         },
@@ -2532,6 +2665,12 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         return _buildCompleteWordContent();
       case "Re-Arrange the Word":
         return _reArrangeWord();
+        case "Guess The Image":
+        return _guessTheImage();
+        case "Re-Arrange Sentence":
+        return _reArrangeSntence();
+        case "Image Letter Match":
+        return _imageLetterMatch();
       case "True/False":
         return _buildTrueFalseContent();
       case "Story":
@@ -2563,6 +2702,14 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         );
       case "Card Flip":
         return BuildCardFlipContent(
+          pointsController: pointsController,
+          sub_topic_id: subtopicId,
+          topic_id: topicId,
+          sub_category_id: subCategoryId,
+          main_category_id: mainCategoryId,
+        );
+      case "Alphabets Example":
+        return BuildAlphabetExContent(
           pointsController: pointsController,
           sub_topic_id: subtopicId,
           topic_id: topicId,
@@ -2617,7 +2764,21 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           qImage: pathsFile,
           profileImageName: pathsFileName,
           index: indexController.text);
-    } else if (selectedQuestionType == "Complete the Word") {
+    } else if (selectedQuestionType == "Re-Arrange Sentence") {
+      int pointsValue = int.tryParse(pointsController.text) ?? 0;
+      questionApiController.addRearrangeSentenseApi(
+          mainCategoryId: mainCategoryId.toString(),
+          subCategoryId: subCategoryId.toString(),
+          topicId: topicId.toString(),
+          subTopicId: subtopicId.toString(),
+          questionType: selectedQuestionType.toString(),
+          title: titleController.text,
+          question: questionController.text,
+          answer: correctAnswerController.text,
+          points: pointsValue.toString(),
+          question_formate: selectedFormat,
+          index: indexController.text);
+    }else if (selectedQuestionType == "Complete the Word") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
       questionApiController.addCompleteWordApi(
           mainCategoryId: mainCategoryId.toString(),
@@ -2678,6 +2839,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     } else if (selectedQuestionType == "Learning Slide") {
     } else if (selectedQuestionType == "Complete the paragraph") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
+
       questionApiController.addCompleteParagraphApi(
         mainCategoryId: mainCategoryId.toString(),
         subCategoryId: subCategoryId.toString(),
@@ -2719,8 +2881,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         optionC: optionControllers[2].text,
         optionD: optionControllers[3].text,
       );
-    }
-    else if (selectedQuestionType == "Alphabets Example") {
+    } else if (selectedQuestionType == "Alphabets Example") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
       questionApiController.addFillBlanksApi(
         mainCategoryId: mainCategoryId.toString(),
@@ -2922,22 +3083,19 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             const Text(
-              'Enter index',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              'Question Index:',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            boxH08(),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.08,
-              child: CustomTextField(
-                controller: indexController,
-                maxLines: 1,
-                labelText: "Enter index",
-              ),
+            const SizedBox(height: 8),
+            CustomTextField(
+              controller: indexController,
+              labelText: '',
+              hintText: "0",
             ),
-            boxH10(),
+            boxH15(),
             const Text(
               'Enter true false question:',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             boxH20(),
             CustomTextField(
@@ -2986,11 +3144,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
               ),
             ),
             boxH20(),
-            const Text(
-              'Enter correct answer',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
             CustomTextField(
               controller: correctAnswerController,
               labelText: "Enter correct answer",
@@ -3452,6 +3605,387 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     );
   }
 
+  ///Guess The Image
+ Widget _guessTheImage() {
+    return DottedBorder(
+      color: Colors.orange,
+      strokeWidth: 1,
+      dashPattern: [4, 4],
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+        ),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter index',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.08,
+              child: CustomTextField(
+                controller: indexController,
+                maxLines: 1,
+                labelText: "Enter index",
+              ),
+            ),
+            boxH10(),
+            const Text(
+              'Enter title',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: titleController,
+              maxLines: 1,
+              labelText: "Enter title",
+            ),
+            boxH10(),
+            const Text(
+              'Upload Image',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: GestureDetector(
+                onTap: () {
+                  pickFile();
+                },
+                child: pathsFile != null
+                    ? ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.memory(
+                    pathsFile!,
+                    width: 140,
+                    height: 140,
+                    fit: BoxFit.cover,
+                  ),
+                )
+                    : Container(
+                  width: 140,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.grey, width: 0.8),
+                    color: Colors.grey[200],
+                  ),
+                  child: const Align(
+                    alignment: Alignment.bottomRight,
+                    child: CircleAvatar(
+                      backgroundColor: Colors.orange,
+                      radius: 15,
+                      child: Icon(Icons.add,
+                          size: 18, color: Colors.black),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            boxH15(),
+            const Text(
+              'Enter Options',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, // Number of items per row
+                crossAxisSpacing: 10.0, // Spacing between columns
+                mainAxisSpacing: 5.0, // Spacing between rows
+                childAspectRatio:
+                2.8, // Adjust height and width of grid items
+              ),
+              itemCount: optionControllers.length,
+              itemBuilder: (context, index) {
+                return CustomTextField(
+                  controller: optionControllers[index],
+                  labelText: "Option ${index + 1}",
+                );
+              },
+            ),
+            boxH10(),
+            const Text(
+              'Correct answer',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: correctAnswerController,
+              labelText: "Enter correct answer",
+            ),
+            boxH10(),
+            const Text(
+              'Upload Image',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: GestureDetector(
+                onTap: () {
+                  pickFile();
+                },
+                child: pathsFile != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.memory(
+                          pathsFile!,
+                          width: 120,
+                          height: 120,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.grey[200],
+                        ),
+                        child: const Align(
+                          alignment: Alignment.bottomRight,
+                          child: CircleAvatar(
+                            backgroundColor: Colors.orange,
+                            radius: 15,
+                            child:
+                                Icon(Icons.add, size: 18, color: Colors.black),
+                          ),
+                        ),
+                      ),
+              ),
+            ),
+            boxH50(),
+            CustomButton(
+              label: "Add Question",
+              onPressed: _submitQuestion,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Image Letter Match
+  Widget _imageLetterMatch() {
+    return DottedBorder(
+      color: Colors.orange,
+      strokeWidth: 1,
+      dashPattern: [4, 4],
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+        ),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter index',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.08,
+              child: CustomTextField(
+                controller: indexController,
+                maxLines: 1,
+                labelText: "Enter index",
+              ),
+            ),
+            boxH10(),
+            const Text(
+              'Enter title',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: titleController,
+              maxLines: 1,
+              labelText: "Enter title",
+            ),
+            boxH10(),
+            const Text(
+              'Upload Image',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: GestureDetector(
+                onTap: () {
+                  pickFile();
+                },
+                child: pathsFile != null
+                    ? ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.memory(
+                    pathsFile!,
+                    width: 120,
+                    height: 120,
+                    fit: BoxFit.cover,
+                  ),
+                )
+                    : Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.grey[200],
+                  ),
+                  child: const Align(
+                    alignment: Alignment.bottomRight,
+                    child: CircleAvatar(
+                      backgroundColor: Colors.orange,
+                      radius: 15,
+                      child:
+                      Icon(Icons.add, size: 18, color: Colors.black),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            boxH10(),
+            const Text(
+              'Enter Options',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10.0,
+                mainAxisSpacing: 5.0,
+                childAspectRatio: 2.8,
+              ),
+              itemCount: optionControllers.length,
+              itemBuilder: (context, index) {
+                return CustomTextField(
+                  controller: optionControllers[index],
+                  labelText: "Option ${index + 1}",
+                );
+              },
+            ),
+
+            CustomButton(
+              label: "Add Question",
+              onPressed: _submitQuestion,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// re-arrange sentence
+  Widget _reArrangeSntence() {
+    return DottedBorder(
+      color: Colors.orange,
+      strokeWidth: 1,
+      dashPattern: [4, 4],
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+        ),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter index',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.08,
+              child: CustomTextField(
+                controller: indexController,
+                maxLines: 1,
+                labelText: "Enter index",
+              ),
+            ),
+            boxH10(),
+            const Text(
+              'Enter title',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: titleController,
+              maxLines: 1,
+              labelText: "Enter title",
+            ),
+            boxH10(),
+            const Text(
+              'Enter question',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: questionController,
+              maxLines: 1,
+              labelText: "Enter question",
+            ),
+            boxH10(),
+            const Text(
+              'Question Format',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH15(),
+            // Radio button selection for Sound or Native Language
+            Row(
+              children: [
+                Radio(
+                  value: "Sound",
+                  groupValue: selectedFormat,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedFormat = value!;
+                    });
+                  },
+                ),
+                const Text("Sound"),
+                const SizedBox(width: 16),
+                Radio(
+                  value: "Native Language",
+                  groupValue: selectedFormat,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedFormat = value!;
+                    });                  },
+                ),
+                const Text("Native Language"),
+              ],
+            ),
+
+            boxH15(),
+            const Text(
+              'Correct sentence',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH08(),
+            CustomTextField(
+              controller: correctAnswerController,
+              labelText: "Enter correct sentence",
+            ),
+            boxH10(),
+            Spacer(),
+            CustomButton(
+              label: "Add Question",
+              onPressed: _submitQuestion,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
   /// add Conversation
   Widget _buildConversationContent() {
     // Implement the UI for "Conversation" question type
@@ -3694,20 +4228,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Enter index',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-              boxH08(),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.08,
-                child: CustomTextField(
-                  controller: indexController,
-                  maxLines: 1,
-                  labelText: "Enter index",
-                ),
-              ),
-              boxH10(),
               const Text(
                 'Question title',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
