@@ -93,6 +93,60 @@ class QuestionApiController extends GetxController {
     }
   }
 
+  ///Add re-arrange api function
+  addRearrangeSentenseApi({
+    required String mainCategoryId,
+    required String subCategoryId,
+    required String topicId,
+    required String subTopicId,
+    required String questionType,
+    required String title,
+    required String question,
+    required String answer,
+    required String points,
+    required String index,
+    required String question_formate,
+  }) async {
+    isLoading.value = true;
+    var uri = Uri.parse(ApiString.add_complete_sentence);
+    try {
+
+      var request = http.MultipartRequest("POST", uri);
+
+      request.fields['main_category_id'] = mainCategoryId;
+      request.fields['sub_category_id'] = subCategoryId;
+      request.fields['topic_id'] = topicId;
+      request.fields['sub_topic_id'] = subTopicId;
+      request.fields['question_type'] = questionType;
+      request.fields['title'] = title;
+      request.fields['question'] = question;
+      request.fields['answer'] = answer;
+      request.fields['points'] = points;
+      request.fields['index'] = index;
+      request.fields['question_format'] = question_formate;
+      request.fields['options'] = "";
+
+      http.Response response = await http.Response.fromStream(await request.send());
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 201) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        print('Response status: ${responseData}');
+        if (responseData['status'] == 1) {
+          showSnackbar(message: "question added successfully");
+        } else {
+          showSnackbar(message: "Failed to add question");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while add $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   ///Add re-true-false api function
    addTrueFalseApi({
     required String mainCategoryId,
@@ -556,19 +610,22 @@ class QuestionApiController extends GetxController {
   }
 
 
-  addLearningSlideApi({
+  Future<void> addLearningSlideApi({
     required String mainCategoryId,
     required String subCategoryId,
     required String topicId,
     String? subTopicId,
     required String title,
-    required String question_type,
+    required String questionType,
     required String definition,
-    required String transcriptionOne,
-    required String grammarExamples,
-    required String transcriptionTwo,
     required String index,
     required String points,
+    String? youtubeLink,
+    String? image_link,
+    String?  pdf_link,
+    String?  ppt_link,
+    // Uint8List? pdfBytes,
+    // Uint8List? pptBytes,
   }) async {
     isLoading.value = true;
 
@@ -578,41 +635,57 @@ class QuestionApiController extends GetxController {
         Uri.parse(ApiString.add_learning_slide),
       );
 
+      // Add form fields
       request.fields.addAll({
         'main_category_id': mainCategoryId,
         'sub_category_id': subCategoryId,
         'topic_id': topicId,
         'sub_topic_id': subTopicId ?? "",
-        'question_type': question_type,
+        'question_type': questionType,
         'title': title,
         'index': index,
         'definition': definition,
-        'transcription_one': transcriptionOne,
-        'grammar_examples': grammarExamples,
-        'transcription_two': transcriptionTwo,
         'points': points,
+        'video_file': youtubeLink ?? "",
+        'pdf_file': pdf_link ?? "",
+        'ppt_file': ppt_link ?? "",
+        'image_file': image_link ?? "",
       });
 
+      // // Attach files if they exist
+      // if (imageBytes != null) {
+      //   request.files.add(http.MultipartFile.fromBytes(
+      //     'image_file',
+      //     imageBytes,
+      //     filename: 'image.png',
+      //     contentType: MediaType('image', 'png'),
+      //   ));
+      // }
+
+      // Send request
       final response = await request.send();
       final responseData = jsonDecode(await response.stream.bytesToString());
-      print(responseData);
+
       if (response.statusCode == 201 && responseData['status'] == 1) {
         Fluttertoast.showToast(
           msg: responseData['message'] ?? 'Slide content added successfully',
         );
+        print('added successfully..!');
       } else {
         Fluttertoast.showToast(
           msg: responseData['message'] ?? 'Failed to add slide content',
         );
+        print('error to add question');
       }
     } catch (e) {
-      Fluttertoast.showToast(
-        msg: 'An error occurred: $e',
-      );
+      Fluttertoast.showToast(msg: 'An error occurred: $e');
+      print('error occurred $e');
     } finally {
       isLoading.value = false;
     }
   }
+
+
 
   addExampleApi({
     required String mainCategoryId,
