@@ -34,6 +34,7 @@ class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
   bool isSelectAll=false;
   List<String> selected_question_ids=[];
   late QuestionDataSource _dataSource;
+
   final GetAllQuestionsApiController _getdeleteApiController = Get.find();
 
   @override
@@ -63,6 +64,7 @@ class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
             question.phraseName!.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
+
       // Update the data source with the filtered questions
       _dataSource = QuestionDataSource(
         _filteredQuestions,
@@ -283,12 +285,7 @@ class QuestionDataSource extends DataTableSource {
               onSelectionChanged(
                 selectedQuestionIds.join('|'), // Pipe-separated IDs
               );
-              // if (!isSelected) {
-              //   bool confirmed = await _showConfirmationDialog(context);
-              //   if(confirmed){
-              //     _deleteSelectedQuestions();
-              //   }
-              // }
+
               notifyListeners();
             },
           ),
@@ -471,76 +468,4 @@ class QuestionDataSource extends DataTableSource {
 
 
 }
-
-
-/// DataTableSource for handling data in the DataTable
-// class QuestionDataSource extends DataTableSource {
-//   final List<StoryPhrases> questions;
-//   final Function(String) onSelectionChanged; // Callback for selection
-//   final Set<String> selectedQuestionIds = {}; // Track selected question IDs
-//   bool isSelectAll = false; // Track "Select All" state
-//
-//   QuestionDataSource(this.questions, this.onSelectionChanged);
-//
-//   @override
-//   DataRow? getRow(int index) {
-//     if (index >= questions.length) return null;
-//     final question = questions[index];
-//     final isSelected = selectedQuestionIds.contains(question.id);
-//
-//     return DataRow(
-//       selected: isSelected,
-//       cells: [
-//         DataCell(
-//           Checkbox(
-//             value: isSelected,
-//             onChanged: (bool? value) {
-//               if (value == true) {
-//                 selectedQuestionIds.add(question.id!);
-//               } else {
-//                 selectedQuestionIds.remove(question.id);
-//               }
-//               isSelectAll = selectedQuestionIds.length == questions.length;
-//               onSelectionChanged(
-//                 selectedQuestionIds.join('|'), // Pipe-separated IDs
-//               );
-//               notifyListeners(); // Update UI
-//             },
-//           ),
-//         ),
-//
-//         DataCell(Text(question.index.toString() ?? "")),
-//         DataCell(Text(question.points.toString())),
-//         DataCell(Text(question.phraseName ?? "")),
-//       ],
-//     );
-//   }
-//
-//   @override
-//   bool get isRowCountApproximate => false;
-//
-//   @override
-//   int get rowCount => questions.length;
-//
-//   @override
-//   int get selectedRowCount => selectedQuestionIds.length;
-//
-//   void toggleSelectAll(bool value) {
-//     isSelectAll = value;
-//
-//     if (isSelectAll) {
-//       // Select all IDs
-//       selectedQuestionIds.addAll(
-//         questions.map((question) => question.id!).toList(),
-//       );
-//     } else {
-//       // Clear all selections
-//       selectedQuestionIds.clear();
-//     }
-//
-//     onSelectionChanged(selectedQuestionIds.join('|'));
-//     notifyListeners(); // Update UI
-//   }
-// }
-
 

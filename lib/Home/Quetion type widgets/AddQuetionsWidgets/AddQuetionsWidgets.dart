@@ -6,7 +6,9 @@ import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/LearningSlideTable.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/MCQDataTable.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/Re_arrange_the_word_DataTable.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/BuildAlphabetExContent.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/BuildCardFlipContent.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/BuildLearningSlideContent.dart';
@@ -412,8 +414,12 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           sub_category_id: subCategoryId,
           topic_id: topicId,
           sub_topic_id: subtopicId);
-    } else if (selectedQuestionType == "Card Flip") {}
-
+    } else if (selectedQuestionType == "Learning Slide") {}
+_getAllQuestionsApiController.getAllLearningSlideApi(
+    main_category_id: mainCategoryId,
+    sub_category_id: subCategoryId,
+    topic_id: topicId,
+    sub_topic_id: subtopicId);
     setState(() {
       questionController.clear();
       optionControllers.forEach((controller) => controller.clear());
@@ -709,6 +715,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                   if (selectedQuestionType ==
                                       "Multiple Choice Question")
                                     _buildQuestionsTable(),
+      if (selectedQuestionType ==
+                                      "Learning Slide")
+        _buildLearningSlideTable(),
 
                                   if (selectedQuestionType ==
                                       "Re-Arrange the Word")
@@ -1079,6 +1088,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     return true;
   }
 
+  /// mcq question table
   Widget _buildQuestionsTable() {
     return Card(
       elevation: 1.0,
@@ -1130,6 +1140,85 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     );
   }
 
+  Widget _buildLearningSlideTable() {
+    print(_getAllQuestionsApiController.getLearningSlideData.length);
+    _getAllQuestionsApiController.getLearningSlideData.forEach((element) {
+      print(element);
+    },);
+    return Card(
+      elevation: 1.0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        width: MediaQuery.of(context).size.width * 0.8,
+        height: MediaQuery.of(context).size.height * 0.9,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+        Row(
+        children: [
+        const Text(
+        'Question Data',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        const Spacer(),
+        Tooltip(
+          message: 'Export to Excel',
+          child: CircleAvatar(
+            backgroundColor: Colors.orange.shade100,
+            child: IconButton(
+              icon: Image.asset('assets/excel.png',
+                  width: 24, height: 24),
+              onPressed: () {
+                print("categoryId " + mainCategoryId!);
+                print("subcategoryId " + subCategoryId!);
+                print("topicId " + topicId!);
+                print("subtopicId " + subtopicId!);
+                if (mainCategoryId!.isNotEmpty &&
+                    subCategoryId!.isNotEmpty &&
+                    topicId!.isNotEmpty)
+                  showImportExportDialog("export");
+                else
+                  showSnackbar(
+                      message:
+                      "Please select category,subcategory,topic,etc");
+              },
+            ),
+          ),
+        ),
+        ],
+      ),
+            SizedBox(height: 10),
+            Obx(() {
+              return Center(
+                  child: _getAllQuestionsApiController.isLoading.value
+                      ? CircularProgressIndicator()
+                      : (_getAllQuestionsApiController.getLearningSlideData.isEmpty
+                      ? const Center(
+                    child: Text(
+                      'No data available',
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey),
+                    ),
+                  ):
+                  LearningSlideTable(main_category_id: mainCategoryId,
+                      sub_category_id: subCategoryId,
+                      topic_id: topicId,sub_topic_id: subtopicId,
+                      questionList: _getAllQuestionsApiController.getLearningSlideData)
+                  )
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildTableHeader(String text) {
     return Expanded(
       //flex: flex,
@@ -1173,24 +1262,6 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                   'Question Data',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                const Spacer(),
-                Tooltip(
-                  message: 'Export to Excel',
-                  child: CircleAvatar(
-                    backgroundColor: Colors.orange.shade100,
-                    child: IconButton(
-                      icon: Image.asset('assets/excel.png',
-                          width: 24, height: 24),
-                      onPressed: () {
-                        print("categoryId " + mainCategoryId!);
-                        print("subcategoryId " + subCategoryId!);
-                        print("topicId " + topicId!);
-                        print("subtopicId " + subtopicId!);
-                        showImportExportDialog("export");
-                      },
-                    ),
-                  ),
-                ),
               ],
             ),
             SizedBox(height: 10),
@@ -1208,72 +1279,10 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                   color: Colors.grey),
                             ),
                           )
-                        : SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            controller: _scrollController,
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(
-                                  minWidth: 1200, minHeight: 400),
-                              child: SizedBox(
-                                height: 400,
-                                width: 600,
-                                child: Column(
-                                  children: [
-                                    // Table Header
-                                    Container(
-                                      color: Colors.orange.shade100,
-                                      child: Row(
-                                        children: [
-                                          _buildTableHeader("Question Type"),
-                                          _buildTableHeader("Title"),
-                                          _buildTableHeader("Re-Arrange Word"),
-                                          _buildTableHeader("Points"),
-                                          _buildTableHeader("Question Image"),
-                                        ],
-                                      ),
-                                    ),
-                                    // Table Rows
-                                    Expanded(
-                                      child: ListView.builder(
-                                        scrollDirection: Axis.vertical,
-                                        itemCount: _getAllQuestionsApiController
-                                            .getReArrangeList.length,
-                                        itemBuilder: (context, index) {
-                                          var row =
-                                              _getAllQuestionsApiController
-                                                  .getReArrangeList[index];
-                                          return Row(
-                                            children: [
-                                              _buildTableCell(
-                                                  row.questionType ?? ""),
-                                              _buildTableCell(row.title ?? ""),
-                                              _buildTableCell(
-                                                  row.question ?? ""),
-                                              _buildTableCell(row.answer ?? ""),
-                                              _buildTableCell(
-                                                  row.points.toString() ?? ""),
-                                              GestureDetector(
-                                                onTap: () => _showImagePopup(),
-                                                child: const Text(
-                                                  "View",
-                                                  style: TextStyle(
-                                                    color: Colors.blue,
-                                                    decoration: TextDecoration
-                                                        .underline,
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          )),
+                        :   Re_Arrange_QuestionTableScreen(main_category_id: mainCategoryId,
+                    sub_category_id: subCategoryId,
+                    topic_id: topicId,sub_topic_id: subtopicId,
+                    questionList: _getAllQuestionsApiController.getReArrangeList)),
               );
             })
           ],
@@ -1281,6 +1290,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       ),
     );
   }
+
 Widget _buildRearrangeTheSentenceQuestionsTable() {
     return Card(
       elevation: 1.0,
@@ -2600,19 +2610,18 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
     print("Deleting IDs: $idsToDelete");
 
     // Call the API or perform the delete action here
-    _getAllQuestionsApiController
-        .delete_example(example_ids: idsToDelete)
-        .then((success) {
-      if (success) {
-        // Remove deleted entries from the list
-        entries.removeWhere(
-            (entry) => _selectedIds.contains(entry['_id'].toString()));
-        print(entries.length);
-        showSnackbar(message: "Selected entries deleted successfully");
-      } else {
-        showSnackbar(message: "Failed to delete entries");
-      }
-    });
+    // _getAllQuestionsApiController.delete_example(example_ids: idsToDelete)
+    //     .then((success) {
+    //   if (success) {
+    //     // Remove deleted entries from the list
+    //     entries.removeWhere(
+    //         (entry) => _selectedIds.contains(entry['_id'].toString()));
+    //     print(entries.length);
+    //     showSnackbar(message: "Selected entries deleted successfully");
+    //   } else {
+    //     showSnackbar(message: "Failed to delete entries");
+    //   }
+    // });
     if (mounted) {
       setState(() {
         entries;
@@ -2837,6 +2846,7 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
       );
     } else if (selectedQuestionType == "Conversation") {
     } else if (selectedQuestionType == "Learning Slide") {
+
     } else if (selectedQuestionType == "Complete the paragraph") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
 
