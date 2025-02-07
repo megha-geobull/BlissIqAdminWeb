@@ -448,8 +448,7 @@ class TrueFalseDataSource extends DataTableSource {
     );
 
     questions[index] = updatedQuestion;
-    await updateQueApiController
-        .updateTrueFalseQuestionAPI(updatedQuestion); // API call to update
+    await updateQueApiController.updateTrueFalseTableQuestionApi(updatedQuestion); // API call to update
     notifyListeners();
   }
 
@@ -492,7 +491,7 @@ class TrueFalseDataSource extends DataTableSource {
           sub_category_id: questions[0].subCategoryId.toString(),
           topic_id: questions[0].topicId.toString(),
           sub_topic_id: questions[0].subTopicId.toString(),
-          truefalse_ids: selectedQuestionIds.join('|'), // Pipe-separated IDs
+        true_false_id: selectedQuestionIds.join('|') // Pipe-separated IDs
         );
 
         // Optionally, refresh the list of questions after deletion

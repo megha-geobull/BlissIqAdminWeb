@@ -46,6 +46,6 @@ List<String> complete_paragraph =["main_category_id", "sub_category_id","topic_i
   "option_e", "option_f", "answer", "points","index"];
 
 List<String> learning_slide =["main_category_id", "sub_category_id", "topic_id", "sub_topic_id",
-  "question_type", "title", "definition", "transcription_one", "grammar_examples", "transcription_two",
+  "question_type", "title", "definition", "pdf_file", "ppt_file", "video_file",'image_file',
   "points", "index"];
 

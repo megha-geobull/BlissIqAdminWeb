@@ -206,7 +206,7 @@ class _QuestionTableScreenState extends State<ConversationTableScreen> {
         yesText: 'Yes',
         noText: 'No', onYesPressed: () {
         Navigator.pop(context);
-        _getdeleteApiController.delete_conversation(conversation_id: _selectedQuestionIds);
+        // _getdeleteApiController.delete_conversation(conversation_id: _selectedQuestionIds);
         Future.delayed(const Duration(seconds: 2), () {
           _removeSelectedQuestions();
           _getdeleteApiController.getConversation(

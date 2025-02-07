@@ -1,23 +1,17 @@
-import 'dart:io';
-
-import 'package:blissiqadmin/Global/constants/ApiString.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import '../../../../Global/constants/CustomTextField.dart';
 import '../../controller/GetAllQuestionsApiController.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_rearrange_model.dart';
 
-class Re_Arrange_QuestionTableScreen extends StatefulWidget {
+class Re_Arrange_Sentence_QuestionTableScreen extends StatefulWidget {
   final String main_category_id;
   final String sub_category_id;
   final String topic_id;
   final String sub_topic_id;
   final List<ReArrange> questionList;
 
-  Re_Arrange_QuestionTableScreen({
+  Re_Arrange_Sentence_QuestionTableScreen({
     required this.main_category_id,
     required this.sub_category_id,
     required this.topic_id,
@@ -29,7 +23,7 @@ class Re_Arrange_QuestionTableScreen extends StatefulWidget {
   _QuestionTableScreenState createState() => _QuestionTableScreenState();
 }
 
-class _QuestionTableScreenState extends State<Re_Arrange_QuestionTableScreen> {
+class _QuestionTableScreenState extends State<Re_Arrange_Sentence_QuestionTableScreen> {
   TextEditingController _searchController = TextEditingController();
   List<ReArrange> _filteredQuestions = [];
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
@@ -99,7 +93,6 @@ class _QuestionTableScreenState extends State<Re_Arrange_QuestionTableScreen> {
       });
     }
   }
-
 
 
 
@@ -254,6 +247,8 @@ class QuestionDataSource extends DataTableSource {
   List<TextEditingController> titleControllers = [];
   List<TextEditingController> questionControllers = [];
   List<TextEditingController> questionImageControllers = [];
+  //List<TextEditingController> answerControllers = [];
+  //List<TextEditingController> indexControllers = [];
   List<TextEditingController> pointsControllers = [];
 
   final GetAllQuestionsApiController updateQueApiController = Get.find();
@@ -390,24 +385,23 @@ class QuestionDataSource extends DataTableSource {
 
         DataCell(
           editingRowIndex == index
-              ? Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: questionImageControllers[index],
-                 // onSubmitted: (value) => _updateQuestion(...),
-                ),
-              ),
-              IconButton(
-                icon: Icon(Icons.image),
-                onPressed: () => _pickAndUpdateImage(index),
-              ),
-            ],
+              ? TextField(
+            controller: questionImageControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(
+                index,
+                questionTypeControllers[index].text,
+                titleControllers[index].text,
+                questionControllers[index].text,
+                pointsControllers[index].text,
+                value,
+              );
+            },
           )
-              : ElevatedButton(
-            onPressed: () => _showImageDialog(context, index),
-            child: Text('View Image'),
-          ),
+              : Text(question.qImage ?? ""),
         ),
 
         DataCell(
@@ -461,7 +455,7 @@ class QuestionDataSource extends DataTableSource {
     final updatedQuestion = ReArrange(
       id: questions[index].id, // Keep the same ID
       questionType: questionType,
-     // index: int.tryParse(title) ?? questions[index].index, // Update index
+      // index: int.tryParse(title) ?? questions[index].index, // Update index
       title: title,
       question:question,
       qImage:questionImage,
@@ -491,7 +485,13 @@ class QuestionDataSource extends DataTableSource {
         await deleteApiController.deleteReArrangeAPI(
 
           question_id: questions[0].mainCategoryId.toString(),
-);
+          // sub_category_id: questions[0].subCategoryId.toString(),
+          // topic_id: questions[0].topicId.toString(),
+          // sub_topic_id: questions[0].subTopicId.toString(),
+          //
+          //phrase_id: questions[0].phrase_ids.toString(),
+
+        );
 
         // Refresh the list of questions
         await deleteApiController.getAllRe_Arrange(
@@ -565,148 +565,4 @@ class QuestionDataSource extends DataTableSource {
       },
     ) ?? false; // Default to false if dialog is dismissed
   }
-
-// Show image preview dialog
-  void _showImageDialog(BuildContext context, int index) {
-    final imageUrl = questionImageControllers[index].text.isNotEmpty
-        ? questionImageControllers[index].text
-        : (questions[index].qImage != null ? questions[index].qImage! : '');
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Question Image'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-        imageUrl.isNotEmpty
-        ? CachedNetworkImage(
-        imageUrl: ApiString.ImgBaseUrl + imageUrl,
-          progressIndicatorBuilder: (context, url, downloadProgress) =>
-              CircularProgressIndicator(value: downloadProgress.progress),
-          errorWidget: (context, url, error) => const Icon(Icons.error),
-        )
-              : const Text('No image available'),
-
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                TextButton(
-                  onPressed: () => _showFullScreenImage(context, index),
-                  child: const Text('View Full Screen'),
-                ),
-                TextButton(
-                  onPressed: () => _pickAndUpdateImage(index), // Change image
-                  child: const Text('Change Image'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showFullScreenImage(BuildContext context, int index) {
-    final imageUrl = ApiString.ImgBaseUrl + questions[index].qImage!;
-
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.black,
-        child: InteractiveViewer(
-          child: imageUrl.isNotEmpty
-              ? Image.network(imageUrl)
-              : const Center(child: Text("No Image Available", style: TextStyle(color: Colors.white))),
-        ),
-      ),
-    );
-  }
-
-// Pick and update image
-  Future<void> _pickAndUpdateImage(int index) async {
-    try {
-      final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (pickedFile == null) return;
-
-      File newImageFile = File(pickedFile.path);
-
-      // Show selected image in the dialog instantly
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Preview Selected Image'),
-          content: Image.file(newImageFile), // Show the selected image
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context), // Close preview
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(context); // Close preview dialog
-
-                // Show loading indicator
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => const Center(child: CircularProgressIndicator()),
-                );
-
-                _updateQuestion(
-                  index,
-                  questionTypeControllers[index].text,
-                  titleControllers[index].text,
-                  questionControllers[index].text,
-                  pointsControllers[index].text,
-                  newImageFile.path,
-                );
-
-                // Close loading
-                Navigator.pop(context);
-
-                // Show the new image in a dialog
-                _showImageDialog(context, index);
-              },
-              child: const Text('Upload'),
-            ),
-          ],
-        ),
-      );
-    } catch (e) {
-      Navigator.pop(context); // Close loading
-      _showErrorDialog('Image selection failed: $e');
-    }
-  }
-
-
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

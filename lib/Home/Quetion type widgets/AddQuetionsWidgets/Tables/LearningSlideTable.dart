@@ -76,27 +76,29 @@ class _LearningSlideTableState extends State<LearningSlideTable> {
 
   void _removeSelectedQuestions() {
     // Convert the selected IDs string to a Set for efficient lookup
-    final selectedIdsSet = _selectedQuestionIds.split('|').toSet();
-    if(mounted){
-      setState(() {
-        // Remove matching items from the main list
+    final selectedIdsSet = _selectedQuestionIds.split('|').toList();
 
-        // Remove matching items from the filtered list
-        _filteredQuestions.removeWhere((mcq) => selectedIdsSet.contains(mcq.id));
-
-        // Clear selected IDs after deletion
-        _selectedQuestionIds = '';
-
-        // Update the data source with the updated filtered list
-        _dataSource = QuestionDataSource(
-          _filteredQuestions,
-              (selectedIds) {
-            setState(() {
-              _selectedQuestionIds = selectedIds;
-            });
-          },
-        );
-      });}
+    // if(mounted){
+    //
+    //   setState(() {
+    //     // Remove matching items from the main list
+    //
+    //     // Remove matching items from the filtered list
+    //     _filteredQuestions.removeWhere((mcq) => selectedIdsSet.contains(mcq.id));
+    //
+    //     // Clear selected IDs after deletion
+    //     _selectedQuestionIds = '';
+    //
+    //     // Update the data source with the updated filtered list
+    //     _dataSource = QuestionDataSource(
+    //       _filteredQuestions,
+    //           (selectedIds) {
+    //         setState(() {
+    //           _selectedQuestionIds = selectedIds;
+    //         });
+    //       },
+    //     );
+    //   });}
   }
 
 
@@ -155,10 +157,10 @@ class _LearningSlideTableState extends State<LearningSlideTable> {
                       ),
                     ),
                     onPressed: () async {
-                      print("Selected Ids - $_selectedQuestionIds");
+                      print("Selected Ids -$_selectedQuestionIds");
                       Future.delayed(const Duration(seconds: 1), () {
-                        _removeSelectedQuestions();
-                        _getdeleteApiController.getFillInTheBlanks(
+                        _getdeleteApiController.deleteLearningSlideAPI(learning_ids:_selectedQuestionIds);
+                        _getdeleteApiController.getAllLearningSlideApi(
                           main_category_id: widget.main_category_id,
                           sub_category_id: widget.sub_category_id,
                           topic_id: widget.topic_id,
@@ -215,9 +217,10 @@ class _LearningSlideTableState extends State<LearningSlideTable> {
                         ),
                         const DataColumn(label: Text("Title")),
                         const DataColumn(label: Text("Defintion")),
-                        const DataColumn(label: Text("Transcription One")),
-                        const DataColumn(label: Text("Grammer Example")),
-                        const DataColumn(label: Text("Transcription Two")),
+                        const DataColumn(label: Text("Video Link")),
+                        const DataColumn(label: Text("PDF Link")),
+                        const DataColumn(label: Text("PPT Link")),
+                        const DataColumn(label: Text("Image Link")),
                         const DataColumn(label: Text("Index")),
                         const DataColumn(label: Text("Points")),
                         const DataColumn(label: Text("Edit")),
@@ -235,8 +238,6 @@ class _LearningSlideTableState extends State<LearningSlideTable> {
   }
 
 }
-
-
 
 class QuestionDataSource extends DataTableSource {
   final List<LearningSlide> questions;
@@ -259,7 +260,7 @@ class QuestionDataSource extends DataTableSource {
   @override
   DataRow? getRow(int index) {
     if (index >= questions.length) return null;
-    final question = questions[index];
+    var question = questions[index];
     final isSelected = selectedQuestionIds.contains(question.id);
 
     return DataRow(
@@ -321,51 +322,66 @@ class QuestionDataSource extends DataTableSource {
         DataCell(
           editingRowIndex == index
               ? TextField(
-            controller: TextEditingController(text: question.transcriptionOne),
+            controller: TextEditingController(text: question.videoFile),
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
             ),
             onSubmitted: (value) {
-              question.transcriptionOne = value; // Update definition
+              question.videoFile = value; // Update definition
               _updateQuestion(question); // Call API
               notifyListeners(); // Update UI
             },
           )
-              : Text(question.transcriptionOne ?? ""),
+              : Text(question.videoFile ?? ""),
         ),
 
         DataCell(
           editingRowIndex == index
               ? TextField(
-            controller: TextEditingController(text: question.grammarExamples),
+            controller: TextEditingController(text: question.pdfFile),
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
             ),
             onSubmitted: (value) {
-              question.grammarExamples = value; // Update definition
+              question.pdfFile = value; // Update definition
               _updateQuestion(question); // Call API
               notifyListeners(); // Update UI
             },
           )
-              : Text(question.grammarExamples ?? ""),
+              : Text(question.pdfFile ?? ""),
         ),
 
         DataCell(
           editingRowIndex == index
               ? TextField(
-            controller: TextEditingController(text: question.transcriptionTwo),
+            controller: TextEditingController(text: question.pptFile),
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
             ),
             onSubmitted: (value) {
-              question.transcriptionTwo = value; // Update definition
+              question.pptFile = value; // Update definition
               _updateQuestion(question); // Call API
               notifyListeners(); // Update UI
             },
           )
-              : Text(question.transcriptionTwo ?? ""),
+              : Text(question.pptFile ?? ""),
         ),
 
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: TextEditingController(text: question.imageFile),
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              question.imageFile = value; // Update definition
+              _updateQuestion(question); // Call API
+              notifyListeners(); // Update UI
+            },
+          )
+              : Text(question.imageFile ?? ""),
+        ),
         DataCell(
           editingRowIndex == index
               ? TextField(
@@ -456,100 +472,10 @@ class QuestionDataSource extends DataTableSource {
       // Clear all selections
       selectedQuestionIds.clear();
     }
-
-    onSelectionChanged(selectedQuestionIds.join ('|'));
+    onSelectionChanged(selectedQuestionIds.join('|'));
     notifyListeners(); // Update UI
   }
 }
 
-/// DataTableSource for handling data in the DataTable
-// class QuestionDataSource extends DataTableSource {
-//   final List<LearningSlide> questions;
-//   final Function(String) onSelectionChanged; // Callback for selection
-//   final Set<String> selectedQuestionIds = {}; // Track selected question IDs
-//   bool isSelectAll = false; // Track "Select All" state
-//
-//   QuestionDataSource(this.questions, this.onSelectionChanged);
-//
-//   @override
-//   DataRow? getRow(int index) {
-//     if (index >= questions.length) return null;
-//     final question = questions[index];
-//     final isSelected = selectedQuestionIds.contains(question.id);
-//
-//     return DataRow(
-//       selected: isSelected,
-//       cells: [
-//         DataCell(
-//           Checkbox(
-//             value: isSelected,
-//             onChanged: (bool? value) {
-//               if (value == true) {
-//                 selectedQuestionIds.add(question.id!);
-//               } else {
-//                 selectedQuestionIds.remove(question.id);
-//               }
-//               isSelectAll = selectedQuestionIds.length == questions.length;
-//               onSelectionChanged(
-//                 selectedQuestionIds.join('|'), // Pipe-separated IDs
-//               );
-//               notifyListeners(); // Update UI
-//             },
-//           ),
-//         ),
-//         DataCell(
-//             Text(question.questionType ?? "")),
-//         DataCell(Text(question.title ?? "")),
-//         DataCell(Text(question.definition ?? "")),
-//         DataCell(Text(question.transcriptionOne ?? "")),
-//         DataCell(Text(question.grammarExamples ?? "")),
-//         DataCell(Text(question.transcriptionTwo ?? "")),
-//         DataCell(Text(question.index.toString() ?? "")),
-//         DataCell(Text(question.points.toString())),
-//         DataCell(
-//           GestureDetector(
-//             onTap: () {
-//
-//             },
-//             child: const Text(
-//               "Edit",
-//               style: TextStyle(
-//                 color: Colors.blue,
-//                 decoration: TextDecoration.underline,
-//               ),
-//             ),
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-//
-//
-//   @override
-//   bool get isRowCountApproximate => false;
-//
-//   @override
-//   int get rowCount => questions.length;
-//
-//   @override
-//   int get selectedRowCount => selectedQuestionIds.length;
-//
-//   void toggleSelectAll(bool value) {
-//     isSelectAll = value;
-//
-//     if (isSelectAll) {
-//       // Select all IDs
-//       selectedQuestionIds.addAll(
-//         questions.map((question) => question.id!).toList(),
-//       );
-//     } else {
-//       // Clear all selections
-//       selectedQuestionIds.clear();
-//     }
-//
-//     onSelectionChanged(selectedQuestionIds.join('|'));
-//     notifyListeners(); // Update UI
-//   }
-// }
 
 
