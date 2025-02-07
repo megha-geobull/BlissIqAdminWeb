@@ -46,7 +46,7 @@ class _CompleteParagraphTableState extends State<CompleteParagraphTable> {
         setState(() {
           _selectedQuestionIds = selectedIds;
         });
-      },
+      },context,
     );
     //_questions = widget.questionList;
     _filteredQuestions = widget.questionList;
@@ -70,7 +70,7 @@ class _CompleteParagraphTableState extends State<CompleteParagraphTable> {
           setState(() {
             _selectedQuestionIds = selectedIds;
           });
-        },
+        },context,
       );
     });
   }
@@ -95,7 +95,7 @@ class _CompleteParagraphTableState extends State<CompleteParagraphTable> {
             setState(() {
               _selectedQuestionIds = selectedIds;
             });
-          },
+          },context,
         );
       });}
   }
@@ -156,8 +156,11 @@ class _CompleteParagraphTableState extends State<CompleteParagraphTable> {
                     ),
                     onPressed: () async {
                       print("Selected Ids - $_selectedQuestionIds");
-                      Future.delayed(const Duration(seconds: 1), () {
-                        _removeSelectedQuestions();
+                      Future.delayed(const Duration(seconds: 1), () async {
+                        bool cofirmed = await _dataSource._showConfirmationDialog(context);
+                        if(cofirmed){
+                          _dataSource._deleteSelectedQuestions();
+                        }
                         _getdeleteApiController.getCompleteParaApi(
                           main_category_id: widget.main_category_id,
                           sub_category_id: widget.sub_category_id,
@@ -213,19 +216,20 @@ class _CompleteParagraphTableState extends State<CompleteParagraphTable> {
                             ],
                           ),
                         ),
-                        const DataColumn(label: Text("Question Type")),
-                        const DataColumn(label: Text("Index")),
-                        const DataColumn(label: Text("Title")),
-                        const DataColumn(label: Text("Question")),
-                        const DataColumn(label: Text("Option A")),
-                        const DataColumn(label: Text("Option B")),
-                        const DataColumn(label: Text("Option C")),
-                        const DataColumn(label: Text("Option D")),
-                        const DataColumn(label: Text("Option E")),
-                        const DataColumn(label: Text("Option F")),
-                        const DataColumn(label: Text("Answer")),
-                        const DataColumn(label: Text("Points")),
-                        const DataColumn(label: Text("Question Image")),
+                         DataColumn(label: Text("Question Type")),
+                         DataColumn(label: Text("Index")),
+                         DataColumn(label: Text("Title")),
+                         DataColumn(label: Text("Paragraph")),
+                         DataColumn(label: Text("Question")),
+                         DataColumn(label: Text("Option A")),
+                         DataColumn(label: Text("Option B")),
+                         DataColumn(label: Text("Option C")),
+                         DataColumn(label: Text("Option D")),
+                         DataColumn(label: Text("Option E")),
+                         DataColumn(label: Text("Option F")),
+                         DataColumn(label: Text("Answer")),
+                         DataColumn(label: Text("Points")),
+                DataColumn(label: Text("Edit")),
                       ],
                       source: _dataSource,
                     ),
@@ -246,9 +250,46 @@ class QuestionDataSource extends DataTableSource {
   final List<CompleteParaData> questions;
   final Function(String) onSelectionChanged; // Callback for selection
   final Set<String> selectedQuestionIds = {}; // Track selected question IDs
-  bool isSelectAll = false; // Track "Select All" state
+  bool isSelectAll = false;
+  BuildContext context;
+    // Track "Select All" state
+  int? editingRowIndex; // Track which row is being edited
+    List<TextEditingController> questionTypeControllers = [];
+    List<TextEditingController> titleControllers = [];
+    List<TextEditingController> questionControllers = [];
+    List<TextEditingController> optionAControllers = [];
+    List<TextEditingController> optionBControllers = [];
+    List<TextEditingController> optionCControllers = [];
+    List<TextEditingController> optionDControllers = [];
+    List<TextEditingController> optionEControllers = [];
+    List<TextEditingController> optionFControllers = [];
+    List<TextEditingController> answerControllers = [];
+    List<TextEditingController> indexControllers = [];
+    List<TextEditingController> pointsControllers = [];
+    List<TextEditingController> paragraphController = [];
 
-  QuestionDataSource(this.questions, this.onSelectionChanged);
+  final GetAllQuestionsApiController updateQueApiController = Get.find();
+
+  QuestionDataSource(this.questions, this.onSelectionChanged, this.context) {
+    // Initialize controllers for each question
+    for (var question in questions) {
+      questionTypeControllers.add(TextEditingController(text: question.questionType));
+      titleControllers.add(TextEditingController(text: question.title));
+      questionControllers.add(TextEditingController(text: question.question));
+      optionAControllers.add(TextEditingController(text: question.optionA));
+      optionBControllers.add(TextEditingController(text: question.optionB));
+      optionCControllers.add(TextEditingController(text: question.optionC));
+      optionDControllers.add(TextEditingController(text: question.optionD));
+      optionEControllers.add(TextEditingController(text: question.optionE));
+      optionFControllers.add(TextEditingController(text: question.optionF));
+      answerControllers.add(TextEditingController(text: question.answer));
+      paragraphController.add(TextEditingController(text: question.paragraphContent));
+      indexControllers.add(TextEditingController(text: question.index.toString()));
+      pointsControllers.add(TextEditingController(text: question.points.toString()));
+
+    }
+  }
+
 
   @override
   DataRow? getRow(int index) {
@@ -259,42 +300,461 @@ class QuestionDataSource extends DataTableSource {
     return DataRow(
       selected: isSelected,
       cells: [
+      DataCell(
+      Checkbox(
+      value: isSelected,
+      onChanged: (bool? value) async{
+        if (value == true) {
+          selectedQuestionIds.add(question.id!);
+        } else {
+          selectedQuestionIds.remove(question.id);
+        }
+        isSelectAll = selectedQuestionIds.length == questions.length;
+        onSelectionChanged(
+          selectedQuestionIds.join('|'), // Pipe-separated IDs
+        );
+
+        notifyListeners();
+        },
+      ),
+      ),
+
         DataCell(
-          Checkbox(
-            value: isSelected,
-            onChanged: (bool? value) {
-              if (value == true) {
-                selectedQuestionIds.add(question.id!);
-              } else {
-                selectedQuestionIds.remove(question.id);
-              }
-              isSelectAll = selectedQuestionIds.length == questions.length;
-              onSelectionChanged(
-                selectedQuestionIds.join('|'), // Pipe-separated IDs
+          editingRowIndex == index
+              ? TextField(
+            controller: indexControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(
+                  index,
+                  questionTypeControllers[index].text,
+                  //value,
+                  titleControllers[index].text,
+              questionControllers[index].text,
+              pointsControllers[index].text,
+              optionAControllers[index].text,
+              optionBControllers[index].text,
+              optionCControllers[index].text,
+                  optionDControllers[index].text,
+                  optionEControllers[index].text,
+                  optionFControllers[index].text,
+                  answerControllers[index].text,
+                  indexControllers[index].text,
+                paragraphController[index].text
+
               );
+
+            },
+          )
+              : Text(question.index.toString() ?? ""),
+        ),
+
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: questionTypeControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(
+                  index,
+                  questionTypeControllers[index].text,
+                 // value,
+                  titleControllers[index].text,
+                  questionControllers[index].text,
+                  pointsControllers[index].text,
+                  optionAControllers[index].text,
+                  optionBControllers[index].text,
+                  optionCControllers[index].text,
+                  optionDControllers[index].text,
+                  optionEControllers[index].text,
+                  optionFControllers[index].text,
+                  answerControllers[index].text,
+                  indexControllers[index].text,
+                  paragraphController[index].text
+
+              );
+            },
+          )
+              : Text(question.questionType ?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: titleControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(
+                  index,
+                  questionTypeControllers[index].text,
+                  //value,
+                  titleControllers[index].text,
+                  questionControllers[index].text,
+                  pointsControllers[index].text,
+                  optionAControllers[index].text,
+                  optionBControllers[index].text,
+                  optionCControllers[index].text,
+                  optionDControllers[index].text,
+                  optionEControllers[index].text,
+                  optionFControllers[index].text,
+                  answerControllers[index].text,
+                  indexControllers[index].text,
+                  paragraphController[index].text
+
+              );
+            },
+          )
+              : Text(question.title ?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: questionControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(
+                  index,
+                  questionTypeControllers[index].text,
+                  //value,
+                  titleControllers[index].text,
+                  questionControllers[index].text,
+                  pointsControllers[index].text,
+                  optionAControllers[index].text,
+                  optionBControllers[index].text,
+                  optionCControllers[index].text,
+                  optionDControllers[index].text,
+                  optionEControllers[index].text,
+                  optionFControllers[index].text,
+                  answerControllers[index].text,
+                  indexControllers[index].text,
+                  paragraphController[index].text
+              );
+            },
+          )
+              : Text(question.question ?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: optionAControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(
+                  index,
+                  questionTypeControllers[index].text,
+                  //value,
+                  titleControllers[index].text,
+                  questionControllers[index].text,
+                  pointsControllers[index].text,
+                  optionAControllers[index].text,
+                  optionBControllers[index].text,
+                  optionCControllers[index].text,
+                  optionDControllers[index].text,
+                  optionEControllers[index].text,
+                  optionFControllers[index].text,
+                  answerControllers[index].text,
+                  indexControllers[index].text,
+                  paragraphController[index].text
+
+              );
+            },
+          )
+              : Text(question.optionA?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: optionBControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(
+                  index,
+                  questionTypeControllers[index].text,
+                  //value,
+                  titleControllers[index].text,
+                  questionControllers[index].text,
+                  pointsControllers[index].text,
+                  optionAControllers[index].text,
+                  optionBControllers[index].text,
+                  optionCControllers[index].text,
+                  optionDControllers[index].text,
+                  optionEControllers[index].text,
+                  optionFControllers[index].text,
+                  answerControllers[index].text,
+                  indexControllers[index].text,
+                  paragraphController[index].text
+              );
+            },
+          )
+              : Text(question.optionB?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: optionCControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(
+                  index,
+                  questionTypeControllers[index].text,
+                  //value,
+                  titleControllers[index].text,
+                  questionControllers[index].text,
+                  pointsControllers[index].text,
+                  optionAControllers[index].text,
+                  optionBControllers[index].text,
+                  optionCControllers[index].text,
+                  optionDControllers[index].text,
+                  optionEControllers[index].text,
+                  optionFControllers[index].text,
+                  answerControllers[index].text,
+                  indexControllers[index].text,
+                  paragraphController[index].text
+              );
+            },
+          )
+              : Text(question.optionC?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: optionDControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(
+                  index,
+                  questionTypeControllers[index].text,
+                  //value,
+                  titleControllers[index].text,
+                  questionControllers[index].text,
+                  pointsControllers[index].text,
+                  optionAControllers[index].text,
+                  optionBControllers[index].text,
+                  optionCControllers[index].text,
+                  optionDControllers[index].text,
+                  optionEControllers[index].text,
+                  optionFControllers[index].text,
+                  answerControllers[index].text,
+                  indexControllers[index].text,
+                  paragraphController[index].text
+              );
+            },
+          )
+              : Text(question.optionD?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: optionEControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(
+                  index,
+                  questionTypeControllers[index].text,
+                  //value,
+                  titleControllers[index].text,
+                  questionControllers[index].text,
+                  pointsControllers[index].text,
+                  optionAControllers[index].text,
+                  optionBControllers[index].text,
+                  optionCControllers[index].text,
+                  optionDControllers[index].text,
+                  optionEControllers[index].text,
+                  optionFControllers[index].text,
+                  answerControllers[index].text,
+                  indexControllers[index].text,
+                  paragraphController[index].text
+              );
+            },
+          )
+              : Text(question.optionE?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: optionFControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(
+                  index,
+                  questionTypeControllers[index].text,
+                  //value,
+                  titleControllers[index].text,
+                  questionControllers[index].text,
+                  pointsControllers[index].text,
+                  optionAControllers[index].text,
+                  optionBControllers[index].text,
+                  optionCControllers[index].text,
+                  optionDControllers[index].text,
+                  optionEControllers[index].text,
+                  optionFControllers[index].text,
+                  answerControllers[index].text,
+                  indexControllers[index].text,
+                  paragraphController[index].text
+              );
+            },
+          )
+              : Text(question.optionF?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: questionTypeControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(
+                  index,
+                  questionTypeControllers[index].text,
+                  //value,
+                  titleControllers[index].text,
+                  questionControllers[index].text,
+                  pointsControllers[index].text,
+                  optionAControllers[index].text,
+                  optionBControllers[index].text,
+                  optionCControllers[index].text,
+                  optionDControllers[index].text,
+                  optionEControllers[index].text,
+                  optionFControllers[index].text,
+                  answerControllers[index].text,
+                  indexControllers[index].text,
+                  paragraphController[index].text
+
+              );
+            },
+          )
+              : Text(question.questionType ?? ""),
+        ),
+
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: paragraphController[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(
+                  index,
+                  questionTypeControllers[index].text,
+                  //value,
+                  titleControllers[index].text,
+                  questionControllers[index].text,
+                  pointsControllers[index].text,
+                  optionAControllers[index].text,
+                  optionBControllers[index].text,
+                  optionCControllers[index].text,
+                  optionDControllers[index].text,
+                  optionEControllers[index].text,
+                  optionFControllers[index].text,
+                  answerControllers[index].text,
+                  indexControllers[index].text,
+                  paragraphController[index].text
+              );
+            },
+          )
+              : Text(question.paragraphContent?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: pointsControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(
+                  index,
+                  questionTypeControllers[index].text,
+                  //value,
+                  titleControllers[index].text,
+                  questionControllers[index].text,
+                  pointsControllers[index].text,
+                  optionAControllers[index].text,
+                  optionBControllers[index].text,
+                  optionCControllers[index].text,
+                  optionDControllers[index].text,
+                  optionEControllers[index].text,
+                  optionFControllers[index].text,
+                  answerControllers[index].text,
+                  indexControllers[index].text,
+                  paragraphController[index].text
+
+              );
+
+            },
+          )
+              : Text(question.points.toString() ?? ""),
+        ),
+
+        DataCell(
+          editingRowIndex == index
+              ? ElevatedButton(
+            onPressed: () {
+              _updateQuestion(
+                  index,
+                  questionTypeControllers[index].text,
+                  //value,
+                  titleControllers[index].text,
+                  questionControllers[index].text,
+                  pointsControllers[index].text,
+                  optionAControllers[index].text,
+                  optionBControllers[index].text,
+                  optionCControllers[index].text,
+                  optionDControllers[index].text,
+                  optionEControllers[index].text,
+                  optionFControllers[index].text,
+                  answerControllers[index].text,
+                  indexControllers[index].text,
+                  paragraphController[index].text
+              );
+              editingRowIndex = null; // Exit edit mode
               notifyListeners(); // Update UI
             },
-          ),
-        ),
-        DataCell(Text(question.questionType ?? "")),
-        DataCell(Text(question.index.toString()?? "")),
-        DataCell(Text(question.title ?? "")),
-        DataCell(Text(question.question ?? "")),
-        DataCell(Text(question.optionA.toString()?? "")),
-        DataCell(Text(question.optionB.toString()?? "")),
-        DataCell(Text(question.optionC.toString()?? "")),
-        DataCell(Text(question.optionD.toString()?? "")),
-        DataCell(Text(question.optionE.toString()?? "")),
-        DataCell(Text(question.optionF.toString()?? "")),
-        DataCell(Text(question.answer ?? "")),
-        DataCell(Text(question.points.toString())),
-        // DataCell(Text(question.qImage ?? "")),
-        DataCell(
-          GestureDetector(
+            child: Text("Update"),
+          )
+              : GestureDetector(
             onTap: () {
+              if (editingRowIndex == null) {
+                // Start editing
+                editingRowIndex = index;
+                notifyListeners(); // Update UI
+              }
             },
             child: const Text(
-              "View",
+              "Edit",
               style: TextStyle(
                 color: Colors.blue,
                 decoration: TextDecoration.underline,
@@ -306,6 +766,86 @@ class QuestionDataSource extends DataTableSource {
     );
   }
 
+
+  /// call the update the story phrases api here
+  _updateQuestion(
+      int index,
+      String questionType,
+      String title,
+      String question,
+      String answer,
+      String optionA,
+      String optionB,
+      String optionC,
+      String optionD,
+      String optionE,
+      String optionF,
+      String indexValue,
+      String pointsValue,
+      String paragraphContent
+
+      ) async {
+    final updatedQuestion = CompleteParaData(
+      id: questions[index].id, // Keep the same ID
+      questionType: questionType,
+      title: title,
+      question: question,
+      answer: answer,
+      optionA: optionA,
+      optionB: optionB,
+      optionC: optionC,
+      optionD: optionD,
+      optionE: optionE,
+      optionF: optionF,
+      paragraphContent:paragraphContent,
+
+      index: int.tryParse(indexValue) ?? questions[index].index, // Update index
+      points: int.tryParse(pointsValue) ?? questions[index].points, // Update points
+
+      mainCategoryId: questions[index].mainCategoryId,
+      subCategoryId: questions[index].subCategoryId,
+      topicId: questions[index].topicId,
+      subTopicId: questions[index].subTopicId,
+    );
+
+    questions[index] = updatedQuestion;
+    await updateQueApiController.updateCompleteTheParagraphTableQuestionApi(updatedQuestion);
+    notifyListeners();
+  }
+
+  /// call delete the story phrases api here
+  /// multiple deletions
+  _deleteSelectedQuestions() async {
+    final deleteApiController = Get.find<GetAllQuestionsApiController>();
+
+    if (selectedQuestionIds.isNotEmpty) {
+      try {
+        await deleteApiController.deleteCompleteTheParagraphAPI(
+          // main_category_id: questions[0].mainCategoryId.toString(),
+          // sub_category_id: questions[0].subCategoryId.toString(),
+          // topic_id: questions[0].topicId.toString(),
+          // sub_topic_id: questions[0].subTopicId.toString(),
+          question_id: selectedQuestionIds.join('|'), // Pipe-separated IDs
+        );
+
+        // Optionally, refresh the list of questions after deletion
+        await deleteApiController.getCompleteParaData(
+          // main_category_id: questions[0].mainCategoryId.toString(),
+          // sub_category_id: questions[0].subCategoryId.toString(),
+          // topic_id: questions[0].topicId.toString(),
+          // sub_topic_id: questions[0].subTopicId.toString(),
+        );
+
+        // Remove the deleted questions from the local list
+        questions.removeWhere((question) => selectedQuestionIds.contains(question.id));
+        selectedQuestionIds.clear(); // Clear the selected IDs after deletion
+        notifyListeners(); // Update UI
+      } catch (e) {
+        print('Error deleting questions: $e');
+      }
+    }
+  }
+
   @override
   bool get isRowCountApproximate => false;
 
@@ -315,7 +855,7 @@ class QuestionDataSource extends DataTableSource {
   @override
   int get selectedRowCount => selectedQuestionIds.length;
 
-  void toggleSelectAll(bool value) {
+  toggleSelectAll(bool value) async {
     isSelectAll = value;
 
     if (isSelectAll) {
@@ -324,13 +864,48 @@ class QuestionDataSource extends DataTableSource {
         questions.map((question) => question.id!).toList(),
       );
     } else {
-      // Clear all selections
+      bool confirmed = await _showConfirmationDialog(context);
+      if(confirmed){
+        _deleteSelectedQuestions();
+      }
       selectedQuestionIds.clear();
     }
 
     onSelectionChanged(selectedQuestionIds.join('|'));
     notifyListeners(); // Update UI
   }
+
+  _showConfirmationDialog(BuildContext context) async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Deletion'),
+          content: const Text('Do you really want to delete the selected phrases?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false); // User pressed "No"
+              },
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true); // User pressed "Yes"
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    ) ?? false; // Default to false if dialog is dismissed
+  }
+
+
 }
+
+
+
+
 
 
