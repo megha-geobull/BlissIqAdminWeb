@@ -94,6 +94,11 @@ class ApiString {
   static const String delete_fill_blanks = "${baseUrl}delete_fill_blanks";
   static const String update_fill_blanks = "${baseUrl}update_fill_blanks";
 
+  static const String add_guess_the_image = "${baseUrl}add_guess_the_image";
+  static const String get_guess_the_image = "${baseUrl}get_guess_the_image";
+  static const String delete_guess_the_image = "${baseUrl}delete_guess_the_image";
+  static const String update_guess_the_image = "${baseUrl}update_guess_the_image";
+
   static const String add_card_flipping = "${baseUrl}add_card_flipping";
   static const String get_card_flipping = "${baseUrl}get_card_flipping";
   static const String delete_card_flipping = "${baseUrl}delete_card_flipping";

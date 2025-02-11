@@ -11,6 +11,7 @@ import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_rearrange_m
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_story_model.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_story_phrases_model.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_trueOrfalse_model.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/guess_the_image.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_mcqs.dart';
@@ -23,6 +24,7 @@ class GetAllQuestionsApiController extends GetxController{
   RxList<TrueOrFalse> getTrueOrFalseList = <TrueOrFalse>[].obs;
   RxList<FillInTheBlanks> getFillInTheBlanksList = <FillInTheBlanks>[].obs;
   RxList<StoryData> getStoryDataList = <StoryData>[].obs;
+  RxList<GuessTheImageData> guessTheImageList = <GuessTheImageData>[].obs;
 
   RxList<StoryPhrases> getStoryPhrasesList = <StoryPhrases>[].obs;
   RxList<PhrasesData> getConversationList = <PhrasesData>[].obs;
@@ -47,6 +49,7 @@ class GetAllQuestionsApiController extends GetxController{
     getLearningSlideData.clear();
     getCompleteWordData.clear();
     getCompleteParaData.clear();
+    guessTheImageList.clear();
   }
 
 
@@ -90,6 +93,52 @@ class GetAllQuestionsApiController extends GetxController{
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching complete word: $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  getGuessTheImage({
+    required String main_category_id ,
+    required String sub_category_id,
+    required String topic_id,
+    String? sub_topic_id}) async {
+    isLoading.value = true;
+    guessTheImageList.clear();
+    try {
+      var body = {
+        'main_category_id':main_category_id,
+        'sub_category_id':sub_category_id,
+        'topic_id':topic_id,
+        'sub_topic_id':sub_topic_id??''
+      };
+      final response = await http.post(
+          Uri.parse(ApiString.get_guess_the_image),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(body)
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      print('Url: ${ApiString.get_guess_the_image}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          // Parse each JSON object into a Data model
+          guessTheImageList.value = (responseData["data"] as List)
+              .map((wordJson) => GuessTheImageData.fromJson(wordJson))
+              .toList();
+          print("Fetched ${guessTheImageList.length} guess the image");
+        } else {
+          showSnackbar(message: responseData['message'] ?? "Failed to fetch guess the image ");
+        }
+      } else {
+        showSnackbar(message: "Failed to fetch word. Status: ${response.statusCode}");
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetching guess the image: $e");
       log(e.toString());
     } finally {
       isLoading.value = false;
@@ -827,12 +876,6 @@ class GetAllQuestionsApiController extends GetxController{
   //delete api
   deleteReArrangeAPI({
     required String question_id,
-
-    // required String main_category_id,
-    // required String sub_category_id,
-    // required String topic_id,
-    // required String sub_topic_id,
-    // required String phrase_ids,
   }) async {
     final response = await http.delete(
       Uri.parse(ApiString.delete_rearrange),
@@ -1246,6 +1289,50 @@ class GetAllQuestionsApiController extends GetxController{
           'option_c': question.optionC,
           'option_d': question.optionD,
           'answer': question.answer,
+          'index': question.index,
+          'points': question.points,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        await getAllMCQS(
+            main_category_id: question.mainCategoryId.toString(),
+            sub_category_id: question.subCategoryId.toString(),
+            topic_id: question.topicId.toString(),
+            sub_topic_id: question.subTopicId.toString());
+      } else {
+        print('Failed to update question: ${response.body}');
+      }
+    } catch (e) {
+      print('Error updating question: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  updateGuessTheImageApi(GuessTheImageData question) async {
+    isLoading.value = true;
+    try {
+      print(question.topicId);
+      final response = await http.post(
+        Uri.parse(ApiString.update_guess_the_image),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'question_id': question.id,
+          'main_category_id': question.mainCategoryId,
+          'sub_category_id': question.subCategoryId,
+          'topic_id': question.topicId,
+          'sub_topic_id': question.subTopicId,
+          'question_type': question.questionType,
+          'title': question.title,
+          'option_a': question.optionA,
+          'option_b': question.optionB,
+          'option_c': question.optionC,
+          'option_d': question.optionD,
+          'answer': question.answer,
+          'q_image': question.qImage,
           'index': question.index,
           'points': question.points,
         }),

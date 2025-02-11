@@ -45,6 +45,7 @@ class CategoryController extends GetxController {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
+          categories.refresh();
           getCategory();
           showSnackbar(message: "Category added successfully");
         } else {
@@ -95,9 +96,10 @@ class CategoryController extends GetxController {
 
   getCategory() async {
     isLoading.value = true;
+    categories.refresh();
     categories.clear();
     try {
-
+      categories.clear();
       final response = await http.get(
         Uri.parse(ApiString.get_main_category),
         headers: {"Content-Type": "application/json"},
@@ -110,6 +112,7 @@ class CategoryController extends GetxController {
         var responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
           categories.value = responseData["data"];
+          isLoading.value = false;
         } else {
           showSnackbar(message: "Failed to fetch category");
         }
@@ -119,6 +122,7 @@ class CategoryController extends GetxController {
       log(e.toString());
     } finally {
       isLoading.value = false;
+      categories.refresh();
     }
   }
 
@@ -146,6 +150,7 @@ class CategoryController extends GetxController {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
+          getCategory();
           showSnackbar(message: "Subcategory added successfully");
         } else {
           showSnackbar(message: "Failed to add Subcategory");
@@ -183,6 +188,7 @@ class CategoryController extends GetxController {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
           getSubCategory(categoryId: categoryId);
+          getCategory();
           showSnackbar(message: "Subcategory deleted successfully");
         } else {
           showSnackbar(message: "Failed to delete Subcategory");
