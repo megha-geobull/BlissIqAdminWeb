@@ -1573,7 +1573,7 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                 child: _getAllQuestionsApiController.isLoading.value
                     ? CircularProgressIndicator()
                     : (_getAllQuestionsApiController.getTrueOrFalseList.isEmpty
-                        ? Center(
+                        ? const Center(
                             child: Text(
                               'No data available',
                               style: TextStyle(

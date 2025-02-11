@@ -682,13 +682,12 @@ class GetAllQuestionsApiController extends GetxController{
 
     try {
       print(learning_ids);
-      final Uri url = Uri.parse("${ApiString.delete_learning_slide}?learning_id=$learning_ids");
-      var body = {
+      final Map<String, dynamic> body = {
         "learning_id": learning_ids,
       };
       print(body.toString());
       final response = await http.delete(
-        url,
+        Uri.parse(ApiString.delete_learning_slide),
         headers: {
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*"  // Corrected header
@@ -718,10 +717,7 @@ class GetAllQuestionsApiController extends GetxController{
 
 
 
-
-
   //Update Story Phrases
-
   updateStoryPhrasesTableQuestionApi(StoryPhrases question) async {
     isLoading.value = true;
     try {
@@ -760,7 +756,6 @@ class GetAllQuestionsApiController extends GetxController{
 
 
   //delete story phrases
-
   deleteStoryPhraseAPI({
     required String main_category_id,
     required String sub_category_id,
@@ -790,7 +785,6 @@ class GetAllQuestionsApiController extends GetxController{
   }
 
   // Update Rearrange thw word
-
   updateRearrangeTheWordTableQuestionApi(ReArrange question) async {
     isLoading.value = true;
     try {
@@ -831,7 +825,6 @@ class GetAllQuestionsApiController extends GetxController{
 
 
   //delete api
-
   deleteReArrangeAPI({
     required String question_id,
 
@@ -909,7 +902,6 @@ class GetAllQuestionsApiController extends GetxController{
 
 
 // Delete Fill in the blanks
-
   deleteFillInTheBlanksAPI({
     required String main_category_id,
     required String sub_category_id,
@@ -937,7 +929,6 @@ class GetAllQuestionsApiController extends GetxController{
   }
 
   //Update Story
-
   updateStoryTableQuestionApi(StoryData question) async {
     isLoading.value = true;
     try {
