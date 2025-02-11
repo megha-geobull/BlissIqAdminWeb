@@ -10,7 +10,7 @@ import 'package:get/get.dart';
 import '../../Global/constants/CustomAlertDialogue.dart';
 import '../../controller/CategoryController.dart';
 import 'Topics_screen.dart';
-
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 class MainCategoriesPage extends StatefulWidget {
   const MainCategoriesPage({super.key});
 
@@ -31,9 +31,7 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
 
   getData() async{
     await _controller.getCategory();
-    Future.delayed(const Duration(seconds: 2), () {
       getRows();
-    });
   }
 
   void _showAddCategoryDialog() {
@@ -58,9 +56,9 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
               onPressed: () => Navigator.of(context).pop(),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (categoryController.text.isNotEmpty) {
-                  _controller.addCategory(categoryname: categoryController.text);
+                  await _controller.addCategory(categoryname: categoryController.text);
                   Navigator.of(context).pop();
                 }
               },
@@ -93,14 +91,21 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                   appBar: isWideScreen
                       ? null
                       : AppBar(
-                          title: const Text('Dashboard'),
-                          backgroundColor: Colors.blue.shade100,
-                        ),
-                  drawer: isWideScreen ? null : Drawer(child: MyDrawer()),
-                  body: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: _buildMainContent(constraints),
+                    title: const Text('Dashboard'),
+                    backgroundColor: Colors.blue.shade100,
                   ),
+                  drawer: isWideScreen ? null : Drawer(child: MyDrawer()),
+                  body: Obx(() => Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: _controller.isLoading.value
+                        ? Center(
+                      child: LoadingAnimationWidget.hexagonDots(
+                        color: Colors.deepOrange,
+                        size: 70,
+                      ),
+                    )
+                        : _buildMainContent(constraints),
+                  )),
                 ),
               ),
             ],
@@ -110,38 +115,40 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
     );
   }
 
+
   Widget _buildMainContent(BoxConstraints constraints) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "Manage Categories,Subcategories,etc from here:",
+          "Manage Categories, Subcategories, etc from here:",
           style: TextStyle(
               fontSize: 18, color: Colors.black, fontWeight: FontWeight.bold),
         ),
         Expanded(
           child: SingleChildScrollView(
-            child: Table(
-                border: TableBorder.all(color: Colors.grey),
-                columnWidths: const {
-                  0: FlexColumnWidth(2),
-                  1: FlexColumnWidth(1),
-                  2: FlexColumnWidth(1),
-                  3: FlexColumnWidth(1),
-                  4: FlexColumnWidth(1),
-                  5: FlexColumnWidth(1),
-                },
-                children: tableRows,
-              )
-             //}),
+            child: Obx(() => Table(
+              border: TableBorder.all(color: Colors.grey),
+              columnWidths: const {
+                0: FlexColumnWidth(2),
+                1: FlexColumnWidth(1),
+                2: FlexColumnWidth(1),
+                3: FlexColumnWidth(1),
+                4: FlexColumnWidth(1),
+                5: FlexColumnWidth(1),
+              },
+              children: getRows(),
+            )),
           ),
         ),
       ],
     );
   }
 
-  getRows(){
-    tableRows.add(TableRow(
+  List<TableRow> getRows() {
+    List<TableRow> rows = [];
+
+    rows.add(TableRow(
       decoration: BoxDecoration(color: Colors.orange[100]),
       children: [
         // 1st column
@@ -185,7 +192,7 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
               ),
               const Spacer(),
               IconButton(
-                onPressed: () => _showAddDialog(context,'subCategory', 0),
+                onPressed: () => _showAddDialog(context, 'subCategory', 0),
                 icon: CircleAvatar(
                   radius: 10,
                   backgroundColor: Colors.deepOrange.shade200,
@@ -202,47 +209,49 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
         ),
       ],
     ));
-      if (_controller.categories.isNotEmpty) {
-        for (int index = 0; index < _controller.categories.length; index++) {
-          var category = _controller.categories[index];
-          tableRows.add(
-            TableRow(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child:Row(children: [
+
+  if (_controller.categories.isNotEmpty) {
+      for (int index = 0; index < _controller.categories.length; index++) {
+        var category = _controller.categories[index];
+        rows.add(
+          TableRow(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
                     Text(
                       category['category_name'] ?? 'No Name',
                       style: const TextStyle(fontSize: 16),
                     ),
-                    Spacer(),
+                    const Spacer(),
                     IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
                       onPressed: () {
-                        onDelete(_controller.categories[index]['_id'],index,
-                            "you want to delete this category?","category");
+                        onDelete(_controller.categories[index]['_id'], index,
+                            "you want to delete this category?", "category");
                       },
                     ),
-                  ],)
+                  ],
                 ),
-                TextButton(
-                  child: const Text(
-                    "View",
-                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-                  ),
-                  onPressed: () async {
-                    await _controller.getSubCategory(categoryId:_controller.categories[index]['_id']);
-                    _showItems(context, index, 'subCategories',_controller.sub_categories);
-                    },
+              ),
+              TextButton(
+                child: const Text(
+                  "View",
+                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                 ),
-              ],
-            ),
-          );
-        }
-      };
-      setState(() {
-        tableRows;
-      });
+                onPressed: () async {
+                  await _controller.getSubCategory(categoryId: _controller.categories[index]['_id']);
+                  _showItems(context, index, 'subCategories', _controller.sub_categories);
+                },
+              ),
+            ],
+          ),
+        );
+      }
+    };
+
+    return rows;
   }
 
   void onDelete(String productId,int index,String title,String type) {
