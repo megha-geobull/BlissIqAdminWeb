@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 
 class TopicsScreen extends StatefulWidget {
@@ -22,9 +23,10 @@ class _TopicsScreenState extends State<TopicsScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    getData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getData();
+    });
   }
 
   getData() async{
@@ -68,7 +70,17 @@ class _TopicsScreenState extends State<TopicsScreen> {
                   drawer: isWideScreen ? null : Drawer(child: MyDrawer()),
                   body: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: _buildMainContent(constraints),
+                    child: Obx(() => Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: _controller.isLoading.value
+                          ? Center(
+                        child: LoadingAnimationWidget.hexagonDots(
+                          color: Colors.deepOrange,
+                          size: 70,
+                        ),
+                      )
+                          : _buildMainContent(constraints),
+                    )),
                   ),
                 ),
               ),

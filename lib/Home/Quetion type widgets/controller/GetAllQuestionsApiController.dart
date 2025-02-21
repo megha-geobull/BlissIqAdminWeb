@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/common_snackbar.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/CardFlipModel.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/GetCompleteParagraphModel.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/GetCompleteWordModel.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/LearningSlideModel.dart';
@@ -12,15 +13,22 @@ import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_story_model
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_story_phrases_model.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_trueOrfalse_model.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/guess_the_image.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/re_arrange_sentence_model.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:get/get.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_mcqs.dart';
+import 'package:mime/mime.dart';
+import 'dart:typed_data' as td;
+
 
 class GetAllQuestionsApiController extends GetxController{
   RxBool isLoading = false.obs;
 
   RxList<Mcqs> getMcqslits = <Mcqs>[].obs;
   RxList<ReArrange> getReArrangeList = <ReArrange>[].obs;
+  RxList<ReArrangeSentenceData> getReArrangeSentenceDataList = <ReArrangeSentenceData>[].obs;
   RxList<TrueOrFalse> getTrueOrFalseList = <TrueOrFalse>[].obs;
   RxList<FillInTheBlanks> getFillInTheBlanksList = <FillInTheBlanks>[].obs;
   RxList<StoryData> getStoryDataList = <StoryData>[].obs;
@@ -29,6 +37,7 @@ class GetAllQuestionsApiController extends GetxController{
   RxList<StoryPhrases> getStoryPhrasesList = <StoryPhrases>[].obs;
   RxList<PhrasesData> getConversationList = <PhrasesData>[].obs;
   RxList<MatchPairs> getMatchPairsList = <MatchPairs>[].obs;
+  RxList<CardFlipData> getCardFlipList = <CardFlipData>[].obs;
 
 
   RxList<LearningSlide> getLearningSlideData = <LearningSlide>[].obs;
@@ -50,6 +59,7 @@ class GetAllQuestionsApiController extends GetxController{
     getCompleteWordData.clear();
     getCompleteParaData.clear();
     guessTheImageList.clear();
+    getReArrangeSentenceDataList.clear();
   }
 
 
@@ -85,6 +95,51 @@ class GetAllQuestionsApiController extends GetxController{
               .map((wordJson) => CompleteWordData.fromJson(wordJson))
               .toList();
           print("Fetched ${getCompleteWordData.length} complete word");
+        } else {
+          showSnackbar(message: responseData['message'] ?? "Failed to fetch complete word ");
+        }
+      } else {
+        showSnackbar(message: "Failed to fetch word. Status: ${response.statusCode}");
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetching complete word: $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  getReArrangeSentenceApi({
+    required String main_category_id ,
+    required String sub_category_id,
+    required String topic_id,
+    String? sub_topic_id}) async {
+    isLoading.value = true;
+    getReArrangeSentenceDataList.clear();
+    try {
+      var body = {
+        'main_category_id':main_category_id,
+        'sub_category_id':sub_category_id,
+        'topic_id':topic_id,
+        'sub_topic_id':sub_topic_id??''
+      };
+      final response = await http.post(
+          Uri.parse(ApiString.get_complete_sentence),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(body)
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      print('Url: ${ApiString.get_complete_sentence}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          getReArrangeSentenceDataList.value = (responseData["data"] as List)
+              .map((wordJson) => ReArrangeSentenceData.fromJson(wordJson))
+              .toList();
+          print("Fetched ${getReArrangeSentenceDataList.length} complete word");
         } else {
           showSnackbar(message: responseData['message'] ?? "Failed to fetch complete word ");
         }
@@ -683,6 +738,117 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
+  getCardFlip({
+    required String main_category_id ,
+    required String sub_category_id,
+    required String topic_id,
+    String? sub_topic_id}) async {
+    isLoading.value = true;
+    getCardFlipList.clear();
+    try {
+      var body = {
+        'main_category_id':main_category_id,
+        'sub_category_id':sub_category_id,
+        'topic_id':topic_id,
+        'sub_topic_id':sub_topic_id??''
+      };
+      final response = await http.post(
+          Uri.parse(ApiString.get_card_flipping),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(body)
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          // Parse each JSON object into a Data model
+          getCardFlipList.clear();
+          getCardFlipList.value = (responseData["data"] as List)
+              .map((mcqJson) => CardFlipData.fromJson(mcqJson))
+              .toList();
+
+          print("Fetched ${getCardFlipList.length} conversation");
+        } else {
+          showSnackbar(message: responseData['message'] ?? "Failed to fetch phrases ");
+        }
+      } else {
+        showSnackbar(message: "Failed to fetch conversation. Status: ${response.statusCode}");
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetching conversation: $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> updateCardFlip({
+    required CardFlipData question,
+    required List<td.Uint8List> images,
+    required String letters,
+    required BuildContext context,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final uri = Uri.parse(ApiString.update_card_flipping);
+      final request = http.MultipartRequest('POST', uri);
+      // Add text fields
+      request.fields['main_category_id'] = question.mainCategoryId.toString();
+      request.fields['sub_category_id'] = question.subCategoryId.toString();
+      request.fields['topic_id'] = question.topicId.toString();
+      request.fields['sub_topic_id'] = question.subTopicId.toString() ?? '';
+      request.fields['title'] = question.title ?? '';
+      request.fields['question_type'] = question.questionType ?? '';
+      request.fields['index'] = question.index.toString() ?? '';
+      request.fields['points'] = question.points.toString() ?? '';
+      request.fields['letter'] = letters;
+
+      // Print request body (fields)
+      print("Request Fields: ${request.fields}");
+
+      // Add images
+      for (int i = 0; i < images.length; i++) {
+        final image = images[i];
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'image',
+            image,
+            filename: 'image_$i.png',
+            contentType: MediaType('image', 'png'),
+          ),
+        );
+      }
+
+      // Send the request
+      final response = await request.send();
+
+      // Print response status code
+      print("Response Status Code: ${response.statusCode}");
+
+      // Convert response stream to a string and print
+      final responseData = await response.stream.bytesToString();
+      print("Response Body: $responseData");
+
+      // Decode and handle the response
+      final decodedResponse = jsonDecode(responseData);
+      if (response.statusCode == 201 && decodedResponse['status'] == 1) {
+        showSnackbar(message: decodedResponse['message'] ?? 'Added successfully');
+      } else {
+        showSnackbar(message: decodedResponse['message'] ?? 'Error occurred');
+      }
+    } catch (e) {
+      // Print any exceptions that occur
+      print('An error occurred: $e');
+      showSnackbar(message: 'An error occurred: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
 //learning slide
 
   updateLearningTableQuestionApi(LearningSlide question) async {
@@ -840,45 +1006,75 @@ class GetAllQuestionsApiController extends GetxController{
 
   // Update Rearrange thw word
 
-  updateRearrangeTheWordTableQuestionApi(ReArrange question) async {
+  updateRearrangeTheWordApi(ReArrange question, List<int>? qImage) async {
     isLoading.value = true;
     try {
-      final response = await http.post(
-        Uri.parse(ApiString.update_rearrange),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'rearrange_id':question.id,
-          'main_category_id':question.mainCategoryId,
-          'sub_category_id':question.subCategoryId,
-          'topic_id': question.topicId,
-          'sub_topic_id':question.subTopicId,
-          'question_type': question.questionType,
-          'title': question.title,
-          'question':question.question,
-          'q_image':question.qImage,
-          'answer':question.answer,
-          'index':question.index,
-          'points': question.points,
-        }),
-      );
+      var uri = Uri.parse(ApiString.update_rearrange);
+      var request = http.MultipartRequest('POST', uri);
+      // Add fields to the request
+      request.fields['rearrange_id'] = question.id.toString();
+      request.fields['main_category_id'] = question.mainCategoryId.toString();
+      request.fields['sub_category_id'] = question.subCategoryId.toString();
+      request.fields['topic_id'] = question.topicId.toString();
+      request.fields['sub_topic_id'] = question.subTopicId.toString();
+      request.fields['question_type'] = question.questionType ?? "";
+      request.fields['title'] = question.title  ?? "";
+      request.fields['question'] = question.question  ?? "";
+      request.fields['answer'] = question.answer  ?? "";
+      request.fields['index'] = question.index.toString();
+      request.fields['points'] = question.points.toString();
 
-      if (response.statusCode == 200) {
-        await getAllRe_Arrange(main_category_id: question.mainCategoryId.toString(), sub_category_id: question.subCategoryId.toString(),
-            topic_id: question.topicId.toString(), sub_topic_id: question.subTopicId.toString()
+      // Add image file if available
+      if (qImage != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'q_image',
+            qImage,
+            filename: 'question_image.png',
+            contentType: MediaType('image', 'png'),
+          ),
         );
+      }
+
+      var response = await request.send();
+      if (response.statusCode == 200) {
+        showSnackbar(message: "Question updated successfully");
       } else {
-        print('Failed to update question: ${response.body}');
+        print('Failed to update question: ${await response.stream.bytesToString()}');
       }
     } catch (e) {
       print('Error updating question: $e');
     } finally {
-      isLoading.value = false; // Set loading state to false
+      isLoading.value = false;
     }
   }
 
+  updateRearrangeSentenceApi(ReArrangeSentenceData question) async {
+    isLoading.value = true;
+    try {
+      var uri = Uri.parse(ApiString.update_complete_sentence);
+      var request = http.MultipartRequest('POST', uri);
+      // Add fields to the request
+      request.fields['question_id'] = question.id.toString();
+      request.fields['question_format'] = question.questionFormat ?? "";
+      request.fields['title'] = question.title  ?? "";
+      request.fields['question'] = question.question  ?? "";
+      request.fields['answer'] = question.answer  ?? "";
+      request.fields['index'] = question.index.toString();
+      request.fields['points'] = question.points.toString();
 
+      var response = await request.send();
+      if (response.statusCode == 200) {
+        showSnackbar(message: "Question updated successfully");
+      } else {
+        print('Failed to update question: ${await response.stream.bytesToString()}');
+      }
+    } catch (e) {
+      print('Error updating question: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
   //delete api
 
   deleteReArrangeAPI({
@@ -906,42 +1102,65 @@ class GetAllQuestionsApiController extends GetxController{
 
   //Update Fill in the blanks API
 
-  updateFillInTheBlanksTableQuestionApi(FillInTheBlanks question) async {
+  Future<void> updateFillInTheBlanksTableQuestionApi(
+      FillInTheBlanks question, List<int>? qImage) async {
     isLoading.value = true;
     try {
-      final response = await http.post(
+      var request = http.MultipartRequest(
+        'POST',
         Uri.parse(ApiString.update_fill_blanks),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'fill_blank_id':question.id,
-          'main_category_id':question.mainCategoryId,
-          'sub_category_id':question.subCategoryId,
-          'topic_id': question.topicId,
-          'sub_topic_id':question.subTopicId,
-          'question_type': question.questionType,
-          'title': question.title,
-          'question_language': question.questionLanguage,
-          'question': question.question,
-          'q_image': question.qImage,
-          'option_language': question.optionLanguage,
-          'option_a': question.optionA,
-          'option_b': question.optionB,
-          'option_c': question.optionC,
-          'option_d': question.optionD,
-          'answer': question.answer,
-          'index': question.index,
-          'points': question.points,
-        }),
       );
 
+      // Add headers
+      request.headers.addAll({
+        'Content-Type': 'multipart/form-data',
+      });
+
+      // Add fields
+      request.fields.addAll({
+        'fill_blank_id': question.id ?? '',
+        'main_category_id': question.mainCategoryId ?? '',
+        'sub_category_id': question.subCategoryId ?? '',
+        'topic_id': question.topicId ?? '',
+        'sub_topic_id': question.subTopicId ?? '',
+        'question_type': question.questionType ?? '',
+        'title': question.title ?? '',
+        'question_language': question.questionLanguage ?? '',
+        'question': question.question ?? '',
+        'option_language': question.optionLanguage ?? '',
+        'option_a': question.optionA ?? '',
+        'option_b': question.optionB ?? '',
+        'option_c': question.optionC ?? '',
+        'option_d': question.optionD ?? '',
+        'answer': question.answer ?? '',
+        'index': question.index.toString(),
+        'points': question.points.toString(),
+      });
+
+      // Add image if available
+      if (qImage != null && qImage.isNotEmpty) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'q_image', // Field name in API
+            qImage,
+            filename: 'question_image.png', // Adjust filename if needed
+            contentType: MediaType('image', 'png'), // Adjust MIME type if needed
+          ),
+        );
+      }
+
+      // Send request
+      var response = await request.send();
+
       if (response.statusCode == 200) {
-        await getStoryPhrases(main_category_id: question.mainCategoryId.toString(), sub_category_id: question.subCategoryId.toString(),
-            topic_id: question.topicId.toString(), sub_topic_id: question.subTopicId.toString()
+        await getStoryPhrases(
+          main_category_id: question.mainCategoryId.toString(),
+          sub_category_id: question.subCategoryId.toString(),
+          topic_id: question.topicId.toString(),
+          sub_topic_id: question.subTopicId.toString(),
         );
       } else {
-        print('Failed to update question: ${response.body}');
+        print('Failed to update question: ${await response.stream.bytesToString()}');
       }
     } catch (e) {
       print('Error updating question: $e');
@@ -1047,35 +1266,52 @@ class GetAllQuestionsApiController extends GetxController{
 
   //Update true false
 
-  updateTrueFalseTableQuestionApi(TrueOrFalse question) async {
+  updateTrueFalseTableQuestionApi( TrueOrFalse question, List<int>? qImage) async {
     isLoading.value = true;
     try {
-      final response = await http.post(
+      var request = http.MultipartRequest(
+        'POST',
         Uri.parse(ApiString.update_true_false),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'true_false_id':question.id,
-          'main_category_id':question.mainCategoryId,
-          'sub_category_id':question.subCategoryId,
-          'topic_id': question.topicId,
-          'sub_topic_id':question.subTopicId,
-          'question_type': question.questionType,
-          'question': question.question,
-          'q_image': question.qImage,
-          'answer': question.answer,
-          'points': question.points,
-          'index': question.index,
-        }),
       );
 
-      if (response.statusCode == 200) {
-        await getStoryPhrases(main_category_id: question.mainCategoryId.toString(), sub_category_id: question.subCategoryId.toString(),
-            topic_id: question.topicId.toString(), sub_topic_id: question.subTopicId.toString()
+      // Add headers
+      request.headers.addAll({
+        'Content-Type': 'multipart/form-data',
+      });
+
+      // Add fields
+      request.fields.addAll({
+        'true_false_id': question.id ?? '',
+        'main_category_id': question.mainCategoryId ?? '',
+        'sub_category_id': question.subCategoryId ?? '',
+        'topic_id': question.topicId ?? '',
+        'sub_topic_id': question.subTopicId ?? '',
+        'question_type': question.questionType ?? '',
+        'question': question.question ?? '',
+        'answer': question.answer ?? '',
+        'points': question.points.toString(),
+        'index': question.index.toString(),
+      });
+
+      // Add image if available
+      if (qImage != null && qImage.isNotEmpty) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'q_image', // Field name in API
+            qImage,
+            filename: 'question_image.png', // Change filename if needed
+            contentType: MediaType('image', 'png'), // Adjust MIME type if needed
+          ),
         );
+      }
+
+      // Send request
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+print('Question update successfully');
       } else {
-        print('Failed to update question: ${response.body}');
+        print('Failed to update question: ${await response.stream.bytesToString()}');
       }
     } catch (e) {
       print('Error updating question: $e');
@@ -1087,67 +1323,78 @@ class GetAllQuestionsApiController extends GetxController{
 
   //delete true false
 
-  deleteTrueFalseAPI({
-    required String main_category_id,
-    required String sub_category_id,
-    required String topic_id,
-    required String sub_topic_id,
-    required String true_false_id,
-  }) async {
-    final response = await http.delete(
-      Uri.parse(ApiString.delete_true_false),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'main_category_id': main_category_id,
-        'sub_category_id': sub_category_id,
-        'topic_id': topic_id,
-        'sub_topic_id': sub_topic_id,
-        'question_id': true_false_id,
-      }),
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Failed to delete phrase: ${response.body}');
-    }
-  }
+  // deleteTrueFalseAPI({
+  //   required String main_category_id,
+  //   required String sub_category_id,
+  //   required String topic_id,
+  //   required String sub_topic_id,
+  //   required String true_false_id,
+  // }) async {
+  //   final response = await http.delete(
+  //     Uri.parse(ApiString.delete_true_false),
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: jsonEncode({
+  //       'main_category_id': main_category_id,
+  //       'sub_category_id': sub_category_id,
+  //       'topic_id': topic_id,
+  //       'sub_topic_id': sub_topic_id,
+  //       'question_id': true_false_id,
+  //     }),
+  //   );
+  //
+  //   if (response.statusCode != 200) {
+  //     throw Exception('Failed to delete phrase: ${response.body}');
+  //   }
+  // }
 
   //update complete the word
-  updateCompleteTheWordTableQuestionApi(CompleteWordData question) async {
+  Future<void> updateCompleteTheWordTableQuestionApi( CompleteWordData question,List<int>? qImage,) async {
     isLoading.value = true;
+
     try {
-      final response = await http.post(
-        Uri.parse(ApiString.update_complete_the_word),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'question_id':question.id,
-          'question_type':question.questionType,
-          'question':question.question,
-          'title': question.title,
-          'option_a':question.optionA,
-          'option_b': question.optionB,
-          'option_c': question.optionC,
-          'option_d': question.optionD,
-          'answer': question.answer,
-          'index': question.index,
-          'points': question.points,
-        }),
-      );
+      var uri = Uri.parse(ApiString.update_complete_the_word);
+      var request = http.MultipartRequest('POST', uri);
+
+      // Add JSON fields
+      request.fields['question_id'] = question.id.toString();
+      request.fields['question_type'] = question.questionType;
+      request.fields['question'] = question.question;
+      request.fields['title'] = question.title;
+      request.fields['option_a'] = question.optionA;
+      request.fields['option_b'] = question.optionB;
+      request.fields['option_c'] = question.optionC;
+      request.fields['option_d'] = question.optionD;
+      request.fields['answer'] = question.answer;
+      request.fields['index'] = question.index.toString();
+      request.fields['points'] = question.points.toString();
+
+      // Add the image file if provided
+      if (qImage != null && qImage.isNotEmpty) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'image',
+            qImage,
+            filename: 'question_image.png',
+            contentType: MediaType('image', 'png'),
+          ),
+        );
+      }
+
+      // Send the request
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
-        await getStoryPhrases(main_category_id: question.mainCategoryId.toString(), sub_category_id: question.subCategoryId.toString(),
-            topic_id: question.topicId.toString(), sub_topic_id: question.subTopicId.toString()
-        );
+        print('Question update successfully');
       } else {
         print('Failed to update question: ${response.body}');
       }
     } catch (e) {
       print('Error updating question: $e');
     } finally {
-      isLoading.value = false; // Set loading state to false
+      isLoading.value = false;
     }
   }
 
@@ -1239,9 +1486,7 @@ class GetAllQuestionsApiController extends GetxController{
       );
 
       if (response.statusCode == 200) {
-        await getStoryPhrases(main_category_id: question.mainCategoryId.toString(), sub_category_id: question.subCategoryId.toString(),
-            topic_id: question.topicId.toString(), sub_topic_id: question.subTopicId.toString()
-        );
+print('question updated successfully');
       } else {
         print('Failed to update question: ${response.body}');
       }
@@ -1254,16 +1499,20 @@ class GetAllQuestionsApiController extends GetxController{
 
 //delete paragraph
   deleteCompleteTheParagraphAPI({
-    required String question_id,
+    required String question_ids,
   }) async {
+    if (question_ids.isEmpty) {
+      print('Error: No question IDs provided');
+      return;
+    }
+
     final response = await http.delete(
       Uri.parse(ApiString.delete_complete_the_paragraph),
       headers: {
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
-
-        'question_id': question_id,
+        'question_id': question_ids,
       }),
     );
 
@@ -1275,42 +1524,76 @@ class GetAllQuestionsApiController extends GetxController{
 
   /// update Mcq api
 
-  updateMcqQuestionAPI(Mcqs question) async {
+  Future<void> updateMcqQuestionAPI({
+    required String mcq_id,
+    required String mainCategoryId,
+    required String subCategoryId,
+    required String topicId,
+    required String subTopicId,
+    required String questionType,
+    required String title,
+    required String question,
+    List<int>? qImage, // Image bytes
+    required String optionA,
+    required String optionB,
+    required String optionC,
+    required String optionD,
+    required String answer,
+    required String points,
+    required String index,
+  }) async {
     isLoading.value = true;
     try {
-      print(question.topicId);
-      final response = await http.post(
-        Uri.parse(ApiString.update_mcq),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'mcq_id': question.id,
-          'main_category_id': question.mainCategoryId,
-          'sub_category_id': question.subCategoryId,
-          'topic_id': question.topicId,
-          'sub_topic_id': question.subTopicId,
-          'question_type': question.questionType,
-          'question': question.question,
-          'title': question.title,
-          'option_a': question.optionA,
-          'option_b': question.optionB,
-          'option_c': question.optionC,
-          'option_d': question.optionD,
-          'answer': question.answer,
-          'index': question.index,
-          'points': question.points,
-        }),
-      );
+      var request = http.MultipartRequest('POST', Uri.parse(ApiString.update_mcq));
+
+      // Add text fields
+      request.fields.addAll({
+        'mcq_id': mcq_id,
+        'main_category_id': mainCategoryId,
+        'sub_category_id': subCategoryId,
+        'topic_id': topicId,
+        'sub_topic_id': subTopicId,
+        'question_type': questionType,
+        'question': question,
+        'title': title,
+        'option_a': optionA,
+        'option_b': optionB,
+        'option_c': optionC,
+        'option_d': optionD,
+        'answer': answer,
+        'index': index,
+        'points': points,
+      });
+
+      // Add image file if available
+      if (qImage != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'q_image',
+            qImage,
+            filename: 'question_image.jpg',
+            contentType: MediaType('image', 'jpeg'),
+          ),
+        );
+        print('image  is uploaded');
+      }
+
+      // Send the request
+      var response = await request.send();
+      var responseBody = await response.stream.bytesToString();
+
+      print('Response Code: ${response.statusCode}');
+      print('Response Body: $responseBody');
 
       if (response.statusCode == 200) {
-        await getAllMCQS(
-            main_category_id: question.mainCategoryId.toString(),
-            sub_category_id: question.subCategoryId.toString(),
-            topic_id: question.topicId.toString(),
-            sub_topic_id: question.subTopicId.toString());
+        // await getAllMCQS(
+        //   main_category_id: mainCategoryId.toString(),
+        //   sub_category_id: subCategoryId.toString(),
+        //   topic_id: topicId.toString(),
+        //   sub_topic_id: subTopicId.toString(),
+        // );
       } else {
-        print('Failed to update question: ${response.body}');
+        print('Failed to update question: ${await response.stream.bytesToString()}');
       }
     } catch (e) {
       print('Error updating question: $e');
@@ -1319,45 +1602,65 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-  updateGuessTheImageApi(GuessTheImageData question) async {
-    isLoading.value = true;
-    try {
-      print(question.topicId);
-      final response = await http.post(
-        Uri.parse(ApiString.update_guess_the_image),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'question_id': question.id,
-          'main_category_id': question.mainCategoryId,
-          'sub_category_id': question.subCategoryId,
-          'topic_id': question.topicId,
-          'sub_topic_id': question.subTopicId,
-          'question_type': question.questionType,
-          'title': question.title,
-          'option_a': question.optionA,
-          'option_b': question.optionB,
-          'option_c': question.optionC,
-          'option_d': question.optionD,
-          'answer': question.answer,
-          'q_image': question.qImage,
-          'index': question.index,
-          'points': question.points,
-        }),
-      );
 
-      if (response.statusCode == 200) {
-        await getAllMCQS(
-            main_category_id: question.mainCategoryId.toString(),
-            sub_category_id: question.subCategoryId.toString(),
-            topic_id: question.topicId.toString(),
-            sub_topic_id: question.subTopicId.toString());
+  updateGuessTheImageApi({
+    required String question_id,
+    required String title,
+    List<int>? qImage,
+    required String optionA,
+    required String optionB,
+    required String optionC,
+    required String optionD,
+    required String answer,
+    required String points,
+    required String index,
+  }) async {
+    isLoading.value = true;
+    var uri = Uri.parse(ApiString.update_guess_the_image);
+    try {
+      var request = http.MultipartRequest("POST", uri);
+
+      // Add image if available
+      if (qImage != null) {
+        var mimeType = lookupMimeType('image') ?? 'image/jpeg';
+        var multipartFile = http.MultipartFile.fromBytes(
+          'q_image',
+          qImage,
+          filename: 'uploaded_image.jpg',
+          contentType: MediaType.parse(mimeType),
+        );
+        request.files.add(multipartFile);
+      }
+
+      // Add form fields
+      request.fields['question_id'] = question_id;
+      request.fields['title'] = title;
+      request.fields['option_a'] = optionA;
+      request.fields['option_b'] = optionB;
+      request.fields['option_c'] = optionC;
+      request.fields['option_d'] = optionD;
+      request.fields['answer'] = answer;
+      request.fields['points'] = points;
+      request.fields['index'] = index;
+
+      // Send request
+      http.Response response = await http.Response.fromStream(await request.send());
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      if (response.statusCode == 201) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        print('Response status: ${responseData}');
+        if (responseData['status'] == 1) {
+          showSnackbar(message: "Question updated successfully");
+        } else {
+          showSnackbar(message: "Failed to updated question");
+        }
       } else {
-        print('Failed to update question: ${response.body}');
+        showSnackbar(message: "Failed to update question: ${response.reasonPhrase}");
       }
     } catch (e) {
-      print('Error updating question: $e');
+      showSnackbar(message: "Error while updating question: $e");
     } finally {
       isLoading.value = false;
     }
@@ -1374,6 +1677,57 @@ class GetAllQuestionsApiController extends GetxController{
       },
       body: jsonEncode({
         'question_id': question_id,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete phrase: ${response.body}');
+    }
+  }
+
+  deleteReArrangeSentence({ required String question_id,
+  }) async {
+    final response = await http.delete(
+      Uri.parse(ApiString.delete_complete_sentence),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'question_id': question_id,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete phrase: ${response.body}');
+    }
+  }
+
+  deleteGuessTheImageAPI({ required String question_ids,
+  }) async {
+    final response = await http.delete(
+      Uri.parse(ApiString.delete_guess_the_image),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'question_id': question_ids,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete phrase: ${response.body}');
+    }
+  }
+
+  deleteTrueOrFalseAPI({ required String question_ids,
+  }) async {
+    final response = await http.delete(
+      Uri.parse(ApiString.delete_true_false),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'question_id': question_ids,
       }),
     );
 

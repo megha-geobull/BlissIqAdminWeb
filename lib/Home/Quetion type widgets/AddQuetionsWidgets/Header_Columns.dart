@@ -5,17 +5,20 @@ List<String> phrases_headers = ["main_category_id", "sub_category_id", "topic_id
   "sub_topic_id","question_type","phrase_name", "points","index"];
 
 List<String> cardFlip_headers = ["main_category_id", "sub_category_id", "topic_id",
-  "sub_topic_id","question_type","letters[]","images[]","points","index"];
+  "sub_topic_id","question_type","letters","images","points","index"];
 
 List<String> fill_in_the_blanks_headers = ["main_category_id", "sub_category_id", "topic_id",
   "sub_topic_id", "question_type", "title", "question_language","question",
   "q_image_name","option_language","option_a","option_b","option_c","option_d","answer","points","index"];
 
 List<String> mcq_headers = ["main_category_id", "sub_category_id", "topic_id", "sub_topic_id", "question_type",
-  "title","question_format","question","q_image_name","option_a","option_b","option_c",'option_d',"answer","points","index"];
+  "title","question","q_image_name","option_a","option_b","option_c",'option_d',"answer","points","index"];
+
+List<String> guess_image = ["main_category_id", "sub_category_id", "topic_id", "sub_topic_id", "question_type",
+  "title","q_image_name","option_a","option_b","option_c",'option_d',"answer","points","index"];
 
 List<String> complete_the_word_headers = ["main_category_id", "sub_category_id", "topic_id", "sub_topic_id", "question_type",
-  "title","question","option_a","option_b","option_c",'option_d',"answer","points","index"];
+  "title","question","q_image_name","option_a","option_b","option_c",'option_d',"answer","points","index"];
 
 List<String> rearrange_headers = ["main_category_id", "sub_category_id", "topic_id", "sub_topic_id",
   "question_type", "title", "question", "q_image_name", "answer",'points',"index"];
@@ -29,8 +32,8 @@ List<String> conversation_headers = ["id","main_category_id", "sub_category_id",
 // List<String> match_pair_headers = ["id","main_category_id", "sub_category_id", "topic_id", "sub_topic_id",
 //   "question_type", "title", "question_format","questions","answer_format","answer","point","index"];
 
-// List<String> learning_slide =["id","main_category_id", "sub_category_id", "topic_id", "sub_topic_id",
-//   "question_type","title","transcription","onscreen_content","examples","index"];
+List<String> learning_slide =["id","main_category_id", "sub_category_id", "topic_id", "sub_topic_id",
+  "question_type","title","transcription","onscreen_content","examples","index"];
 
 List<String> alphabet_example =["main_category_id", "sub_category_id","topic_name","exg_name","image_name"];
 
@@ -45,7 +48,7 @@ List<String> complete_paragraph =["main_category_id", "sub_category_id","topic_i
   "question_type", "title", "question","paragraph_content","option_a", "option_b", "option_c", "option_d",
   "option_e", "option_f", "answer", "points","index"];
 
-List<String> learning_slide =["main_category_id", "sub_category_id", "topic_id", "sub_topic_id",
-  "question_type", "title", "definition", "pdf_file", "ppt_file", "video_file",'image_file',
-  "points", "index"];
+List<String> complete_sentense =["main_category_id", "sub_category_id","topic_id", "sub_topic_id",
+  "question_type","title", "question",  "question_format",
+  "answer", "points","index"];
 

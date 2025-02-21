@@ -1,4 +1,5 @@
 import 'package:blissiqadmin/Global/constants/AppColor.dart';
+import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Home/Assign/AssignedMentorPage.dart';
 import 'package:blissiqadmin/Home/Assign/AssignedStudentPage.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
@@ -7,6 +8,7 @@ import 'package:blissiqadmin/Home/Users/School/SchoolRegistration.dart';
 import 'package:blissiqadmin/auth/Controller/SchoolController/SchoolController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../../Global/constants/CustomAlertDialogue.dart';
 
@@ -19,14 +21,21 @@ class SchoolScreen extends StatefulWidget {
 
 class _SchoolScreenState extends State<SchoolScreen> {
   final SchoolController schoolController = Get.put(SchoolController());
+  Set<String> selectedSchoolIds = {};
+  bool isSelectAll = false;
+  List<Data> filteredSchoolData = [];
+  Map<String, bool> editingStates = {}; // Track editing state for each row
+
 
   @override
   void initState() {
     super.initState();
+    filteredSchoolData = schoolController.allSchoolData;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       schoolController.getAllSchools();
+      searchController.clear();
+      _filterSchools(''); // Clear search on init
     });
-
   }
 
   void _toggleStatus(String schoolId) async {
@@ -50,20 +59,52 @@ class _SchoolScreenState extends State<SchoolScreen> {
       },
     );
     if (confirmation == true) {
-      var school = schoolController.allSchoolData
-          .where((p0) => p0.id == schoolId)
-          .first;
+      var school =
+          schoolController.allSchoolData.where((p0) => p0.id == schoolId).first;
 
       schoolController.approveSchool(
         school_id: schoolId,
-        approval_status: (school.approvalStatus == "Disapproved" || school.approvalStatus == "Pending") ? "Approved" : "Disapproved",
+        approval_status: (school.approvalStatus == "Disapproved" ||
+                school.approvalStatus == "Pending")
+            ? "Approved"
+            : "Disapproved",
       );
-
     }
   }
-  void _removeSchool(int index) {
+
+  void onDelete(String title, String school_id) {
+    showDialog(
+      context: context,
+      builder: (context) => CustomAlertDialog(
+        title: 'Are you sure',
+        content: title,
+        yesText: 'Yes',
+        noText: 'No',
+        onYesPressed: () {
+          schoolController.delete_school(school_id);
+          schoolController.getAllSchools();
+          Navigator.pop(context);
+          selectedSchoolIds.clear();
+          setState(() {});
+        },
+      ),
+    );
+  }
+
+  final TextEditingController searchController = TextEditingController();
+
+  void _filterSchools(String query) {
     setState(() {
-      schoolController.allSchoolData.removeAt(index);
+      if (query.isEmpty) {
+        filteredSchoolData = schoolController.allSchoolData;
+      } else {
+        filteredSchoolData =
+          schoolController.allSchoolData
+              .where((school) => school.schoolName!
+                  .toLowerCase()
+                  .contains(query.toLowerCase()))
+              .toList();
+      }
     });
   }
 
@@ -72,40 +113,43 @@ class _SchoolScreenState extends State<SchoolScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       body: Obx(() {
-        if (schoolController.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        } else {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              bool isWideScreen = constraints.maxWidth > 800;
-              return Row(
-                children: [
-                  if (isWideScreen)
-                    Container(
-                      width: 250,
-                      color: Colors.orange.shade100,
-                      child: const MyDrawer(),
-                    ),
-                  Expanded(
-                    child: Scaffold(
-                      appBar: isWideScreen
-                          ? null
-                          : AppBar(
-                        title: const Text('Dashboard'),
-                        backgroundColor: Colors.blue.shade100,
+        return schoolController.isLoading.value
+            ? Center(
+                child: LoadingAnimationWidget.hexagonDots(
+                  color: Colors.deepOrange,
+                  size: 70,
+                ),
+              )
+            : LayoutBuilder(
+                builder: (context, constraints) {
+                  bool isWideScreen = constraints.maxWidth > 800;
+                  return Row(
+                    children: [
+                      if (isWideScreen)
+                        Container(
+                          width: 250,
+                          color: Colors.orange.shade100,
+                          child: const MyDrawer(),
+                        ),
+                      Expanded(
+                        child: Scaffold(
+                          appBar: isWideScreen
+                              ? null
+                              : AppBar(
+                                  title: const Text('Dashboard'),
+                                  backgroundColor: Colors.blue.shade100,
+                                ),
+                          body: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8.0, vertical: 16),
+                            child: _buildSchoolMainContent(),
+                          ),
+                        ),
                       ),
-                      body: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8.0, vertical: 16),
-                        child: _buildSchoolMainContent(),
-                      ),
-                    ),
-                  ),
-                ],
+                    ],
+                  );
+                },
               );
-            },
-          );
-        }
       }),
     );
   }
@@ -117,194 +161,103 @@ class _SchoolScreenState extends State<SchoolScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(),
+          boxH15(),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search by name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    _filterSchools(value);
+                  },
+                ),
+              ),
+              boxW15(),
+              if (selectedSchoolIds.isNotEmpty)
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade100,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 19, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  label: const Text(
+                    "Delete",
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  onPressed: () async {
+                    print("Selected Ids - ${selectedSchoolIds.join('|')}");
+                    Future.delayed(const Duration(seconds: 1), () async {
+                      onDelete("You want to delete this company?",
+                          selectedSchoolIds.join('|'));
+                    });
+                  },
+                ),
+            ],
+          ),
           const SizedBox(height: 16),
-          Expanded(child: _buildSchoolTable()),
+          Expanded(
+              child: schoolController.isLoading.value
+                  ? Center(
+                      child: LoadingAnimationWidget.hexagonDots(
+                        color: Colors.deepOrange,
+                        size: 70,
+                      ),
+                    )
+                  : _buildSchoolDataTable()),
         ],
       ),
     );
   }
 
-  Widget _buildSchoolTable() {
-    return SingleChildScrollView(
-      child: Card(
-        elevation: 0.8,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        child: Table(
-          border: const TableBorder.symmetric(
-            inside: BorderSide(color: Colors.grey, width: 0.5),
+  Widget _buildSchoolDataTable() {
+    return Card(
+      elevation: 0.8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: SingleChildScrollView(
+        child: PaginatedDataTable(
+          header: const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Schools'),
+            ],
           ),
-          columnWidths: const {
-            0: FlexColumnWidth(1),
-            1: FlexColumnWidth(1),
-            2: FlexColumnWidth(1.8),
-            3: FlexColumnWidth(1),
-            4: FlexColumnWidth(1),
-            5: FlexColumnWidth(1),
-            6: FlexColumnWidth(1),
-            7: FlexColumnWidth(1),
-            8: FlexColumnWidth(1),
-          },
-          children: [
-            _buildTableHeader(),
-            ...schoolController.allSchoolData.asMap().entries.map((entry) {
-              int index = entry.key;
-              Data mentor = entry.value;
-              return _buildTableRow(mentor, index);
-            }).toList(),
+          columns: const [
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Email')),
+            DataColumn(label: Text('Contact No')),
+            DataColumn(label: Text('Address')),
+            DataColumn(label: Text('School Reg.no')),
+            DataColumn(label: Text('School Type')),
+            DataColumn(label: Text('Sponsor')),
+            DataColumn(label: Text('Status')),
+            DataColumn(label: Text('Mentor')),
+            DataColumn(label: Text('Student')),
+            DataColumn(label: Text('Actions')),
+            DataColumn(label: Text('Edit')),
           ],
+          source: SchoolDataTableSource(
+            filteredSchoolData,
+            context,
+            this,
+          ),
+          rowsPerPage: 10,
+          showFirstLastButtons: true,
         ),
       ),
     );
-  }
-
-  TableRow _buildTableRow(Data school, int index) {
-    return TableRow(
-      children: [
-        // Padding(
-        //   padding: const EdgeInsets.all(12.0),
-        //   child: CircleAvatar(
-        //     radius: 24,
-        //     backgroundColor: Colors.grey.shade300,
-        //     child: CachedNetworkImage(
-        //       imageUrl: "${ApiString.ImgBaseUrl}${school.profileImage}",
-        //       imageBuilder: (context, imageProvider) => Container(
-        //         decoration: BoxDecoration(
-        //           shape: BoxShape.circle,
-        //           image: DecorationImage(
-        //             image: imageProvider,
-        //             fit: BoxFit.cover,
-        //           ),
-        //         ),
-        //       ),
-        //       placeholder: (context, url) => const CircularProgressIndicator(),
-        //       errorWidget: (context, url, error) => const Icon(Icons.person, size: 48, color: Colors.grey),
-        //     ),
-        //   ),
-        // ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(school.schoolName ?? 'No Name'),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(school.principalEmail ?? 'No Email'),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(school.principalPhone?.toString() ?? '-'),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(school.address ?? 'No Address'),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(school.schoolRegNumber ?? 'No school reg.no'),
-        ), // Placeholder if experience is missing
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(school.schoolType ?? 'no type'),
-        ), // Placeholder if qualification is missing
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: ElevatedButton(
-            onPressed: () => _toggleStatus(school.id ?? ''),
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              backgroundColor: _getButtonColor(school.approvalStatus), // Dynamic color
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 9),
-            ),
-            child: Text(
-              school.approvalStatus ?? 'Pending',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AssignedMentorPage(schoolID: school.id ?? ''),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              backgroundColor: Colors.blue,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            ),
-            child: const Text('View', style: TextStyle(fontSize: 12,color: Colors.white)),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AssignedStudentPage(schoolID: school.id ?? ''),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              backgroundColor: Colors.blueAccent,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            ),
-            child: const Text('View', style: TextStyle(fontSize: 12,color: Colors.white)),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () {
-              onDelete("You want to delete this school ?",index,school.id!);
-              },
-          ),
-        ),
-      ],
-    );
-  }
-
-  void onDelete(String title,int index,String school_id) {
-    showDialog(
-      context: context,
-      builder: (context) => CustomAlertDialog(
-        title: 'Are you sure',
-        content: title,
-        yesText: 'Yes',
-        noText: 'No', onYesPressed: () {
-        Navigator.pop(context);
-        schoolController.delete_school(school_id);
-        Future.delayed(const Duration(seconds: 2), () {
-          _removeSchool(index);
-        });
-      },
-      ),
-    );
-  }
-
-  Color _getButtonColor(String? approvalStatus) {
-    switch (approvalStatus) {
-      case "Approved":
-        return AppColor.green;
-      case "Disapproved":
-        return AppColor.red;
-      case "Pending":
-        return AppColor.amber;
-      default:
-        return AppColor.grey;
-    }
   }
 
   Widget _buildHeader() {
@@ -344,8 +297,8 @@ class _SchoolScreenState extends State<SchoolScreen> {
                   elevation: 3,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8)),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
               ),
             ),
@@ -354,74 +307,232 @@ class _SchoolScreenState extends State<SchoolScreen> {
       ),
     );
   }
-
-  TableRow _buildTableHeader() {
-    return TableRow(
-      decoration: BoxDecoration(
-        color: Colors.blueGrey.shade50,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-      ),
-      children: const [
-        // Padding(
-        //   padding: EdgeInsets.all(12.0),
-        //   child: Text('Profile', style: TextStyle(fontWeight: FontWeight.bold)),
-        // ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Name', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Email', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Contact No', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Address', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('School Reg.no', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('School Type', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Mentor', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Student', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Actions', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-      ],
-    );
-  }
-
 }
 
+class SchoolDataTableSource extends DataTableSource {
+  SchoolDataTableSource(this.schools, this.context, this.schoolScreenState) {
+    buildDataTableRows();
+  }
 
+  final List<Data> schools;
+  final BuildContext context;
+  final _SchoolScreenState schoolScreenState;
 
+  List<DataRow> dataTableRows = [];
 
+  void buildDataTableRows() {
+    dataTableRows = schools.map<DataRow>((dataRow) {
+      final isEditing = schoolScreenState.editingStates[dataRow.id] ?? false;
+      return DataRow(
+        selected: schoolScreenState.selectedSchoolIds.contains(dataRow.id),
+        onSelectChanged: (isSelected) {
+          if (isSelected == true) {
+            schoolScreenState.selectedSchoolIds.add(dataRow.id ?? '');
+          } else {
+            schoolScreenState.selectedSchoolIds.remove(dataRow.id ?? '');
+          }
+          schoolScreenState.setState(() {});
+        },
+        cells: [
+          DataCell(
+            isEditing
+                ? TextFormField(
+                    initialValue: dataRow.schoolName,
+                    onChanged: (value) {
+                      // dataRow.schoolName = value;
+                    },
+                  )
+                : Text(dataRow.schoolName ?? 'No Name'),
+          ),
+          DataCell(
+            isEditing
+                ? TextFormField(
+                    initialValue: dataRow.principalEmail,
+                    onChanged: (value) {
+                      // dataRow.principalEmail = value;
+                    },
+                  )
+                : Text(dataRow.principalEmail ?? 'No Email'),
+          ),
+          DataCell(
+            isEditing
+                ? TextFormField(
+                    initialValue: dataRow.principalPhone?.toString(),
+                    onChanged: (value) {
+                      // dataRow.principalPhone = value;
+                    },
+                  )
+                : Text(dataRow.principalPhone?.toString() ?? '-'),
+          ),
+          DataCell(
+            isEditing
+                ? TextFormField(
+                    initialValue: dataRow.address,
+                    onChanged: (value) {
+                      // dataRow.address = value;
+                    },
+                  )
+                : Text(dataRow.address ?? 'No Address'),
+          ),
+          DataCell(
+            isEditing
+                ? TextFormField(
+                    initialValue: dataRow.schoolRegNumber,
+                    onChanged: (value) {
+                      // dataRow.schoolRegNumber = value;
+                    },
+                  )
+                : Text(dataRow.schoolRegNumber ?? 'No school reg.no'),
+          ),
+          DataCell(
+            isEditing
+                ? TextFormField(
+                    initialValue: dataRow.schoolType,
+                    onChanged: (value) {
+                      // dataRow.schoolType = value;
+                    },
+                  )
+                : Text(dataRow.schoolType ?? 'no type'),
+          ),
+          DataCell(
+            dataRow.companyId!.isNotEmpty
+                ? ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepOrange,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 11),
+                    ),
+                    child: const Text('Sponsored',
+                        style: TextStyle(fontSize: 12, color: Colors.white)),
+                  )
+                : const SizedBox.shrink(),
+          ),
+          DataCell(
+            ElevatedButton(
+              onPressed: () =>
+                  schoolScreenState._toggleStatus(dataRow.id ?? ''),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                backgroundColor: _getButtonColor(dataRow.approvalStatus),
+              ),
+              child: Text(
+                dataRow.approvalStatus ?? 'Pending',
+                style: const TextStyle(color: Colors.white, fontSize: 12),
+              ),
+            ),
+          ),
+          DataCell(
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        AssignedMentorPage(schoolID: dataRow.id ?? ''),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Text('View',
+                  style: TextStyle(color: Colors.white, fontSize: 12)),
+            ),
+          ),
+          DataCell(
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        AssignedStudentPage(schoolID: dataRow.id ?? ''),
+                  ),
+                );
+              },
+              style:
+                  ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+              child: const Text('View',
+                  style: TextStyle(color: Colors.white, fontSize: 12)),
+            ),
+          ),
+          DataCell(
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () {
+                schoolScreenState.onDelete(
+                  "You want to delete this school?",
+                  dataRow.id!,
+                );
+              },
+            ),
+          ),
+          DataCell(isEditing
+              ? ElevatedButton(
+                  onPressed: () {
+                    // Save changes and exit edit mode
+                    schoolScreenState.setState(() {
+                      schoolScreenState.editingStates[dataRow.id!] = false;
+                    });
+                    // Call update API here if needed
+                  },
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+                  child: const Text('Update'),
+                )
+              : ElevatedButton(
+                  onPressed: () {
+                    // Save changes and exit edit mode
+                    schoolScreenState.setState(() {
+                      schoolScreenState.editingStates[dataRow.id!] = true;
+                    });
+                    // Call update API here if needed
+                  },
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+                  child: const Text('Edit'),
+                )),
+        ],
+      );
+    }).toList();
+  }
 
+  Color _getButtonColor(String? approvalStatus) {
+    switch (approvalStatus) {
+      case "Approved":
+        return AppColor.green;
+      case "Disapproved":
+        return AppColor.red;
+      case "Pending":
+        return AppColor.amber;
+      default:
+        return AppColor.grey;
+    }
+  }
 
+  @override
+  DataRow? getRow(int index) => dataTableRows[index];
 
+  @override
+  int get rowCount => dataTableRows.length;
 
+  @override
+  bool get isRowCountApproximate => false;
 
-
-
-
-
-
-
+  @override
+  int get selectedRowCount => schoolScreenState.selectedSchoolIds.length;
+}

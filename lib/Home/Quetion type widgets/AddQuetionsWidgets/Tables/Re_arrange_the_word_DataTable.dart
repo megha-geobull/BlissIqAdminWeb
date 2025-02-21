@@ -163,14 +163,8 @@ class _QuestionTableScreenState extends State<Re_Arrange_QuestionTableScreen> {
                         //_removeSelectedQuestions();
                         bool confirmed = await _dataSource._showConfirmationDialog(context);
                         if(confirmed){
-                          _dataSource._deleteSelectedQuestions();
+                          _dataSource._deleteSelectedQuestions(_selectedQuestionIds);
                         }
-                        _getdeleteApiController.getAllRe_Arrange(
-                          main_category_id: widget.main_category_id,
-                          sub_category_id: widget.sub_category_id,
-                          topic_id: widget.topic_id,
-                          sub_topic_id: widget.sub_topic_id,
-                        );
                       });
                     },
                   ),
@@ -220,9 +214,11 @@ class _QuestionTableScreenState extends State<Re_Arrange_QuestionTableScreen> {
                             ],
                           ),
                         ),
+                        DataColumn(label: Text("Index")),
                         DataColumn(label: Text("Question Type")),
                         DataColumn(label: Text("Title")),
                         DataColumn(label: Text("Re_Arrange Word")),
+                        DataColumn(label: Text("Correct Word")),
                         DataColumn(label: Text("Points")),
                         DataColumn(label: Text("Question Image")),
                         DataColumn(label: Text("Edit")),
@@ -250,11 +246,105 @@ class QuestionDataSource extends DataTableSource {
   BuildContext context;
 
   int? editingRowIndex; // Track which row is being edited
+  List<TextEditingController> indexControllers = [];
   List<TextEditingController> questionTypeControllers = [];
   List<TextEditingController> titleControllers = [];
   List<TextEditingController> questionControllers = [];
   List<TextEditingController> questionImageControllers = [];
   List<TextEditingController> pointsControllers = [];
+  List<TextEditingController> correctAnswerControllers = [];
+
+  List<PlatformFile>? _paths;
+  var pathsFile;
+  var pathsFileName;
+  bool isFilePicked = false;
+  pickFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: false,
+      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
+      allowedExtensions: [
+        'bmp',
+        'dib',
+        'gif',
+        'jfif',
+        'jpe',
+        'jpg',
+        'jpeg',
+        'pbm',
+        'pgm',
+        'ppm',
+        'pnm',
+        'pfm',
+        'png',
+        'apng',
+        'blp',
+        'bufr',
+        'cur',
+        'pcx',
+        'dcx',
+        'dds',
+        'ps',
+        'eps',
+        'fit',
+        'fits',
+        'fli',
+        'flc',
+        'ftc',
+        'ftu',
+        'gbr',
+        'grib',
+        'h5',
+        'hdf',
+        'jp2',
+        'j2k',
+        'jpc',
+        'jpf',
+        'jpx',
+        'j2c',
+        'icns',
+        'ico',
+        'im',
+        'iim',
+        'mpg',
+        'mpeg',
+        'tif',
+        'tiff',
+        'mpo',
+        'msp',
+        'palm',
+        'pcd',
+        'pdf',
+        'pxr',
+        'psd',
+        'qoi',
+        'bw',
+        'rgb',
+        'rgba',
+        'sgi',
+        'ras',
+        'tga',
+        'icb',
+        'vda',
+        'vst',
+        'webp',
+        'wmf',
+        'emf',
+        'xbm',
+        'xpm'
+      ],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      _paths = result.files;
+      pathsFile = _paths!.first.bytes; // Store the bytes
+      pathsFileName = _paths!.first.name; // Store the file name
+      isFilePicked = true;
+      notifyListeners();
+    } else {
+      print('No file selected');
+    }
+  }
 
   final GetAllQuestionsApiController updateQueApiController = Get.find();
 
@@ -264,6 +354,9 @@ class QuestionDataSource extends DataTableSource {
     for (var question in questions) {
 
       questionTypeControllers.add(TextEditingController(text: question.questionType));
+
+      indexControllers.add(TextEditingController(text: question.index.toString()));
+      correctAnswerControllers.add(TextEditingController(text: question.answer.toString()));
 
       titleControllers.add(TextEditingController(text: question.title));
 
@@ -306,191 +399,129 @@ class QuestionDataSource extends DataTableSource {
             },
           ),
         ),
-
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: questionTypeControllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                value,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                pointsControllers[index].text,
-                questionImageControllers[index].text,
-              );
-            },
-          )
-              : Text(question.questionType ?? ""),
-        ),
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: titleControllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                value,
-                questionControllers[index].text,
-                pointsControllers[index].text,
-                questionImageControllers[index].text,
-              );
-            },
-          )
-              : Text(question.title ?? ""),
-        ),
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: questionControllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                titleControllers[index].text,
-                value,
-                pointsControllers[index].text,
-                questionImageControllers[index].text,
-              );
-            },
-          )
-              : Text(question.question ?? ""),
-        ),
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: pointsControllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                value,
-                questionImageControllers[index].text,
-              );
-            },
-          )
-              : Text(question.points?.toString() ?? ""),
-        ),
-
-        DataCell(
-          editingRowIndex == index
-              ? Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: questionImageControllers[index],
-                 // onSubmitted: (value) => _updateQuestion(...),
-                ),
-              ),
-              IconButton(
-                icon: Icon(Icons.image),
-                onPressed: () => _pickAndUpdateImage(index),
-              ),
-            ],
-          )
-              : ElevatedButton(
-            onPressed: () => _showImageDialog(context, index),
-            child: Text('View Image'),
-          ),
-        ),
-
-        DataCell(
-          editingRowIndex == index
-              ? ElevatedButton(
-            onPressed: () {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                pointsControllers[index].text,
-                questionImageControllers[index].text,
-              );
-              editingRowIndex = null; // Exit edit mode
-              notifyListeners(); // Update UI
-            },
-            child: const Text("Update"),
-          )
-              : GestureDetector(
-            onTap: () {
-              if (editingRowIndex == null) {
-                // Start editing
-                editingRowIndex = index;
-                notifyListeners(); // Update UI
-              }
-            },
-            child: const Text(
-              "Edit",
-              style: TextStyle(
-                color: Colors.blue,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ),
-        ),
+        DataCell(_buildEditableField(index, indexControllers)),
+        DataCell(_buildEditableField(index, questionTypeControllers)),
+        DataCell(_buildEditableField(index, titleControllers)),
+        DataCell(_buildEditableField(index, questionControllers)),
+        DataCell(_buildEditableField(index, correctAnswerControllers)),
+        DataCell(_buildEditableField(index, pointsControllers)),
+        DataCell(_buildEditableField(index, questionImageControllers)),
+        DataCell(_buildEditButton(index)),
       ],
     );
   }
 
-  /// call the update the story phrases api here
-  /// Update the story phrases API here
-  _updateQuestion(
-      int index,
-      String questionType,
-      String title,
-      String question,
-      String pointsValue,
-      String questionImage,
-      ) async {
-    final updatedQuestion = ReArrange(
-      id: questions[index].id, // Keep the same ID
-      questionType: questionType,
-     // index: int.tryParse(title) ?? questions[index].index, // Update index
-      title: title,
-      question:question,
-      qImage:questionImage,
-      points: int.tryParse(pointsValue) ?? questions[index].points, // Update points
+  Widget _buildEditableField(int index, List<TextEditingController> controllers) {
+    if (index >= controllers.length) return const Text("");
+
+    if (controllers == questionImageControllers) {
+      return editingRowIndex == index
+          ? SizedBox(
+        width: 50,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: isFilePicked ? Colors.green : Colors.blue, width: 1.5),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: IconButton(
+            icon: Icon(Icons.image, color: isFilePicked ? Colors.green :Colors.blue),
+            onPressed: () => pickFile(),
+          ),
+        ),
+      )
+          : controllers[index].text.isNotEmpty && controllers[index].text != "null"
+          ? SizedBox(
+        width: 50, // Ensure image preview doesn't take excessive space
+        child: CachedNetworkImage(
+          imageUrl: ApiString.ImgBaseUrl + controllers[index].text,
+          progressIndicatorBuilder: (context, url, downloadProgress) =>
+              CircularProgressIndicator(value: downloadProgress.progress),
+          errorWidget: (context, url, error) => Icon(Icons.error),
+        ),
+      )
+          : const Icon(Icons.broken_image, color: Colors.grey);
+    }
+
+    return editingRowIndex == index
+        ? controllers == questionTypeControllers ? TextField(
+      controller: controllers[index],
+      enabled: false,
+      decoration: const InputDecoration(border: OutlineInputBorder()),
+    ) : TextField(
+      controller: controllers[index],
+      decoration: const InputDecoration(border: OutlineInputBorder()),
+    )
+        : Text(controllers[index].text);
+  }
+
+  Widget _buildEditButton(int index) {
+    return editingRowIndex == index
+        ? ElevatedButton(
+      onPressed: () {
+        _updateQuestion(index);
+        editingRowIndex = null;
+        notifyListeners();
+      },
+      child: const Text("Update"),
+    )
+        : GestureDetector(
+      onTap: () {
+        if (editingRowIndex == null) {
+          editingRowIndex = index;
+          notifyListeners();
+        }
+      },
+      child: const Text(
+        "Edit",
+        style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
+      ),
+    );
+  }
+
+  void _updateQuestion(int index) async {
+    if (index >= questions.length || index >= titleControllers.length) return;
+
+    final   updatedQuestion = ReArrange(
+      id: questions[index].id,
+      questionType: questionTypeControllers[index].text,
+      index: int.tryParse(indexControllers[index].text) ?? questions[index].index,
+      title: titleControllers[index].text,
+      answer: correctAnswerControllers[index].text,
+      question:questionControllers[index].text,
+      qImage:questionImageControllers[index].text,
+      points: int.tryParse(pointsControllers[index].text) ?? questions[index].points,
       mainCategoryId: questions[index].mainCategoryId,
       subCategoryId: questions[index].subCategoryId,
       topicId: questions[index].topicId,
       subTopicId: questions[index].subTopicId,
     );
 
-    questions[index] = updatedQuestion;
-
     try {
-      await updateQueApiController.updateRearrangeTheWordTableQuestionApi(updatedQuestion);
+      questions[index] = updatedQuestion;
+      await updateQueApiController.updateRearrangeTheWordApi(updatedQuestion,pathsFile)
+          .whenComplete(() => updateQueApiController.getAllRe_Arrange(
+        main_category_id: updatedQuestion.mainCategoryId.toString(),
+        sub_category_id: updatedQuestion.subCategoryId.toString(),
+        topic_id: updatedQuestion.topicId.toString(),
+        sub_topic_id:updatedQuestion.subTopicId.toString(),
+      ),);
+
       notifyListeners();
     } catch (e) {
       print('Error updating question: $e');
     }
   }
 
+
   /// Delete the story phrases API here
-  _deleteSelectedQuestions() async {
+  _deleteSelectedQuestions(String ids) async {
     final deleteApiController = Get.find<GetAllQuestionsApiController>();
 
     if (selectedQuestionIds.isNotEmpty) {
       try {
         await deleteApiController.deleteReArrangeAPI(
 
-          question_id: questions[0].mainCategoryId.toString(),
+          question_id: ids,
 );
 
         // Refresh the list of questions
@@ -531,7 +562,7 @@ class QuestionDataSource extends DataTableSource {
     } else {
       bool confirmed = await _showConfirmationDialog(context);
       if(confirmed){
-        _deleteSelectedQuestions();
+        // _deleteSelectedQuestions();
       }
       selectedQuestionIds.clear();
     }
@@ -564,136 +595,6 @@ class QuestionDataSource extends DataTableSource {
         );
       },
     ) ?? false; // Default to false if dialog is dismissed
-  }
-
-// Show image preview dialog
-  void _showImageDialog(BuildContext context, int index) {
-    final imageUrl = questionImageControllers[index].text.isNotEmpty
-        ? questionImageControllers[index].text
-        : (questions[index].qImage != null ? questions[index].qImage! : '');
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Question Image'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-        imageUrl.isNotEmpty
-        ? CachedNetworkImage(
-        imageUrl: ApiString.ImgBaseUrl + imageUrl,
-          progressIndicatorBuilder: (context, url, downloadProgress) =>
-              CircularProgressIndicator(value: downloadProgress.progress),
-          errorWidget: (context, url, error) => const Icon(Icons.error),
-        )
-              : const Text('No image available'),
-
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                TextButton(
-                  onPressed: () => _showFullScreenImage(context, index),
-                  child: const Text('View Full Screen'),
-                ),
-                TextButton(
-                  onPressed: () => _pickAndUpdateImage(index), // Change image
-                  child: const Text('Change Image'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showFullScreenImage(BuildContext context, int index) {
-    final imageUrl = ApiString.ImgBaseUrl + questions[index].qImage!;
-
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.black,
-        child: InteractiveViewer(
-          child: imageUrl.isNotEmpty
-              ? Image.network(imageUrl)
-              : const Center(child: Text("No Image Available", style: TextStyle(color: Colors.white))),
-        ),
-      ),
-    );
-  }
-
-// Pick and update image
-  Future<void> _pickAndUpdateImage(int index) async {
-    try {
-      final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (pickedFile == null) return;
-
-      File newImageFile = File(pickedFile.path);
-
-      // Show selected image in the dialog instantly
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Preview Selected Image'),
-          content: Image.file(newImageFile), // Show the selected image
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context), // Close preview
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(context); // Close preview dialog
-
-                // Show loading indicator
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => const Center(child: CircularProgressIndicator()),
-                );
-
-                _updateQuestion(
-                  index,
-                  questionTypeControllers[index].text,
-                  titleControllers[index].text,
-                  questionControllers[index].text,
-                  pointsControllers[index].text,
-                  newImageFile.path,
-                );
-
-                // Close loading
-                Navigator.pop(context);
-
-                // Show the new image in a dialog
-                _showImageDialog(context, index);
-              },
-              child: const Text('Upload'),
-            ),
-          ],
-        ),
-      );
-    } catch (e) {
-      Navigator.pop(context); // Close loading
-      _showErrorDialog('Image selection failed: $e');
-    }
-  }
-
-
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 
 }

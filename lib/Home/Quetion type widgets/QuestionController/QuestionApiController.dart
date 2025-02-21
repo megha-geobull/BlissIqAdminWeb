@@ -591,6 +591,7 @@ class QuestionApiController extends GetxController {
 
       // Handle success and error responses
       if (response.statusCode == 201 && responseData['status'] == 1) {
+        print('Question added successfully');
         Fluttertoast.showToast(
           msg: responseData['message'] ?? 'Added successfully',
         );

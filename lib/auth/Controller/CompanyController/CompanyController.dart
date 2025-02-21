@@ -20,8 +20,6 @@ import '../../../Home/Users/Models/GetAllCompanyModel.dart';
 
 class CompanyController extends GetxController{
 
-
-
   var ownerNameController = TextEditingController();
   var companyNameController = TextEditingController();
   var emailController = TextEditingController();
@@ -180,7 +178,6 @@ class CompanyController extends GetxController{
   companyRegistration({
     required String companyName,
     required String ownerName,
-    required String panCardNo,
     required String cinNumber,
     required String gstNumber,
     required String email,
@@ -188,7 +185,9 @@ class CompanyController extends GetxController{
     required String password,
     required BuildContext context,
     List<int>? profileImageBytes,
+    List<int>? pan_card,
     String? profileImageName,
+    String? panImageName,
   }) async {
     isLoading.value = true;
 
@@ -213,11 +212,21 @@ class CompanyController extends GetxController{
       if (profileImageBytes != null) {
         final mimeType = lookupMimeType(profileImageName!); // Get MIME type
         final mimeTypeParts = mimeType?.split('/') ?? ['application', 'octet-stream'];
-
         final multipartFile = http.MultipartFile.fromBytes(
           'profile_pic',
           profileImageBytes,
           filename: profileImageName, // Pass file name
+          contentType: MediaType(mimeTypeParts[0], mimeTypeParts[1]),
+        );
+        request.files.add(multipartFile);
+      }
+      if (pan_card != null) {
+        final mimeType = lookupMimeType(panImageName!); // Get MIME type
+        final mimeTypeParts = mimeType?.split('/') ?? ['application', 'octet-stream'];
+        final multipartFile = http.MultipartFile.fromBytes(
+          'pan_card',
+          pan_card,
+          filename: panImageName, // Pass file name
           contentType: MediaType(mimeTypeParts[0], mimeTypeParts[1]),
         );
         request.files.add(multipartFile);
@@ -232,6 +241,8 @@ class CompanyController extends GetxController{
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(responseData['message'])),
         );
+        getAllCompany();
+        Get.back();
         clearControllers();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -251,7 +262,7 @@ class CompanyController extends GetxController{
 
   getAllCompany() async {
     isLoading.value = true;
-
+allCompanyData.clear();
     try {
       final response = await http.get(
         Uri.parse(ApiString.get_all_companies),
@@ -268,7 +279,6 @@ class CompanyController extends GetxController{
           allCompanyData.value = (responseData["data"] as List)
               .map((mentorJson) => Data.fromJson(mentorJson))
               .toList();
-
           print("Fetched ${allCompanyData.length} company");
         } else {
           showSnackbar(message: responseData['message'] ?? "Failed to fetch company");
@@ -340,7 +350,7 @@ class CompanyController extends GetxController{
 
       if (response.statusCode == 200) {
         var responseData = jsonDecode(response.body);
-
+        getAllCompany();
         if (responseData['status'] == 1) {
           // Parse each JSON object into a Data model
           showSnackbar(message: "Deleted successfully");
