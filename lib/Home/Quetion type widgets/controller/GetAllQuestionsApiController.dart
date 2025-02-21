@@ -1004,7 +1004,7 @@ class GetAllQuestionsApiController extends GetxController{
     } catch (e) {
       print('Error updating question: $e');
     } finally {
-      isLoading.value = false; // Set loading state to false
+      isLoading.value = false;
     }
   }
 

@@ -11,6 +11,9 @@ import '../../Global/constants/CustomAlertDialogue.dart';
 import '../../controller/CategoryController.dart';
 import 'Topics_screen.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+
+
+
 class MainCategoriesPage extends StatefulWidget {
   const MainCategoriesPage({super.key});
 
