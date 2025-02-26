@@ -158,8 +158,8 @@ class _LearningSlideTableState extends State<LearningSlideTable> {
                     ),
                     onPressed: () async {
                       print("Selected Ids -$_selectedQuestionIds");
+                      _getdeleteApiController.deleteLearningSlideAPI(learning_ids:_selectedQuestionIds);
                       Future.delayed(const Duration(seconds: 1), () {
-                        _getdeleteApiController.deleteLearningSlideAPI(learning_ids:_selectedQuestionIds);
                         _getdeleteApiController.getAllLearningSlideApi(
                           main_category_id: widget.main_category_id,
                           sub_category_id: widget.sub_category_id,
