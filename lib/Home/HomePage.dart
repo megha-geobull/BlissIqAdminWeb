@@ -255,7 +255,7 @@ class _HomePageState extends State<HomePage> {
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) =>
-                                                    const MainCategoriesPage()),
+                                                     MainCategoriesPage()),
                                           );
                                           break;
                                         case 2:

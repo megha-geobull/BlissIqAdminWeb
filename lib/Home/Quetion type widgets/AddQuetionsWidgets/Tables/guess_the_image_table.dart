@@ -1,14 +1,11 @@
-import 'dart:convert';
-
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/controller/GetAllQuestionsApiController.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/guess_the_image.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
-
 
 class GuessTheImageTable extends StatefulWidget {
   final String main_category_id;
@@ -162,9 +159,9 @@ class _QuestionTableScreenState extends State<GuessTheImageTable> {
                         //_removeSelectedQuestions();
                         bool confirmed = await _dataSource._showConfirmationDialog(context);
                         if(confirmed){
-                          _dataSource._deleteSelectedQuestions();
+                          _dataSource._deleteSelectedQuestions(_selectedQuestionIds);
                         }
-                        _getdeleteApiController.getAllRe_Arrange(
+                        _getdeleteApiController.getGuessTheImage(
                           main_category_id: widget.main_category_id,
                           sub_category_id: widget.sub_category_id,
                           topic_id: widget.topic_id,
@@ -252,6 +249,7 @@ class QuestionDataSource extends DataTableSource {
   bool isSelectAll = false;
   BuildContext context;
 
+
   int? editingRowIndex;
 
   // Controllers for each editable field
@@ -298,17 +296,99 @@ class QuestionDataSource extends DataTableSource {
       pointsControllers.add(TextEditingController(text: question.points?.toString() ?? ''));
     }
   }
-  Future<void> _pickImage(int index) async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
-    if (image != null) {
-      final bytes = await image.readAsBytes();
-      final base64Image = base64Encode(bytes);
-      questionImageControllers[index].text = base64Image;
+  List<PlatformFile>? _paths;
+  var pathsFile;
+  var pathsFileName;
+  bool isFilePicked = false;
+  pickFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: false,
+      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
+      allowedExtensions: [
+        'bmp',
+        'dib',
+        'gif',
+        'jfif',
+        'jpe',
+        'jpg',
+        'jpeg',
+        'pbm',
+        'pgm',
+        'ppm',
+        'pnm',
+        'pfm',
+        'png',
+        'apng',
+        'blp',
+        'bufr',
+        'cur',
+        'pcx',
+        'dcx',
+        'dds',
+        'ps',
+        'eps',
+        'fit',
+        'fits',
+        'fli',
+        'flc',
+        'ftc',
+        'ftu',
+        'gbr',
+        'grib',
+        'h5',
+        'hdf',
+        'jp2',
+        'j2k',
+        'jpc',
+        'jpf',
+        'jpx',
+        'j2c',
+        'icns',
+        'ico',
+        'im',
+        'iim',
+        'mpg',
+        'mpeg',
+        'tif',
+        'tiff',
+        'mpo',
+        'msp',
+        'palm',
+        'pcd',
+        'pdf',
+        'pxr',
+        'psd',
+        'qoi',
+        'bw',
+        'rgb',
+        'rgba',
+        'sgi',
+        'ras',
+        'tga',
+        'icb',
+        'vda',
+        'vst',
+        'webp',
+        'wmf',
+        'emf',
+        'xbm',
+        'xpm'
+      ],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      _paths = result.files;
+      pathsFile = _paths!.first.bytes; // Store the bytes
+      pathsFileName = _paths!.first.name; // Store the file name
+      isFilePicked = true; // Mark file as picked
       notifyListeners();
+    } else {
+      print('No file selected');
     }
   }
+
   @override
   DataRow? getRow(int index) {
     if (index >= questions.length) return null;
@@ -355,25 +435,31 @@ class QuestionDataSource extends DataTableSource {
       return editingRowIndex == index
           ? Row(
         children: [
-          Expanded(
-            child: TextField(
-              controller: controllers[index],
-              decoration: const InputDecoration(border: OutlineInputBorder()),
+          SizedBox(
+            width: 50,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: isFilePicked ? Colors.green : Colors.blue, width: 1.5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: IconButton(
+                icon: Icon(Icons.image, color: isFilePicked ? Colors.green :Colors.blue),
+                onPressed: () => pickFile(),
+              ),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.image, color: Colors.blue),
-            onPressed: () => _pickImage(index),
           ),
         ],
       )
           : controllers[index].text.isNotEmpty && controllers[index].text != "null"
-          ? CachedNetworkImage(
-        imageUrl: ApiString.ImgBaseUrl + controllers[index].text,
-        progressIndicatorBuilder: (context, url, downloadProgress) =>
-            CircularProgressIndicator(value: downloadProgress.progress),
-        errorWidget: (context, url, error) => Icon(Icons.error),
-      )
+          ? SizedBox(
+        width: 50,
+            child: CachedNetworkImage(
+                    imageUrl: ApiString.ImgBaseUrl + controllers[index].text,
+                    progressIndicatorBuilder: (context, url, downloadProgress) =>
+              CircularProgressIndicator(value: downloadProgress.progress),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                  ),
+          )
           : const Icon(Icons.broken_image, color: Colors.grey); /// img not provided
     }
 
@@ -384,7 +470,6 @@ class QuestionDataSource extends DataTableSource {
     )
         : Text(controllers[index].text);
   }
-
 
   Widget _buildEditButton(int index) {
     return editingRowIndex == index
@@ -411,24 +496,12 @@ class QuestionDataSource extends DataTableSource {
   }
 
   /// Delete the story phrases API here
-  _deleteSelectedQuestions() async {
+  _deleteSelectedQuestions(String ids) async {
     final deleteApiController = Get.find<GetAllQuestionsApiController>();
 
     if (selectedQuestionIds.isNotEmpty) {
       try {
-        await deleteApiController.deleteReArrangeAPI(
-
-          question_id: questions[0].mainCategoryId.toString(),
-        );
-
-        // Refresh the list of questions
-        await deleteApiController.getAllRe_Arrange(
-          main_category_id: questions[0].mainCategoryId.toString(),
-          sub_category_id: questions[0].subCategoryId.toString(),
-          topic_id: questions[0].topicId.toString(),
-          sub_topic_id: questions[0].subTopicId.toString(),
-        );
-
+        await deleteApiController.deleteGuessTheImageAPI(question_ids: ids);
         questions.removeWhere((question) => selectedQuestionIds.contains(question.id));
         selectedQuestionIds.clear(); // Clear selected IDs
         notifyListeners(); // Update UI
@@ -437,8 +510,6 @@ class QuestionDataSource extends DataTableSource {
       }
     }
   }
-
-
 
   void _updateQuestion(int index) async {
     if (index >= questions.length || index >= titleControllers.length) return;
@@ -462,7 +533,23 @@ class QuestionDataSource extends DataTableSource {
 
     try {
       questions[index] = updatedQuestion;
-      await updateQueApiController.updateGuessTheImageApi(updatedQuestion);
+      await updateQueApiController.updateGuessTheImageApi(
+          question_id: updatedQuestion.id.toString(),
+          title: updatedQuestion.title ?? "",
+          optionA: updatedQuestion.optionA ?? "",
+          optionB: updatedQuestion.optionB ?? "",
+          optionC: updatedQuestion.optionC ?? "",
+          optionD: updatedQuestion.optionD ?? "",
+          answer: updatedQuestion.answer ?? "",
+          points: updatedQuestion.points.toString() ?? "",
+          index: updatedQuestion.index.toString() ?? "",
+          qImage:pathsFile
+      ).whenComplete(() => updateQueApiController.getGuessTheImage(
+        main_category_id: updatedQuestion.mainCategoryId.toString(),
+        sub_category_id: updatedQuestion.subCategoryId.toString(),
+        topic_id: updatedQuestion.topicId.toString(),
+        sub_topic_id:updatedQuestion.subTopicId.toString(),
+      ),);
 
       notifyListeners();
     } catch (e) {
@@ -491,7 +578,7 @@ class QuestionDataSource extends DataTableSource {
     } else {
       bool confirmed = await _showConfirmationDialog(context);
       if(confirmed){
-        _deleteSelectedQuestions();
+        _deleteSelectedQuestions(selectedQuestionIds.join('|'));
       }
       selectedQuestionIds.clear();
     }

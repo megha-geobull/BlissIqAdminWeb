@@ -9,14 +9,14 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class BuildCardFlipContent extends StatefulWidget {
+class BuildImagePuzzleContent extends StatefulWidget {
   final String? main_category_id;
   final String? sub_category_id;
   final String? topic_id;
   final String? sub_topic_id;
   final TextEditingController pointsController;
 
-  const BuildCardFlipContent({
+  const BuildImagePuzzleContent({
     Key? key,
     required this.sub_topic_id,
     required this.topic_id,
@@ -26,13 +26,13 @@ class BuildCardFlipContent extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<BuildCardFlipContent> createState() => _BuildCardFlipContentState();
+  State<BuildImagePuzzleContent> createState() => _BuildCardFlipContentState();
 }
 
-class _BuildCardFlipContentState extends State<BuildCardFlipContent> {
-  List<TextEditingController> _textControllers = List.generate(6, (_) => TextEditingController());
+class _BuildCardFlipContentState extends State<BuildImagePuzzleContent> {
+  List<TextEditingController> _textControllers = List.generate(5, (_) => TextEditingController());
   final QuestionController _questionController = Get.find();
-  final List<Uint8List?> _imagesBytes = List.filled(6, null);
+  final List<Uint8List?> _imagesBytes = List.filled(5, null);
   final TextEditingController indexController = TextEditingController();
   final TextEditingController titleController = TextEditingController();
   final List<String> imageNames = [];
@@ -91,7 +91,7 @@ class _BuildCardFlipContentState extends State<BuildCardFlipContent> {
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               boxH10(),
-              for (int i = 0; i < 6; i++) ...[
+              for (int i = 0; i < 5; i++) ...[
                 Row(
                   children: [
                     Expanded(
@@ -140,7 +140,7 @@ class _BuildCardFlipContentState extends State<BuildCardFlipContent> {
                       .cast<Uint8List>()
                       .toList();
 
-                  _questionController.addFlipTheCard(
+                  _questionController.addImagePuzzleApi(
                     main_category_id: widget.main_category_id!,
                     sub_category_id: widget.sub_category_id!,
                     topic_id: widget.topic_id!,

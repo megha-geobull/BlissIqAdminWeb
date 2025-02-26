@@ -25,8 +25,12 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
   var pathsFile;
   var pathsFileName;
 
+  List<PlatformFile>? _panPaths;
+  var panPathsFile;
+  var panPathsFileName;
+
   // File picker for profile image
-  pickFile() async {
+  pickFile(String fileType) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowMultiple: false,
@@ -45,15 +49,20 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
 
     if (result != null && result.files.isNotEmpty) {
       setState(() {
-        _paths = result.files;
-        pathsFile = _paths!.first.bytes; // Store the bytes
-        pathsFileName = _paths!.first.name; // Store the file name
+        if (fileType == 'profile') {
+          _paths = result.files;
+          pathsFile = _paths!.first.bytes; // Store the bytes
+          pathsFileName = _paths!.first.name; // Store the file name
+        } else if (fileType == 'pan') {
+          _panPaths = result.files;
+          panPathsFile = _panPaths!.first.bytes; // Store the bytes
+          panPathsFileName = _panPaths!.first.name; // Store the file name
+        }
       });
     } else {
       print('No file selected');
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -76,19 +85,19 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
                   appBar: isWideScreen
                       ? null
                       : AppBar(
-                          title: const Text('Dashboard'),
-                          scrolledUnderElevation: 0,
-                          backgroundColor: Colors.blue.shade100,
-                          actions: [
-                            IconButton(
-                              icon: const Icon(
-                                Icons.person,
-                                color: Colors.grey,
-                              ),
-                              onPressed: () {},
-                            ),
-                          ],
+                    title: const Text('Dashboard'),
+                    scrolledUnderElevation: 0,
+                    backgroundColor: Colors.blue.shade100,
+                    actions: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.person,
+                          color: Colors.grey,
                         ),
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
                   drawer: isWideScreen ? null : Drawer(child: MyDrawer()),
                   body: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -106,264 +115,282 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
 
   Widget _buildCompanyMainContent(BoxConstraints constraints) {
     return SafeArea(
-        child: SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-        child: Center(
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.38,
-            child: Builder(builder: (context) {
-              return Form(
-                key: companyController.formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    // Logo
-                    Center(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          // Welcome Text
-                          const Text(
-                            'Company Registration',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+          child: Center(
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.38,
+              child: Builder(builder: (context) {
+                return Form(
+                  key: companyController.formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      // Logo
+                      Center(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            // Welcome Text
+                            const Text(
+                              'Company Registration',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
                             ),
-                          ),
-                          boxH10(),
+                            boxH10(),
 
-                          GestureDetector(
-                            onTap: () {
-                              pickFile();
-                            },
-                            child: pathsFile != null
-                                ? CircleAvatar(
-                              radius: 50,
-                              backgroundImage: MemoryImage(pathsFile!),
-                              child: const Align(
-                                alignment: Alignment.bottomRight,
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.orange,
-                                  radius: 15,
-                                  child: Icon(Icons.add, size: 18, color: Colors.black),
-                                ),
-                              ),
-                            )
-                                : Container(
-                              width: 100,
-                              height: 100,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.grey[200],
-                              ),
-                              child: const Align(
-                                alignment: Alignment.bottomRight,
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.orange,
-                                  radius: 15,
-                                  child: Icon(Icons.add, size: 18, color: Colors.black),
-                                ),
-                              ),
-                            ),
-                          ),
-
-                        ],
-                      ),
-                    ),
-                    boxH30(),
-                    // Name TextField
-                    CustomTextField(
-                      controller: companyController.companyNameController,
-                      labelText: 'Company Name',
-                      keyboardType: TextInputType.text,
-                      prefixIcon: Icon(Icons.perm_identity),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please Enter your Company name';
-                        }
-                        return null;
-                      },
-                    ),
-                    boxH20(),
-                    CustomTextField(
-                      controller: companyController.ownerNameController,
-                      labelText: 'Company Owner Name',
-                      keyboardType: TextInputType.text,
-                      prefixIcon: Icon(Icons.perm_identity),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please Enter Owner name';
-                        }
-                        return null;
-                      },
-                    ),
-                    boxH20(),
-                    // Email TextField
-                    CustomTextField(
-                      controller: companyController.emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      labelText: 'Email',
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
-                        }
-                        if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                          return 'Please enter a valid email address';
-                        }
-                        return null;
-                      },
-                      prefixIcon: Icon(Icons.email_outlined),
-                    ),
-                    boxH20(),
-                    // Phone Number & Country Code
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: Container(
-                            margin: EdgeInsets.only(right: 10),
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8.0)),
-                              border: Border.all(
-                                  width: 1, color: Colors.blueAccent),
-                            ),
-                            height: 50,
-                            alignment: Alignment.centerLeft,
-                            child: CountryCodePicker(
-                              onChanged: companyController.onCountryChange,
-                              initialSelection: 'IN',
-                              favorite: ['+91', 'IN'],
-                              showCountryOnly: false,
-                              showOnlyCountryWhenClosed: false,
-                              alignLeft: false,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 7,
-                          child: SizedBox(
-                            height: 50,
-                            child: TextFormField(
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(10)
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please Enter your mobile number';
-                                }
-                                return null;
+                            GestureDetector(
+                              onTap: () {
+                                pickFile('profile');
                               },
-                              keyboardType: TextInputType.phone,
-                              controller: companyController.contactNumberController,
-                              cursorColor: Colors.black,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                filled: true,
-                                fillColor: Colors.white.withOpacity(0.2),
-                                focusedBorder: const OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.grey),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(10)),
+                              child: pathsFile != null
+                                  ? CircleAvatar(
+                                radius: 50,
+                                backgroundImage: MemoryImage(pathsFile!),
+                                child: const Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: CircleAvatar(
+                                    backgroundColor: Colors.orange,
+                                    radius: 15,
+                                    child: Icon(Icons.add, size: 18, color: Colors.black),
+                                  ),
                                 ),
-                                hintText: 'Enter mobile number',
+                              )
+                                  : Container(
+                                width: 100,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.grey[200],
+                                ),
+                                child: const Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: CircleAvatar(
+                                    backgroundColor: Colors.orange,
+                                    radius: 15,
+                                    child: Icon(Icons.add, size: 18, color: Colors.black),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
-                    boxH20(),
-
-                    // Experience TextField
-                    CustomTextField(
-                      controller: companyController.panCardController,
-                      labelText: 'PanCard No (optional)',
-                      keyboardType: TextInputType.number,
-                      prefixIcon: const Icon(Icons.work_outline),
-                    ),
-                    boxH20(),
-
-                    // Qualification TextField
-                    CustomTextField(
-                      controller: companyController.gstNumberController,
-                      labelText: 'Gst Number',
-                      keyboardType: TextInputType.text,
-                      prefixIcon: Icon(Icons.school_outlined),
-                    ),
-                    boxH20(),
-
-                    // Bio/Introduction TextField
-                    CustomTextField(
-                      controller: companyController.cinNumberController,
-                      labelText: 'Cin Numer',
-                      prefixIcon: Icon(Icons.person_outline),
-                    ),
-                    boxH20(),
-                    CustomTextField(
-                      controller: companyController.passwordController,
-                      labelText: 'Enter your password',
-                      keyboardType: TextInputType.visiblePassword,
-                      prefixIcon: const Icon(Icons.password_outlined),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please Enter your password';
-                        }
-                        return null;
-                      },
-                      obscureText: !companyController.passwordVisible.value,
-                      sufixIcon: IconButton(
-                        icon: Icon(companyController.passwordVisible.value
-                            ? Icons.visibility
-                            : Icons.visibility_off),
-                        onPressed: () {
-                          setState(() {
-                            companyController.passwordVisible.value =
-                                !companyController.passwordVisible.value;
-                          });
+                      ),
+                      boxH30(),
+                      // Name TextField
+                      CustomTextField(
+                        controller: companyController.companyNameController,
+                        labelText: 'Company Name',
+                        keyboardType: TextInputType.text,
+                        prefixIcon: Icon(Icons.perm_identity),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please Enter your Company name';
+                          }
+                          return null;
                         },
                       ),
-                    ),
-                    boxH20(),
-                    Obx(() {
-                      return Center(
-                        child: companyController.isLoading.value
-                            ? CircularProgressIndicator()
-                            : CustomButton(
-                                label: "Register",
-                                onPressed: () {
-                                  if (companyController.formKey.currentState!.validate()) {
-                                    companyController.companyRegistration(
-                                      companyName: companyController.companyNameController.text,
-                                      ownerName:  companyController.ownerNameController.text,
-                                      email: companyController.emailController.text,
-                                      contactNo: companyController.contactNumberController.text,
-                                      password: companyController.passwordController.text,
-                                      context: context,
-                                      profileImageBytes: pathsFile,
-                                      profileImageName: pathsFileName,
-                                      panCardNo: companyController.panCardController.text,
-                                      cinNumber: companyController.cinNumberController.text,
-                                      gstNumber: companyController.gstNumberController.text,
-                                    );
-                                  }
-                                },
+                      boxH20(),
+                      CustomTextField(
+                        controller: companyController.ownerNameController,
+                        labelText: 'Company Owner Name',
+                        keyboardType: TextInputType.text,
+                        prefixIcon: Icon(Icons.perm_identity),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please Enter Owner name';
+                          }
+                          return null;
+                        },
+                      ),
+                      boxH20(),
+                      // Email TextField
+                      CustomTextField(
+                        controller: companyController.emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        labelText: 'Email',
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your email';
+                          }
+                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                            return 'Please enter a valid email address';
+                          }
+                          return null;
+                        },
+                        prefixIcon: Icon(Icons.email_outlined),
+                      ),
+                      boxH20(),
+                      // Phone Number & Country Code
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Container(
+                              margin: EdgeInsets.only(right: 10),
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                BorderRadius.all(Radius.circular(8.0)),
+                                border: Border.all(
+                                    width: 1, color: Colors.blueAccent),
                               ),
-                      );
-                    }),
-                  ],
-                ),
-              );
-            }),
+                              height: 50,
+                              alignment: Alignment.centerLeft,
+                              child: CountryCodePicker(
+                                onChanged: companyController.onCountryChange,
+                                initialSelection: 'IN',
+                                favorite: ['+91', 'IN'],
+                                showCountryOnly: false,
+                                showOnlyCountryWhenClosed: false,
+                                alignLeft: false,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 7,
+                            child: SizedBox(
+                              height: 50,
+                              child: TextFormField(
+                                inputFormatters: [
+                                  LengthLimitingTextInputFormatter(10)
+                                ],
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please Enter your mobile number';
+                                  }
+                                  return null;
+                                },
+                                keyboardType: TextInputType.phone,
+                                controller: companyController.contactNumberController,
+                                cursorColor: Colors.black,
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  filled: true,
+                                  fillColor: Colors.white.withOpacity(0.2),
+                                  focusedBorder: const OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.grey),
+                                    borderRadius:
+                                    BorderRadius.all(Radius.circular(10)),
+                                  ),
+                                  hintText: 'Enter mobile number',
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      boxH20(),
+                      // Qualification TextField
+                      CustomTextField(
+                        controller: companyController.gstNumberController,
+                        labelText: 'Gst Number',
+                        keyboardType: TextInputType.text,
+                        prefixIcon: Icon(Icons.school_outlined),
+                      ),
+                      boxH20(),
+
+                      // Bio/Introduction TextField
+                      CustomTextField(
+                        controller: companyController.cinNumberController,
+                        labelText: 'Cin Numer',
+                        prefixIcon: Icon(Icons.person_outline),
+                      ),
+                      boxH20(),
+                      CustomTextField(
+                        controller: companyController.passwordController,
+                        labelText: 'Enter your password',
+                        keyboardType: TextInputType.visiblePassword,
+                        prefixIcon: const Icon(Icons.password_outlined),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please Enter your password';
+                          }
+                          return null;
+                        },
+                        obscureText: !companyController.passwordVisible.value,
+                        sufixIcon: IconButton(
+                          icon: Icon(companyController.passwordVisible.value
+                              ? Icons.visibility
+                              : Icons.visibility_off),
+                          onPressed: () {
+                            setState(() {
+                              companyController.passwordVisible.value =
+                              !companyController.passwordVisible.value;
+                            });
+                          },
+                        ),
+                      ),
+                      boxH20(),
+                      // Experience TextField
+                      GestureDetector(
+                        onTap: () => pickFile('pan'),
+                        child: Container(
+                          height: 200,
+                          width: Get.width * 0.8,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.grey)),
+                          child: panPathsFile == null
+                              ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.image),
+                                boxH08(),
+                                const Text('Upload PAN Card'),
+                              ],
+                            ),
+                          )
+                              : Image.memory(
+                            panPathsFile,
+                            fit: BoxFit.cover, // Ensure the image fits properly
+                          ),
+                        ),
+                      ),
+                      boxH20(),
+                      Obx(() {
+                        return Center(
+                          child: companyController.isLoading.value
+                              ? CircularProgressIndicator()
+                              : CustomButton(
+                            label: "Register",
+                            onPressed: () {
+                              if (companyController.formKey.currentState!.validate()) {
+                                companyController.companyRegistration(
+                                  companyName: companyController.companyNameController.text,
+                                  ownerName:  companyController.ownerNameController.text,
+                                  email: companyController.emailController.text,
+                                  contactNo: companyController.contactNumberController.text,
+                                  password: companyController.passwordController.text,
+                                  context: context,
+                                  profileImageBytes: pathsFile,
+                                  profileImageName: pathsFileName,
+                                  pan_card: panPathsFile,
+                                  panImageName: panPathsFileName,
+                                  cinNumber: companyController.cinNumberController.text,
+                                  gstNumber: companyController.gstNumberController.text,
+                                );
+                              }
+                            },
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                );
+              }),
+            ),
           ),
         ),
       ),
-    ));
+    );
   }
-
 }

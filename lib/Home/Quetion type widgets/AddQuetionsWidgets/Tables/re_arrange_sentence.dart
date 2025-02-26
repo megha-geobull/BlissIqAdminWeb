@@ -1,3 +1,5 @@
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/re_arrange_sentence_model.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Global/constants/CustomTextField.dart';
@@ -9,7 +11,7 @@ class Re_Arrange_Sentence_QuestionTableScreen extends StatefulWidget {
   final String sub_category_id;
   final String topic_id;
   final String sub_topic_id;
-  final List<ReArrange> questionList;
+  final List<ReArrangeSentenceData> questionList;
 
   Re_Arrange_Sentence_QuestionTableScreen({
     required this.main_category_id,
@@ -25,7 +27,7 @@ class Re_Arrange_Sentence_QuestionTableScreen extends StatefulWidget {
 
 class _QuestionTableScreenState extends State<Re_Arrange_Sentence_QuestionTableScreen> {
   TextEditingController _searchController = TextEditingController();
-  List<ReArrange> _filteredQuestions = [];
+  List<ReArrangeSentenceData> _filteredQuestions = [];
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   final _verticalScrollController = ScrollController();
   final _horizontalScrollController = ScrollController();
@@ -93,9 +95,6 @@ class _QuestionTableScreenState extends State<Re_Arrange_Sentence_QuestionTableS
       });
     }
   }
-
-
-
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -156,7 +155,7 @@ class _QuestionTableScreenState extends State<Re_Arrange_Sentence_QuestionTableS
                         //_removeSelectedQuestions();
                         bool confirmed = await _dataSource._showConfirmationDialog(context);
                         if(confirmed){
-                          _dataSource._deleteSelectedQuestions();
+                          _dataSource._deleteSelectedQuestions(_selectedQuestionIds);
                         }
                         _getdeleteApiController.getAllRe_Arrange(
                           main_category_id: widget.main_category_id,
@@ -213,11 +212,13 @@ class _QuestionTableScreenState extends State<Re_Arrange_Sentence_QuestionTableS
                             ],
                           ),
                         ),
+                        DataColumn(label: Text("Index")),
                         DataColumn(label: Text("Question Type")),
                         DataColumn(label: Text("Title")),
-                        DataColumn(label: Text("Re_Arrange Word")),
+                        DataColumn(label: Text("Question")),
+                        DataColumn(label: Text("Question Format")),
+                        DataColumn(label: Text("Answer")),
                         DataColumn(label: Text("Points")),
-                        DataColumn(label: Text("Question Image")),
                         DataColumn(label: Text("Edit")),
                       ],
                       source: _dataSource,
@@ -235,7 +236,7 @@ class _QuestionTableScreenState extends State<Re_Arrange_Sentence_QuestionTableS
 }
 
 class QuestionDataSource extends DataTableSource {
-  final List<ReArrange> questions;
+  final List<ReArrangeSentenceData> questions;
   final Function(String) onSelectionChanged;
   //final BuildContext context;
   final Set<String> selectedQuestionIds = {};
@@ -246,10 +247,11 @@ class QuestionDataSource extends DataTableSource {
   List<TextEditingController> questionTypeControllers = [];
   List<TextEditingController> titleControllers = [];
   List<TextEditingController> questionControllers = [];
-  List<TextEditingController> questionImageControllers = [];
-  //List<TextEditingController> answerControllers = [];
-  //List<TextEditingController> indexControllers = [];
+  List<TextEditingController> questionFormatControllers = [];
+  List<TextEditingController> answerControllers = [];
+  List<TextEditingController> indexControllers = [];
   List<TextEditingController> pointsControllers = [];
+
 
   final GetAllQuestionsApiController updateQueApiController = Get.find();
 
@@ -264,11 +266,11 @@ class QuestionDataSource extends DataTableSource {
 
       questionControllers.add(TextEditingController(text: question.question));
 
-      questionImageControllers.add(TextEditingController(text: question.qImage));
+      answerControllers.add(TextEditingController(text: question.answer));
 
-      //answerControllers.add(TextEditingController(text: question.answer));
+      questionFormatControllers.add(TextEditingController(text: question.questionFormat));
 
-      //indexControllers.add(TextEditingController(text: question.index.toString()));
+      indexControllers.add(TextEditingController(text: question.index.toString()));
 
       pointsControllers.add(TextEditingController(text: question.points.toString()));
     }
@@ -301,206 +303,135 @@ class QuestionDataSource extends DataTableSource {
             },
           ),
         ),
-
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: questionTypeControllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                value,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                pointsControllers[index].text,
-                questionImageControllers[index].text,
-              );
-            },
-          )
-              : Text(question.questionType ?? ""),
-        ),
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: titleControllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                value,
-                questionControllers[index].text,
-                pointsControllers[index].text,
-                questionImageControllers[index].text,
-              );
-            },
-          )
-              : Text(question.title ?? ""),
-        ),
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: questionControllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                titleControllers[index].text,
-                value,
-                pointsControllers[index].text,
-                questionImageControllers[index].text,
-              );
-            },
-          )
-              : Text(question.question ?? ""),
-        ),
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: pointsControllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                value,
-                questionImageControllers[index].text,
-              );
-            },
-          )
-              : Text(question.points?.toString() ?? ""),
-        ),
-
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: questionImageControllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                pointsControllers[index].text,
-                value,
-              );
-            },
-          )
-              : Text(question.qImage ?? ""),
-        ),
-
-        DataCell(
-          editingRowIndex == index
-              ? ElevatedButton(
-            onPressed: () {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                pointsControllers[index].text,
-                questionImageControllers[index].text,
-              );
-              editingRowIndex = null; // Exit edit mode
-              notifyListeners(); // Update UI
-            },
-            child: const Text("Update"),
-          )
-              : GestureDetector(
-            onTap: () {
-              if (editingRowIndex == null) {
-                // Start editing
-                editingRowIndex = index;
-                notifyListeners(); // Update UI
-              }
-            },
-            child: const Text(
-              "Edit",
-              style: TextStyle(
-                color: Colors.blue,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ),
-        ),
+        DataCell(_buildEditableField(index, indexControllers)),
+        DataCell(_buildEditableField(index, questionTypeControllers)),
+        DataCell(_buildEditableField(index, titleControllers)),
+        DataCell(_buildEditableField(index, questionControllers)),
+        DataCell(_buildEditableField(index, questionFormatControllers)),
+        DataCell(_buildEditableField(index, answerControllers)),
+        DataCell(_buildEditableField(index, pointsControllers)),
+        DataCell(_buildEditButton(index)),
       ],
     );
   }
 
-  /// call the update the story phrases api here
-  /// Update the story phrases API here
-  _updateQuestion(
-      int index,
-      String questionType,
-      String title,
-      String question,
-      String pointsValue,
-      String questionImage,
-      ) async {
-    final updatedQuestion = ReArrange(
-      id: questions[index].id, // Keep the same ID
-      questionType: questionType,
-      // index: int.tryParse(title) ?? questions[index].index, // Update index
-      title: title,
-      question:question,
-      qImage:questionImage,
-      points: int.tryParse(pointsValue) ?? questions[index].points, // Update points
+  Widget _buildEditableField(int index, List<TextEditingController> controllers) {
+    if (index >= controllers.length) return const Text("");
+    if (controllers == questionFormatControllers) {
+      String dropdownValue = controllers[index].text.trim(); // Trim to remove any extra spaces
+
+      List<String> dropdownItems = ["Sound", "Native Language"];
+
+      // Ensure the value exists in the dropdown list
+      if (!dropdownItems.contains(dropdownValue)) {
+        dropdownValue = dropdownItems.first; // Default to first item if mismatch
+      }
+
+      return editingRowIndex == index
+          ? DropdownButtonFormField<String>(
+        value: dropdownValue, // Ensure correct value
+        onChanged: (String? newValue) {
+          if (newValue != null) {
+            controllers[index].text = newValue.trim();
+            notifyListeners();
+          }
+        },
+        items: dropdownItems.map((item) {
+          return DropdownMenuItem(
+            value: item,
+            child: Text(item),
+          );
+        }).toList(),
+        decoration: const InputDecoration(border: OutlineInputBorder()),
+      )
+          : Text(controllers[index].text);
+    }
+
+    return editingRowIndex == index
+        ? controllers == questionTypeControllers ? TextField(
+      controller: controllers[index],
+      enabled: false,
+      decoration: const InputDecoration(border: OutlineInputBorder()),
+    ) : TextField(
+      controller: controllers[index],
+      decoration: const InputDecoration(border: OutlineInputBorder()),
+    )
+        : Text(controllers[index].text);
+  }
+
+  Widget _buildEditButton(int index) {
+    return editingRowIndex == index
+        ? ElevatedButton(
+      onPressed: () {
+        _updateQuestion(index);
+        editingRowIndex = null;
+        notifyListeners();
+      },
+      child: const Text("Update"),
+    )
+        : GestureDetector(
+      onTap: () {
+        if (editingRowIndex == null) {
+          editingRowIndex = index;
+          notifyListeners();
+        }
+      },
+      child: const Text(
+        "Edit",
+        style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
+      ),
+    );
+  }
+
+  void _updateQuestion(int index) async {
+    if (index >= questions.length || index >= titleControllers.length) return;
+
+    final   updatedQuestion = ReArrangeSentenceData(
+      id: questions[index].id,
+      questionType: questionTypeControllers[index].text,
+      index: int.tryParse(indexControllers[index].text) ?? questions[index].index,
+      title: titleControllers[index].text,
+      answer: answerControllers[index].text,
+      question:questionControllers[index].text,
+      points: int.tryParse(pointsControllers[index].text) ?? questions[index].points,
       mainCategoryId: questions[index].mainCategoryId,
       subCategoryId: questions[index].subCategoryId,
       topicId: questions[index].topicId,
       subTopicId: questions[index].subTopicId,
+      questionFormat: questionFormatControllers[index].text
     );
 
-    questions[index] = updatedQuestion;
-
     try {
-      await updateQueApiController.updateRearrangeTheWordTableQuestionApi(updatedQuestion);
+      questions[index] = updatedQuestion;
+      await updateQueApiController.updateRearrangeSentenceApi(updatedQuestion)
+          .whenComplete(() => updateQueApiController.getReArrangeSentenceApi(
+        main_category_id: updatedQuestion.mainCategoryId.toString(),
+        sub_category_id: updatedQuestion.subCategoryId.toString(),
+        topic_id: updatedQuestion.topicId.toString(),
+        sub_topic_id:updatedQuestion.subTopicId.toString(),
+      ),);
+
       notifyListeners();
     } catch (e) {
       print('Error updating question: $e');
     }
   }
 
+
   /// Delete the story phrases API here
-  _deleteSelectedQuestions() async {
+  _deleteSelectedQuestions(String ids) async {
     final deleteApiController = Get.find<GetAllQuestionsApiController>();
 
     if (selectedQuestionIds.isNotEmpty) {
       try {
-        await deleteApiController.deleteReArrangeAPI(
-
-          question_id: questions[0].mainCategoryId.toString(),
-          // sub_category_id: questions[0].subCategoryId.toString(),
-          // topic_id: questions[0].topicId.toString(),
-          // sub_topic_id: questions[0].subTopicId.toString(),
-          //
-          //phrase_id: questions[0].phrase_ids.toString(),
-
-        );
-
+        await deleteApiController.deleteReArrangeSentence( question_id: ids, );
         // Refresh the list of questions
-        await deleteApiController.getAllRe_Arrange(
+        await deleteApiController.getReArrangeSentenceApi(
           main_category_id: questions[0].mainCategoryId.toString(),
           sub_category_id: questions[0].subCategoryId.toString(),
           topic_id: questions[0].topicId.toString(),
           sub_topic_id: questions[0].subTopicId.toString(),
         );
-
         questions.removeWhere((question) => selectedQuestionIds.contains(question.id));
         selectedQuestionIds.clear(); // Clear selected IDs
         notifyListeners(); // Update UI
@@ -531,7 +462,7 @@ class QuestionDataSource extends DataTableSource {
     } else {
       bool confirmed = await _showConfirmationDialog(context);
       if(confirmed){
-        _deleteSelectedQuestions();
+        _deleteSelectedQuestions(selectedQuestionIds.join('|'));
       }
       selectedQuestionIds.clear();
     }

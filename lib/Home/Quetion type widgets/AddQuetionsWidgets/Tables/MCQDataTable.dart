@@ -1,5 +1,8 @@
+import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/controller/GetAllQuestionsApiController.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_mcqs.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -30,7 +33,6 @@ class _MCQ_QuestionTableScreenState extends State<MCQ_QuestionTableScreen> {
   final _horizontalScrollController = ScrollController();
   String _selectedQuestionIds = "";
   bool isSelectAll = false;
-  List<String> selected_question_ids = [];
   late MCQDataSource _dataSource;
   final GetAllQuestionsApiController _getdeleteApiController = Get.find();
 
@@ -241,6 +243,7 @@ class MCQDataSource extends DataTableSource {
   int? editingRowIndex;
   List<TextEditingController> questionTypeControllers = [];
   List<TextEditingController> titleControllers = [];
+  List<TextEditingController> questionImageControllers = [];
   List<TextEditingController> questionControllers = [];
   List<TextEditingController> optionAControllers = [];
   List<TextEditingController> optionBControllers = [];
@@ -248,6 +251,98 @@ class MCQDataSource extends DataTableSource {
   List<TextEditingController> optionDControllers = [];
   List<TextEditingController> answerControllers = [];
   List<TextEditingController> pointsControllers = [];
+
+  List<PlatformFile>? _paths;
+  var pathsFile;
+  var pathsFileName;
+  bool isFilePicked = false;
+  pickFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: false,
+      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
+      allowedExtensions: [
+        'bmp',
+        'dib',
+        'gif',
+        'jfif',
+        'jpe',
+        'jpg',
+        'jpeg',
+        'pbm',
+        'pgm',
+        'ppm',
+        'pnm',
+        'pfm',
+        'png',
+        'apng',
+        'blp',
+        'bufr',
+        'cur',
+        'pcx',
+        'dcx',
+        'dds',
+        'ps',
+        'eps',
+        'fit',
+        'fits',
+        'fli',
+        'flc',
+        'ftc',
+        'ftu',
+        'gbr',
+        'grib',
+        'h5',
+        'hdf',
+        'jp2',
+        'j2k',
+        'jpc',
+        'jpf',
+        'jpx',
+        'j2c',
+        'icns',
+        'ico',
+        'im',
+        'iim',
+        'mpg',
+        'mpeg',
+        'tif',
+        'tiff',
+        'mpo',
+        'msp',
+        'palm',
+        'pcd',
+        'pdf',
+        'pxr',
+        'psd',
+        'qoi',
+        'bw',
+        'rgb',
+        'rgba',
+        'sgi',
+        'ras',
+        'tga',
+        'icb',
+        'vda',
+        'vst',
+        'webp',
+        'wmf',
+        'emf',
+        'xbm',
+        'xpm'
+      ],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      _paths = result.files;
+      pathsFile = _paths!.first.bytes; // Store the bytes
+      pathsFileName = _paths!.first.name; // Store the file name
+      isFilePicked = true; // Mark file as picked
+      notifyListeners();
+    } else {
+      print('No file selected');
+    }
+  }
 
   final GetAllQuestionsApiController updateQueApiController = Get.find();
 
@@ -261,6 +356,7 @@ class MCQDataSource extends DataTableSource {
       optionCControllers.add(TextEditingController(text: question.optionC));
       optionDControllers.add(TextEditingController(text: question.optionD));
       answerControllers.add(TextEditingController(text: question.answer));
+      questionImageControllers.add(TextEditingController(text: question.qImage ?? 'null'));
       pointsControllers.add(TextEditingController(text: question.points.toString()));
     }
   }
@@ -462,10 +558,35 @@ class MCQDataSource extends DataTableSource {
           },
         ),
         DataCell(
-            ElevatedButton(
-              onPressed: () {},
-              child: Text("View"),
+            editingRowIndex == index
+                ? Row(
+              children: [
+                SizedBox(
+                  width: 50,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: isFilePicked ? Colors.green : Colors.blue, width: 1.5),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: IconButton(
+                      icon: Icon(Icons.image, color: isFilePicked ? Colors.green :Colors.blue),
+                      onPressed: () => pickFile(),
+                    ),
+                  ),
+                ),
+              ],
             )
+                : questionImageControllers[index].text.isNotEmpty && questionImageControllers[index].text != "null"
+                    ? SizedBox(
+              width: 50,
+                      child: CachedNetworkImage(
+                                        imageUrl: ApiString.ImgBaseUrl + questionImageControllers[index].text,
+                                        progressIndicatorBuilder: (context, url, downloadProgress) =>
+                        CircularProgressIndicator(value: downloadProgress.progress),
+                                        errorWidget: (context, url, error) => Icon(Icons.error),
+                                      ),
+                    )
+                    : const Icon(Icons.broken_image, color: Colors.grey)
         ),
 
         DataCell(
@@ -555,10 +676,33 @@ class MCQDataSource extends DataTableSource {
       optionD: optionD,
       answer: answer,
       points: int.tryParse(points) ?? questions[index].points ?? 0,
+      index: index
     );
 
     questions[index] = updatedQuestion;
-    await updateQueApiController.updateMcqQuestionAPI(updatedQuestion);
+    await updateQueApiController.updateMcqQuestionAPI(
+        mcq_id: updatedQuestion.id.toString(),
+        mainCategoryId: updatedQuestion.mainCategoryId.toString(),
+        subCategoryId: updatedQuestion.subCategoryId.toString(),
+        topicId: updatedQuestion.topicId.toString(),
+        subTopicId: updatedQuestion.subTopicId.toString(),
+        questionType: updatedQuestion.questionType ?? '',
+        title: updatedQuestion.title ?? '',
+        question: updatedQuestion.question ?? '',
+        optionA: updatedQuestion.optionA ?? '',
+        optionB: updatedQuestion.optionB ?? '',
+        optionC: updatedQuestion.optionC ?? '',
+        optionD: updatedQuestion.optionD ?? '',
+        answer: updatedQuestion.answer ?? '',
+        points: updatedQuestion.points.toString() ?? '',
+        index: updatedQuestion.index.toString() ?? '',
+        qImage: pathsFile
+    ).whenComplete(() => updateQueApiController.getAllMCQS(
+      main_category_id: updatedQuestion.mainCategoryId.toString(),
+      sub_category_id: updatedQuestion.subCategoryId.toString(),
+      topic_id: updatedQuestion.topicId.toString(),
+      sub_topic_id:updatedQuestion.subTopicId.toString(),
+    ),);
     notifyListeners();
   }
 

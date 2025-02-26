@@ -1,6 +1,9 @@
+import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/controller/GetAllQuestionsApiController.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_fill_in_the_blanks.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:googleapis/shared.dart';
@@ -211,6 +214,7 @@ class _FillBlanksTableState extends State<FillBlanksTable> {
                             ],
                           ),
                         ),
+                        DataColumn(label: Text("Index")),
                         DataColumn(label: Text("Question Type")),
                         DataColumn(label: Text("Title")),
                         DataColumn(label: Text("Question Language")),
@@ -221,8 +225,8 @@ class _FillBlanksTableState extends State<FillBlanksTable> {
                         DataColumn(label: Text("Option 4")),
                         DataColumn(label: Text("Answer")),
                         DataColumn(label: Text("Option Language")),
-                        DataColumn(label: Text("Points")),
                         DataColumn(label: Text("Question Image")),
+                        DataColumn(label: Text("Points")),
                         DataColumn(label: Text("Edit")),
 
                       ],
@@ -249,6 +253,7 @@ class QuestionDataSource extends DataTableSource {
 
   int? editingRowIndex;
   List<TextEditingController> questionTypeControllers = [];
+  List<TextEditingController> indexControllers = [];
   List<TextEditingController> titleControllers = [];
   List<TextEditingController> questionLanguageController = [];
   List<TextEditingController> questionControllers = [];
@@ -259,30 +264,119 @@ class QuestionDataSource extends DataTableSource {
   List<TextEditingController> answerControllers = [];
   List<TextEditingController> optionLanguageControllers = [];
   List<TextEditingController> pointsControllers = [];
-  List<TextEditingController> imageControllers = [];
+  List<TextEditingController> questionImageControllers = [];
+
+  List<PlatformFile>? _paths;
+  var pathsFile;
+  var pathsFileName;
+  bool isFilePicked = false;
+  pickFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: false,
+      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
+      allowedExtensions: [
+        'bmp',
+        'dib',
+        'gif',
+        'jfif',
+        'jpe',
+        'jpg',
+        'jpeg',
+        'pbm',
+        'pgm',
+        'ppm',
+        'pnm',
+        'pfm',
+        'png',
+        'apng',
+        'blp',
+        'bufr',
+        'cur',
+        'pcx',
+        'dcx',
+        'dds',
+        'ps',
+        'eps',
+        'fit',
+        'fits',
+        'fli',
+        'flc',
+        'ftc',
+        'ftu',
+        'gbr',
+        'grib',
+        'h5',
+        'hdf',
+        'jp2',
+        'j2k',
+        'jpc',
+        'jpf',
+        'jpx',
+        'j2c',
+        'icns',
+        'ico',
+        'im',
+        'iim',
+        'mpg',
+        'mpeg',
+        'tif',
+        'tiff',
+        'mpo',
+        'msp',
+        'palm',
+        'pcd',
+        'pdf',
+        'pxr',
+        'psd',
+        'qoi',
+        'bw',
+        'rgb',
+        'rgba',
+        'sgi',
+        'ras',
+        'tga',
+        'icb',
+        'vda',
+        'vst',
+        'webp',
+        'wmf',
+        'emf',
+        'xbm',
+        'xpm'
+      ],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      _paths = result.files;
+      pathsFile = _paths!.first.bytes; // Store the bytes
+      pathsFileName = _paths!.first.name; // Store the file name
+      isFilePicked = true; // Mark file as picked
+      notifyListeners();
+    } else {
+      print('No file selected');
+    }
+  }
 
   final GetAllQuestionsApiController updateQueApiController = Get.find();
 
   QuestionDataSource(this.questions, this.onSelectionChanged, this.context) {
     for (var question in questions) {
       questionTypeControllers.add(TextEditingController(text: question.questionType));
+      indexControllers.add(TextEditingController(text: question.index.toString()));
       titleControllers.add(TextEditingController(text: question.title));
-      questionLanguageController.add(TextEditingController(text: questions.questionLanguage));
+      questionLanguageController.add(TextEditingController(text: question.questionLanguage));
       questionControllers.add(TextEditingController(text: question.question));
       option1Controllers.add(TextEditingController(text: question.optionA));
       option2Controllers.add(TextEditingController(text: question.optionB));
       option3Controllers.add(TextEditingController(text: question.optionC));
       option4Controllers.add(TextEditingController(text: question.optionD));
       answerControllers.add(TextEditingController(text: question.answer));
-      optionLanguageControllers.add(TextEditingController(text: questions.optionLanguage));
+      optionLanguageControllers.add(TextEditingController(text: question.optionLanguage));
       pointsControllers.add(TextEditingController(text: question.points.toString()));
-      imageControllers.add(TextEditingController(text: question.qImage));
+      questionImageControllers.add(TextEditingController(text: question.qImage));
     }
   }
-
-  //get questionLanguage => null;
-
-  //get titleText => null;
 
   @override
   DataRow? getRow(int index) {
@@ -311,458 +405,125 @@ class QuestionDataSource extends DataTableSource {
             },
           ),
         ),
+        DataCell(_buildEditableField(index, indexControllers)),
+        DataCell(_buildEditableField(index, questionTypeControllers)),
+        DataCell(_buildEditableField(index, titleControllers)),
+        DataCell(_buildEditableField(index, questionLanguageController)),
+        DataCell(_buildEditableField(index, questionControllers)),
+        DataCell(_buildEditableField(index, option1Controllers)),
+        DataCell(_buildEditableField(index, option2Controllers)),
+        DataCell(_buildEditableField(index, option3Controllers)),
+        DataCell(_buildEditableField(index, option4Controllers)),
+        DataCell(_buildEditableField(index, answerControllers)),
+        DataCell(_buildEditableField(index, optionLanguageControllers)),
+        DataCell(_buildEditableField(index, questionImageControllers)),
+        DataCell(_buildEditableField(index, pointsControllers)),
+        DataCell(_buildEditButton(index)),
 
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: questionTypeControllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                value,
-                // questionTypeControllers[index].text,
-                questionLanguageController[index].text,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                option1Controllers[index].text,
-                option2Controllers[index].text,
-                option3Controllers[index].text,
-                option4Controllers[index].text,
-                optionLanguageControllers[index].text,
-                answerControllers[index].text,
-                pointsControllers[index].text,
-                imageControllers[index].text,
-
-
-              );
-            },
-          )
-              : Text(question.questionType ?? ""),
-        ),
-
-
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: questionLanguageController[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                //questionTypeControllers[index].text,
-                questionLanguageController[index].text,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                option1Controllers[index].text,
-                option2Controllers[index].text,
-                option3Controllers[index].text,
-                option4Controllers[index].text,
-                optionLanguageControllers[index].text,
-                answerControllers[index].text,
-                pointsControllers[index].text,
-                imageControllers[index].text,
-                imageControllers[index].text,
-
-                //value
-              );
-            },
-          )
-              : Text(question.question ?? ""),
-        ),
-
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: titleControllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                questionLanguageController[index].text,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                option1Controllers[index].text,
-                option2Controllers[index].text,
-                option3Controllers[index].text,
-                option4Controllers[index].text,
-                optionLanguageControllers[index].text,
-                answerControllers[index].text,
-                pointsControllers[index].text,
-                imageControllers[index].text,
-
-
-              );
-            },
-          )
-              : Text(question.question ?? ""),
-        ),
-
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: questionControllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                questionLanguageController[index].text,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                option1Controllers[index].text,
-                option2Controllers[index].text,
-                option3Controllers[index].text,
-                option4Controllers[index].text,
-                optionLanguageControllers[index].text,
-                answerControllers[index].text,
-                pointsControllers[index].text,
-                imageControllers[index].text,
-
-              );
-            },
-          )
-              : Text(question.question ?? ""),
-        ),
-
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: option1Controllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                questionLanguageController[index].text,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                option1Controllers[index].text,
-                option2Controllers[index].text,
-                option3Controllers[index].text,
-                option4Controllers[index].text,
-                optionLanguageControllers[index].text,
-                answerControllers[index].text,
-                pointsControllers[index].text,
-                imageControllers[index].text,
-              );
-            },
-          )
-              : Text(question.question ?? ""),
-        ),
-
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: option2Controllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                questionLanguageController[index].text,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                option1Controllers[index].text,
-                option2Controllers[index].text,
-                option3Controllers[index].text,
-                option4Controllers[index].text,
-                optionLanguageControllers[index].text,
-                answerControllers[index].text,
-                pointsControllers[index].text,
-                imageControllers[index].text,
-
-                //value
-              );
-            },
-          )
-              : Text(question.question ?? ""),
-        ),
-
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: option3Controllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                questionLanguageController[index].text,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                option1Controllers[index].text,
-                option2Controllers[index].text,
-                option3Controllers[index].text,
-                option4Controllers[index].text,
-                optionLanguageControllers[index].text,
-                answerControllers[index].text,
-                pointsControllers[index].text,
-                imageControllers[index].text,
-
-              );
-            },
-          )
-              : Text(question.question ?? ""),
-        ),
-
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: option4Controllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                questionLanguageController[index].text,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                option1Controllers[index].text,
-                option2Controllers[index].text,
-                option3Controllers[index].text,
-                option4Controllers[index].text,
-                optionLanguageControllers[index].text,
-                answerControllers[index].text,
-                pointsControllers[index].text,
-                imageControllers[index].text,
-
-              );
-            },
-          )
-              : Text(question.question ?? ""),
-        ),
-
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: optionLanguageControllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                questionLanguageController[index].text,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                option1Controllers[index].text,
-                option2Controllers[index].text,
-                option3Controllers[index].text,
-                option4Controllers[index].text,
-                optionLanguageControllers[index].text,
-                answerControllers[index].text,
-                pointsControllers[index].text,
-                imageControllers[index].text,
-
-              );
-            },
-          )
-              : Text(question.question ?? ""),
-        ),
-
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: answerControllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                questionLanguageController[index].text,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                option1Controllers[index].text,
-                option2Controllers[index].text,
-                option3Controllers[index].text,
-                option4Controllers[index].text,
-                optionLanguageControllers[index].text,
-                answerControllers[index].text,
-                pointsControllers[index].text,
-                imageControllers[index].text,
-
-              );
-            },
-          )
-              : Text(question.question ?? ""),
-        ),
-
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: pointsControllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                questionLanguageController[index].text,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                option1Controllers[index].text,
-                option2Controllers[index].text,
-                option3Controllers[index].text,
-                option4Controllers[index].text,
-                optionLanguageControllers[index].text,
-                answerControllers[index].text,
-                pointsControllers[index].text,
-                imageControllers[index].text,
-
-
-              );
-            },
-          )
-              : Text(question.question ?? ""),
-        ),
-
-
-        DataCell(
-          editingRowIndex == index
-              ? TextField(
-            controller: questionImageControllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              _updateQuestion(
-                index,
-                questionTypeControllers[index].text,
-                questionLanguageController[index].text,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                option1Controllers[index].text,
-                option2Controllers[index].text,
-                option3Controllers[index].text,
-                option4Controllers[index].text,
-                optionLanguageControllers[index].text,
-                answerControllers[index].text,
-                pointsControllers[index].text,
-                imageControllers[index].text,
-
-              );
-            },
-          )
-              : Text(question.qImage ?? ""),
-        ),
-
-        // Question Image
-
-        DataCell(
-          editingRowIndex == index
-              ? ElevatedButton(
-            onPressed: () {
-              _updateQuestion(
-                index,
-                questionLanguageController[index].text,
-                questionTypeControllers[index].text,
-                titleControllers[index].text,
-                questionControllers[index].text,
-                option1Controllers[index].text,
-                option2Controllers[index].text,
-                option3Controllers[index].text,
-                option4Controllers[index].text,
-                answerControllers[index].text,
-                pointsControllers[index].text,
-                imageControllers[index].text,
-                optionLanguageControllers[index].text,
-
-              );
-
-              editingRowIndex = null; // Exit edit mode
-              notifyListeners();
-            },
-            child: const Text("Update"),
-          )
-              : GestureDetector(
-            onTap: () {
-              if (editingRowIndex == null) {
-                editingRowIndex = index; // Start editing
-                notifyListeners();
-              }
-            },
-            child: const Text(
-              "Edit",
-              style: TextStyle(
-                color: Colors.blue,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }
 
-  /// Call the update story phrases API here
-  _updateQuestion(
-      int index,
-      String questionType,
-      String title,
-      String questionLanguage,
-      String optionLanguage,
-      String question,
-      String optionA,
-      String optionB,
-      String optionC,
-      String optionD,
-      String answer,
-      String pointsValue,
-      String questionImage,
-      //String text,
+  Widget _buildEditableField(int index, List<TextEditingController> controllers) {
+    if (index >= controllers.length) return const Text("");
 
-
+    if (controllers == questionImageControllers && index < controllers.length){
+      return editingRowIndex == index
+          ? SizedBox(
+        width: 50,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: isFilePicked ? Colors.green : Colors.blue, width: 1.5),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: IconButton(
+            icon: Icon(Icons.image, color: isFilePicked ? Colors.green :Colors.blue),
+            onPressed: () => pickFile(),
+          ),
+        ),
       )
-  async {
-    final updatedQuestion = FillInTheBlanks(
-      id: questions[index].id,
-      questionType: questionType,
-      title: title,
-      question: question,
-      questionLanguage: questionLanguage,
-      optionA: optionA,
-      optionB: optionB,
-      optionC: optionC,
-      optionD: optionD,
-      answer: answer,
-      optionLanguage: optionLanguage,
-      qImage: questionImage,
+          : controllers[index].text.isNotEmpty && controllers[index].text != "null"
+          ? SizedBox(
+        width: 50, // Ensure image preview doesn't take excessive space
+        child: CachedNetworkImage(
+          imageUrl: ApiString.ImgBaseUrl + controllers[index].text,
+          progressIndicatorBuilder: (context, url, downloadProgress) =>
+              CircularProgressIndicator(value: downloadProgress.progress),
+          errorWidget: (context, url, error) => Icon(Icons.error),
+        ),
+      )
+          : const Icon(Icons.broken_image, color: Colors.grey);
+    }
 
-      points: int.tryParse(pointsValue) ?? questions[index].points,
+    return editingRowIndex == index
+        ? controllers == questionTypeControllers ? TextField(
+      controller: controllers[index],
+      enabled: false,
+      decoration: const InputDecoration(border: OutlineInputBorder()),
+    ) : TextField(
+      controller: controllers[index],
+      decoration: const InputDecoration(border: OutlineInputBorder()),
+    )
+        : Text(controllers[index].text);
+  }
+
+  Widget _buildEditButton(int index) {
+    return editingRowIndex == index
+        ? ElevatedButton(
+      onPressed: () {
+        _updateQuestion(index);
+        editingRowIndex = null;
+        notifyListeners();
+      },
+      child: const Text("Update"),
+    )
+        : GestureDetector(
+      onTap: () {
+        if (editingRowIndex == null) {
+          editingRowIndex = index;
+          notifyListeners();
+        }
+      },
+      child: const Text(
+        "Edit",
+        style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
+      ),
+    );
+  }
+
+  void _updateQuestion(int index) async {
+    if (index >= questions.length) return;
+
+    final   updatedQuestion = FillInTheBlanks(
+      id: questions[index].id,
+      questionType: questionTypeControllers[index].text,
+      index: int.tryParse(indexControllers[index].text) ?? questions[index].index,
+      answer: answerControllers[index].text,
+      question:questionControllers[index].text,
+      points: int.tryParse(pointsControllers[index].text) ?? questions[index].points,
       mainCategoryId: questions[index].mainCategoryId,
       subCategoryId: questions[index].subCategoryId,
       topicId: questions[index].topicId,
       subTopicId: questions[index].subTopicId,
+      optionA:option1Controllers[index].text ,
+      optionB:option2Controllers[index].text ,
+      optionC: option3Controllers[index].text,
+      optionD: option4Controllers[index].text,
+      optionLanguage:optionLanguageControllers[index].text ,
+      questionLanguage: questionLanguageController[index].text,
+      title: titleControllers[index].text,
     );
 
-    // Update the question locally
-    questions[index] = updatedQuestion;
-
     try {
-      await updateQueApiController.updateFillInTheBlanksTableQuestionApi(
-          updatedQuestion);
+      questions[index] = updatedQuestion;
+      await updateQueApiController.updateFillInTheBlanksTableQuestionApi(updatedQuestion,pathsFile)
+          .whenComplete(() => updateQueApiController.getFillInTheBlanks(
+        main_category_id: updatedQuestion.mainCategoryId.toString(),
+        sub_category_id: updatedQuestion.subCategoryId.toString(),
+        topic_id: updatedQuestion.topicId.toString(),
+        sub_topic_id:updatedQuestion.subTopicId.toString(),
+      ),);
+
       notifyListeners();
     } catch (e) {
       print('Error updating question: $e');
@@ -781,7 +542,7 @@ class QuestionDataSource extends DataTableSource {
           sub_category_id: questions[0].subCategoryId.toString(),
           topic_id: questions[0].topicId.toString(),
           sub_topic_id: questions[0].subTopicId.toString(),
-          question_id: selectedQuestionIds.join('|'), // Pipe-separated IDs
+          question_id: selectedQuestionIds.join('|'),
         );
 
         // Refresh the questions list
@@ -811,8 +572,6 @@ class QuestionDataSource extends DataTableSource {
 
   @override
   int get selectedRowCount => selectedQuestionIds.length;
-
-  get questionImageControllers => null;
 
   toggleSelectAll(bool value) async {
     isSelectAll = value;
@@ -862,11 +621,6 @@ class QuestionDataSource extends DataTableSource {
 
 }
 
-extension on List<FillInTheBlanks> {
-  get optionLanguage => null;
-
-  get questionLanguage => null;
-}
 
 
 

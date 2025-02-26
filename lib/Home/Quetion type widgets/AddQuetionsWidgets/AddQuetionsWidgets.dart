@@ -6,12 +6,21 @@ import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/CompleteParagraphTable.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/CompleteWordTable.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/FillBlanksTable.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/LearningSlideTable.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/MCQDataTable.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/Re_arrange_the_word_DataTable.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/TrueFalseDataTable.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/card_flip_question_table.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/guess_the_image_table.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/image_puzzle_table.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/match_the_pairs_question_table.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/re_arrange_sentence.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/BuildAlphabetExContent.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/BuildCardFlipContent.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/BuildImagePuzzleContent.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/BuildLearningSlideContent.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/QuestionController/QuestionApiController.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/add_match_the_pairs.dart';
@@ -123,7 +132,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     "Re-Arrange Sentence",
     "Complete the Word",
     "Guess The Image",
-    // 'Image Letter Match' ,
+    'Image puzzle' ,
     "True/False",
     "Story",
     "Phrases",
@@ -133,7 +142,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     "Complete the paragraph",
     "Learning Slide",
     "Card Flip",
-    "Alphabets Example",
+    // "Alphabets Example",
   ];
 
   final CategoryController _controller = Get.put(CategoryController());
@@ -259,6 +268,10 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = fill_in_the_blanks_headers;
     } else if (selectedQuestionType == "Re-Arrange the Word") {
       headers = rearrange_headers;
+    }else if (selectedQuestionType == "Re-Arrange Sentence") {
+      headers = complete_sentense;
+    }else if (selectedQuestionType == "Guess The Image") {
+      headers = guess_image;
     } else if (selectedQuestionType == "Complete the Word") {
       headers = complete_the_word_headers;
     } else if (selectedQuestionType == "True/False") {
@@ -272,6 +285,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     } else if (selectedQuestionType == "Learning Slide") {
       headers = learning_slide;
     } else if (selectedQuestionType == "Card Flip") {
+      headers = cardFlip_headers;
+    } else if (selectedQuestionType == "Image puzzle") {
       headers = cardFlip_headers;
     } else if (selectedQuestionType == "Complete the paragraph") {
       headers = complete_paragraph;
@@ -332,6 +347,10 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = rearrange_headers;
     } else if (selectedQuestionType == "Complete the Word") {
       headers = complete_the_word_headers;
+    }else if (selectedQuestionType == "Guess The Image") {
+      headers = guess_image;
+    }else if (selectedQuestionType == "Re-Arrange Sentence") {
+      headers = complete_sentense;
     } else if (selectedQuestionType == "True/False") {
       headers = true_false_headers;
     } else if (selectedQuestionType == "Story") {
@@ -346,6 +365,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = learning_slide;
     } else if (selectedQuestionType == "Card Flip") {
       headers = cardFlip_headers;
+    } else if (selectedQuestionType == "Image puzzle") {
+      headers = imagePuzzle_headers;
     } else if (selectedQuestionType == "Complete the paragraph") {
       headers = complete_paragraph;
     } else if (selectedQuestionType == "Match the pairs") {
@@ -377,8 +398,18 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           sub_category_id: subCategoryId,
           topic_id: topicId,
           sub_topic_id: subtopicId);
-    } else if (selectedQuestionType == "Complete the Word") {
-      ///
+    } else if (selectedQuestionType == "Re-Arrange Sentence") {
+      _getAllQuestionsApiController.getReArrangeSentenceApi(
+          main_category_id: mainCategoryId,
+          sub_category_id: subCategoryId,
+          topic_id: topicId,
+          sub_topic_id: subtopicId);
+    }  else if (selectedQuestionType == "Complete the Word") {
+      _getAllQuestionsApiController.getCompleteWordApi(
+          main_category_id: mainCategoryId,
+          sub_category_id: subCategoryId,
+          topic_id: topicId,
+          sub_topic_id: subtopicId);
     } else if (selectedQuestionType == "Guess The Image") {
       _getAllQuestionsApiController.getGuessTheImage(
           main_category_id: mainCategoryId,
@@ -423,6 +454,26 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           sub_topic_id: subtopicId);
     } else if (selectedQuestionType == "Learning Slide") {
       _getAllQuestionsApiController.getAllLearningSlideApi(
+          main_category_id: mainCategoryId,
+          sub_category_id: subCategoryId,
+          topic_id: topicId,
+          sub_topic_id: subtopicId);
+    }
+    else if (selectedQuestionType == "Complete the paragraph") {
+      _getAllQuestionsApiController.getCompleteParaApi(
+          main_category_id: mainCategoryId,
+          sub_category_id: subCategoryId,
+          topic_id: topicId,
+          sub_topic_id: subtopicId);
+    }
+else if (selectedQuestionType == "Card Flip") {
+      _getAllQuestionsApiController.getCardFlip(
+          main_category_id: mainCategoryId,
+          sub_category_id: subCategoryId,
+          topic_id: topicId,
+          sub_topic_id: subtopicId);
+    }else if (selectedQuestionType == "Image puzzle") {
+      _getAllQuestionsApiController.getImagePuzzleList(
           main_category_id: mainCategoryId,
           sub_category_id: subCategoryId,
           topic_id: topicId,
@@ -762,6 +813,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
 
                                   if (selectedQuestionType == "Card Flip")
                                     _buildQuestionsFlipTheCardTable(),
+      if (selectedQuestionType == "Image puzzle")
+                                    _buildQuestionsImagePuzzleTable(),
 
                                   if (selectedQuestionType ==
                                       "Complete the paragraph")
@@ -1031,6 +1084,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                   ? ApiString.add_rearrange
           : selectedQuestionType == "Re-Arrange Sentence"
           ? ApiString.add_complete_sentence
+                  :selectedQuestionType == "Guess The Image"
+          ? ApiString.add_guess_the_image
                   : selectedQuestionType == "True/False"
                       ? ApiString.add_true_false
                       : selectedQuestionType == "Story"
@@ -1042,7 +1097,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                   : selectedQuestionType == "Conversation"
                                       ? ApiString.add_conversation
                                       : selectedQuestionType == "Card Flip"
-                                          ? ApiString.add_card_flipping
+                                          ?ApiString.add_conversation
+                                      : selectedQuestionType == "Image puzzle"
+                                          ? ApiString.add_puzzle_the_image
                                           : selectedQuestionType ==
                                                   "Learning Slide"
                                               ? ApiString.add_learning_slide
@@ -1456,7 +1513,14 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                         print("subcategoryId " + subCategoryId!);
                         print("topicId " + topicId!);
                         print("subtopicId " + subtopicId!);
-                        showImportExportDialog("export");
+                        if (mainCategoryId!.isNotEmpty &&
+                            subCategoryId!.isNotEmpty &&
+                            topicId!.isNotEmpty)
+                          showImportExportDialog("export");
+                        else
+                          showSnackbar(
+                              message:
+                              "Please select category,subcategory,topic,etc");
                       },
                     ),
                   ),
@@ -1468,81 +1532,20 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
               return Center(
                 child: _getAllQuestionsApiController.isLoading.value
                     ? const CircularProgressIndicator()
-                    : (_getAllQuestionsApiController.getReArrangeList.isEmpty
-                        ? const Center(
-                            child: Text(
-                              'No data available',
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey),
-                            ),
-                          )
-                        : SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            controller: _scrollController,
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(
-                                  minWidth: 1200, minHeight: 400),
-                              child: SizedBox(
-                                height: 400,
-                                width: 600,
-                                child: Column(
-                                  children: [
-                                    // Table Header
-                                    Container(
-                                      color: Colors.orange.shade100,
-                                      child: Row(
-                                        children: [
-                                          _buildTableHeader("Question Type"),
-                                          _buildTableHeader("Title"),
-                                          _buildTableHeader("Re-Arrange Sentence"),
-                                          _buildTableHeader("Points"),
-                                        ],
-                                      ),
-                                    ),
-                                    // Table Rows
-                                    Expanded(
-                                      child: ListView.builder(
-                                        scrollDirection: Axis.vertical,
-                                        itemCount: _getAllQuestionsApiController
-                                            .getReArrangeList.length,
-                                        itemBuilder: (context, index) {
-                                          var row =
-                                              _getAllQuestionsApiController
-                                                  .getReArrangeList[index];
-                                          return Row(
-                                            children: [
-                                              _buildTableCell(
-                                                  row.questionType ?? ""),
-                                              _buildTableCell(row.title ?? ""),
-                                              _buildTableCell(
-                                                  row.question ?? ""),
-                                              _buildTableCell(row.answer ?? ""),
-                                              _buildTableCell(
-                                                  row.points.toString() ?? ""),
-                                              // GestureDetector(
-                                              //   onTap: () => _showImagePopup(),
-                                              //   child: const Text(
-                                              //     "View",
-                                              //     style: TextStyle(
-                                              //       color: Colors.blue,
-                                              //       decoration: TextDecoration
-                                              //           .underline,
-                                              //     ),
-                                              //     textAlign: TextAlign.center,
-                                              //   ),
-                                              // ),
-                                            ],
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          )),
+                    : (_getAllQuestionsApiController.getReArrangeSentenceDataList.isEmpty
+                    ? const Center(
+                  child: Text(
+                    'No data available',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey),
+                  ),
+                )
+                    :   Re_Arrange_Sentence_QuestionTableScreen(main_category_id: mainCategoryId,
+                    sub_category_id: subCategoryId,
+                    topic_id: topicId,sub_topic_id: subtopicId,
+                    questionList: _getAllQuestionsApiController.getReArrangeSentenceDataList)),
               );
             })
           ],
@@ -1599,64 +1602,26 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
             ),
             SizedBox(height: 10),
             // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal, // Horizontal scroll
-              child: Container(
-                constraints:
-                    BoxConstraints(maxWidth: 1200), // Max width constraint
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical, // Vertical scroll
-                  child: Table(
-                    border: TableBorder.all(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    columnWidths: const {
-                      0: FlexColumnWidth(1),
-                      1: FlexColumnWidth(2),
-                      2: FlexColumnWidth(1),
-                      3: FlexColumnWidth(1),
-                      4: FlexColumnWidth(1),
-                      5: FlexColumnWidth(1),
-                      6: FlexColumnWidth(1),
-                      7: FlexColumnWidth(1),
-                    },
-                    children: [
-                      TableRow(
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade100,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        children: [
-                          _buildTableHeader("Question Type"),
-                          _buildTableHeader("Question"),
-                          _buildTableHeader("Option 1"),
-                          _buildTableHeader("Option 2"),
-                          _buildTableHeader("Option 3"),
-                          _buildTableHeader("Option 4"),
-                          _buildTableHeader("Answer"),
-                          _buildTableHeader("Points"),
-                        ],
-                      ),
-                      // Dummy rows
-                      for (int i = 0; i < 5; i++)
-                        TableRow(
-                          children: [
-                            _buildTableCell("Complete The Word"),
-                            _buildTableCell("Fill in the blank: W_rld"),
-                            _buildTableCell("World"),
-                            _buildTableCell("Word"),
-                            _buildTableCell("Ward"),
-                            _buildTableCell("Wild"),
-                            _buildTableCell("World"),
-                            _buildTableCell((5 + i * 5).toString()),
-                          ],
-                        ),
-                    ],
+            Obx(() {
+              return Center(
+                child: _getAllQuestionsApiController.isLoading.value
+                    ? const CircularProgressIndicator()
+                    : (_getAllQuestionsApiController.getCompleteWordData.isEmpty
+                    ? const Center(
+                  child: Text(
+                    'No data available',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey),
                   ),
-                ),
-              ),
-            ),
+                )
+                    :   CompleteWordTable(main_category_id: mainCategoryId,
+                    sub_category_id: subCategoryId,
+                    topic_id: topicId,sub_topic_id: subtopicId,
+                    questionList: _getAllQuestionsApiController.getCompleteWordData)),
+              );
+            }),
           ],
         ),
       ),
@@ -1705,84 +1670,22 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
             Obx(() {
               return Center(
                 child: _getAllQuestionsApiController.isLoading.value
-                    ? CircularProgressIndicator()
+                    ? const CircularProgressIndicator()
                     : (_getAllQuestionsApiController.getTrueOrFalseList.isEmpty
-                        ? const Center(
-                            child: Text(
-                              'No data available',
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey),
-                            ),
-                          )
-                        : SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            controller: _scrollController,
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                  minWidth: 1200, minHeight: 400),
-                              child: SizedBox(
-                                height: 400,
-                                width: 600,
-                                child: Column(
-                                  children: [
-                                    // Table Header
-                                    Container(
-                                      color: Colors.orange.shade100,
-                                      child: Row(
-                                        children: [
-                                          _buildTableHeader("Question Type"),
-                                          _buildTableHeader("Question"),
-                                          _buildTableHeader("Answer"),
-                                          _buildTableHeader("Points"),
-                                          _buildTableHeader("Question Image"),
-                                        ],
-                                      ),
-                                    ),
-                                    // Table Rows
-                                    Expanded(
-                                      child: ListView.builder(
-                                        scrollDirection: Axis.vertical,
-                                        itemCount: _getAllQuestionsApiController
-                                            .getTrueOrFalseList.length,
-                                        itemBuilder: (context, index) {
-                                          var row =
-                                              _getAllQuestionsApiController
-                                                  .getTrueOrFalseList[index];
-                                          return Row(
-                                            children: [
-                                              _buildTableCell(
-                                                  row.questionType ?? ""),
-                                              _buildTableCell(
-                                                  row.question ?? ""),
-                                              _buildTableCell(
-                                                  row.question ?? ""),
-                                              _buildTableCell(row.answer ?? ""),
-                                              _buildTableCell(
-                                                  row.points.toString() ?? ""),
-                                              GestureDetector(
-                                                onTap: () => _showImagePopup(),
-                                                child: const Text(
-                                                  "View",
-                                                  style: TextStyle(
-                                                    color: Colors.blue,
-                                                    decoration: TextDecoration
-                                                        .underline,
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          )),
+                    ? const Center(
+                  child: Text(
+                    'No data available',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey),
+                  ),
+                )
+                    :   TrueFalseDataTable(main_category_id: mainCategoryId,
+                    sub_category_id: subCategoryId,
+                    topic_id: topicId,sub_topic_id: subtopicId,
+                    questionList: _getAllQuestionsApiController.getTrueOrFalseList)),
+
               );
             })
           ],
@@ -2170,11 +2073,11 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                 ),
               ],
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Obx(() {
               return Center(
                   child: _getAllQuestionsApiController.isLoading.value
-                      ? CircularProgressIndicator()
+                      ? const CircularProgressIndicator()
                       : (_getAllQuestionsApiController
                               .getFillInTheBlanksList.isEmpty
                           ? const Center(
@@ -2186,7 +2089,7 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                                     color: Colors.grey),
                               ),
                             )
-                          : FillTheBlanks_TableScreen(
+                          : FillBlanksTable(
                               main_category_id: mainCategoryId,
                               sub_category_id: subCategoryId,
                               topic_id: topicId,
@@ -2234,10 +2137,11 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                             subCategoryId!.isNotEmpty &&
                             topicId!.isNotEmpty)
                           showImportExportDialog("export");
-                        else
+                        else {
                           showSnackbar(
                               message:
                                   "Please select category,subcategory,topic,etc");
+                        }
                       },
                     ),
                   ),
@@ -2251,7 +2155,7 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                 child: _getAllQuestionsApiController.isLoading.value
                     ? CircularProgressIndicator()
                     : (_getAllQuestionsApiController.getMatchPairsList.isEmpty
-                        ? Center(
+                        ? const Center(
                             child: Text(
                               'No data available',
                               style: TextStyle(
@@ -2260,81 +2164,12 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                                   color: Colors.grey),
                             ),
                           )
-                        : SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            controller: _scrollController,
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                  minWidth: 1200, minHeight: 400),
-                              child: SizedBox(
-                                height: 400,
-                                width: 600,
-                                child: Column(
-                                  children: [
-                                    // Table Header
-                                    Container(
-                                      color: Colors.orange.shade100,
-                                      child: Row(
-                                        children: [
-                                          _buildTableHeader("Question Type"),
-                                          // _buildTableHeader("Question Title"),
-                                          _buildTableHeader("Left Column"),
-                                          _buildTableHeader("Right Column"),
-                                          _buildTableHeader("Points"),
-                                        ],
-                                      ),
-                                    ),
-                                    // Table Rows
-                                    Expanded(
-                                      child: ListView.builder(
-                                        scrollDirection: Axis.vertical,
-                                        itemCount: _getAllQuestionsApiController
-                                            .getMatchPairsList.length,
-                                        itemBuilder: (context, index) {
-                                          var row =
-                                              _getAllQuestionsApiController
-                                                  .getMatchPairsList[index];
-                                          return Row(
-                                            children: [
-                                              _buildTableCell(
-                                                  row.questionType ?? ""),
-                                              GestureDetector(
-                                                onTap: () => _showImagePopup(),
-                                                child: const Text(
-                                                  "View",
-                                                  style: TextStyle(
-                                                    color: Colors.blue,
-                                                    decoration: TextDecoration
-                                                        .underline,
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ),
-                                              GestureDetector(
-                                                onTap: () => _showImagePopup(),
-                                                child: const Text(
-                                                  "View",
-                                                  style: TextStyle(
-                                                    color: Colors.blue,
-                                                    decoration: TextDecoration
-                                                        .underline,
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ),
-                                              _buildTableCell(
-                                                  row.points.toString() ?? ""),
-                                            ],
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          )),
-              );
+                        : MatchThePairsQuestionTable(
+                    main_category_id: mainCategoryId,
+                    sub_category_id: subCategoryId,
+                    topic_id: topicId,
+                    sub_topic_id: subtopicId,
+                    questionList: _getAllQuestionsApiController.getMatchPairsList)));
             })
           ],
         ),
@@ -2392,95 +2227,100 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
             // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
             Obx(() {
               return Center(
-                child: _getAllQuestionsApiController.isLoading.value
-                    ? CircularProgressIndicator()
-                    : (_getAllQuestionsApiController.getMatchPairsList.isEmpty
-                        ? Center(
-                            child: Text(
-                              'No data available',
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey),
-                            ),
-                          )
-                        : SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            controller: _scrollController,
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                  minWidth: 1200, minHeight: 400),
-                              child: SizedBox(
-                                height: 400,
-                                width: 600,
-                                child: Column(
-                                  children: [
-                                    // Table Header
-                                    Container(
-                                      color: Colors.orange.shade100,
-                                      child: Row(
-                                        children: [
-                                          _buildTableHeader("Question Type"),
-                                          // _buildTableHeader("Question Title"),
-                                          _buildTableHeader("Left Column"),
-                                          _buildTableHeader("Right Column"),
-                                          _buildTableHeader("Points"),
-                                        ],
-                                      ),
-                                    ),
-                                    // Table Rows
-                                    Expanded(
-                                      child: ListView.builder(
-                                        scrollDirection: Axis.vertical,
-                                        itemCount: _getAllQuestionsApiController
-                                            .getMatchPairsList.length,
-                                        itemBuilder: (context, index) {
-                                          var row =
-                                              _getAllQuestionsApiController
-                                                  .getMatchPairsList[index];
-                                          return Row(
-                                            children: [
-                                              _buildTableCell(
-                                                  row.questionType ?? ""),
-                                              // _buildTableCell(row.title ?? ""),
-                                              // _buildTableCell(row.questionType ?? ""),
-                                              GestureDetector(
-                                                onTap: () => _showImagePopup(),
-                                                child: const Text(
-                                                  "View",
-                                                  style: TextStyle(
-                                                    color: Colors.blue,
-                                                    decoration: TextDecoration
-                                                        .underline,
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ),
-                                              GestureDetector(
-                                                onTap: () => _showImagePopup(),
-                                                child: const Text(
-                                                  "View",
-                                                  style: TextStyle(
-                                                    color: Colors.blue,
-                                                    decoration: TextDecoration
-                                                        .underline,
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ),
-                                              _buildTableCell(
-                                                  row.points.toString() ?? ""),
-                                            ],
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          )),
-              );
+                  child: _getAllQuestionsApiController.isLoading.value
+                      ? CircularProgressIndicator()
+                      : (_getAllQuestionsApiController
+                      .getCardFlipList.isEmpty
+                      ? const Center(
+                    child: Text(
+                      'No data available',
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey),
+                    ),
+                  )
+                      : CardFlipQuestionTable(
+                      main_category_id: mainCategoryId,
+                      sub_category_id: subCategoryId,
+                      topic_id: topicId,
+                      sub_topic_id: subtopicId,
+                      questionList: _getAllQuestionsApiController.getCardFlipList)));
+            })
+          ],
+        ),
+      ),
+    );
+  }
+  Widget _buildQuestionsImagePuzzleTable() {
+    return Card(
+      elevation: 1.0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'Question Data',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Tooltip(
+                  message: 'Export to Excel',
+                  child: CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: IconButton(
+                      icon: Image.asset('assets/excel.png',
+                          width: 24, height: 24),
+                      onPressed: () {
+                        print("categoryId " + mainCategoryId!);
+                        print("subcategoryId " + subCategoryId!);
+                        print("topicId " + topicId!);
+                        print("subtopicId " + subtopicId!);
+                        if (mainCategoryId!.isNotEmpty &&
+                            subCategoryId!.isNotEmpty &&
+                            topicId!.isNotEmpty)
+                          showImportExportDialog("export");
+                        else {
+                          showSnackbar(
+                              message:
+                                  "Please select category,subcategory,topic,etc");
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
+            Obx(() {
+              return Center(
+                  child: _getAllQuestionsApiController.isLoading.value
+                      ? CircularProgressIndicator()
+                      : (_getAllQuestionsApiController
+                      .imagePuzzleDataList.isEmpty
+                      ? const Center(
+                    child: Text(
+                      'No data available',
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey),
+                    ),
+                  )
+                      : ImagePuzzleQuestionTable(
+                      main_category_id: mainCategoryId,
+                      sub_category_id: subCategoryId,
+                      topic_id: topicId,
+                      sub_topic_id: subtopicId,
+                      questionList: _getAllQuestionsApiController.imagePuzzleDataList)));
             })
           ],
         ),
@@ -2536,74 +2376,28 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
             ),
             SizedBox(height: 10),
             // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal, // Horizontal scroll
-              child: Container(
-                constraints:
-                    BoxConstraints(maxWidth: 1200), // Max width constraint
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical, // Vertical scroll
-                  child: Table(
-                    border: TableBorder.all(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(8),
+            Obx(() {
+              return Center(
+                  child: _getAllQuestionsApiController.isLoading.value
+                      ? CircularProgressIndicator()
+                      : (_getAllQuestionsApiController
+                      .getCompleteParaData.isEmpty
+                      ? const Center(
+                    child: Text(
+                      'No data available',
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey),
                     ),
-                    columnWidths: const {
-                      0: FlexColumnWidth(1),
-                      1: FlexColumnWidth(2),
-                      2: FlexColumnWidth(3),
-                      3: FlexColumnWidth(1),
-                      4: FlexColumnWidth(1),
-                      5: FlexColumnWidth(1),
-                      6: FlexColumnWidth(1),
-                      7: FlexColumnWidth(1),
-                      8: FlexColumnWidth(1),
-                      9: FlexColumnWidth(1),
-                      10: FlexColumnWidth(1),
-                    },
-                    children: [
-                      TableRow(
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade100,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        children: [
-                          _buildTableHeader("Question Type"),
-                          _buildTableHeader("Title"),
-                          _buildTableHeader("Paragraph"),
-                          _buildTableHeader("Option 1"),
-                          _buildTableHeader("Option 2"),
-                          _buildTableHeader("Option 3"),
-                          _buildTableHeader("Option 4"),
-                          _buildTableHeader("Option 5"),
-                          _buildTableHeader("Option 6"),
-                          _buildTableHeader("Answer"),
-                          _buildTableHeader("Points"),
-                        ],
-                      ),
-                      // Dummy rows
-                      for (int i = 0; i < 5; i++)
-                        TableRow(
-                          children: [
-                            _buildTableCell("Complete Paragraph"),
-                            _buildTableCell("Title $i"),
-                            _buildTableCell(
-                                "This is a sample paragraph content $i for testing purposes."),
-                            _buildTableCell("Option A$i"),
-                            _buildTableCell("Option B$i"),
-                            _buildTableCell("Option C$i"),
-                            _buildTableCell("Option D$i"),
-                            _buildTableCell("Option E$i"),
-                            _buildTableCell("Option F$i"),
-                            _buildTableCell("Option A$i"),
-                            _buildTableCell((5 + i).toString()),
-                          ],
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+                  )
+                      : CompleteParagraphTable(
+                      main_category_id: mainCategoryId,
+                      sub_category_id: subCategoryId,
+                      topic_id: topicId,
+                      sub_topic_id: subtopicId,
+                      questionList: _getAllQuestionsApiController.getCompleteParaData)));
+            })
           ],
         ),
       ),
@@ -2851,6 +2645,14 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
           sub_category_id: subCategoryId,
           main_category_id: mainCategoryId,
         );
+        case "Image puzzle":
+        return BuildImagePuzzleContent(
+          pointsController: pointsController,
+          sub_topic_id: subtopicId,
+          topic_id: topicId,
+          sub_category_id: subCategoryId,
+          main_category_id: mainCategoryId,
+        );
       case "Alphabets Example":
         return BuildAlphabetExContent(
           pointsController: pointsController,
@@ -3074,15 +2876,6 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
 
       pathsFile = null;
     });
-  }
-
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
-    );
   }
 
   /// multiple choice question content
@@ -3767,169 +3560,6 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
   }
 
 
- // Widget _guessTheImage() {
- //    return DottedBorder(
- //      color: Colors.orange,
- //      strokeWidth: 1,
- //      dashPattern: [4, 4],
- //      child: Container(
- //        decoration: BoxDecoration(
- //          borderRadius: BorderRadius.circular(10),
- //          color: Colors.white,
- //        ),
- //        padding: const EdgeInsets.all(16.0),
- //        child: Column(
- //          crossAxisAlignment: CrossAxisAlignment.start,
- //          children: [
- //            const Text(
- //              'Enter index',
- //              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
- //            ),
- //            boxH08(),
- //            SizedBox(
- //              width: MediaQuery.of(context).size.width * 0.08,
- //              child: CustomTextField(
- //                controller: indexController,
- //                maxLines: 1,
- //                labelText: "Enter index",
- //              ),
- //            ),
- //            boxH10(),
- //            const Text(
- //              'Enter title',
- //              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
- //            ),
- //            boxH08(),
- //            CustomTextField(
- //              controller: titleController,
- //              maxLines: 1,
- //              labelText: "Enter title",
- //            ),
- //            boxH10(),
- //            const Text(
- //              'Upload Image',
- //              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
- //            ),
- //            const SizedBox(height: 8),
- //            Center(
- //              child: GestureDetector(
- //                onTap: () {
- //                  pickFile();
- //                },
- //                child: pathsFile != null
- //                    ? ClipRRect(
- //                  borderRadius: BorderRadius.circular(10),
- //                  child: Image.memory(
- //                    pathsFile!,
- //                    width: 140,
- //                    height: 140,
- //                    fit: BoxFit.cover,
- //                  ),
- //                )
- //                    : Container(
- //                  width: 140,
- //                  height: 140,
- //                  decoration: BoxDecoration(
- //                    borderRadius: BorderRadius.circular(10),
- //                    border: Border.all(color: Colors.grey, width: 0.8),
- //                    color: Colors.grey[200],
- //                  ),
- //                  child: const Align(
- //                    alignment: Alignment.bottomRight,
- //                    child: CircleAvatar(
- //                      backgroundColor: Colors.orange,
- //                      radius: 15,
- //                      child: Icon(Icons.add,
- //                          size: 18, color: Colors.black),
- //                    ),
- //                  ),
- //                ),
- //              ),
- //            ),
- //            boxH15(),
- //            const Text(
- //              'Enter Options',
- //              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
- //            ),
- //            boxH08(),
- //            GridView.builder(
- //              shrinkWrap: true,
- //              physics: NeverScrollableScrollPhysics(),
- //              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
- //                crossAxisCount: 2, // Number of items per row
- //                crossAxisSpacing: 10.0, // Spacing between columns
- //                mainAxisSpacing: 5.0, // Spacing between rows
- //                childAspectRatio:
- //                2.8, // Adjust height and width of grid items
- //              ),
- //              itemCount: optionControllers.length,
- //              itemBuilder: (context, index) {
- //                return CustomTextField(
- //                  controller: optionControllers[index],
- //                  labelText: "Option ${index + 1}",
- //                );
- //              },
- //            ),
- //            boxH10(),
- //            const Text(
- //              'Correct answer',
- //              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
- //            ),
- //            boxH08(),
- //            CustomTextField(
- //              controller: correctAnswerController,
- //              labelText: "Enter correct answer",
- //            ),
- //            boxH10(),
- //            const Text(
- //              'Upload Image',
- //              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
- //            ),
- //            const SizedBox(height: 8),
- //            Center(
- //              child: GestureDetector(
- //                onTap: () {
- //                  pickFile();
- //                },
- //                child: pathsFile != null
- //                    ? ClipRRect(
- //                        borderRadius: BorderRadius.circular(10),
- //                        child: Image.memory(
- //                          pathsFile!,
- //                          width: 120,
- //                          height: 120,
- //                          fit: BoxFit.cover,
- //                        ),
- //                      )
- //                    : Container(
- //                        width: 120,
- //                        height: 120,
- //                        decoration: BoxDecoration(
- //                          borderRadius: BorderRadius.circular(10),
- //                          color: Colors.grey[200],
- //                        ),
- //                        child: const Align(
- //                          alignment: Alignment.bottomRight,
- //                          child: CircleAvatar(
- //                            backgroundColor: Colors.orange,
- //                            radius: 15,
- //                            child:
- //                                Icon(Icons.add, size: 18, color: Colors.black),
- //                          ),
- //                        ),
- //                      ),
- //              ),
- //            ),
- //            boxH50(),
- //            CustomButton(
- //              label: "Add Question",
- //              onPressed: _submitQuestion,
- //            ),
- //          ],
- //        ),
- //      ),
- //    );
- //  }
 
   /// Guess The Image
   Widget _guessTheImage() {
@@ -4127,14 +3757,14 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                 const Text("Sound"),
                 const SizedBox(width: 16),
                 Radio(
-                  value: "Native Language",
+                  value: "Native language",
                   groupValue: selectedFormat,
                   onChanged: (value) {
                     setState(() {
                       selectedFormat = value!;
                     });                  },
                 ),
-                const Text("Native Language"),
+                const Text("Native language"),
               ],
             ),
 
@@ -4305,82 +3935,124 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
           color: Colors.white,
         ),
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Enter index',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.08,
-              child: CustomTextField(
-                controller: indexController,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Enter index',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              boxH08(),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.08,
+                child: CustomTextField(
+                  controller: indexController,
+                  maxLines: 1,
+                  labelText: "Enter index",
+                ),
+              ),
+              boxH10(),
+              const Text(
+                'Enter title',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              boxH08(),
+              CustomTextField(
+                controller: titleController,
                 maxLines: 1,
-                labelText: "Enter index",
+                labelText: "Enter title",
               ),
-            ),
-            boxH10(),
-            const Text(
-              'Enter title',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            CustomTextField(
-              controller: titleController,
-              maxLines: 1,
-              labelText: "Enter title",
-            ),
-            boxH10(),
-            const Text(
-              'Enter your question',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            CustomTextField(
-              controller: questionController,
-              maxLines: 1,
-              labelText: "Enter your question (e.g:- C_t, Man_o)",
-            ),
-            boxH20(),
-            const Text(
-              'Enter Options (e.g:- a, b, c)',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Number of items per row
-                crossAxisSpacing: 10.0, // Spacing between columns
-                mainAxisSpacing: 5.0, // Spacing between rows
-                childAspectRatio: 2.8, // Adjust height and width of grid items
+              boxH10(),
+              const Text(
+                'Enter your question',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
-              itemCount: optionControllers.length,
-              itemBuilder: (context, index) {
-                return CustomTextField(
-                  controller: optionControllers[index],
-                  labelText: "Option ${index + 1}",
-                );
-              },
-            ),
-            const Text(
-              'Enter correct answer',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            CustomTextField(
-              controller: correctAnswerController,
-              labelText: "Enter correct answer",
-            ),
-            const SizedBox(height: 20),
-            CustomButton(
-              label: "Add Question",
-              onPressed: _submitQuestion,
-            ),
-          ],
+              boxH08(),
+              CustomTextField(
+                controller: questionController,
+                maxLines: 1,
+                labelText: "Enter your question (e.g:- C_t, Man_o)",
+              ),
+              boxH10(),
+              const Text(
+                'Upload Image',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Center(
+                child: GestureDetector(
+                  onTap: () {
+                    pickFile();
+                  },
+                  child: pathsFile != null
+                      ? ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.memory(
+                      pathsFile!,
+                      width: 120,
+                      height: 120,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                      : Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.grey[200],
+                    ),
+                    child: const Align(
+                      alignment: Alignment.bottomRight,
+                      child: CircleAvatar(
+                        backgroundColor: Colors.orange,
+                        radius: 15,
+                        child:
+                        Icon(Icons.add, size: 18, color: Colors.black),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              boxH10(),
+              const Text(
+                'Enter Options (e.g:- a, b, c)',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              boxH08(),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2, // Number of items per row
+                  crossAxisSpacing: 10.0, // Spacing between columns
+                  mainAxisSpacing: 5.0, // Spacing between rows
+                  childAspectRatio: 2.8, // Adjust height and width of grid items
+                ),
+                itemCount: optionControllers.length,
+                itemBuilder: (context, index) {
+                  return CustomTextField(
+                    controller: optionControllers[index],
+                    labelText: "Option ${index + 1}",
+                  );
+                },
+              ),
+              const Text(
+                'Enter correct answer',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              boxH08(),
+              CustomTextField(
+                controller: correctAnswerController,
+                labelText: "Enter correct answer",
+              ),
+              const SizedBox(height: 20),
+              CustomButton(
+                label: "Add Question",
+                onPressed: _submitQuestion,
+              ),
+            ],
+          ),
         ),
       ),
     ); // Placeholder for the actual implementation
@@ -4402,6 +4074,17 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const Text(
+                'Question Index:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              CustomTextField(
+                controller: indexController,
+                labelText: '',
+                hintText: "0",
+              ),
+              boxH15(),
               const Text(
                 'Question title',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
