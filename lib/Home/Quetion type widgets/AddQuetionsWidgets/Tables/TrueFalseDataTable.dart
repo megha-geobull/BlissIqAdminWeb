@@ -1,7 +1,10 @@
+import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/controller/GetAllQuestionsApiController.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_mcqs.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_trueOrfalse_model.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -158,14 +161,12 @@ class _TrueFalseDataTableState extends State<TrueFalseDataTable> {
                     ),
                     onPressed: () async {
                       print("Selected Ids - $_selectedQuestionIds");
-                      Future.delayed(const Duration(seconds: 1), () {
-                        _removeSelectedQuestions();
-                        _getdeleteApiController.getTrueORFalse(
-                          main_category_id: widget.main_category_id,
-                          sub_category_id: widget.sub_category_id,
-                          topic_id: widget.topic_id,
-                          sub_topic_id: widget.sub_topic_id,
-                        );
+                      Future.delayed(const Duration(seconds: 1), () async {
+                        //_removeSelectedQuestions();
+                        bool confirmed = await _dataSource._showConfirmationDialog(context);
+                        if(confirmed){
+                          _dataSource._deleteSelectedQuestions(_selectedQuestionIds);
+                        }
                       });
                     },
                   ),
@@ -250,6 +251,99 @@ class TrueFalseDataSource extends DataTableSource {
   List<TextEditingController> answerControllers = [];
   List<TextEditingController> pointsControllers = [];
   List<TextEditingController> indexControllers = [];
+  List<TextEditingController> questionImageControllers = [];
+
+  List<PlatformFile>? _paths;
+  var pathsFile;
+  var pathsFileName;
+  bool isFilePicked = false;
+  pickFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: false,
+      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
+      allowedExtensions: [
+        'bmp',
+        'dib',
+        'gif',
+        'jfif',
+        'jpe',
+        'jpg',
+        'jpeg',
+        'pbm',
+        'pgm',
+        'ppm',
+        'pnm',
+        'pfm',
+        'png',
+        'apng',
+        'blp',
+        'bufr',
+        'cur',
+        'pcx',
+        'dcx',
+        'dds',
+        'ps',
+        'eps',
+        'fit',
+        'fits',
+        'fli',
+        'flc',
+        'ftc',
+        'ftu',
+        'gbr',
+        'grib',
+        'h5',
+        'hdf',
+        'jp2',
+        'j2k',
+        'jpc',
+        'jpf',
+        'jpx',
+        'j2c',
+        'icns',
+        'ico',
+        'im',
+        'iim',
+        'mpg',
+        'mpeg',
+        'tif',
+        'tiff',
+        'mpo',
+        'msp',
+        'palm',
+        'pcd',
+        'pdf',
+        'pxr',
+        'psd',
+        'qoi',
+        'bw',
+        'rgb',
+        'rgba',
+        'sgi',
+        'ras',
+        'tga',
+        'icb',
+        'vda',
+        'vst',
+        'webp',
+        'wmf',
+        'emf',
+        'xbm',
+        'xpm'
+      ],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      _paths = result.files;
+      pathsFile = _paths!.first.bytes; // Store the bytes
+      pathsFileName = _paths!.first.name; // Store the file name
+      isFilePicked = true; // Mark file as picked
+      notifyListeners();
+    } else {
+      print('No file selected');
+    }
+  }
 
   final GetAllQuestionsApiController updateQueApiController = Get.find();
 
@@ -264,6 +358,8 @@ class TrueFalseDataSource extends DataTableSource {
           .add(TextEditingController(text: question.points.toString()));
       indexControllers
           .add(TextEditingController(text: question.index.toString()));
+      questionImageControllers
+          .add(TextEditingController(text: question.qImage.toString()));
     }
   }
 
@@ -292,165 +388,118 @@ class TrueFalseDataSource extends DataTableSource {
             },
           ),
         ),
+        DataCell(_buildEditableField(index, indexControllers)),
+        DataCell(_buildEditableField(index, questionTypeControllers)),
+        DataCell(_buildEditableField(index, questionControllers)),
+        DataCell(_buildEditableField(index, answerControllers)),
+        DataCell(_buildEditableField(index, pointsControllers)),
+        DataCell(_buildEditableField(index, questionImageControllers)),
+        DataCell(_buildEditButton(index)),
 
-        _editableDataCell(
-          index: index,
-          controller: indexControllers[index],
-          initialValue: question.index.toString(),
-          onSubmit: (value) {
-            _updateQuestion(
-              index,
-              questionTypeControllers[index].text,
-              questionControllers[index].text,
-              answerControllers[index].text,
-              pointsControllers[index].text,
-              value,
-            );
-          },
-        ),
-
-        _editableDataCell(
-          index: index,
-          controller: questionTypeControllers[index],
-          initialValue: question.questionType.toString(),
-          onSubmit: (value) {
-            _updateQuestion(
-              index,
-              value,
-              questionControllers[index].text,
-              answerControllers[index].text,
-              pointsControllers[index].text,
-              indexControllers[index].text,
-            );
-          },
-        ),
-
-        _editableDataCell(
-          index: index,
-          controller: questionControllers[index],
-          initialValue: question.question.toString(),
-          onSubmit: (value) {
-            _updateQuestion(
-              index,
-              questionTypeControllers[index].text,
-              value,
-              answerControllers[index].text,
-              pointsControllers[index].text,
-              indexControllers[index].text,
-            );
-          },
-        ),
-
-        _editableDataCell(
-          index: index,
-          controller: answerControllers[index],
-          initialValue: question.answer.toString(),
-          onSubmit: (value) {
-            _updateQuestion(
-              index,
-              questionTypeControllers[index].text,
-              questionControllers[index].text,
-              value,
-              pointsControllers[index].text,
-              indexControllers[index].text,
-            );
-          },
-        ),
-
-        _editableDataCell(
-          index: index,
-          controller: pointsControllers[index],
-          initialValue: question.points.toString(),
-          onSubmit: (value) {
-            _updateQuestion(
-              index,
-              questionTypeControllers[index].text,
-              questionControllers[index].text,
-              answerControllers[index].text,
-              value,
-              indexControllers[index].text,
-            );
-          },
-        ),
-
-        DataCell(TextButton(onPressed: () {}, child: Text('View'))),
-
-        DataCell(
-          editingRowIndex == index
-              ? ElevatedButton(
-                  onPressed: () {
-                    _updateQuestion(
-                      index,
-                      questionTypeControllers[index].text,
-                      questionControllers[index].text,
-                      answerControllers[index].text,
-                      pointsControllers[index].text,
-                      indexControllers[index].text,
-                    );
-                    editingRowIndex = null; // Exit edit mode
-                    notifyListeners();
-                  },
-                  child: Text("Update"),
-                )
-              : GestureDetector(
-                  onTap: () {
-                    if (editingRowIndex == null) {
-                      editingRowIndex = index; // Start editing
-                      notifyListeners();
-                    }
-                  },
-                  child: const Text(
-                    "Edit",
-                    style: TextStyle(
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-        ),
       ],
     );
   }
 
-  /// Helper for creating editable data cells
-  DataCell _editableDataCell({
-    required int index,
-    required TextEditingController controller,
-    required String initialValue,
-    required Function(String) onSubmit,
-  }) {
-    return DataCell(
-      editingRowIndex == index
-          ? TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-              ),
-              onSubmitted: onSubmit,
-            )
-          : Text(initialValue),
+  Widget _buildEditableField(int index, List<TextEditingController> controllers) {
+    if (index >= controllers.length) return const Text("");
+
+    if (controllers == questionImageControllers) {
+      return editingRowIndex == index
+          ? SizedBox(
+        width: 50,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: isFilePicked ? Colors.green : Colors.blue, width: 1.5),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: IconButton(
+            icon: Icon(Icons.image, color: isFilePicked ? Colors.green :Colors.blue),
+            onPressed: () => pickFile(),
+          ),
+        ),
+      )
+          : controllers[index].text.isNotEmpty && controllers[index].text != "null"
+          ? SizedBox(
+        width: 50, // Ensure image preview doesn't take excessive space
+        child: CachedNetworkImage(
+          imageUrl: ApiString.ImgBaseUrl + controllers[index].text,
+          progressIndicatorBuilder: (context, url, downloadProgress) =>
+              CircularProgressIndicator(value: downloadProgress.progress),
+          errorWidget: (context, url, error) => Icon(Icons.error),
+        ),
+      )
+          : const Icon(Icons.broken_image, color: Colors.grey);
+    }
+
+    return editingRowIndex == index
+        ? controllers == questionTypeControllers ? TextField(
+      controller: controllers[index],
+      enabled: false,
+      decoration: const InputDecoration(border: OutlineInputBorder()),
+    ) : TextField(
+      controller: controllers[index],
+      decoration: const InputDecoration(border: OutlineInputBorder()),
+    )
+        : Text(controllers[index].text);
+  }
+
+  Widget _buildEditButton(int index) {
+    return editingRowIndex == index
+        ? ElevatedButton(
+      onPressed: () {
+        _updateQuestion(index);
+        editingRowIndex = null;
+        notifyListeners();
+      },
+      child: const Text("Update"),
+    )
+        : GestureDetector(
+      onTap: () {
+        if (editingRowIndex == null) {
+          editingRowIndex = index;
+          notifyListeners();
+        }
+      },
+      child: const Text(
+        "Edit",
+        style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
+      ),
     );
   }
 
-  /// Update the question's data
-  _updateQuestion(int index, String questionType, String question, String answer, String points, String indexValue) async {
-    final updatedQuestion = TrueOrFalse(
-      id: questions[index].id, // Keep the same ID
+  void _updateQuestion(int index) async {
+    if (index >= questions.length) return;
+
+    final   updatedQuestion = TrueOrFalse(
+      id: questions[index].id,
+      questionType: questionTypeControllers[index].text,
+      index: int.tryParse(indexControllers[index].text) ?? questions[index].index,
+      answer: answerControllers[index].text,
+      question:questionControllers[index].text,
+      qImage:questionImageControllers[index].text,
+      points: int.tryParse(pointsControllers[index].text) ?? questions[index].points,
       mainCategoryId: questions[index].mainCategoryId,
       subCategoryId: questions[index].subCategoryId,
       topicId: questions[index].topicId,
       subTopicId: questions[index].subTopicId,
-      questionType: questionType,
-      question: question,
-      answer: answer,
-      points: int.tryParse(points) ?? questions[index].points,
-      index: int.tryParse(indexValue) ?? questions[index].index,
     );
 
-    questions[index] = updatedQuestion;
-    await updateQueApiController.updateTrueFalseTableQuestionApi(updatedQuestion); // API call to update
-    notifyListeners();
+    try {
+      questions[index] = updatedQuestion;
+      await updateQueApiController.updateTrueFalseTableQuestionApi(updatedQuestion,pathsFile)
+          .whenComplete(() => updateQueApiController.getTrueORFalse(
+        main_category_id: updatedQuestion.mainCategoryId.toString(),
+        sub_category_id: updatedQuestion.subCategoryId.toString(),
+        topic_id: updatedQuestion.topicId.toString(),
+        sub_topic_id:updatedQuestion.subTopicId.toString(),
+      ),);
+
+      notifyListeners();
+    } catch (e) {
+      print('Error updating question: $e');
+    }
   }
+
 
   @override
   bool get isRowCountApproximate => false;
@@ -472,7 +521,7 @@ class TrueFalseDataSource extends DataTableSource {
     } else {
       bool confirmed = await _showConfirmationDialog(context);
       if (confirmed) {
-        _deleteSelectedQuestions();
+        _deleteSelectedQuestions(selectedQuestionIds.join('|'));
       }
       selectedQuestionIds.clear();
     }
@@ -481,20 +530,13 @@ class TrueFalseDataSource extends DataTableSource {
     notifyListeners(); // Update UI
   }
 
-  _deleteSelectedQuestions() async {
+  _deleteSelectedQuestions(String ids) async {
     final deleteApiController = Get.find<GetAllQuestionsApiController>();
 
     if (selectedQuestionIds.isNotEmpty) {
       try {
-        await deleteApiController.deleteTrueFalseAPI(
-          main_category_id: questions[0].mainCategoryId.toString(),
-          sub_category_id: questions[0].subCategoryId.toString(),
-          topic_id: questions[0].topicId.toString(),
-          sub_topic_id: questions[0].subTopicId.toString(),
-        true_false_id: selectedQuestionIds.join('|') // Pipe-separated IDs
-        );
 
-        // Optionally, refresh the list of questions after deletion
+        await deleteApiController.deleteTrueOrFalseAPI(question_ids:ids);
         await deleteApiController.getTrueORFalse(
           main_category_id: questions[0].mainCategoryId.toString(),
           sub_category_id: questions[0].subCategoryId.toString(),

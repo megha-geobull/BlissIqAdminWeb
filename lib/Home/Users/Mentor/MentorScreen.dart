@@ -1,5 +1,6 @@
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/AppColor.dart';
+import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/Home/Users/Mentor/MentorRegistration.dart';
 import 'package:blissiqadmin/Home/Users/Models/GetAllMentorModel.dart';
@@ -7,9 +8,9 @@ import 'package:blissiqadmin/auth/Controller/AuthController.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../../Global/constants/CustomAlertDialogue.dart';
-import '../../../auth/Controller/StudentController.dart';
 
 class MentorScreen extends StatefulWidget {
   const MentorScreen({super.key});
@@ -20,14 +21,21 @@ class MentorScreen extends StatefulWidget {
 
 class _MentorScreenState extends State<MentorScreen> {
   final AuthController mentorController = Get.put(AuthController());
+  Set<String> selectedMentorIds = {};
+  bool isSelectAll = false;
+  List<Data> filteredMentorData = [];
+  Map<String, bool> editingStates = {}; // Track editing state for each row
+  final TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    filteredMentorData = mentorController.allMentorData;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       mentorController.getAllMentors();
+      searchController.clear();
+      _filterMentors(''); // Clear search on init
     });
-
   }
 
   void _toggleStatus(String mentorId) async {
@@ -59,13 +67,39 @@ class _MentorScreenState extends State<MentorScreen> {
         mentor_id: mentorId,
         approval_status: (mentor.approvalStatus == "Disapproved" || mentor.approvalStatus == "Pending") ? "Approved" : "Disapproved",
       );
-
     }
   }
 
-  void _removeMentor(int index) {
+  void onDelete(String title, String mentor_id) {
+    showDialog(
+      context: context,
+      builder: (context) => CustomAlertDialog(
+        title: 'Are you sure',
+        content: title,
+        yesText: 'Yes',
+        noText: 'No',
+        onYesPressed: () {
+          mentorController.delete_mentors(mentor_id);
+          mentorController.getAllMentors();
+          Navigator.pop(context);
+          selectedMentorIds.clear();
+          setState(() {});
+        },
+      ),
+    );
+  }
+
+  void _filterMentors(String query) {
     setState(() {
-      mentorController.allMentorData.removeAt(index);
+      if (query.isEmpty) {
+        filteredMentorData = mentorController.allMentorData;
+      } else {
+        filteredMentorData = mentorController.allMentorData
+            .where((mentor) => mentor.fullName!
+            .toLowerCase()
+            .contains(query.toLowerCase()))
+            .toList();
+      }
     });
   }
 
@@ -74,40 +108,43 @@ class _MentorScreenState extends State<MentorScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       body: Obx(() {
-        if (mentorController.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        } else {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              bool isWideScreen = constraints.maxWidth > 800;
-              return Row(
-                children: [
-                  if (isWideScreen)
-                    Container(
-                      width: 250,
-                      color: Colors.orange.shade100,
-                      child: const MyDrawer(),
+        return mentorController.isLoading.value
+            ? Center(
+          child: LoadingAnimationWidget.hexagonDots(
+            color: Colors.deepOrange,
+            size: 70,
+          ),
+        )
+            : LayoutBuilder(
+          builder: (context, constraints) {
+            bool isWideScreen = constraints.maxWidth > 800;
+            return Row(
+              children: [
+                if (isWideScreen)
+                  Container(
+                    width: 250,
+                    color: Colors.orange.shade100,
+                    child: const MyDrawer(),
+                  ),
+                Expanded(
+                  child: Scaffold(
+                    appBar: isWideScreen
+                        ? null
+                        : AppBar(
+                      title: const Text('Dashboard'),
+                      backgroundColor: Colors.blue.shade100,
                     ),
-                  Expanded(
-                    child: Scaffold(
-                      appBar: isWideScreen
-                          ? null
-                          : AppBar(
-                        title: const Text('Dashboard'),
-                        backgroundColor: Colors.blue.shade100,
-                      ),
-                      body: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8.0, vertical: 16),
-                        child: _buildMentorMainContent(),
-                      ),
+                    body: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0, vertical: 16),
+                      child: _buildMentorMainContent(),
                     ),
                   ),
-                ],
-              );
-            },
-          );
-        }
+                ),
+              ],
+            );
+          },
+        );
       }),
     );
   }
@@ -119,151 +156,100 @@ class _MentorScreenState extends State<MentorScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(),
+          boxH15(),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search by name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    _filterMentors(value);
+                  },
+                ),
+              ),
+              boxW15(),
+              if (selectedMentorIds.isNotEmpty)
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade100,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 19, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  label: const Text(
+                    "Delete",
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  onPressed: () async {
+                    print("Selected Ids - ${selectedMentorIds.join('|')}");
+                    Future.delayed(const Duration(seconds: 1), () async {
+                      onDelete("You want to delete this mentor?",
+                          selectedMentorIds.join('|'));
+                    });
+                  },
+                ),
+            ],
+          ),
           const SizedBox(height: 16),
-          Expanded(child: _buildMentorTable()),
+          Expanded(
+              child: mentorController.isLoading.value
+                  ? Center(
+                child: LoadingAnimationWidget.hexagonDots(
+                  color: Colors.deepOrange,
+                  size: 70,
+                ),
+              )
+                  : _buildMentorDataTable()),
         ],
       ),
     );
   }
 
-  Widget _buildMentorTable() {
-    return SingleChildScrollView(
-      child: Card(
-        elevation: 0.8,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        child: Table(
-          border: const TableBorder.symmetric(
-            inside: BorderSide(color: Colors.grey, width: 0.5),
+  Widget _buildMentorDataTable() {
+    return Card(
+      elevation: 0.8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: SingleChildScrollView(
+        child: PaginatedDataTable(
+          header: const Row(
+            children: [
+              Text('Mentors'),
+            ],
           ),
-          columnWidths: const {
-            0: FlexColumnWidth(1.5), // Profile column
-            1: FlexColumnWidth(1.5), // Name column
-            2: FlexColumnWidth(2.5), // Email column (increased width)
-            3: FlexColumnWidth(1.5), // Contact No column
-            4: FlexColumnWidth(1.5), // Address column
-            5: FlexColumnWidth(1.5), // Experience column
-            6: FlexColumnWidth(1.5), // Qualification column
-            7: FlexColumnWidth(2.0), // Status column (increased width)
-            8: FlexColumnWidth(1.5), // Actions column
-          },
-          children: [
-            _buildTableHeader(),
-            ...mentorController.allMentorData.asMap().entries.map((entry) {
-              int index = entry.key;
-              Data mentor = entry.value;
-              return _buildTableRow(mentor, index);
-            }).toList(),
+          columns: const [
+            DataColumn(label: Text('Profile')),
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Email')),
+            DataColumn(label: Text('Contact No')),
+            DataColumn(label: Text('Address')),
+            DataColumn(label: Text('Experience')),
+            DataColumn(label: Text('Qualification')),
+            DataColumn(label: Text('Status')),
+            DataColumn(label: Text('Actions')),
+            DataColumn(label: Text('Edit')),
           ],
+          source: MentorDataTableSource(
+            filteredMentorData,
+            context,
+            this,
+          ),
+          rowsPerPage: 10,
+          showFirstLastButtons: true,
         ),
       ),
     );
-  }
-
-  TableRow _buildTableRow(Data mentor, int index) {
-    return TableRow(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: CircleAvatar(
-            radius: 30,
-            backgroundColor: Colors.white,
-            child: CachedNetworkImage(
-              imageUrl: ApiString.ImgBaseUrl + (mentor.profileImage ?? ''),
-              placeholder: (context, url) => CircularProgressIndicator(),
-              errorWidget: (context, url, error) => Icon(Icons.error),
-              fit: BoxFit.cover,
-
-            ),
-          ),
-
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(mentor.fullName ?? 'No Name'),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(mentor.email ?? 'No Email'),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(mentor.contactNo?.toString() ?? '-'),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(mentor.address ?? 'No Address'),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(mentor.experience ?? 'No experience'),
-        ), // Placeholder if experience is missing
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(mentor.qualification ?? 'not mention'),
-        ), // Placeholder if qualification is missing
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: ElevatedButton(
-            onPressed: () => _toggleStatus(mentor.sId ?? ''),
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              backgroundColor: _getButtonColor(mentor.approvalStatus), // Dynamic color
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 9),
-            ),
-            child: Text(
-              mentor.approvalStatus ?? 'Pending',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-              ),
-            ),
-          ),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () {
-              onDelete("You want to delete mentor ?",index,mentor.sId!);
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  void onDelete(String title,int index,String mentor_id) {
-    showDialog(
-      context: context,
-      builder: (context) => CustomAlertDialog(
-        title: 'Are you sure',
-        content: title,
-        yesText: 'Yes',
-        noText: 'No', onYesPressed: () {
-        Navigator.pop(context);
-        mentorController.delete_mentors(mentor_id);
-        Future.delayed(const Duration(seconds: 2), () {
-          _removeMentor(index);
-        });
-      },
-      ),
-    );
-  }
-
-  Color _getButtonColor(String? approvalStatus) {
-    switch (approvalStatus) {
-      case "Approved":
-        return AppColor.green;
-      case "Disapproved":
-        return AppColor.red;
-      case "Pending":
-        return AppColor.amber;
-      default:
-        return AppColor.grey;
-    }
   }
 
   Widget _buildHeader() {
@@ -303,8 +289,8 @@ class _MentorScreenState extends State<MentorScreen> {
                   elevation: 3,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8)),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
               ),
             ),
@@ -313,67 +299,187 @@ class _MentorScreenState extends State<MentorScreen> {
       ),
     );
   }
-
-  TableRow _buildTableHeader() {
-    return TableRow(
-      decoration: BoxDecoration(
-        color: Colors.blueGrey.shade50,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-      ),
-      children: const [
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Profile', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Name', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Email', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Contact No', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Address', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Experience', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Qualification', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Actions', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-      ],
-    );
-  }
-
 }
 
+class MentorDataTableSource extends DataTableSource {
+  MentorDataTableSource(this.mentors, this.context, this.mentorScreenState) {
+    buildDataTableRows();
+  }
 
+  final List<Data> mentors;
+  final BuildContext context;
+  final _MentorScreenState mentorScreenState;
 
+  List<DataRow> dataTableRows = [];
 
+  void buildDataTableRows() {
+    dataTableRows = mentors.map<DataRow>((dataRow) {
+      final isEditing = mentorScreenState.editingStates[dataRow.sId] ?? false;
+      return DataRow(
+        selected: mentorScreenState.selectedMentorIds.contains(dataRow.sId),
+        onSelectChanged: (isSelected) {
+          if (isSelected == true) {
+            mentorScreenState.selectedMentorIds.add(dataRow.sId ?? '');
+          } else {
+            mentorScreenState.selectedMentorIds.remove(dataRow.sId ?? '');
+          }
+          mentorScreenState.setState(() {});
+        },
+        cells: [
+          DataCell(
+            CircleAvatar(
+              radius: 20,
+              backgroundColor: Colors.white,
+              child: CachedNetworkImage(
+                imageUrl: ApiString.ImgBaseUrl + (dataRow.profileImage ?? ''),
+                placeholder: (context, url) => CircularProgressIndicator(),
+                errorWidget: (context, url, error) => Icon(Icons.error),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          DataCell(
+            isEditing
+                ? TextFormField(
+              initialValue: dataRow.fullName,
+              onChanged: (value) {
+                // dataRow.fullName = value;
+              },
+            )
+                : Text(dataRow.fullName ?? 'No Name'),
+          ),
+          DataCell(
+            isEditing
+                ? TextFormField(
+              initialValue: dataRow.email,
+              onChanged: (value) {
+                // dataRow.email = value;
+              },
+            )
+                : Text(dataRow.email ?? 'No Email'),
+          ),
+          DataCell(
+            isEditing
+                ? TextFormField(
+              initialValue: dataRow.contactNo?.toString(),
+              onChanged: (value) {
+                // dataRow.contactNo = value;
+              },
+            )
+                : Text(dataRow.contactNo?.toString() ?? '-'),
+          ),
+          DataCell(
+            isEditing
+                ? TextFormField(
+              initialValue: dataRow.address,
+              onChanged: (value) {
+                // dataRow.address = value;
+              },
+            )
+                : Text(dataRow.address ?? 'No Address'),
+          ),
+          DataCell(
+            isEditing
+                ? TextFormField(
+              initialValue: dataRow.experience,
+              onChanged: (value) {
+                // dataRow.experience = value;
+              },
+            )
+                : Text(dataRow.experience ?? 'No experience'),
+          ),
+          DataCell(
+            isEditing
+                ? TextFormField(
+              initialValue: dataRow.qualification,
+              onChanged: (value) {
+                // dataRow.qualification = value;
+              },
+            )
+                : Text(dataRow.qualification ?? 'No qualification'),
+          ),
+          DataCell(
+            ElevatedButton(
+              onPressed: () =>
+                  mentorScreenState._toggleStatus(dataRow.sId ?? ''),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                backgroundColor: _getButtonColor(dataRow.approvalStatus),
+              ),
+              child: Text(
+                dataRow.approvalStatus ?? 'Pending',
+                style: const TextStyle(color: Colors.white, fontSize: 12),
+              ),
+            ),
+          ),
+          DataCell(
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () {
+                mentorScreenState.onDelete(
+                  "You want to delete this mentor?",
+                  dataRow.sId!,
+                );
+              },
+            ),
+          ),
+          DataCell(isEditing
+              ? ElevatedButton(
+            onPressed: () {
+              // Save changes and exit edit mode
+              mentorScreenState.setState(() {
+                mentorScreenState.editingStates[dataRow.sId!] = false;
+              });
+              // Call update API here if needed
+            },
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Update'),
+          )
+              : ElevatedButton(
+            onPressed: () {
+              // Save changes and exit edit mode
+              mentorScreenState.setState(() {
+                mentorScreenState.editingStates[dataRow.sId!] = true;
+              });
+              // Call update API here if needed
+            },
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Edit'),
+          )),
+        ],
+      );
+    }).toList();
+  }
 
+  Color _getButtonColor(String? approvalStatus) {
+    switch (approvalStatus) {
+      case "Approved":
+        return AppColor.green;
+      case "Disapproved":
+        return AppColor.red;
+      case "Pending":
+        return AppColor.amber;
+      default:
+        return AppColor.grey;
+    }
+  }
 
+  @override
+  DataRow? getRow(int index) => dataTableRows[index];
 
+  @override
+  int get rowCount => dataTableRows.length;
 
+  @override
+  bool get isRowCountApproximate => false;
 
-
-
-
-
-
-
+  @override
+  int get selectedRowCount => mentorScreenState.selectedMentorIds.length;
+}

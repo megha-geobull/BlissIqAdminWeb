@@ -44,7 +44,6 @@ class SchoolController extends GetxController {
   // Form key
   final formKey = GlobalKey<FormState>();
   RxString userId = "".obs;
-
   RxList<Data> allSchoolData = <Data>[].obs;
 
 
@@ -55,17 +54,17 @@ class SchoolController extends GetxController {
 
   // Dispose controllers when the screen is removed
   clearControllers() {
-    nameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    phNoController.dispose();
-    addressController.dispose();
-    schoolNameController.dispose();
-    schoolRegNumberController.dispose();
-    principalNameController.dispose();
-    principalEmailController.dispose();
-    principalPhoneController.dispose();
+    nameController.clear();
+    emailController.clear();
+    passwordController.clear();
+    confirmPasswordController.clear();
+    phNoController.clear();
+    addressController.clear();
+    schoolNameController.clear();
+    schoolRegNumberController.clear();
+    principalNameController.clear();
+    principalEmailController.clear();
+    principalPhoneController.clear();
     super.onClose();
   }
 
@@ -116,8 +115,9 @@ class SchoolController extends GetxController {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(responseData['message'])),
         );
+        getAllSchools();
+        Get.back();
         clearControllers();
-        Get.toNamed(AppRoutes.login);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(responseData['message'] ?? 'Error occurred')),

@@ -1,17 +1,17 @@
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
-import 'package:blissiqadmin/Global/constants/AppColor.dart';
+import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
+import 'package:blissiqadmin/Global/constants/CustomAlertDialogue.dart';
 import 'package:blissiqadmin/Home/Assign/AssignedSchoolPage.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/Home/Users/Company/CompanyRegistrationPage.dart';
 import 'package:blissiqadmin/Home/Users/Company/CompnayListBottomSheet.dart';
+import 'package:blissiqadmin/Home/Users/Models/GetAllCompanyModel.dart';
 import 'package:blissiqadmin/auth/Controller/CompanyController/CompanyController.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/foundation.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../../Global/constants/CustomAlertDialogue.dart';
-import '../Models/GetAllCompanyModel.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class CompanyScreen extends StatefulWidget {
   const CompanyScreen({super.key});
@@ -22,19 +22,25 @@ class CompanyScreen extends StatefulWidget {
 
 class _CompanyScreenState extends State<CompanyScreen> {
   final CompanyController companyController = Get.put(CompanyController());
-  String? selectedSchool;
+  Set<String> selectedCompanyIds = {};
+  bool isSelectAll = false;
+  int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
+  final _verticalScrollController = ScrollController();
+  Map<String, bool> editingStates = {}; // Track editing state for each row
+  List<Data> filteredCompanyData = [];
 
   @override
   void initState() {
     super.initState();
+    filteredCompanyData = companyController.allCompanyData;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       companyController.getAllCompany();
+      searchController.clear();
+      _filterSchools('');
     });
-
   }
 
-
-  void _toggleStatus(String companyId) async {
+  void _toggleStatus(String schoolId) async {
     bool? confirmation = await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -54,26 +60,68 @@ class _CompanyScreenState extends State<CompanyScreen> {
         );
       },
     );
-
     if (confirmation == true) {
-      var company = companyController.allCompanyData.firstWhere((p0) => p0.id == companyId);
-      if (kDebugMode) {
-        print("Company ID: $companyId");
-      }
-      String newStatus = (company.approvalStatus?.toLowerCase() == "disapproved" ||
-          company.approvalStatus?.toLowerCase() == "pending")
-          ? "Approved"
-          : "Disapproved";
-      await companyController.approveCompany(
-        companyID: companyId,
-        approvalStatus: newStatus,
+      var school = companyController.allCompanyData
+          .where((p0) => p0.id == schoolId)
+          .first;
+
+      companyController.approveCompany(
+        companyID: schoolId,
+        approvalStatus: (school.approvalStatus == "Disapproved" ||
+            school.approvalStatus == "Pending")
+            ? "Approved"
+            : "Disapproved",
       );
     }
   }
 
-  void _removeCompany(int index) {
+  void _showSchoolBottomSheet(BuildContext context, String? id) async {
+    var selectedSchool = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) {
+        String? companyID = id;
+        return CompnayListBottomSheet(companyID);
+      },
+    );
+    if (selectedSchool != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Assigned to $selectedSchool')),
+      );
+    }
+  }
+
+  void onDelete(String title, String companyId) {
+    showDialog(
+      context: context,
+      builder: (context) => CustomAlertDialog(
+        title: 'Are you sure',
+        content: title,
+        yesText: 'Yes',
+        noText: 'No',
+        onYesPressed: () {
+          Navigator.pop(context);
+          companyController.delete_company(companyId);
+          companyController.getAllCompany();
+          setState(() {});
+        },
+      ),
+    );
+  }
+
+  final TextEditingController searchController = TextEditingController();
+
+  void _filterSchools(String query) {
     setState(() {
-      companyController.allCompanyData.removeAt(index);
+      if (query.isEmpty) {
+        filteredCompanyData = companyController.allCompanyData;
+      } else {
+        filteredCompanyData =
+          companyController.allCompanyData.where(
+                (company) =>
+            (company.companyName?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
+                (company.ownerName?.toLowerCase().contains(query.toLowerCase()) ?? false),
+          ).toList();
+      }
     });
   }
 
@@ -83,7 +131,12 @@ class _CompanyScreenState extends State<CompanyScreen> {
       backgroundColor: Colors.grey.shade50,
       body: Obx(() {
         if (companyController.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(
+            child: LoadingAnimationWidget.hexagonDots(
+              color: Colors.deepOrange,
+              size: 70,
+            ),
+          );
         } else {
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -107,7 +160,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
                       body: Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8.0, vertical: 16),
-                        child: _buildCompanyMainContent(),
+                        child: _buildSchoolMainContent(),
                       ),
                     ),
                   ),
@@ -120,235 +173,131 @@ class _CompanyScreenState extends State<CompanyScreen> {
     );
   }
 
-  Widget _buildCompanyMainContent() {
+  Widget _buildSchoolMainContent() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(),
+          boxH15(),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search by name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    _filterSchools(value);
+                  },
+                ),
+              ),
+              boxW15(),
+              if (selectedCompanyIds.isNotEmpty)
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade100,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 19, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  label: const Text(
+                    "Delete",
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  onPressed: () async {
+                    print("Selected Ids - $selectedCompanyIds");
+                    Future.delayed(const Duration(seconds: 1), () async {
+                      onDelete("You want to delete this company?",
+                          selectedCompanyIds.join('|'));
+                    });
+                  },
+                ),
+            ],
+          ),
           const SizedBox(height: 16),
-          Expanded(child: _buildCompanyTable()),
+          companyController.allCompanyData.isEmpty && filteredCompanyData.isEmpty
+              ? Center(child: Text('No Data Available'))
+              : Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Scrollbar(
+                thumbVisibility: true,
+                controller: _verticalScrollController,
+                child: SingleChildScrollView(
+                  controller: _verticalScrollController,
+                  child: PaginatedDataTable(
+                    headingRowHeight: 48,
+                    columnSpacing: 20,
+                    horizontalMargin: 16,
+                    rowsPerPage: _rowsPerPage,
+                    onRowsPerPageChanged: (value) {
+                      setState(() {
+                        _rowsPerPage = value!;
+                      });
+                    },
+                    dataRowHeight: 72,
+                    header: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Companies'),
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: isSelectAll,
+                              onChanged: (value) {
+                                setState(() {
+                                  isSelectAll = value ?? false;
+                                  if (isSelectAll) {
+                                    selectedCompanyIds.addAll(
+                                      filteredCompanyData.map((e) => e.id ?? ''),
+                                    );
+                                  } else {
+                                    selectedCompanyIds.clear();
+                                  }
+                                });
+                              },
+                            ),
+                            const Text('Select All'),
+                          ],
+                        ),
+                      ],
+                    ),
+                    columns: [
+                      DataColumn(label: Text("Profile")),
+                      DataColumn(label: Text("Owner Name")),
+                      DataColumn(label: Text("Company Name")),
+                      DataColumn(label: Text("Email")),
+                      DataColumn(label: Text("Contact No")),
+                      DataColumn(label: Text("GST No")),
+                      DataColumn(label: Text("CIN Number")),
+                      DataColumn(label: Text("Pan Card No")),
+                      DataColumn(label: Text("Status")),
+                      DataColumn(label: Text("School")),
+                      DataColumn(label: Text("Assign")),
+                      DataColumn(label: Text("Action")),
+                      DataColumn(label: Text("Edit")),
+                    ],
+                    source: CompanyTableSource(filteredCompanyData, this,context),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
-  }
-
-  Widget _buildCompanyTable() {
-    return SingleChildScrollView(
-      child: Card(
-        elevation: 0.8,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        child: Table(
-          border: const TableBorder.symmetric(
-            inside: BorderSide(color: Colors.grey, width: 0.5),
-          ),
-          columnWidths: const {
-            0: FlexColumnWidth(1.5),
-            1: FlexColumnWidth(1.5),
-            2: FlexColumnWidth(1.5),
-            3: FlexColumnWidth(1.5),
-            4: FlexColumnWidth(1.5),
-            5: FlexColumnWidth(1.5),
-            6: FlexColumnWidth(1.5),
-            7: FlexColumnWidth(1.5),
-            8: FlexColumnWidth(1.5),
-            9: FlexColumnWidth(1.6),
-            10: FlexColumnWidth(1.6),
-            11: FlexColumnWidth(1.5),
-
-          },
-          children: [
-            _buildTableHeader(),
-            ...companyController.allCompanyData.asMap().entries.map((entry) {
-              int index = entry.key;
-              Data mentor = entry.value;
-              return _buildTableRow(mentor, index);
-            }).toList(),
-          ],
-        ),
-      ),
-    );
-  }
-
-
-  TableRow _buildTableRow(Data company, int index) {
-    return TableRow(
-      children: [
-
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: CircleAvatar(
-            radius: 30,
-            backgroundColor: Colors.white,
-            child: CachedNetworkImage(
-              imageUrl: ApiString.ImgBaseUrl + (company.profilePic ?? ''),
-              placeholder: (context, url) => CircularProgressIndicator(),
-              errorWidget: (context, url, error) => Icon(Icons.error),
-              fit: BoxFit.cover,
-
-            ),
-          ),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(company.ownerName ?? 'No Name'),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(company.companyName ?? 'No Name'),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(company.email ?? 'No Email'),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(company.contactNo?.toString() ?? '-'),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(company.gstNumber ?? 'No Gst Number'),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(company.cinNumber ?? 'No cinNumber'),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(company.panCard ?? 'not Pan Card'),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: ElevatedButton(
-            onPressed: () => _toggleStatus(company.id ?? ''),
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              backgroundColor: _getButtonColor(company.approvalStatus),
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 9),
-            ),
-            child: Text(
-              company.approvalStatus ?? 'Pending',
-              style: const TextStyle(
-                color: Colors.black,fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
-            ),
-          ),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.blueAccent,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: InkWell(
-              // onTap: () {
-              //   print("Company.Id ${company.id}");
-              //   _showSchoolBottomSheet(context, company.id);
-              // },
-              onTap: () {
-                Get.to(() => AssignedSchoolPage(companyID: company.id.toString()));
-                print(company.id);
-              },
-              borderRadius: BorderRadius.circular(10),
-              child: const Text(
-                'View',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  letterSpacing: 1,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.green,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: InkWell(
-              onTap: () {
-                print("Company.Id ${company.id}");
-                _showSchoolBottomSheet(context, company.id);
-              },
-              borderRadius: BorderRadius.circular(10),
-              child: const Text(
-                'Assign',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  letterSpacing: 1,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () {
-              onDelete("You want to delete this company ?",index,company.id!);
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  void onDelete(String title,int index,String school_id) {
-    showDialog(
-      context: context,
-      builder: (context) => CustomAlertDialog(
-        title: 'Are you sure',
-        content: title,
-        yesText: 'Yes',
-        noText: 'No', onYesPressed: () {
-        Navigator.pop(context);
-        companyController.delete_company(school_id);
-        Future.delayed(const Duration(seconds: 2), () {
-          _removeCompany(index);
-        });
-      },
-      ),
-    );
-  }
-
-  Color _getButtonColor(String? approvalStatus) {
-    switch (approvalStatus) {
-      case "Approved":
-        return AppColor.green;
-      case "Disapproved":
-        return AppColor.red;
-      case "Pending":
-        return AppColor.amber;
-      default:
-        return AppColor.grey;
-    }
   }
 
   Widget _buildHeader() {
@@ -388,8 +337,8 @@ class _CompanyScreenState extends State<CompanyScreen> {
                   elevation: 3,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8)),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
               ),
             ),
@@ -398,94 +347,365 @@ class _CompanyScreenState extends State<CompanyScreen> {
       ),
     );
   }
-
-  TableRow _buildTableHeader() {
-    return TableRow(
-      decoration: BoxDecoration(
-        color: Colors.blueGrey.shade50,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-      ),
-      children: const [
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Profile', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Owner Name', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Company Name', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Email', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Contact No', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('GST No', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Cin Number', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Pan Card No', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Schools', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Assign', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Actions', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-      ],
-    );
-  }
-
-  void _showSchoolBottomSheet(BuildContext context, String? id) async {
-    selectedSchool = await showModalBottomSheet<String>(
-      context: context,
-      builder: (context) {
-        String? companyID = id;
-        return CompnayListBottomSheet(companyID);
-      },
-    );
-    if (selectedSchool != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Assigned to $selectedSchool')),
-      );
-    }
-  }
-
 }
 
+class CompanyTableSource extends DataTableSource {
+  CompanyTableSource(
+      this.company,
+      this.companyScreenState,
+      this.context
+      ){
+    buildDataTableRows();
+  }
+  final List<Data> company;
+  final BuildContext context;
+  final _CompanyScreenState companyScreenState;
+  List<DataRow> dataTableRows = [];
 
+  List<PlatformFile>? _paths;
+  var pathsFile;
+  var pathsFileName;
+  bool isFilePicked = false;
+  List<PlatformFile>? _panPaths;
+  var panPathsFile;
+  var panPathsFileName;
+  pickFile(String fileType) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: false,
+      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
+      allowedExtensions: [
+        'bmp',
+        'dib',
+        'gif',
+        'jfif',
+        'jpe',
+        'jpg',
+        'jpeg',
+        'pbm',
+        'pgm',
+        'ppm',
+        'pnm',
+        'pfm',
+        'png',
+        'apng',
+        'blp',
+        'bufr',
+        'cur',
+        'pcx',
+        'dcx',
+        'dds',
+        'ps',
+        'eps',
+        'fit',
+        'fits',
+        'fli',
+        'flc',
+        'ftc',
+        'ftu',
+        'gbr',
+        'grib',
+        'h5',
+        'hdf',
+        'jp2',
+        'j2k',
+        'jpc',
+        'jpf',
+        'jpx',
+        'j2c',
+        'icns',
+        'ico',
+        'im',
+        'iim',
+        'mpg',
+        'mpeg',
+        'tif',
+        'tiff',
+        'mpo',
+        'msp',
+        'palm',
+        'pcd',
+        'pdf',
+        'pxr',
+        'psd',
+        'qoi',
+        'bw',
+        'rgb',
+        'rgba',
+        'sgi',
+        'ras',
+        'tga',
+        'icb',
+        'vda',
+        'vst',
+        'webp',
+        'wmf',
+        'emf',
+        'xbm',
+        'xpm'
+      ],
+    );
 
+    if (result != null && result.files.isNotEmpty) {
+      if(fileType == 'profile')
+        {
+          _paths = result.files;
+          pathsFile = _paths!.first.bytes; // Store the bytes
+          pathsFileName = _paths!.first.name; // Store the file name
+          isFilePicked = true;
+          notifyListeners();
+        }
+      else{
+        _panPaths = result.files;
+        panPathsFile = _paths!.first.bytes; // Store the bytes
+        panPathsFileName = _paths!.first.name; // Store the file name
+        isFilePicked = true;
+        notifyListeners();
+      }
+    } else {
+      print('No file selected');
+    }
+  }
+  void buildDataTableRows() {
+    dataTableRows = company.map<DataRow>((dataRow) {
+      final isEditing = companyScreenState.editingStates[dataRow.id] ?? false;
+      return DataRow(
+        selected: companyScreenState.selectedCompanyIds.contains(dataRow.id),
+        onSelectChanged: (isSelected) {
+          if (isSelected == true) {
+            companyScreenState.selectedCompanyIds.add(dataRow.id ?? '');
+          } else {
+            companyScreenState.selectedCompanyIds.remove(dataRow.id ?? '');
+          }
+          companyScreenState.setState(() {});
+        },
+        cells: [
+          DataCell(
+      isEditing ? SizedBox(
+        width: 50,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: isFilePicked ? Colors.green : Colors.blue, width: 1.5),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: IconButton(
+            icon: Icon(Icons.image, color: isFilePicked ? Colors.green :Colors.blue),
+            onPressed: () => pickFile('profile'),
+          ),
+        ),
+      ) :
+            dataRow.profilePic != null
+                ? SizedBox(
+              width: 50,
+              child: CachedNetworkImage(
+                imageUrl: ApiString.ImgBaseUrl + dataRow.profilePic!,
+                progressIndicatorBuilder:
+                    (context, url, downloadProgress) =>
+                    CircularProgressIndicator(
+                        value: downloadProgress.progress),
+                errorWidget: (context, url, error) => Icon(Icons.error),
+              ),
+            )
+                : const SizedBox.shrink(),
+          ),
+          DataCell(
+            isEditing
+                ? TextFormField(
+              initialValue: dataRow.ownerName,
+              onChanged: (value) {
+                // dataRow.principalEmail = value;
+              },
+            )
+                : Text(dataRow.ownerName ?? 'No name'),
+          ),
+          DataCell(
+            isEditing
+                ? TextFormField(
+              initialValue: dataRow.companyName?.toString(),
+              onChanged: (value) {
+                // dataRow.principalPhone = value;
+              },
+            )
+                : Text(dataRow.companyName?.toString() ?? '-'),
+          ),
+          DataCell(
+            isEditing
+                ? TextFormField(
+              initialValue: dataRow.email,
+              onChanged: (value) {
+                // dataRow.address = value;
+              },
+            )
+                : Text(dataRow.email ?? 'No Address'),
+          ),
+          DataCell(
+            isEditing
+                ? TextFormField(
+              initialValue: dataRow.contactNo.toString(),
+              onChanged: (value) {
+                // dataRow.schoolRegNumber = value;
+              },
+            )
+                : Text(dataRow.contactNo.toString() ?? 'No school reg.no'),
+          ),
+          DataCell(
+            isEditing
+                ? TextFormField(
+              initialValue: dataRow.gstNumber.toString(),
+              onChanged: (value) {
+                // dataRow.schoolType = value;
+              },
+            )
+                : Text(dataRow.gstNumber.toString() ?? 'no type'),
+          ),
+          DataCell(
+            isEditing
+                ? TextFormField(
+              initialValue: dataRow.cinNumber.toString(),
+              onChanged: (value) {
+                // dataRow.schoolType = value;
+              },
+            )
+                : Text(dataRow.cinNumber.toString() ?? 'no type'),
+          ),
+          DataCell(
+            isEditing ? SizedBox(
+              width: 50,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: isFilePicked ? Colors.green : Colors.blue, width: 1.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.image, color: isFilePicked ? Colors.green :Colors.blue),
+                  onPressed: () => pickFile('profile'),
+                ),
+              ),
+            ) :
+            dataRow.panCard != null
+                ? SizedBox(
+              width: 50,
+              child: CachedNetworkImage(
+                imageUrl: ApiString.ImgBaseUrl + dataRow.panCard!,
+                progressIndicatorBuilder:
+                    (context, url, downloadProgress) =>
+                    CircularProgressIndicator(
+                        value: downloadProgress.progress),
+                errorWidget: (context, url, error) => Icon(Icons.error),
+              ),
+            )
+                : const SizedBox.shrink(),
+          ),
+          DataCell(
+            ElevatedButton(
+              onPressed: () =>
+                  companyScreenState._toggleStatus(dataRow.id ?? ''),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                backgroundColor: _getButtonColor(dataRow.approvalStatus),
+              ),
+              child: Text(
+                dataRow.approvalStatus ?? 'Pending',
+                style: const TextStyle(color: Colors.white, fontSize: 12),
+              ),
+            ),
+          ),
+          DataCell(
+            ElevatedButton(
+              onPressed: () {
+                Get.to(
+                        () => AssignedSchoolPage(companyID: dataRow.id.toString()));
+              },
+              style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  backgroundColor: Colors.blue,
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8)),
+              child: const Text('View', style: TextStyle(color: Colors.white)),
+            ),
+          ),
+          DataCell(
+            ElevatedButton(
+                onPressed: () {
+                  companyScreenState._showSchoolBottomSheet(
+                      Get.context!, dataRow.id);
+                },
+                child:
+                const Text('Assign', style: TextStyle(color: Colors.white)),
+                style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                    backgroundColor: Colors.green,
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8))),
+          ),
+          DataCell(
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () {
+                companyScreenState.onDelete(
+                  "You want to delete this company?",
+                  dataRow.id!,
+                );
+              },
+            ),
+          ),
+          DataCell(isEditing
+              ? ElevatedButton(
+            onPressed: () {
+              // Save changes and exit edit mode
+              companyScreenState.setState(() {
+                companyScreenState.editingStates[dataRow.id!] = false;
+              });
+              // Call update API here if needed
+            },
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Update'),
+          )
+              : ElevatedButton(
+            onPressed: () {
+              companyScreenState.setState(() {
+                companyScreenState.editingStates[dataRow.id!] = true;
+              });
+              // Call update API here if needed
+            },
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Edit'),
+          ))
+        ],
+      );
+    }).toList();
+  }
 
+  Color _getButtonColor(String? approvalStatus) {
+    switch (approvalStatus) {
+      case "Approved":
+        return Colors.green;
+      case "Disapproved":
+        return Colors.red;
+      case "Pending":
+        return Colors.amber;
+      default:
+        return Colors.grey;
+    }
+  }
+  @override
+  DataRow? getRow(int index) => dataTableRows[index];
 
+  @override
+  int get rowCount => dataTableRows.length;
 
+  @override
+  bool get isRowCountApproximate => false;
 
-
-
-
-
-
-
-
-
+  @override
+  int get selectedRowCount => companyScreenState.selectedCompanyIds.length;
+}

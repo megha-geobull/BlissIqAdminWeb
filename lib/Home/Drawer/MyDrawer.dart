@@ -153,7 +153,7 @@ class _MyDrawerState extends State<MyDrawer> {
               isSelected: controller.selectedPage.value == 'Categories',
               onTap: () {
                 controller.changePage('Categories');
-                Get.to(() => const MainCategoriesPage());
+                Get.to(() =>  MainCategoriesPage());
               },
             )),
         Obx(() => buildDrawerTile(

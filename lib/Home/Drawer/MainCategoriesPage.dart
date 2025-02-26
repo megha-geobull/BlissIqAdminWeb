@@ -27,9 +27,10 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    getData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getData();
+    });
   }
 
   getData() async{
@@ -63,6 +64,7 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                 if (categoryController.text.isNotEmpty) {
                   await _controller.addCategory(categoryname: categoryController.text);
                   Navigator.of(context).pop();
+                  getData();
                 }
               },
               child: const Text('Add Category'),
@@ -165,20 +167,20 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                     fontWeight: FontWeight.bold,
                     color: Colors.black),
               ),
-              const Spacer(),
-              IconButton(
-                onPressed: _showAddCategoryDialog,
-                icon: CircleAvatar(
-                  radius: 10,
-                  backgroundColor: Colors.deepOrange.shade200,
-                  child: const Icon(
-                    Icons.add,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-                tooltip: 'Add Main Category',
-              ),
+              // const Spacer(),
+              // IconButton(
+              //   onPressed: _showAddCategoryDialog,
+              //   icon: CircleAvatar(
+              //     radius: 10,
+              //     backgroundColor: Colors.deepOrange.shade200,
+              //     child: const Icon(
+              //       Icons.add,
+              //       color: Colors.white,
+              //       size: 20,
+              //     ),
+              //   ),
+              //   tooltip: 'Add Main Category',
+              // ),
             ],
           ),
         ),
