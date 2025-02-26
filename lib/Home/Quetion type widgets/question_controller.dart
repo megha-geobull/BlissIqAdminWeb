@@ -215,7 +215,80 @@ class QuestionController extends GetxController {
       request.fields['topic_id'] = topic_id;
       request.fields['sub_topic_id'] = sub_topic_id ?? '';
       request.fields['title'] = title ?? '';
-      request.fields['question_type'] = 'Card Flip';
+      request.fields['question_type'] = 'Image ';
+      request.fields['index'] = index;
+      request.fields['points'] = points;
+      request.fields['letter'] = letters;
+      request.fields['image_name'] = image_name;
+
+      // Print request body (fields)
+      print("Request Fields: ${request.fields}");
+
+      // Add images
+      for (int i = 0; i < images.length; i++) {
+        final image = images[i];
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'image',
+            image,
+            filename: 'image_$i.png',
+            contentType: MediaType('image', 'png'),
+          ),
+        );
+      }
+
+      // Send the request
+      final response = await request.send();
+
+      // Print response status code
+      print("Response Status Code: ${response.statusCode}");
+
+      // Convert response stream to a string and print
+      final responseData = await response.stream.bytesToString();
+      print("Response Body: $responseData");
+
+      // Decode and handle the response
+      final decodedResponse = jsonDecode(responseData);
+      if (response.statusCode == 201 && decodedResponse['status'] == 1) {
+        showSnackbar(message: decodedResponse['message'] ?? 'Added successfully');
+      } else {
+        showSnackbar(message: decodedResponse['message'] ?? 'Error occurred');
+      }
+    } catch (e) {
+      // Print any exceptions that occur
+      print('An error occurred: $e');
+      showSnackbar(message: 'An error occurred: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> addImagePuzzleApi({
+    required String main_category_id,
+    String? title,
+    required String sub_category_id,
+    required String topic_id,
+    String? sub_topic_id,
+    required String points,
+    required String letters,
+    required List<td.Uint8List> images,
+    required String index,
+    required String image_name,
+    required BuildContext context,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final uri = Uri.parse(ApiString.add_puzzle_the_image);
+      final request = http.MultipartRequest('POST', uri);
+
+      // Add text fields
+      request.fields['main_category_id'] = main_category_id;
+      request.fields['sub_category_id'] = sub_category_id;
+      request.fields['topic_id'] = topic_id;
+      request.fields['sub_topic_id'] = sub_topic_id ?? '';
+      request.fields['title'] = title ?? '';
+      request.fields['question_type'] = 'Image puzzle';
       request.fields['index'] = index;
       request.fields['points'] = points;
       request.fields['letter'] = letters;

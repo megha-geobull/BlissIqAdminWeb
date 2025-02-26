@@ -13,6 +13,7 @@ import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_story_model
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_story_phrases_model.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_trueOrfalse_model.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/guess_the_image.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/image_puzzle_model.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/re_arrange_sentence_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
@@ -33,6 +34,7 @@ class GetAllQuestionsApiController extends GetxController{
   RxList<FillInTheBlanks> getFillInTheBlanksList = <FillInTheBlanks>[].obs;
   RxList<StoryData> getStoryDataList = <StoryData>[].obs;
   RxList<GuessTheImageData> guessTheImageList = <GuessTheImageData>[].obs;
+  RxList<ImagePuzzleData> imagePuzzleDataList = <ImagePuzzleData>[].obs;
 
   RxList<StoryPhrases> getStoryPhrasesList = <StoryPhrases>[].obs;
   RxList<PhrasesData> getConversationList = <PhrasesData>[].obs;
@@ -785,10 +787,55 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
+  getImagePuzzleList({
+    required String main_category_id ,
+    required String sub_category_id,
+    required String topic_id,
+    String? sub_topic_id}) async {
+    isLoading.value = true;
+    imagePuzzleDataList.clear();
+    try {
+      var body = {
+        'main_category_id':main_category_id,
+        'sub_category_id':sub_category_id,
+        'topic_id':topic_id,
+        'sub_topic_id':sub_topic_id??''
+      };
+      final response = await http.post(
+          Uri.parse(ApiString.get_puzzle_the_image),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(body)
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          // Parse each JSON object into a Data model
+          imagePuzzleDataList.clear();
+          imagePuzzleDataList.value = (responseData["data"] as List)
+              .map((mcqJson) => ImagePuzzleData.fromJson(mcqJson))
+              .toList();
+
+          print("Fetched ${imagePuzzleDataList.length} puzzles ");
+        } else {
+          showSnackbar(message: responseData['message'] ?? "Failed to fetch image puzzles ");
+        }
+      } else {
+        showSnackbar(message: "Failed to fetch image puzzles. Status: ${response.statusCode}");
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetching image puzzles: $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> updateCardFlip({
     required CardFlipData question,
-    required List<td.Uint8List> images,
-    required String letters,
     required BuildContext context,
   }) async {
     isLoading.value = true;
@@ -797,6 +844,114 @@ class GetAllQuestionsApiController extends GetxController{
       final uri = Uri.parse(ApiString.update_card_flipping);
       final request = http.MultipartRequest('POST', uri);
       // Add text fields
+      request.fields['card_flipping_id'] = question.id.toString();
+      request.fields['main_category_id'] = question.mainCategoryId.toString();
+      request.fields['sub_category_id'] = question.subCategoryId.toString();
+      request.fields['topic_id'] = question.topicId.toString();
+      request.fields['sub_topic_id'] = question.subTopicId.toString() ?? '';
+      request.fields['title'] = question.title ?? '';
+      request.fields['question_type'] = question.questionType ?? '';
+      request.fields['index'] = question.index.toString() ?? '';
+      request.fields['points'] = question.points.toString() ?? '';
+
+      // Print request body (fields)
+      print("Request Fields: ${request.fields}");
+
+      // Send the request
+      final response = await request.send();
+
+      // Print response status code
+      print("Response Status Code: ${response.statusCode}");
+
+      // Convert response stream to a string and print
+      final responseData = await response.stream.bytesToString();
+      print("Response Body: $responseData");
+
+      // Decode and handle the response
+      final decodedResponse = jsonDecode(responseData);
+      if (response.statusCode == 201 && decodedResponse['status'] == 1) {
+        showSnackbar(message: decodedResponse['message'] ?? 'Added successfully');
+      } else {
+        showSnackbar(message: decodedResponse['message'] ?? 'Error occurred');
+      }
+    } catch (e) {
+      // Print any exceptions that occur
+      print('An error occurred: $e');
+      showSnackbar(message: 'An error occurred: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> updateCardFlipEntry({
+    required String id,
+    required List<td.Uint8List> images,
+    required String letters,
+    required BuildContext context,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final uri = Uri.parse(ApiString.add_card_flip_entry);
+      final request = http.MultipartRequest('POST', uri);
+      // Add text fields
+      request.fields['letter'] = letters;
+      request.fields['card_pair'] = id;
+      // Print request body (fields)
+      print("Request Fields: ${request.fields}");
+
+      // Add images
+      for (int i = 0; i < images.length; i++) {
+        final image = images[i];
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'image',
+            image,
+            filename: 'image_$i.png',
+            contentType: MediaType('image', 'png'),
+          ),
+        );
+      }
+
+      // Send the request
+      final response = await request.send();
+
+      // Print response status code
+      print("Response Status Code: ${response.statusCode}");
+
+      // Convert response stream to a string and print
+      final responseData = await response.stream.bytesToString();
+      print("Response Body: $responseData");
+
+      // Decode and handle the response
+      final decodedResponse = jsonDecode(responseData);
+      if (response.statusCode == 201 && decodedResponse['status'] == 1) {
+        showSnackbar(message: decodedResponse['message'] ?? 'Added successfully');
+      } else {
+        showSnackbar(message: decodedResponse['message'] ?? 'Error occurred');
+      }
+    } catch (e) {
+      // Print any exceptions that occur
+      print('An error occurred: $e');
+      showSnackbar(message: 'An error occurred: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> updateImagePuzzle({
+    required ImagePuzzleData question,
+    required List<td.Uint8List> images,
+    required String letters,
+    required BuildContext context,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final uri = Uri.parse(ApiString.update_puzzle_the_image);
+      final request = http.MultipartRequest('POST', uri);
+      // Add text fields
+      request.fields['puzzle_id'] = question.id.toString();
       request.fields['main_category_id'] = question.mainCategoryId.toString();
       request.fields['sub_category_id'] = question.subCategoryId.toString();
       request.fields['topic_id'] = question.topicId.toString();
@@ -849,6 +1004,131 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
+  Future<void> updateImagePuzzleEntry({
+    required String id,
+    required List<td.Uint8List> images,
+    required String letters,
+    required BuildContext context,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final uri = Uri.parse(ApiString.add_puzzle_entry);
+      final request = http.MultipartRequest('POST', uri);
+      // Add text fields
+      request.fields['puzzle_id'] = id;
+      request.fields['letter'] = letters;
+      // Print request body (fields)
+      print("Request Fields: ${request.fields}");
+
+      // Add images
+      for (int i = 0; i < images.length; i++) {
+        final image = images[i];
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'image',
+            image,
+            filename: 'image_$i.png',
+            contentType: MediaType('image', 'png'),
+          ),
+        );
+      }
+
+      // Send the request
+      final response = await request.send();
+
+      // Print response status code
+      print("Response Status Code: ${response.statusCode}");
+
+      // Convert response stream to a string and print
+      final responseData = await response.stream.bytesToString();
+      print("Response Body: $responseData");
+
+      // Decode and handle the response
+      final decodedResponse = jsonDecode(responseData);
+      if (response.statusCode == 201 && decodedResponse['status'] == 1) {
+        showSnackbar(message: decodedResponse['message'] ?? 'Added successfully');
+      } else {
+        showSnackbar(message: decodedResponse['message'] ?? 'Error occurred');
+      }
+    } catch (e) {
+      // Print any exceptions that occur
+      print('An error occurred: $e');
+      showSnackbar(message: 'An error occurred: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> updateMatchThePairEntry({
+    required String id,
+    required List<td.Uint8List> qImages,
+    required List<td.Uint8List> aImages,
+    required String question,
+    required String answer,
+    required BuildContext context,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final uri = Uri.parse(ApiString.add_match_pair_question_entry);
+      final request = http.MultipartRequest('POST', uri);
+      // Add text fields
+      request.fields['match_pair'] = id;
+      request.fields['question'] = question;
+      request.fields['answer'] = answer;
+      // Print request body (fields)
+      print("Request Fields: ${request.fields}");
+
+      // Add images
+      for (int i = 0; i < qImages.length; i++) {
+        final image = qImages[i];
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'question_img',
+            image,
+            filename: 'image_$i.png',
+            contentType: MediaType('image', 'png'),
+          ),
+        );
+      }
+      for (int i = 0; i < aImages.length; i++) {
+        final image = aImages[i];
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'answer_img',
+            image,
+            filename: 'image_$i.png',
+            contentType: MediaType('image', 'png'),
+          ),
+        );
+      }
+
+      // Send the request
+      final response = await request.send();
+
+      // Print response status code
+      print("Response Status Code: ${response.statusCode}");
+
+      // Convert response stream to a string and print
+      final responseData = await response.stream.bytesToString();
+      print("Response Body: $responseData");
+
+      // Decode and handle the response
+      final decodedResponse = jsonDecode(responseData);
+      if (response.statusCode == 201 && decodedResponse['status'] == 1) {
+        showSnackbar(message: decodedResponse['message'] ?? 'Added successfully');
+      } else {
+        showSnackbar(message: decodedResponse['message'] ?? 'Error occurred');
+      }
+    } catch (e) {
+      // Print any exceptions that occur
+      print('An error occurred: $e');
+      showSnackbar(message: 'An error occurred: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 //learning slide
 
   updateLearningTableQuestionApi(LearningSlide question) async {
@@ -966,8 +1246,6 @@ class GetAllQuestionsApiController extends GetxController{
       isLoading.value = false; // Set loading state to false
     }
   }
-
-
 
 
   //delete story phrases
@@ -1164,7 +1442,6 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-
 // Delete Fill in the blanks
   deleteFillInTheBlanksAPI({
     required String main_category_id,
@@ -1192,6 +1469,95 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
+  deleteImagePuzzleAPI({
+    required String puzzle_id,
+  }) async {
+    final response = await http.delete(
+      Uri.parse(ApiString.delete_puzzle_the_image),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'puzzle_id': puzzle_id,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete phrase: ${response.body}');
+    }
+  }
+
+  deleteImagePuzzleEntryAPI({
+    required String puzzle_id,
+  }) async {
+    final response = await http.delete(
+      Uri.parse(ApiString.delete_puzzle_entry),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'puzzle_entry_id': puzzle_id,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete phrase: ${response.body}');
+    }
+  }
+
+  deleteCardFlipEntryAPI({
+    required String card_entry_id,
+  }) async {
+    final response = await http.delete(
+      Uri.parse(ApiString.delete_card_flip_entry),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'card_entry_id': card_entry_id,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete phrase: ${response.body}');
+    }
+  }
+
+  deleteCardFlip({
+    required String question_id,
+  }) async {
+    final response = await http.delete(
+      Uri.parse(ApiString.delete_card_flipping),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'card_flipping_id': question_id,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete card flip: ${response.body}');
+    }
+  }
+
+  deleteMatchThePairsEntryAPI({
+    required String pair_id,
+  }) async {
+    final response = await http.delete(
+      Uri.parse(ApiString.delete_match_pair_question_entry),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'match_pair_entry_id': pair_id,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete phrase: ${response.body}');
+    }
+  }
   //Update Story
   updateStoryTableQuestionApi(StoryData question) async {
     isLoading.value = true;
