@@ -103,6 +103,17 @@ class ApiString {
   static const String get_card_flipping = "${baseUrl}get_card_flipping";
   static const String delete_card_flipping = "${baseUrl}delete_card_flipping";
   static const String update_card_flipping = "${baseUrl}update_card_flipping";
+  static const String delete_card_flip_entry = "${baseUrl}delete_card_flip_entry";
+  static const String add_card_flip_entry = "${baseUrl}add_card_flip_entry";
+
+
+  static const String add_puzzle_the_image = "${baseUrl}add_puzzle_the_image";
+  static const String get_puzzle_the_image = "${baseUrl}get_puzzle_the_image";
+  static const String delete_puzzle_the_image = "${baseUrl}delete_puzzle_the_image";
+  static const String update_puzzle_the_image = "${baseUrl}update_puzzle_the_image";
+  static const String add_puzzle_entry = "${baseUrl}add_puzzle_entry";
+  static const String delete_puzzle_entry = "${baseUrl}delete_puzzle_entry";
+
 
   static const String add_story = "${baseUrl}add_story";
   static const String get_story = "${baseUrl}get_story";
@@ -157,6 +168,9 @@ class ApiString {
   static const String add_match_pair_question = "${baseUrl}add_match_pair_question";
   static const String get_match_pair_question = "${baseUrl}get_match_pair_question";
   static const String delete_match_pair_question = "${baseUrl}delete_match_pair_question";
+  static const String add_match_pair_question_entry = "${baseUrl}add_match_pair_question_entry";
+  static const String delete_match_pair_question_entry = "${baseUrl}delete_match_pair_question_entry";
+  static const String update_match_pair_question = "${baseUrl}update_match_pair_question";
 
   ///learning path
   static const String studentBaseUrl = "http://65.0.211.122:4444/cust_api/";

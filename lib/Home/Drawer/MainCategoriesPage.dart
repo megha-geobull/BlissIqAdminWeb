@@ -226,14 +226,14 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                       category['category_name'] ?? 'No Name',
                       style: const TextStyle(fontSize: 16),
                     ),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        onDelete(_controller.categories[index]['_id'], index,
-                            "you want to delete this category?", "category");
-                      },
-                    ),
+                    // const Spacer(),
+                    // IconButton(
+                    //   icon: const Icon(Icons.delete, color: Colors.red),
+                    //   onPressed: () {
+                    //     onDelete(_controller.categories[index]['_id'], index,
+                    //         "you want to delete this category?", "category");
+                    //   },
+                    // ),
                   ],
                 ),
               ),

@@ -6,6 +6,8 @@ List<String> phrases_headers = ["main_category_id", "sub_category_id", "topic_id
 
 List<String> cardFlip_headers = ["main_category_id", "sub_category_id", "topic_id",
   "sub_topic_id","question_type","letters","images","points","index"];
+List<String> imagePuzzle_headers = ["main_category_id", "sub_category_id", "topic_id",
+  "sub_topic_id","question_type","letters","images","points","index"];
 
 List<String> fill_in_the_blanks_headers = ["main_category_id", "sub_category_id", "topic_id",
   "sub_topic_id", "question_type", "title", "question_language","question",

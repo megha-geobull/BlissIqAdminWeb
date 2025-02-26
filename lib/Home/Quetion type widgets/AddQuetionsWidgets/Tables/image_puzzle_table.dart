@@ -2,24 +2,21 @@ import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/AppColor.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/controller/GetAllQuestionsApiController.dart';
-import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/GetCompleteParagraphModel.dart';
-import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_match_the_pairs.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/image_puzzle_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:typed_data' as td;
-
 import 'package:image_picker_web/image_picker_web.dart';
 
-
-class MatchThePairsQuestionTable extends StatefulWidget {
+class ImagePuzzleQuestionTable extends StatefulWidget {
   final String main_category_id;
   final String sub_category_id;
   final String topic_id;
   final String sub_topic_id;
-  final List<MatchPairs> questionList;
+  final List<ImagePuzzleData> questionList;
 
-  MatchThePairsQuestionTable(
+  ImagePuzzleQuestionTable(
       {required this.main_category_id,
         required this.sub_category_id,
         required this.topic_id,
@@ -27,19 +24,18 @@ class MatchThePairsQuestionTable extends StatefulWidget {
         required this.questionList});
 
   @override
-  _MatchThePairsQuestionTableState createState() => _MatchThePairsQuestionTableState();
+  _ImagePuzzleQuestionTableeState createState() => _ImagePuzzleQuestionTableeState();
 }
 
-class _MatchThePairsQuestionTableState extends State<MatchThePairsQuestionTable> {
-
+class _ImagePuzzleQuestionTableeState extends State<ImagePuzzleQuestionTable> {
   TextEditingController _searchController = TextEditingController();
-  List<MatchPairs> _filteredQuestions = [];
+  List<ImagePuzzleData> _filteredQuestions = []; // Filtered data for the table
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   final _verticalScrollController = ScrollController();
   final _horizontalScrollController = ScrollController();
   String _selectedQuestionIds = "";
-  bool isSelectAll=false;
-  List<String> selected_question_ids=[];
+  bool isSelectAll = false;
+  List<String> selected_question_ids = [];
   late QuestionDataSource _dataSource;
   final GetAllQuestionsApiController _getdeleteApiController = Get.find();
 
@@ -53,7 +49,8 @@ class _MatchThePairsQuestionTableState extends State<MatchThePairsQuestionTable>
         setState(() {
           _selectedQuestionIds = selectedIds;
         });
-      },context,
+      },
+      context,
     );
     //_questions = widget.questionList;
     _filteredQuestions = widget.questionList;
@@ -77,7 +74,8 @@ class _MatchThePairsQuestionTableState extends State<MatchThePairsQuestionTable>
           setState(() {
             _selectedQuestionIds = selectedIds;
           });
-        },context,
+        },
+        context,
       );
     });
   }
@@ -85,28 +83,23 @@ class _MatchThePairsQuestionTableState extends State<MatchThePairsQuestionTable>
   void _removeSelectedQuestions() {
     // Convert the selected IDs string to a Set for efficient lookup
     final selectedIdsSet = _selectedQuestionIds.split('|').toSet();
-    if(mounted){
+    if (mounted) {
       setState(() {
-        // Remove matching items from the main list
-
-        // Remove matching items from the filtered list
-        _filteredQuestions.removeWhere((mcq) => selectedIdsSet.contains(mcq.id));
-
-        // Clear selected IDs after deletion
+        _filteredQuestions
+            .removeWhere((question) => selectedIdsSet.contains(question.id));
         _selectedQuestionIds = '';
-
-        // Update the data source with the updated filtered list
         _dataSource = QuestionDataSource(
           _filteredQuestions,
               (selectedIds) {
             setState(() {
               _selectedQuestionIds = selectedIds;
             });
-          },context,
+          },
+          context,
         );
-      });}
+      });
+    }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -136,19 +129,18 @@ class _MatchThePairsQuestionTableState extends State<MatchThePairsQuestionTable>
                 Expanded(
                   child: Padding(
                       padding: const EdgeInsets.only(right: 16.0),
-                      child:
-                      CustomTextField(
+                      child: CustomTextField(
                         controller: _searchController,
                         labelText: "Search by Question",
                         onChanged: _filterQuestions,
-                      )
-                  ),
+                      )),
                 ),
                 if (_selectedQuestionIds.isNotEmpty)
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red.shade100,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -164,11 +156,12 @@ class _MatchThePairsQuestionTableState extends State<MatchThePairsQuestionTable>
                     onPressed: () async {
                       print("Selected Ids - $_selectedQuestionIds");
                       Future.delayed(const Duration(seconds: 1), () async {
-                        bool cofirmed = await _dataSource._showConfirmationDialog(context);
-                        if(cofirmed){
-                          _dataSource._deleteSelectedQuestions(_selectedQuestionIds);
+                        bool confirmed =
+                        await _dataSource._showConfirmationDialog(context);
+                        if (confirmed) {
+                          _dataSource._deleteSelectedQuestions();
                         }
-                        _getdeleteApiController.getCompleteParaApi(
+                        _getdeleteApiController.getFillInTheBlanks(
                           main_category_id: widget.main_category_id,
                           sub_category_id: widget.sub_category_id,
                           topic_id: widget.topic_id,
@@ -179,6 +172,7 @@ class _MatchThePairsQuestionTableState extends State<MatchThePairsQuestionTable>
                   ),
               ],
             ),
+
             const SizedBox(height: 20),
             // Paginated DataTable
             Expanded(
@@ -216,7 +210,7 @@ class _MatchThePairsQuestionTableState extends State<MatchThePairsQuestionTable>
                                 value: _dataSource.isSelectAll,
                                 onChanged: (bool? value) {
                                   _dataSource.toggleSelectAll(value!);
-                                  setState(() {});
+                                  setState(() async {});
                                 },
                               ),
                               const Text("Select All"),
@@ -241,27 +235,25 @@ class _MatchThePairsQuestionTableState extends State<MatchThePairsQuestionTable>
       ),
     );
   }
-
 }
 
-// DataTableSource for handling data in the DataTable
 class QuestionDataSource extends DataTableSource {
-  final List<MatchPairs> questions;
-  final Function(String) onSelectionChanged; // Callback for selection
-  final Set<String> selectedQuestionIds = {}; // Track selected question IDs
+  final List<ImagePuzzleData> questions;
+  final Function(String) onSelectionChanged;
+  final Set<String> selectedQuestionIds = {};
   bool isSelectAll = false;
   BuildContext context;
-  // Track "Select All" state
-  int? editingRowIndex; // Track which row is being edited
+
+  int? editingRowIndex;
   List<TextEditingController> questionTypeControllers = [];
-  List<TextEditingController> titleControllers = [];
   List<TextEditingController> indexControllers = [];
+  List<TextEditingController> titleControllers = [];
+  List<TextEditingController> questionLanguageController = [];
   List<TextEditingController> pointsControllers = [];
 
   List<TextEditingController> questionControllers = [];
   List<TextEditingController> answerControllers = [];
   List<td.Uint8List> questionImages = [];
-  List<td.Uint8List> answerImages = [];
   final List<String> imageNames = [];
   bool isFilePicked = false;
 
@@ -277,16 +269,16 @@ class QuestionDataSource extends DataTableSource {
   final GetAllQuestionsApiController updateQueApiController = Get.find();
 
   QuestionDataSource(this.questions, this.onSelectionChanged, this.context) {
-    // Initialize controllers for each question
     for (var question in questions) {
-      questionTypeControllers.add(TextEditingController(text: question.questionType));
+      questionTypeControllers
+          .add(TextEditingController(text: question.questionType));
+      indexControllers
+          .add(TextEditingController(text: question.index.toString()));
       titleControllers.add(TextEditingController(text: question.title));
-      indexControllers.add(TextEditingController(text: question.index.toString()));
-      pointsControllers.add(TextEditingController(text: question.points.toString()));
-
+      pointsControllers
+          .add(TextEditingController(text: question.points.toString()));
     }
   }
-
 
   @override
   DataRow? getRow(int index) {
@@ -300,22 +292,18 @@ class QuestionDataSource extends DataTableSource {
         DataCell(
           Checkbox(
             value: isSelected,
-            onChanged: (bool? value) async{
+            onChanged: (bool? value) {
               if (value == true) {
                 selectedQuestionIds.add(question.id!);
               } else {
                 selectedQuestionIds.remove(question.id);
               }
               isSelectAll = selectedQuestionIds.length == questions.length;
-              onSelectionChanged(
-                selectedQuestionIds.join('|'), // Pipe-separated IDs
-              );
-
+              onSelectionChanged(selectedQuestionIds.join('|'));
               notifyListeners();
             },
           ),
         ),
-
         DataCell(_buildEditableField(index, indexControllers)),
         DataCell(_buildEditableField(index, questionTypeControllers)),
         DataCell(_buildEditableField(index, titleControllers)),
@@ -331,33 +319,22 @@ class QuestionDataSource extends DataTableSource {
         ),
         DataCell(_buildEditableField(index, pointsControllers)),
         DataCell(_buildEditButton(index)),
-
       ],
     );
   }
 
   void _showEntriesDialog(BuildContext context, List<Entries> entries,
-      int questionIndex, MatchPairs question) async {
+      int questionIndex, ImagePuzzleData question) async {
     // Clear the lists
     questionControllers.clear();
     answerControllers.clear();
     questionImages.clear();
-    answerImages.clear();
 
     // Initialize the lists with the correct number of elements
     for (var entry in entries) {
-      if (question.questionFormat == 'Image') {
-        questionControllers.add(TextEditingController(text: entry.questionImg));
-      } else {
-        questionControllers.add(TextEditingController(text: entry.question));
-      }
-      if (question.answerFormat == 'Image') {
-        answerControllers.add(TextEditingController(text: entry.answerImg));
-      } else {
-        answerControllers.add(TextEditingController(text: entry.answer));
-      }
+      questionControllers.add(TextEditingController(text: entry.image));
+      answerControllers.add(TextEditingController(text: entry.letter));
       questionImages.add(td.Uint8List(0)); // Initialize with an empty Uint8List
-      answerImages.add(td.Uint8List(0)); // Initialize with an empty Uint8List
     }
 
     showDialog(
@@ -366,7 +343,7 @@ class QuestionDataSource extends DataTableSource {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title:  Text('Entries (${question.questionFormat}/${question.answerFormat})'),
+              title: const Text('Entries'),
               content: SizedBox(
                 width: 350, // Reduced width
                 child: SingleChildScrollView(
@@ -376,19 +353,21 @@ class QuestionDataSource extends DataTableSource {
                         children: [
                           Row(
                             children: [
-                              if (editingRowIndex == questionIndex && question.questionFormat == 'Image')
-                                SizedBox(
-                                  width: 40, // Smaller button
-                                  height: 40,
-                                  child: IconButton(
-                                    icon: Icon(Icons.image, color: Colors.blue),
-                                    onPressed: () => _pickImg(i),
-                                  ),
+                              editingRowIndex == questionIndex
+                                  ? SizedBox(
+                                width: 40, // Smaller button
+                                height: 40,
+                                child: IconButton(
+                                  icon: Icon(Icons.image,
+                                      color: Colors.blue),
+                                  onPressed: () => _pickImg(i),
                                 ),
+                              )
+                                  : SizedBox.shrink(),
                               const SizedBox(width: 10),
-                              if (question.questionFormat == 'Image')
-                                (questionImages[i] != null && questionImages[i].isNotEmpty)
-                                    ? SizedBox(
+                              if (questionImages[i] != null &&
+                                  questionImages[i].isNotEmpty)
+                                SizedBox(
                                   width: 80,
                                   height: 80,
                                   child: Image.memory(
@@ -396,98 +375,68 @@ class QuestionDataSource extends DataTableSource {
                                     fit: BoxFit.cover,
                                   ),
                                 )
-                                    : (questionControllers[i].text.isNotEmpty && questionControllers[i].text != "null")
-                                    ? SizedBox(
-                                  width: 80,
-                                  height: 80,
-                                  child: CachedNetworkImage(
-                                    imageUrl: ApiString.ImgBaseUrl + 'media/' + questionControllers[i].text,
-                                    progressIndicatorBuilder: (context, url, progress) =>
-                                        CircularProgressIndicator(value: progress.progress),
-                                    errorWidget: (context, url, error) => const Icon(Icons.error),
-                                  ),
-                                )
-                                    : const Icon(Icons.broken_image, color: Colors.grey, size: 50)
-                              else
-                                Expanded(
-                                  child: TextField(
-                                    controller: questionControllers[i],
-                                    decoration: InputDecoration(
-                                        labelText: 'Letters / Words',
-                                      suffixIcon: question.questionFormat! == 'Sound' ? Icon(Icons.volume_down) : null
-                                    ),
-                                    enabled: editingRowIndex == questionIndex,
-
-                                  ),
-                                ),
-                              const SizedBox(width: 20),
-                              if (editingRowIndex == questionIndex && question.answerFormat == 'Image')
+                              else if (questionControllers[i].text.isNotEmpty &&
+                                  questionControllers[i].text != "null")
                                 SizedBox(
-                                  width: 40, // Smaller button
-                                  height: 40,
-                                  child: IconButton(
-                                    icon: Icon(Icons.image, color: Colors.blue),
-                                    onPressed: () => _pickImg(i),
-                                  ),
-                                ),
-                              const SizedBox(width: 10),
-                              if (question.answerFormat == 'Image')
-                                (answerImages[i] != null && answerImages[i].isNotEmpty)
-                                    ? SizedBox(
-                                  width: 80,
-                                  height: 80,
-                                  child: Image.memory(
-                                    answerImages[i]!,
-                                    fit: BoxFit.cover,
-                                  ),
-                                )
-                                    : (answerControllers[i].text.isNotEmpty && answerControllers[i].text != "null")
-                                    ? SizedBox(
                                   width: 80,
                                   height: 80,
                                   child: CachedNetworkImage(
-                                    imageUrl: ApiString.ImgBaseUrl + 'media/' + answerControllers[i].text,
-                                    progressIndicatorBuilder: (context, url, progress) =>
-                                        CircularProgressIndicator(value: progress.progress),
-                                    errorWidget: (context, url, error) => const Icon(Icons.error),
+                                    imageUrl: ApiString.ImgBaseUrl +
+                                        'media/' +
+                                        questionControllers[i].text,
+                                    progressIndicatorBuilder:
+                                        (context, url, progress) =>
+                                        CircularProgressIndicator(
+                                            value: progress.progress),
+                                    errorWidget: (context, url, error) =>
+                                    const Icon(Icons.error),
                                   ),
                                 )
-                                    : const Icon(Icons.broken_image, color: Colors.grey, size: 50)
                               else
-                                Expanded(
-                                  child: TextField(
-                                    controller: answerControllers[i],
-                                    decoration: InputDecoration(
-                                        labelText: 'Letters / Words',
-                                        suffixIcon: question.answerFormat! == 'Sound' ? Icon(Icons.volume_down) : null
-                                    ),                                    enabled: editingRowIndex == questionIndex,
-                                  ),
+                                const Icon(Icons.broken_image,
+                                    color: Colors.grey, size: 50),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: TextField(
+                                  controller: answerControllers[i],
+                                  decoration: const InputDecoration(
+                                      labelText: 'Letters / Words'),
+                                  enabled: editingRowIndex == questionIndex,
                                 ),
-                              if (editingRowIndex == questionIndex)
-                                IconButton(
-                                  onPressed: () async {
-                                    print('button pressed : ${entries[i].id.toString()}');
-                                    if (entries[i].id != null) {
-                                      await Get.find<GetAllQuestionsApiController>().deleteMatchThePairsEntryAPI(
-                                        pair_id: entries[i].id.toString(),
-                                      );
-                                      await Get.find<GetAllQuestionsApiController>().getImagePuzzleList(
+                              ),
+                              editingRowIndex == questionIndex
+                                  ? IconButton(
+                                onPressed: () async {
+                                  print(
+                                      'button pressed : ${entries[i].id.toString()}');
+
+                                  if(entries[i].id != null)
+                                  {
+                                    await Get.find<
+                                        GetAllQuestionsApiController>()
+                                        .deleteImagePuzzleEntryAPI(
+                                        puzzle_id:
+                                        entries[i].id.toString(),);
+                                    await Get.find<
+                                        GetAllQuestionsApiController>()
+                                        .getImagePuzzleList(
                                         main_category_id: question.mainCategoryId.toString(),
                                         sub_category_id: question.subCategoryId.toString(),
                                         topic_id: question.topicId.toString(),
-                                        sub_topic_id: question.subTopicId.toString(),
-                                      );
-                                    }
-                                    setState(() {
-                                      entries.removeAt(i);
-                                      questionControllers.removeAt(i);
-                                      answerControllers.removeAt(i);
-                                      questionImages.removeAt(i);
-                                      answerImages.removeAt(i);
-                                    });
-                                  },
-                                  icon: Icon(Icons.delete_forever_sharp, color: AppColor.red),
-                                ),
+                                        sub_topic_id : question.subTopicId.toString()
+                                    );
+                                  }
+                                  setState(() {
+                                    entries.removeAt(i);
+                                    questionControllers.removeAt(i);
+                                    answerControllers.removeAt(i);
+                                    questionImages.removeAt(i);
+                                  });
+                                },
+                                icon: Icon(Icons.delete_forever_sharp,
+                                    color: AppColor.red),
+                              )
+                                  : SizedBox.shrink()
                             ],
                           ),
                         ],
@@ -506,42 +455,38 @@ class QuestionDataSource extends DataTableSource {
                 if (editingRowIndex == questionIndex)
                   TextButton(
                     onPressed: () async {
-                      final answer = answerControllers
+                      final letters = answerControllers
                           .map((e) => e.text)
-                          .where((text) => !entries.any((entry) => entry.answer == text)) // Filter out existing letters
+                          .where((text) => !entries.any((entry) => entry.letter == text)) // Filter out existing letters
                           .toList();
-                      final questionList = questionControllers
-                          .map((e) => e.text)
-                          .where((text) => !entries.any((entry) => entry.question == text)) // Filter out existing letters
-                          .toList();
-print(answer);
-print(questionList);
 
-                        await Get.find<GetAllQuestionsApiController>().updateMatchThePairEntry(
+                      if (letters.isNotEmpty) {
+                        await Get.find<GetAllQuestionsApiController>().updateImagePuzzleEntry(
+                          images: questionImages,
+                          letters: letters.join('|'),
                           context: context,
-                          id: question.id ?? '', qImages: questionImages, aImages: answerImages,  question: questionList.join('|'), answer: answer.join('|'),
+                          id: question.id ?? '',
                         );
-                        await Get.find<GetAllQuestionsApiController>().getCardFlip(
-                          main_category_id: question.mainCategoryId.toString(),
-                          sub_category_id: question.subCategoryId.toString(),
-                          topic_id: question.topicId.toString(),
-                          sub_topic_id: question.subTopicId.toString(),
-                        );
+                        await Get.find<GetAllQuestionsApiController>()
+                            .getCardFlip(main_category_id: question.mainCategoryId.toString(),
+                            sub_category_id: question.subCategoryId.toString(),
+                            topic_id: question.topicId.toString(),sub_topic_id :question.subTopicId.toString());
 
+                      }
 
                       Get.back();
                     },
                     child: const Text('Save'),
                   ),
+
                 if (editingRowIndex == questionIndex)
                   TextButton(
                     onPressed: () {
                       setState(() {
-                        entries.add(Entries(id: null,answer: '',answerImg: '',question: '',questionImg: ''));
+                        entries.add(Entries(id: null, image: '', letter: ''));
                         questionControllers.add(TextEditingController());
                         answerControllers.add(TextEditingController());
                         questionImages.add(td.Uint8List(0));
-                        answerImages.add(td.Uint8List(0));
                       });
                     },
                     child: const Text('Add New Entry'),
@@ -553,7 +498,6 @@ print(questionList);
       },
     );
   }
-
 
   Widget _buildEditableField(
       int index, List<TextEditingController> controllers) {
@@ -591,38 +535,28 @@ print(questionList);
   }
 
   void _updateQuestion(int index) async {
-    if (index >= questions.length || index >= titleControllers.length) return;
+    if (index >= questions.length) return;
 
-    final   updatedQuestion = MatchPairs(
+    final updatedQuestion = ImagePuzzleData(
       id: questions[index].id,
       questionType: questionTypeControllers[index].text,
-      index: int.tryParse(indexControllers[index].text) ?? questions[index].index,
-      title: titleControllers[index].text,
-      // answer: answerControllers[index].text,
-      // question:questionControllers[index].text,
-      points: int.tryParse(pointsControllers[index].text) ?? questions[index].points,
+      index:
+      int.tryParse(indexControllers[index].text) ?? questions[index].index,
+      points: int.tryParse(pointsControllers[index].text) ??
+          questions[index].points,
       mainCategoryId: questions[index].mainCategoryId,
       subCategoryId: questions[index].subCategoryId,
       topicId: questions[index].topicId,
       subTopicId: questions[index].subTopicId,
-      // paragraphContent: paragraphController[index].text,
-      // optionA: optionAControllers[index].text,
-      // optionF: optionFControllers[index].text,
-      // optionB: optionBControllers[index].text,
-      // optionC: optionCControllers[index].text,
-      // optionD: optionDControllers[index].text,
-      // optionE: optionEControllers[index].text,
+      title: titleControllers[index].text,
     );
 
     try {
       questions[index] = updatedQuestion;
-      // await updateQueApiController.updateCompleteTheParagraphTableQuestionApi(updatedQuestion)
-      //     .whenComplete(() => updateQueApiController.getCompleteParaApi(
-      //   main_category_id: updatedQuestion.mainCategoryId.toString(),
-      //   sub_category_id: updatedQuestion.subCategoryId.toString(),
-      //   topic_id: updatedQuestion.topicId.toString(),
-      //   sub_topic_id:updatedQuestion.subTopicId.toString(),
-      // ),);
+      updateQueApiController.updateImagePuzzle(question: updatedQuestion,
+          images: questionImages,
+          letters: questionControllers.join('|'),
+          context: context);
 
       notifyListeners();
     } catch (e) {
@@ -630,30 +564,68 @@ print(questionList);
     }
   }
 
+  toggleSelectAll(bool value) async {
+    isSelectAll = value;
 
-  /// call delete the story phrases api here
-  /// Delete the story phrases API here
-  _deleteSelectedQuestions(String ids) async {
+    if (isSelectAll) {
+      selectedQuestionIds
+          .addAll(questions.map((question) => question.id!).toList());
+    } else {
+      bool confirmed = await _showConfirmationDialog(context);
+      if (confirmed) {
+        _deleteSelectedQuestions();
+      }
+      selectedQuestionIds.clear();
+    }
+
+    onSelectionChanged(selectedQuestionIds.join('|'));
+    notifyListeners();
+  }
+
+  _showConfirmationDialog(BuildContext context) async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Deletion'),
+          content: const Text(
+              'Do you really want to delete the selected phrases?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    ) ??
+        false;
+  }
+
+  _deleteSelectedQuestions() async {
     final deleteApiController = Get.find<GetAllQuestionsApiController>();
 
     if (selectedQuestionIds.isNotEmpty) {
       try {
-        await deleteApiController.deleteCompleteTheParagraphAPI(
-
-          question_ids: ids,
+        await deleteApiController.deleteImagePuzzleAPI(
+          puzzle_id: selectedQuestionIds.join('|'),
         );
 
-        // Refresh the list of questions
-        await deleteApiController.getAllRe_Arrange(
+        await deleteApiController.getStoryPhrases(
           main_category_id: questions[0].mainCategoryId.toString(),
           sub_category_id: questions[0].subCategoryId.toString(),
           topic_id: questions[0].topicId.toString(),
           sub_topic_id: questions[0].subTopicId.toString(),
         );
 
-        questions.removeWhere((question) => selectedQuestionIds.contains(question.id));
-        selectedQuestionIds.clear(); // Clear selected IDs
-        notifyListeners(); // Update UI
+        questions.removeWhere(
+                (question) => selectedQuestionIds.contains(question.id));
+        selectedQuestionIds.clear();
+        notifyListeners();
       } catch (e) {
         print('Error deleting questions: $e');
       }
@@ -668,52 +640,4 @@ print(questionList);
 
   @override
   int get selectedRowCount => selectedQuestionIds.length;
-
-  toggleSelectAll(bool value) async {
-    isSelectAll = value;
-
-    if (isSelectAll) {
-      // Select all IDs
-      selectedQuestionIds.addAll(
-        questions.map((question) => question.id!).toList(),
-      );
-    } else {
-      bool confirmed = await _showConfirmationDialog(context);
-      if(confirmed){
-        _deleteSelectedQuestions(selectedQuestionIds.join('|'));
-      }
-      selectedQuestionIds.clear();
-    }
-
-    onSelectionChanged(selectedQuestionIds.join('|'));
-    notifyListeners(); // Update UI
-  }
-
-  _showConfirmationDialog(BuildContext context) async {
-    return await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirm Deletion'),
-          content: const Text('Do you really want to delete the selected phrases?'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false); // User pressed "No"
-              },
-              child: const Text('No'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(true); // User pressed "Yes"
-              },
-              child: const Text('Yes'),
-            ),
-          ],
-        );
-      },
-    ) ?? false; // Default to false if dialog is dismissed
-  }
-
-
 }

@@ -1,4 +1,5 @@
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
+import 'package:blissiqadmin/Global/constants/AppColor.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/controller/GetAllQuestionsApiController.dart';
@@ -310,7 +311,8 @@ class QuestionDataSource extends DataTableSource {
         DataCell(
           ElevatedButton(
             onPressed: () {
-              _showEntriesDialog(context, question.entries ?? [], index);
+              _showEntriesDialog(
+                  context, question.entries ?? [], index, question);
             },
             child: editingRowIndex == index
                 ? const Text("Edit")
@@ -323,112 +325,188 @@ class QuestionDataSource extends DataTableSource {
     );
   }
 
-  void _showEntriesDialog(BuildContext context, List<Entries> entries, int questionIndex) async {
+  void _showEntriesDialog(BuildContext context, List<Entries> entries,
+      int questionIndex, CardFlipData question) async {
+    // Clear the lists
     questionControllers.clear();
     answerControllers.clear();
     questionImages.clear();
 
+    // Initialize the lists with the correct number of elements
     for (var entry in entries) {
       questionControllers.add(TextEditingController(text: entry.image));
       answerControllers.add(TextEditingController(text: entry.letter));
-
+      questionImages.add(td.Uint8List(0)); // Initialize with an empty Uint8List
     }
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Entries'),
-          content: SizedBox(
-            width: 350, // Reduced width
-            child: SingleChildScrollView(
-              child: Column(
-                children: List.generate(entries.length, (i) {
-                  return Column(
-                    children: [
-                      Row(
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Entries'),
+              content: SizedBox(
+                width: 350, // Reduced width
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: List.generate(entries.length, (i) {
+                      return Column(
                         children: [
-                          editingRowIndex == questionIndex ?
-                          SizedBox(
-                            width: 40, // Smaller button
-                            height: 40,
-                            child: IconButton(
-                              icon: Icon(Icons.image, color: Colors.blue),
-                              onPressed: () => _pickImg(i),
-                            ),
-                          ) : SizedBox.shrink(),
-                          const SizedBox(width: 10),
-
-                          if (questionImages[i] != null)
-                            SizedBox(
-                              width: 80, // Smaller image
-                              height: 80,
-                              child: Image.memory(
-                                questionImages[i]!,
-                                fit: BoxFit.cover,
+                          Row(
+                            children: [
+                              editingRowIndex == questionIndex
+                                  ? SizedBox(
+                                      width: 40, // Smaller button
+                                      height: 40,
+                                      child: IconButton(
+                                        icon: Icon(Icons.image,
+                                            color: Colors.blue),
+                                        onPressed: () => _pickImg(i),
+                                      ),
+                                    )
+                                  : SizedBox.shrink(),
+                              const SizedBox(width: 10),
+                              if (questionImages[i] != null &&
+                                  questionImages[i].isNotEmpty)
+                                SizedBox(
+                                  width: 80,
+                                  height: 80,
+                                  child: Image.memory(
+                                    questionImages[i]!,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              else if (questionControllers[i].text.isNotEmpty &&
+                                  questionControllers[i].text != "null")
+                                SizedBox(
+                                  width: 80,
+                                  height: 80,
+                                  child: CachedNetworkImage(
+                                    imageUrl: ApiString.ImgBaseUrl +
+                                        'media/' +
+                                        questionControllers[i].text,
+                                    progressIndicatorBuilder:
+                                        (context, url, progress) =>
+                                            CircularProgressIndicator(
+                                                value: progress.progress),
+                                    errorWidget: (context, url, error) =>
+                                        const Icon(Icons.error),
+                                  ),
+                                )
+                              else
+                                const Icon(Icons.broken_image,
+                                    color: Colors.grey, size: 50),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: TextField(
+                                  controller: answerControllers[i],
+                                  decoration: const InputDecoration(
+                                      labelText: 'Letters / Words'),
+                                  enabled: editingRowIndex == questionIndex,
+                                ),
                               ),
-                            )
-                          else if (questionControllers[i].text.isNotEmpty &&
-                              questionControllers[i].text != "null")
-                            SizedBox(
-                              width: 80,
-                              height: 80,
-                              child: CachedNetworkImage(
-                                imageUrl: ApiString.ImgBaseUrl +
-                                    'media/' +
-                                    questionControllers[i].text,
-                                progressIndicatorBuilder: (context, url, progress) =>
-                                    CircularProgressIndicator(value: progress.progress),
-                                errorWidget: (context, url, error) =>
-                                const Icon(Icons.error),
-                              ),
-                            )
-                          else
-                            const Icon(Icons.broken_image, color: Colors.grey, size: 50),
+                              editingRowIndex == questionIndex
+                                  ? IconButton(
+                                      onPressed: () async {
+                                        print(
+                                            'button pressed : ${entries[i].id.toString()}');
 
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: TextField(
-                              controller: answerControllers[i],
-                              decoration: const InputDecoration(labelText: 'Letters / Words'),
-                              enabled: editingRowIndex == questionIndex,
-                            ),
+                                        if(entries[i].id != null)
+                                          {
+                                            await Get.find<
+                                                GetAllQuestionsApiController>()
+                                                .deleteCardFlipEntryAPI(
+                                                card_entry_id:
+                                                entries[i].id.toString());
+                                            await Get.find<
+                                                GetAllQuestionsApiController>()
+                                                .getCardFlip(
+                                                main_category_id: question.mainCategoryId.toString(),
+                                                sub_category_id: question.subCategoryId.toString(),
+                                                topic_id: question.topicId.toString(),
+                                                sub_topic_id : question.subTopicId.toString()
+                                            );
+                                          }
+                                        setState(() {
+                                          entries.removeAt(i);
+                                          questionControllers.removeAt(i);
+                                          answerControllers.removeAt(i);
+                                          questionImages.removeAt(i);
+                                        });
+                                      },
+                                      icon: Icon(Icons.delete_forever_sharp,
+                                          color: AppColor.red),
+                                    )
+                                  : SizedBox.shrink()
+                            ],
                           ),
                         ],
-                      ),
-                    ],
-                  );
-                }),
+                      );
+                    }),
+                  ),
+                ),
               ),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            if (editingRowIndex == questionIndex)
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  notifyListeners();
-                },
-                child: const Text('Save'),
-              ),
-          ],
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Cancel'),
+                ),
+                if (editingRowIndex == questionIndex)
+                  TextButton(
+                    onPressed: () async {
+                      final letters = answerControllers
+                          .map((e) => e.text)
+                          .where((text) => !entries.any((entry) => entry.letter == text)) // Filter out existing letters
+                          .toList();
+
+                      if (letters.isNotEmpty) {
+                        await Get.find<GetAllQuestionsApiController>().updateImagePuzzleEntry(
+                          images: questionImages,
+                          letters: letters.join('|'),
+                          context: context,
+                          id: question.id ?? '',
+                        );
+                        await Get.find<GetAllQuestionsApiController>()
+                            .getImagePuzzleList(main_category_id: question.mainCategoryId.toString(),
+                            sub_category_id: question.subCategoryId.toString(),
+                            topic_id: question.topicId.toString(),sub_topic_id :question.subTopicId.toString());
+
+                      }
+
+                      Get.back();
+                    },
+                    child: const Text('Save'),
+                  ),
+
+                if (editingRowIndex == questionIndex)
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        entries.add(Entries(id: null, image: '', letter: ''));
+                        questionControllers.add(TextEditingController());
+                        answerControllers.add(TextEditingController());
+                        questionImages.add(td.Uint8List(0));
+                      });
+                    },
+                    child: const Text('Add New Entry'),
+                  ),
+              ],
+            );
+          },
         );
       },
     );
   }
-
 
   Widget _buildEditableField(
       int index, List<TextEditingController> controllers) {
     if (index >= controllers.length) return const Text("");
     return editingRowIndex == index
         ? TextField(
+            enabled: controllers == questionTypeControllers ? false : true,
             controller: controllers[index],
             decoration: const InputDecoration(border: OutlineInputBorder()),
           )
@@ -477,12 +555,15 @@ class QuestionDataSource extends DataTableSource {
 
     try {
       questions[index] = updatedQuestion;
-      updateQueApiController.updateCardFlip(question: updatedQuestion,
-          images: questionImages,
-          letters: questionControllers.join('|'),
+      updateQueApiController.updateCardFlip(
+          question: updatedQuestion,
+          // images: questionImages,
+          // letters: questionControllers.join('|'),
           context: context);
-
       notifyListeners();
+      // await updateQueApiController.getCardFlip(main_category_id: updatedQuestion.mainCategoryId.toString(),
+      //     sub_category_id: updatedQuestion.subCategoryId.toString(),
+      //     topic_id: updatedQuestion.topicId.toString(),sub_topic_id :updatedQuestion.subTopicId.toString());
     } catch (e) {
       print('Error updating question: $e');
     }
@@ -535,11 +616,7 @@ class QuestionDataSource extends DataTableSource {
 
     if (selectedQuestionIds.isNotEmpty) {
       try {
-        await deleteApiController.deleteFillInTheBlanksAPI(
-          main_category_id: questions[0].mainCategoryId.toString(),
-          sub_category_id: questions[0].subCategoryId.toString(),
-          topic_id: questions[0].topicId.toString(),
-          sub_topic_id: questions[0].subTopicId.toString(),
+        await deleteApiController.deleteCardFlip(
           question_id: selectedQuestionIds.join('|'),
         );
 
