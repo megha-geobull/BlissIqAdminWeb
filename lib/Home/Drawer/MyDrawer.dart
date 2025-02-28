@@ -2,6 +2,7 @@
 
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Home/Drawer/ChangePasswordPage.dart';
+import 'package:blissiqadmin/Home/Drawer/FeedbackPage.dart';
 import 'package:blissiqadmin/Home/Drawer/MainCategoriesPage.dart';
 import 'package:blissiqadmin/Home/Drawer/Notification.dart';
 import 'package:blissiqadmin/Home/Drawer/QuestionWidgets.dart';
@@ -178,12 +179,12 @@ class _MyDrawerState extends State<MyDrawer> {
             )),
 
         Obx(() => buildDrawerTile(
-          title: 'Change Password',
-          icon: Icons.password,
-          isSelected: controller.selectedPage.value == 'Change Password',
+          title: 'Feedback',
+          icon: Icons.feedback_outlined,
+          isSelected: controller.selectedPage.value == 'Feedback',
           onTap: () {
-            controller.changePage('Change Password');
-            Get.to(() => const ChangePasswordPage());
+            controller.changePage('Feedback');
+            Get.to(() =>  const FeedbackPage());
           },
         )),
 

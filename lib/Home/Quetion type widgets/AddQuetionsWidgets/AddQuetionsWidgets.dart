@@ -1666,7 +1666,7 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                 ),
               ],
             ),
-            SizedBox(height: 10),
+            boxH10(),
             Obx(() {
               return Center(
                 child: _getAllQuestionsApiController.isLoading.value
