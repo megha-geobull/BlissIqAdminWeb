@@ -72,6 +72,25 @@ class _SchoolScreenState extends State<SchoolScreen> {
     }
   }
 
+  // void onDelete(String title, String school_id) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => CustomAlertDialog(
+  //       title: 'Are you sure',
+  //       content: title,
+  //       yesText: 'Yes',
+  //       noText: 'No',
+  //       onYesPressed: () {
+  //         schoolController.delete_school(school_id);
+  //         schoolController.getAllSchools();
+  //         Navigator.pop(context);
+  //         selectedSchoolIds.clear();
+  //         setState(() {});
+  //       },
+  //     ),
+  //   );
+  // }
+
   void onDelete(String title, String school_id) {
     showDialog(
       context: context,
@@ -81,11 +100,20 @@ class _SchoolScreenState extends State<SchoolScreen> {
         yesText: 'Yes',
         noText: 'No',
         onYesPressed: () {
-          schoolController.delete_school(school_id);
-          schoolController.getAllSchools();
           Navigator.pop(context);
-          selectedSchoolIds.clear();
-          setState(() {});
+          schoolController.delete_school(school_id).then((response) {
+            setState(() {
+              schoolController.getAllSchools();
+              selectedSchoolIds.clear();
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('deleted successfully!')),
+            );
+          }).catchError((error) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error occurred while deleting the company: $error')),
+            );
+          });
         },
       ),
     );
@@ -282,12 +310,22 @@ class _SchoolScreenState extends State<SchoolScreen> {
             Tooltip(
               message: 'Add a New School',
               child: ElevatedButton.icon(
+                // onPressed: () {
+                //   Navigator.push(
+                //     context,
+                //     MaterialPageRoute(
+                //         builder: (context) => SchoolRegistration()),
+                //   );
+                // },
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => SchoolRegistration()),
-                  );
+                  Get.to( SchoolRegistration())?.then((value) {
+                    if (value != null && value == true) {
+                      setState(() {
+                        print("Refresh!!!!");
+                        schoolController.getAllSchools();
+                      });
+                    }
+                  });
                 },
                 icon: const Icon(Icons.add, color: Colors.white, size: 20),
                 label: const Text("Add School",

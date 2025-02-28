@@ -70,6 +70,27 @@ class _MentorScreenState extends State<MentorScreen> {
     }
   }
 
+  // void onDelete(String title, String mentor_id) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => CustomAlertDialog(
+  //       title: 'Are you sure',
+  //       content: title,
+  //       yesText: 'Yes',
+  //       noText: 'No',
+  //       onYesPressed: () {
+  //         mentorController.delete_mentors(mentor_id);
+  //         mentorController.getAllMentors();
+  //         selectedMentorIds.clear();
+  //         Navigator.pop(context);
+  //
+  //         setState(() {});
+  //       },
+  //     ),
+  //   );
+  // }
+
+
   void onDelete(String title, String mentor_id) {
     showDialog(
       context: context,
@@ -79,11 +100,20 @@ class _MentorScreenState extends State<MentorScreen> {
         yesText: 'Yes',
         noText: 'No',
         onYesPressed: () {
-          mentorController.delete_mentors(mentor_id);
-          mentorController.getAllMentors();
           Navigator.pop(context);
-          selectedMentorIds.clear();
-          setState(() {});
+          mentorController.delete_mentors(mentor_id).then((response) {
+            setState(() {
+              mentorController.getAllMentors();
+              selectedMentorIds.clear();
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Company deleted successfully!')),
+            );
+          }).catchError((error) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error occurred while deleting the company: $error')),
+            );
+          });
         },
       ),
     );
@@ -274,12 +304,22 @@ class _MentorScreenState extends State<MentorScreen> {
             Tooltip(
               message: 'Add a New Mentor',
               child: ElevatedButton.icon(
+                // onPressed: () {
+                //   Navigator.push(
+                //     context,
+                //     MaterialPageRoute(
+                //         builder: (context) => MentorRegistration()),
+                //   );
+                // },
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => MentorRegistration()),
-                  );
+                  Get.to( MentorRegistration())?.then((value) {
+                    if (value != null && value == true) {
+                      setState(() {
+                        print("Refresh!!!!");
+                        mentorController.getAllMentors();
+                      });
+                    }
+                  });
                 },
                 icon: const Icon(Icons.add, color: Colors.white, size: 20),
                 label: const Text("Add Mentor",

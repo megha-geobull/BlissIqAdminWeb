@@ -230,8 +230,9 @@ class AuthController extends GetxController{
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(responseData['message'])),
         );
+        getAllMentors();
         clearControllers();
-        Get.toNamed(AppRoutes.mentorPage);
+      //  Get.toNamed(AppRoutes.mentorPage);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(responseData['message'] ?? 'Error occurred')),

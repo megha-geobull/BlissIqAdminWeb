@@ -116,7 +116,7 @@ class SchoolController extends GetxController {
           SnackBar(content: Text(responseData['message'])),
         );
         getAllSchools();
-        Get.back();
+        // Get.back();
         clearControllers();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

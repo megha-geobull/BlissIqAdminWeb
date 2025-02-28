@@ -490,7 +490,18 @@ class _MentorRegistrationState extends State<MentorRegistration> {
                                       context: context,
                                       profileImageBytes: pathsFile,
                                         schoolId : selectedSchool
-                                    );
+                                    ).then((response) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Registration successful!')),
+                                      );
+                                      Navigator.pop(context, true);
+                                    }).
+                                    catchError((error) {
+
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Error occurred: $error')),
+                                      );
+                                    });
                                   }
                                 },
                               ),
