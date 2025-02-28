@@ -351,7 +351,7 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
                           )
                               : Image.memory(
                             panPathsFile,
-                            fit: BoxFit.cover, // Ensure the image fits properly
+                            fit: BoxFit.cover,
                           ),
                         ),
                       ),
@@ -366,7 +366,7 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
                               if (companyController.formKey.currentState!.validate()) {
                                 companyController.companyRegistration(
                                   companyName: companyController.companyNameController.text,
-                                  ownerName:  companyController.ownerNameController.text,
+                                  ownerName: companyController.ownerNameController.text,
                                   email: companyController.emailController.text,
                                   contactNo: companyController.contactNumberController.text,
                                   password: companyController.passwordController.text,
@@ -377,9 +377,21 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
                                   panImageName: panPathsFileName,
                                   cinNumber: companyController.cinNumberController.text,
                                   gstNumber: companyController.gstNumberController.text,
-                                );
+                                ).then((response) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Registration successful!')),
+                                  );
+                                  Navigator.pop(context, true);
+                                }).catchError((error) {
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Error occurred: $error')),
+                                  );
+                                });
                               }
                             },
+
+
                           ),
                         );
                       }),

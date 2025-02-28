@@ -90,6 +90,27 @@ class _CompanyScreenState extends State<CompanyScreen> {
     }
   }
 
+  // void onDelete(String title, String companyId) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => CustomAlertDialog(
+  //       title: 'Are you sure',
+  //       content: title,
+  //       yesText: 'Yes',
+  //       noText: 'No',
+  //       onYesPressed: () {
+  //         Navigator.pop(context);
+  //         companyController.delete_company(companyId);
+  //
+  //         setState(() {
+  //
+  //
+  //         });
+  //       },
+  //     ),
+  //   );
+  // }
+
   void onDelete(String title, String companyId) {
     showDialog(
       context: context,
@@ -100,13 +121,23 @@ class _CompanyScreenState extends State<CompanyScreen> {
         noText: 'No',
         onYesPressed: () {
           Navigator.pop(context);
-          companyController.delete_company(companyId);
-          companyController.getAllCompany();
-          setState(() {});
+          companyController.delete_company(companyId).then((response) {
+            setState(() {
+              companyController.getAllCompany();
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Company deleted successfully!')),
+            );
+          }).catchError((error) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error occurred while deleting the company: $error')),
+            );
+          });
         },
       ),
     );
   }
+
 
   final TextEditingController searchController = TextEditingController();
 
@@ -228,7 +259,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
           ),
           const SizedBox(height: 16),
           companyController.allCompanyData.isEmpty && filteredCompanyData.isEmpty
-              ? Center(child: Text('No Data Available'))
+              ? const Center(child: Text('No Data Available'))
               : Expanded(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
@@ -275,19 +306,19 @@ class _CompanyScreenState extends State<CompanyScreen> {
                       ],
                     ),
                     columns: [
-                      DataColumn(label: Text("Profile")),
-                      DataColumn(label: Text("Owner Name")),
-                      DataColumn(label: Text("Company Name")),
-                      DataColumn(label: Text("Email")),
-                      DataColumn(label: Text("Contact No")),
-                      DataColumn(label: Text("GST No")),
-                      DataColumn(label: Text("CIN Number")),
-                      DataColumn(label: Text("Pan Card No")),
-                      DataColumn(label: Text("Status")),
-                      DataColumn(label: Text("School")),
-                      DataColumn(label: Text("Assign")),
-                      DataColumn(label: Text("Action")),
-                      DataColumn(label: Text("Edit")),
+                      const DataColumn(label: Text("Profile")),
+                      const DataColumn(label: Text("Owner Name")),
+                      const DataColumn(label: Text("Company Name")),
+                      const DataColumn(label: Text("Email")),
+                      const DataColumn(label: Text("Contact No")),
+                      const DataColumn(label: Text("GST No")),
+                      const DataColumn(label: Text("CIN Number")),
+                      const DataColumn(label: Text("Pan Card No")),
+                      const DataColumn(label: Text("Status")),
+                      const DataColumn(label: Text("School")),
+                      const DataColumn(label: Text("Assign")),
+                      const DataColumn(label: Text("Action")),
+                      const DataColumn(label: Text("Edit")),
                     ],
                     source: CompanyTableSource(filteredCompanyData, this,context),
                   ),
@@ -322,13 +353,25 @@ class _CompanyScreenState extends State<CompanyScreen> {
             Tooltip(
               message: 'Add a New Company',
               child: ElevatedButton.icon(
+                // onPressed: () {
+                //   Navigator.push(
+                //     context,
+                //     MaterialPageRoute(
+                //         builder: (context) => CompanyRegistrationPage()),
+                //   );
+                // },
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => CompanyRegistrationPage()),
-                  );
+                  Get.to(const CompanyRegistrationPage())?.then((value) {
+                    if (value != null && value == true) {
+                      setState(() {
+                        print("Refresh!!!!");
+                        companyController.getAllCompany();
+                      });
+                    }
+                  });
                 },
+
+
                 icon: const Icon(Icons.add, color: Colors.white, size: 20),
                 label: const Text("Add Company",
                     style: TextStyle(color: Colors.white, fontSize: 16)),
@@ -503,7 +546,7 @@ class CompanyTableSource extends DataTableSource {
                     (context, url, downloadProgress) =>
                     CircularProgressIndicator(
                         value: downloadProgress.progress),
-                errorWidget: (context, url, error) => Icon(Icons.error),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
               ),
             )
                 : const SizedBox.shrink(),
@@ -591,7 +634,7 @@ class CompanyTableSource extends DataTableSource {
                     (context, url, downloadProgress) =>
                     CircularProgressIndicator(
                         value: downloadProgress.progress),
-                errorWidget: (context, url, error) => Icon(Icons.error),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
               ),
             )
                 : const SizedBox.shrink(),
