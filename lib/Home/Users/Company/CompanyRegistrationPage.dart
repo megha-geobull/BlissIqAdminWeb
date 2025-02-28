@@ -382,7 +382,8 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
                                     SnackBar(content: Text('Registration successful!')),
                                   );
                                   Navigator.pop(context, true);
-                                }).catchError((error) {
+                                }).
+                                catchError((error) {
 
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text('Error occurred: $error')),

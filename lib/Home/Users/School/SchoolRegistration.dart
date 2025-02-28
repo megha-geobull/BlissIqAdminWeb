@@ -319,7 +319,18 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                             password: schoolController.passwordController.text,
                             confirmPassword: schoolController.confirmPasswordController.text,
                             context: context,
-                          );
+                          ).then((response) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Registration successful!')),
+                            );
+                            Navigator.pop(context, true);
+                          }).
+                          catchError((error) {
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error occurred: $error')),
+                            );
+                          });
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blueAccent,

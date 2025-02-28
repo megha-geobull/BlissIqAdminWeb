@@ -69,6 +69,26 @@ class _StudentScreenState extends State<StudentScreen> {
     });
   }
 
+  // void onDelete(String title, String student_id) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => CustomAlertDialog(
+  //       title: 'Are you sure',
+  //       content: title,
+  //       yesText: 'Yes',
+  //       noText: 'No',
+  //       onYesPressed: () {
+  //         studentController.delete_Learners(student_id);
+  //         studentController.getAllLearners();
+  //         selectedStudentIds.clear();
+  //         Navigator.pop(context);
+  //
+  //         setState(() {});
+  //       },
+  //     ),
+  //   );
+  // }
+
   void onDelete(String title, String student_id) {
     showDialog(
       context: context,
@@ -78,11 +98,20 @@ class _StudentScreenState extends State<StudentScreen> {
         yesText: 'Yes',
         noText: 'No',
         onYesPressed: () {
-          studentController.delete_Learners(student_id);
-          studentController.getAllLearners();
           Navigator.pop(context);
-          selectedStudentIds.clear();
-          setState(() {});
+          studentController.delete_Learners(student_id).then((response) {
+            setState(() {
+              studentController.getAllLearners();
+              selectedStudentIds.clear();
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('deleted successfully!')),
+            );
+          }).catchError((error) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error occurred while deleting the company: $error')),
+            );
+          });
         },
       ),
     );
@@ -261,37 +290,37 @@ class _StudentScreenState extends State<StudentScreen> {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.white),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
+      child: const Padding(
+        padding: EdgeInsets.all(8.0),
         child: Row(
           children: [
-            const Text(
+            Text(
               'All Registered Students',
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
                   color: Colors.black),
             ),
-            const Spacer(),
-            Tooltip(
-              message: 'Add a New Student',
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  // Navigate to add student screen
-                },
-                icon: const Icon(Icons.add, color: Colors.white, size: 20),
-                label: const Text("Add Student",
-                    style: TextStyle(color: Colors.white, fontSize: 16)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepOrange,
-                  elevation: 3,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-              ),
-            ),
+          //  const Spacer(),
+            // Tooltip(
+            //   message: 'Add a New Student',
+            //   child: ElevatedButton.icon(
+            //     onPressed: () {
+            //       // Navigate to add student screen
+            //     },
+            //     icon: const Icon(Icons.add, color: Colors.white, size: 20),
+            //     label: const Text("Add Student",
+            //         style: TextStyle(color: Colors.white, fontSize: 16)),
+            //     style: ElevatedButton.styleFrom(
+            //       backgroundColor: Colors.deepOrange,
+            //       elevation: 3,
+            //       shape: RoundedRectangleBorder(
+            //           borderRadius: BorderRadius.circular(8)),
+            //       padding:
+            //       const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),
@@ -330,8 +359,8 @@ class StudentDataTableSource extends DataTableSource {
               backgroundColor: Colors.white,
               child: CachedNetworkImage(
                 imageUrl: ApiString.ImgBaseUrl + (dataRow.profileImage ?? ''),
-                placeholder: (context, url) => CircularProgressIndicator(),
-                errorWidget: (context, url, error) => Icon(Icons.error),
+                placeholder: (context, url) => const CircularProgressIndicator(),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
                 fit: BoxFit.cover,
               ),
             ),

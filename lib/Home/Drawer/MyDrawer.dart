@@ -48,12 +48,6 @@ class _MyDrawerState extends State<MyDrawer> {
     );
   }
 
-  void onLogoutTap() {
-    clearLocalStorage();
-    //  isLogin = false;
-    setState(() {});
-    Get.offAll(LoginScreen());
-  }
 
   Widget MyDrawer() {
     return ListView(
@@ -135,7 +129,7 @@ class _MyDrawerState extends State<MyDrawer> {
               isSelected: controller.selectedPage.value == 'Users',
               onTap: () {
                 controller.changePage('Users');
-                Get.to(() => UsersPage());
+                Get.to(() => const UsersPage());
               },
             )),
         // Assign
@@ -155,7 +149,7 @@ class _MyDrawerState extends State<MyDrawer> {
               isSelected: controller.selectedPage.value == 'Categories',
               onTap: () {
                 controller.changePage('Categories');
-                Get.to(() =>  MainCategoriesPage());
+                Get.to(() =>  const MainCategoriesPage());
               },
             )),
         Obx(() => buildDrawerTile(
@@ -276,7 +270,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 ),
               ),
               onPressed: () {
-                Navigator.of(context).pop();
+                onLogoutTap();
               },
               child: const Text(
                 'Logout',
@@ -289,4 +283,16 @@ class _MyDrawerState extends State<MyDrawer> {
       },
     );
   }
+  void onLogoutTap() {
+    clearLocalStorage();
+    Future.delayed(Duration.zero, () {
+
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen())
+      );
+    });
+  }
+
+
 }
