@@ -2,6 +2,7 @@
 
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Home/Drawer/ChangePasswordPage.dart';
+import 'package:blissiqadmin/Home/Drawer/ComplaintPage.dart';
 import 'package:blissiqadmin/Home/Drawer/FeedbackPage.dart';
 import 'package:blissiqadmin/Home/Drawer/MainCategoriesPage.dart';
 import 'package:blissiqadmin/Home/Drawer/Notification.dart';
@@ -185,6 +186,16 @@ class _MyDrawerState extends State<MyDrawer> {
           onTap: () {
             controller.changePage('Feedback');
             Get.to(() =>  const FeedbackPage());
+          },
+        )),
+
+        Obx(() => buildDrawerTile(
+          title: 'Complaint',
+          icon: Icons.feedback_outlined,
+          isSelected: controller.selectedPage.value == 'Complaint',
+          onTap: () {
+            controller.changePage('Complaint');
+            Get.to(() =>  const ComplaintPage());
           },
         )),
 

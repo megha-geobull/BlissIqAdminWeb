@@ -221,19 +221,16 @@ class CompanyController extends GetxController{
         request.files.add(multipartFile);
       }
       if (pan_card != null) {
-        final mimeType = lookupMimeType(panImageName!); // Get MIME type
+        final mimeType = lookupMimeType(panImageName!);
         final mimeTypeParts = mimeType?.split('/') ?? ['application', 'octet-stream'];
         final multipartFile = http.MultipartFile.fromBytes(
           'pan_card',
           pan_card,
-          filename: panImageName, // Pass file name
+          filename: panImageName,
           contentType: MediaType(mimeTypeParts[0], mimeTypeParts[1]),
         );
         request.files.add(multipartFile);
       }
-
-
-
       final response = await request.send();
       final responseData = jsonDecode(await response.stream.bytesToString());
       print(responseData);
@@ -242,7 +239,7 @@ class CompanyController extends GetxController{
           SnackBar(content: Text(responseData['message'])),
         );
         getAllCompany();
-        Get.back();
+        //Get.back();
         clearControllers();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
