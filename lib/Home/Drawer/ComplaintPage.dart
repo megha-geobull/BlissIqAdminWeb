@@ -1,20 +1,13 @@
+import 'package:blissiqadmin/Global/constants/app_string.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
-import 'package:blissiqadmin/auth/Controller/StudentController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:blissiqadmin/Global/constants/ApiString.dart';
-import 'package:blissiqadmin/Global/constants/AppColor.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
-import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/Home/Users/Mentor/MentorListBottomSheet.dart';
-import 'package:blissiqadmin/Home/Users/Models/AllStudentModel.dart';
-import 'package:blissiqadmin/auth/Controller/StudentController.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-
 import '../../../Global/constants/CustomAlertDialogue.dart';
+import '../Controller/Complaint_Controller.dart';
+import 'models/ComplaintModel.dart';
 
 
 class ComplaintPage extends StatefulWidget {
@@ -25,10 +18,10 @@ class ComplaintPage extends StatefulWidget {
 }
 
 class _ComplaintPageState extends State<ComplaintPage> {
-  final StudentController studentController = Get.put(StudentController());
+  final ComplaintController complaintController = Get.put(ComplaintController());
   Set<String> selectedStudentIds = {};
   bool isSelectAll = false;
-  List<Data> filteredStudentData = [];
+  List<ComplaintData> filteredStudentData = [];
   Map<String, bool> editingStates = {};
   final TextEditingController searchController = TextEditingController();
   Map<String, String?> assignedMentors = {};
@@ -36,9 +29,9 @@ class _ComplaintPageState extends State<ComplaintPage> {
   @override
   void initState() {
     super.initState();
-    filteredStudentData = studentController.allLearnerData;
+    //filteredStudentData = complaintController.allComplaintData;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      studentController.getAllLearners();
+      complaintController.getAllComplaints();
       searchController.clear();
       _filterStudents(''); // Clear search on init
     });
@@ -48,9 +41,9 @@ class _ComplaintPageState extends State<ComplaintPage> {
   void didUpdateWidget(covariant ComplaintPage oldWidget) {
     // TODO: implement didUpdateWidget
     super.didUpdateWidget(oldWidget);
-    filteredStudentData = studentController.allLearnerData;
+    //filteredStudentData = complaintController.allComplaintData;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      studentController.getAllLearners();
+      complaintController.allComplaintData();
       searchController.clear();
       _filterStudents('');
     });
@@ -63,9 +56,9 @@ class _ComplaintPageState extends State<ComplaintPage> {
   void _filterStudents(String query) {
     setState(() {
       if (query.isEmpty) {
-        filteredStudentData = studentController.allLearnerData;
+        filteredStudentData = complaintController.allComplaintData;
       } else {
-        filteredStudentData = studentController.allLearnerData
+        filteredStudentData = complaintController.allComplaintData
             .where((student) => student.userName!
             .toLowerCase()
             .contains(query.toLowerCase()))
@@ -83,8 +76,8 @@ class _ComplaintPageState extends State<ComplaintPage> {
         yesText: 'Yes',
         noText: 'No',
         onYesPressed: () {
-          studentController.delete_Learners(student_id);
-          studentController.getAllLearners();
+          //complaintController.delete_Learners(student_id);
+          //complaintController.getAllLearners();
           Navigator.pop(context);
           selectedStudentIds.clear();
           setState(() {});
@@ -93,29 +86,12 @@ class _ComplaintPageState extends State<ComplaintPage> {
     );
   }
 
-  void _showMentorBottomSheet(BuildContext context, String? studentId) async {
-    String? selectedMentor = await showModalBottomSheet<String>(
-      context: context,
-      builder: (context) {
-        return MentorListBottomSheet(studentId);
-      },
-    );
-    if (selectedMentor != null) {
-      setState(() {
-        assignedMentors[studentId!] = selectedMentor;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Assigned to $selectedMentor')),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       body: Obx(() {
-        return studentController.isLoading.value
+        return complaintController.isLoading.value
             ? Center(
           child: LoadingAnimationWidget.hexagonDots(
             color: Colors.deepOrange,
@@ -181,37 +157,37 @@ class _ComplaintPageState extends State<ComplaintPage> {
                 ),
               ),
               boxW15(),
-              if (selectedStudentIds.isNotEmpty)
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red.shade100,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 19, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  label: const Text(
-                    "Delete",
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  onPressed: () async {
-                    print("Selected Ids - ${selectedStudentIds.join('|')}");
-                    Future.delayed(const Duration(seconds: 1), () async {
-                      onDelete("You want to delete this student?",
-                          selectedStudentIds.join('|'));
-                    });
-                  },
-                ),
+              // if (selectedStudentIds.isNotEmpty)
+              //   ElevatedButton.icon(
+              //     style: ElevatedButton.styleFrom(
+              //       backgroundColor: Colors.red.shade100,
+              //       padding: const EdgeInsets.symmetric(
+              //           horizontal: 19, vertical: 15),
+              //       shape: RoundedRectangleBorder(
+              //         borderRadius: BorderRadius.circular(8),
+              //       ),
+              //     ),
+              //     icon: const Icon(Icons.delete, color: Colors.red),
+              //     label: const Text(
+              //       "Delete",
+              //       style: TextStyle(
+              //         color: Colors.red,
+              //         fontWeight: FontWeight.bold,
+              //       ),
+              //     ),
+              //     onPressed: () async {
+              //       print("Selected Ids - ${selectedStudentIds.join('|')}");
+              //       Future.delayed(const Duration(seconds: 1), () async {
+              //         onDelete("You want to delete this student?",
+              //             selectedStudentIds.join('|'));
+              //       });
+              //     },
+              //   ),
             ],
           ),
           const SizedBox(height: 16),
           Expanded(
-              child: studentController.isLoading.value
+              child: complaintController.isLoading.value
                   ? Center(
                 child: LoadingAnimationWidget.hexagonDots(
                   color: Colors.deepOrange,
@@ -239,13 +215,11 @@ class _ComplaintPageState extends State<ComplaintPage> {
 
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('Email')),
-            DataColumn(label: Text('Contact No')),
-            DataColumn(label: Text('School')),
+            DataColumn(label: Text('Mentor')),
+            //DataColumn(label: Text('School')),
             DataColumn(label: Text('Claim')),
             DataColumn(label: Text('Attachment')),
-
             DataColumn(label: Text('Status')),
-
           ],
           source: StudentDataTableSource(
             filteredStudentData,
@@ -309,87 +283,49 @@ class StudentDataTableSource extends DataTableSource {
     buildDataTableRows();
   }
 
-  final List<Data> students;
+  final List<ComplaintData> students;
   final BuildContext context;
   final _ComplaintPageState studentScreenState;
-  final String complaintMessage =
-      "Despite reaching out for assistance regarding the issue,"
-      " I experienced delays and unhelpful responses. "
-      "I would appreciate it if you could look into this"
-      " matter and provide a resolution.";
   String selectedStatus = 'Pending';
   List<String> statuses = ['Pending', 'Under Investigation', 'Solved'];
-
+  final ComplaintController complaintController = Get.put(ComplaintController());
   List<DataRow> dataTableRows = [];
 
   void buildDataTableRows() {
     dataTableRows = students.map<DataRow>((dataRow) {
-      final isEditing = studentScreenState.editingStates[dataRow.id] ?? false;
       return DataRow(
-        selected: studentScreenState.selectedStudentIds.contains(dataRow.id),
-        onSelectChanged: (isSelected) {
-          if (isSelected == true) {
-            studentScreenState.selectedStudentIds.add(dataRow.id ?? '');
-          } else {
-            studentScreenState.selectedStudentIds.remove(dataRow.id ?? '');
-          }
-          studentScreenState.setState(() {});
-        },
+        // selected: studentScreenState.selectedStudentIds.contains(dataRow.id),
+        // onSelectChanged: (isSelected) {
+        //   if (isSelected == true) {
+        //     studentScreenState.selectedStudentIds.add(dataRow.id ?? '');
+        //   } else {
+        //     studentScreenState.selectedStudentIds.remove(dataRow.id ?? '');
+        //   }
+        //   studentScreenState.setState(() {});
+        // },
         cells: [
 
           DataCell(
-            isEditing
-                ? TextFormField(
-              initialValue: dataRow.userName,
-              onChanged: (value) {
-                // dataRow.userName = value;
-              },
-            )
-                : Text(dataRow.userName ?? 'No Name'),
+            Text(dataRow.userName ?? 'No Name'),
           ),
           DataCell(
-            isEditing
-                ? TextFormField(
-              initialValue: dataRow.email,
-              onChanged: (value) {
-                // dataRow.email = value;
-              },
-            )
-                : Text(dataRow.email ?? 'No Email'),
+             Text(dataRow.email ?? 'No Email'),
           ),
           DataCell(
-            isEditing
-                ? TextFormField(
-              initialValue: dataRow.contactNo?.toString(),
-              onChanged: (value) {
-                // dataRow.contactNo = value;
-              },
-            )
-                : Text(dataRow.contactNo?.toString() ?? '-'),
+            Text(dataRow.mentorDetails?.fullName?.toString() ?? '-'),
           ),
+          // DataCell(
+          //   Text(dataRow.s?.toString() ?? '-'),
+          // ),
           DataCell(
-            isEditing
-                ? TextFormField(
-              initialValue: dataRow.school,
-              onChanged: (value) {
-                // dataRow.school = value;
-              },
-            )
-                : Text(dataRow.school ?? 'No School'),
-          ),
-
-          DataCell(
-         // Text("Despite reaching out for assistance regarding [briefly mention issue], I "
-         //     "experienced delays and unhelpful responses. "
-         //     "I would appreciate it if you could look into this matter and provide a resolution."),
             GestureDetector(
               onTap: () {
-                showComplaintDialog(context, complaintMessage);
+                showComplaintDialog(context, dataRow.issue!);
               },
               child: SizedBox(
-                width: Get.width > 500 ? 500 : 250,
+                width: Get.width > 200 ? 200 : 150,
                 child: Text(
-                  complaintMessage,
+                  dataRow.issue!,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 16),
@@ -398,26 +334,23 @@ class StudentDataTableSource extends DataTableSource {
             ),
           ),
           DataCell(
-         // Text("Despite reaching out for assistance regarding [briefly mention issue], I "
-         //     "experienced delays and unhelpful responses. "
-         //     "I would appreciate it if you could look into this matter and provide a resolution."),
             GestureDetector(
               onTap: () {
-                showAttachmentDialog(context, "assets/top_profile.png");
+                showAttachmentDialog(context,dataRow.attachment!);
               },
-              child: Text(
+              child: const Text(
                 "View Attachment",
-                style: const TextStyle(fontSize: 16,color: Colors.blue,decorationColor: Colors.blue,decoration: TextDecoration.underline),
+                style: TextStyle(fontSize: 16,color: Colors.blue,decorationColor: Colors.blue,decoration: TextDecoration.underline),
               ),
             ),
           ),
 
           DataCell(
-
             DropdownButton<String>(
               value: selectedStatus,
               onChanged: (String? newValue) {
                   selectedStatus = newValue!;
+                  confirmUpdateStatus(dataRow.id ?? '',selectedStatus);
               },
               items: statuses.map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
@@ -454,7 +387,9 @@ class StudentDataTableSource extends DataTableSource {
       },
     );
   }
+
   void showAttachmentDialog(BuildContext context, String imageUrl) {
+    String imagPath = "http://65.0.211.122:4444"+imageUrl;
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -462,7 +397,7 @@ class StudentDataTableSource extends DataTableSource {
           title: const Text("Attachment"),
           content: Container(
             width: Get.width > 500 ? 500 : 200,
-            child: Image.asset(imageUrl),
+            child: Image.network(imagPath),
           ),
           actions: <Widget>[
             TextButton(
@@ -477,6 +412,28 @@ class StudentDataTableSource extends DataTableSource {
     );
   }
 
+  void confirmUpdateStatus(String id,String complaint_status) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Confirm Status Update"),
+        content: Text("Are you sure you want to update this complaint status?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              complaintController.UpdateStatusComplaints(complaint_id: id,complaint_status: complaint_status);
+              Navigator.pop(context);
+            },
+            child: Text("Yes"),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   DataRow? getRow(int index) => dataTableRows[index];

@@ -16,13 +16,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:get/get.dart' as getx;
 import 'package:get/get.dart';
 
+import 'Controller/DashBoardEntrollmentController.dart';
+
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
-
-
-
 
 class _HomePageState extends State<HomePage> {
   String profileImage = "assets/icons/icon_white.png";
@@ -97,11 +96,13 @@ class _HomePageState extends State<HomePage> {
     },
   ];
 
+  final DashBoardController controller = Get.put(DashBoardController());
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    controller.getAllEnrollments();
   }
 
   @override
@@ -160,9 +161,8 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildMainContent(BoxConstraints constraints) {
     int crossAxisCount = constraints.maxWidth > 900
-        ? 2
-        : constraints.maxWidth > 600
-            ? 3
+        ? 2 : constraints.maxWidth > 600
+        ? 3
             : 2;
     return SingleChildScrollView(
       child: Padding(
@@ -195,7 +195,8 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             boxH10(),
-                            const UserPieChart()
+                            UserPieChart(student_count: controller.enrollmentData.students,mentor_count: controller.enrollmentData.mentors,
+                            school_count: controller.enrollmentData.schools,company_count: controller.enrollmentData.companies,)
                           ],
                         ),
                       ),
