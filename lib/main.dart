@@ -10,6 +10,8 @@ import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Global/MyCustomScrollBehaviour.dart';
+import 'Home/Controller/Complaint_Controller.dart';
+import 'Home/Controller/DashBoardEntrollmentController.dart';
 import 'auth/Controller/AuthController.dart';
 import 'auth/Signup/Splash.dart';
 import 'controller/CategoryController.dart';
@@ -21,6 +23,9 @@ void main() {
   Get.put(AuthController());
   Get.put(QuestionController());
   Get.put(GetAllQuestionsApiController());
+  Get.put(ComplaintController());
+  Get.put(DashBoardController());
+
  // debugPaintSizeEnabled = true;
   runApp(const MyApp());
 }

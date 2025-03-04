@@ -6,7 +6,13 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 class UserPieChart extends StatefulWidget {
-  const UserPieChart({Key? key}) : super(key: key);
+  double mentor_count;
+  double student_count;
+  double school_count;
+  double company_count;
+
+  UserPieChart({Key? key,required this.student_count,required this.mentor_count,
+    required this.school_count,required this.company_count}) : super(key: key);
 
   @override
   State<UserPieChart> createState() => _UserPieChartState();
@@ -15,7 +21,7 @@ class UserPieChart extends StatefulWidget {
 class _UserPieChartState extends State<UserPieChart> {
   int touchedIndex = -1;
 
-  final List<Map<String, dynamic>> userList = [
+  final List<Map<String, dynamic>> userListTemplate = [
     {
       "title": "Mentors",
       "imagePath": "assets/icons/mentor.png",
@@ -57,7 +63,7 @@ class _UserPieChartState extends State<UserPieChart> {
       "value": 25,
     },
   ];
-
+  late List<Map<String, dynamic>> userList;
 
   void navigateToScreen(int index) {
     switch (index) {
@@ -88,6 +94,33 @@ class _UserPieChartState extends State<UserPieChart> {
     }
   }
 
+  void updateUserListValues() {
+    for (var item in userList) {
+      switch (item["title"]) {
+        case "Mentors":
+          item["value"] = widget.mentor_count;
+          break;
+        case "Companies":
+          item["value"] = widget.company_count;
+          break;
+        case "Schools":
+          item["value"] = widget.school_count;
+          break;
+        case "Students":
+          item["value"] = widget.student_count;
+          break;
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    userList = userListTemplate.map((item) => Map<String, dynamic>.from(item)).toList();
+    updateUserListValues();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -108,10 +141,8 @@ class _UserPieChartState extends State<UserPieChart> {
                       });
                       return;
                     }
-
                     setState(() {
-                      touchedIndex =
-                          pieTouchResponse.touchedSection!.touchedSectionIndex;
+                      touchedIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
                     });
 
                     if (event is FlTapUpEvent && touchedIndex != -1) {
@@ -165,7 +196,7 @@ class _UserPieChartState extends State<UserPieChart> {
   List<PieChartSectionData> showingSections() {
     return List.generate(userList.length, (i) {
       final isTouched = i == touchedIndex;
-      final fontSize = isTouched ? 18.0 : 14.0;
+      final fontSize = isTouched ? 14.0 : 12.0;
       final radius = isTouched ? 120.0 : 100.0;
       final widgetSize = isTouched ? 60.0 : 50.0;
 
@@ -178,6 +209,7 @@ class _UserPieChartState extends State<UserPieChart> {
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
+        titlePositionPercentageOffset: 0.6,
         color: (userList[i]["gradient"] as LinearGradient).colors[1],
         // badgeWidget: _Badge(
         //   userList[i]["imagePath"] as String,

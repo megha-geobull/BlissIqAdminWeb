@@ -109,7 +109,7 @@ class ProfileController extends GetxController {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(body),
       );
-      print('url: ${ApiString.addTodaysAttendance}');
+      print('url: ${ApiString.getProfile}');
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
 

@@ -81,9 +81,6 @@ class _MyDrawerState extends State<MyDrawer> {
                   },
                   child: CircleAvatar(
                     radius: 40,
-                    // backgroundImage: profileController.pathsFile != null
-                    //     ? MemoryImage(profileController.pathsFile!)
-                    //     : const AssetImage("assets/icons/icon_white.png") as ImageProvider,
                     backgroundImage:  const AssetImage("assets/icons/icon_white.png") as ImageProvider,
                     child: Align(
                       alignment: Alignment.bottomRight,
@@ -94,7 +91,7 @@ class _MyDrawerState extends State<MyDrawer> {
                         child: const CircleAvatar(
                           backgroundColor: Colors.blue,
                           radius: 15,
-                          child: Icon(Icons.add, size: 20, color: Colors.white),
+                          child: Icon(Icons.edit, size: 20, color: Colors.white),
                         ),
                       ),
                     ),
@@ -132,19 +129,9 @@ class _MyDrawerState extends State<MyDrawer> {
                 Get.to(() => const UsersPage());
               },
             )),
-        // Assign
-        // Obx(() => buildDrawerTile(
-        //   title: 'Assign',
-        //   icon: Icons.assignment,
-        //   isSelected: controller.selectedPage.value == 'Assign',
-        //   onTap: () {
-        //     controller.changePage('Assign');
-        //     Get.to(() => AssignPage());
-        //   },
-        // )),
         // Categories
         Obx(() => buildDrawerTile(
-              title: 'Categories',
+              title: 'Courses',
               icon: Icons.category,
               isSelected: controller.selectedPage.value == 'Categories',
               onTap: () {
@@ -185,7 +172,7 @@ class _MyDrawerState extends State<MyDrawer> {
 
         Obx(() => buildDrawerTile(
           title: 'Complaint',
-          icon: Icons.feedback_outlined,
+          icon: Icons.dynamic_feed,
           isSelected: controller.selectedPage.value == 'Complaint',
           onTap: () {
             controller.changePage('Complaint');
@@ -286,13 +273,12 @@ class _MyDrawerState extends State<MyDrawer> {
   void onLogoutTap() {
     clearLocalStorage();
     Future.delayed(Duration.zero, () {
-
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginScreen())
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+            (Route<dynamic> route) => false,
       );
     });
   }
-
 
 }

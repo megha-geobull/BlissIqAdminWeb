@@ -2,9 +2,11 @@ class ApiString {
   /// Base URL
   static const String baseUrl = "http://65.0.211.122:4444/";
   static const String ImgBaseUrl = "http://65.0.211.122:4444/";
+  static const String AttachentBaseUrl = "http://65.0.211.122:4444";
 
   /// Auth Endpoints
   static const String signUp = "${baseUrl}student_registration";
+  static const String student_base_url = "http://65.0.211.122:4444/cust_api/";
 
 
   static const String login = "${baseUrl}login";
@@ -50,7 +52,6 @@ class ApiString {
   static const String get_assign_schools = "${baseUrl}get_assign_schools";
 
 
-
   /// Profile Endpoints
   static const String updateProfile = "${baseUrl}update_profile";
   static const String getProfile = "${baseUrl}get_profile";
@@ -67,6 +68,8 @@ class ApiString {
   static const String delete_vocabulary_categories = "${baseUrl}delete_vocabulary_categories";
 
   static const String add_notifications = "${baseUrl}add_notifications";
+  static const String get_notifications = "${baseUrl}get_notifications";
+  static const String delete_notification = "${baseUrl}delete_notification";
 
   static const String add_main_category = "${baseUrl}add_main_category";
   static const String get_main_category = "${baseUrl}get_main_category";
@@ -179,6 +182,11 @@ class ApiString {
 
   static const String add_topic_example = "${baseUrl}add_topic_example";
   static const String delete_topic_example = "${baseUrl}delete_topic_example";
+
+  //Complaint Apis
+  static const String get_enrollment_students = "${baseUrl}get_enrollment_students";
+  static const String get_raised_complaint = "${student_base_url}get_raised_complaint";
+  static const String update_complaint_status = "${baseUrl}update_complaint_status";
 
 
 
