@@ -162,6 +162,63 @@ class CategoryController extends GetxController {
       isLoading.value = false;
     }
   }
+ /// with imae add the subcategory add
+ //  addSubCategory({
+ //    required String subcategory,
+ //    required String maincategory_id,
+ //    Uint8List? imageBytes,
+ //    String? imageName,
+ //  }) async {
+ //    isLoading.value = true;
+ //
+ //    try {
+ //      // Create a multipart request
+ //      var request = http.MultipartRequest(
+ //        'POST',
+ //        Uri.parse(ApiString.add_sub_category),
+ //      );
+ //
+ //      // Add fields to the request
+ //      request.fields['main_category_id'] = maincategory_id;
+ //      request.fields['sub_category'] = subcategory;
+ //
+ //      // Add image file if available
+ //      if (imageBytes != null && imageName != null) {
+ //        request.files.add(
+ //          http.MultipartFile.fromBytes(
+ //            'subcate_image',
+ //            imageBytes,
+ //            filename: imageName,
+ //          ),
+ //        );
+ //      }
+ //
+ //      // Send the request
+ //      final response = await request.send();
+ //
+ //      // Get the response
+ //      final responseString = await response.stream.bytesToString();
+ //      print('Response status: ${response.statusCode}');
+ //      print('Response body: $responseString');
+ //
+ //      if (response.statusCode == 200) {
+ //        final Map<String, dynamic> responseData = jsonDecode(responseString);
+ //        if (responseData['status'] == 1) {
+ //          getCategory();
+ //          showSnackbar(message: "Subcategory added successfully");
+ //        } else {
+ //          showSnackbar(message: "Failed to add Subcategory");
+ //        }
+ //      } else {
+ //        showSnackbar(message: "Failed to add Subcategory: ${response.statusCode}");
+ //      }
+ //    } catch (e) {
+ //      showSnackbar(message: "Error while adding: $e");
+ //    } finally {
+ //      isLoading.value = false;
+ //    }
+ //  }
+
 
   deleteSubCategory({
     required String categoryId,

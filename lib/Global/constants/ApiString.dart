@@ -57,7 +57,7 @@ class ApiString {
   static const String getProfile = "${baseUrl}get_profile";
 
   /// Leaderboard
-  static const String getLeaderboard = "${baseUrl}get_leaderboard";
+  static const String getLeaderboard = "${student_base_url}get_leaderboard";
 
   /// Attendance
   static const String addTodaysAttendance = "${baseUrl}add_todays_attendance";
@@ -186,7 +186,7 @@ class ApiString {
   //Complaint Apis
   static const String get_enrollment_students = "${baseUrl}get_enrollment_students";
   static const String get_raised_complaint = "${student_base_url}get_raised_complaint";
-  static const String update_complaint_status = "${baseUrl}update_complaint_status";
+  static const String update_complaint_status = "${student_base_url}update_complaint_status";
 
 
 
