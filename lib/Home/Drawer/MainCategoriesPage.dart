@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:blissiqadmin/Global/Widgets/Button/CustomButton.dart';
 import 'package:blissiqadmin/Global/constants/AppColor.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Controller/MainCategoryController.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../Global/constants/CustomAlertDialogue.dart';
@@ -157,11 +162,11 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
       decoration: BoxDecoration(color: Colors.orange[100]),
       children: [
         // 1st column
-        Padding(
-          padding: const EdgeInsets.all(8.0),
+        const Padding(
+          padding: EdgeInsets.all(8.0),
           child: Row(
             children: [
-              const Text(
+              Text(
                 'Main Category Name',
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -296,6 +301,30 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
+            Uint8List? imageBytes; // To store the selected image bytes
+            String? imageName; // To store the selected image name
+
+            // Function to pick an image from the gallery
+            pickImage() async {
+              try {
+                FilePickerResult? pickedFile = await FilePicker.platform.pickFiles(
+                  type: FileType.custom,
+                  allowMultiple: false,
+                  allowedExtensions: ['png', 'jpg', 'jpeg'],
+                );
+                if (pickedFile != null && pickedFile.files.isNotEmpty) {
+                  setState(() {
+                    imageBytes = pickedFile.files.first.bytes;
+                    imageName = 'image_${DateTime.now().millisecondsSinceEpoch}.png';
+                  });
+                }
+              } catch (e) {
+                if (kDebugMode) {
+                  print('Error picking image: $e');
+                }
+              }
+            }
+
             return AlertDialog(
               title: Text('Add $type'),
               content: SingleChildScrollView(
@@ -381,7 +410,34 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                         labelText: 'Enter ${type.capitalizeFirst}',
                       ),
                     ),
-                  ],
+                    /// Show image upload option only if the main category is "Vocabulary"
+                    // if (selectedCategory == 'Vocabulary') ...[
+                    //   const SizedBox(height: 16),
+                    //   const Text('Upload Image:'),
+                    //   const SizedBox(height: 8),
+                    //   imageBytes == null
+                    //       ? ElevatedButton(
+                    //     onPressed: pickImage,
+                    //     child: const Text('Pick Image from Gallery'),
+                    //   )
+                    //       : Column(
+                    //     children: [
+                    //       // Display the selected image
+                    //       Image.memory(
+                    //         imageBytes!,
+                    //         height: 50,
+                    //         width: 50,
+                    //         fit: BoxFit.cover,
+                    //       ),
+                    //       const SizedBox(height: 8),
+                    //       TextButton(
+                    //         onPressed: pickImage,
+                    //         child: const Text('Change Image'),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ],
+              ],
                 ),
               ),
               actions: [
@@ -394,7 +450,9 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                     if (controller.text.isNotEmpty) {
                       _controller.addSubCategory(
                         subcategory:controller.text,
-                        maincategory_id:selectedCategoryId!
+                        maincategory_id:selectedCategoryId!,
+                        //imageBytes: imageBytes,
+                      //  imageName: imageName,
                       );
                       Navigator.of(context).pop();
                     }
@@ -463,6 +521,7 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
       },
     );
   }
+
 }
 
 
