@@ -83,4 +83,5 @@ class ComplaintController extends GetxController {
       isLoading.value = false;
     }
   }
+
 }

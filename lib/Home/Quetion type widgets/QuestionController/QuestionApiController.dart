@@ -392,7 +392,80 @@ class QuestionApiController extends GetxController {
     }
   }
 
- ///Add fill in blanks
+  /// add conversation api
+  addConversationApi({
+    required String mainCategoryId,
+    required String subCategoryId,
+    required String topicId,
+    required String subTopicId,
+    required String questionType,
+    required String title,
+    Uint8List? qImage,
+    required String botConversations,
+    required String userConversations,
+    required String userConversationType,
+    required String options,
+    required String answers,
+    required String points,
+    required String index,
+  }) async {
+    isLoading.value = true;
+    var uri = Uri.parse(ApiString.add_conversation);
+    try {
+      var request = http.MultipartRequest("POST", uri);
+
+      // Add image if available
+      if (qImage != null) {
+        var mimeType = lookupMimeType('image') ?? 'image/jpeg';
+        var multipartFile = http.MultipartFile.fromBytes(
+          'q_image',
+          qImage,
+          filename: 'uploaded_image.jpg',
+          contentType: MediaType.parse(mimeType),
+        );
+        request.files.add(multipartFile);
+      }
+
+      // Add form fields
+      request.fields['main_category_id'] = mainCategoryId;
+      request.fields['sub_category_id'] = subCategoryId;
+      request.fields['topic_id'] = topicId;
+      request.fields['sub_topic_id'] = subTopicId;
+      request.fields['question_type'] = questionType;
+      request.fields['title'] = title;
+      request.fields['bot_conversation'] = botConversations;
+      request.fields['user_conversation'] = userConversations;
+      request.fields['user_conversation_type'] = userConversationType;
+      request.fields['options'] = options;
+      request.fields['answer'] = answers;
+      request.fields['points'] = points;
+      request.fields['index'] = index;
+
+      // Send request
+      http.Response response = await http.Response.fromStream(await request.send());
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      if (response.statusCode == 201) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        print('Response status: ${responseData}');
+        if (responseData['status'] == 1) {
+          showSnackbar(message: "Question added successfully");
+        } else {
+          showSnackbar(message: "Failed to add question");
+        }
+      } else {
+        showSnackbar(message: "Failed to add question: ${response.reasonPhrase}");
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while adding question: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+  ///guess the image
   addGuessTheImage({
     required String mainCategoryId,
     required String subCategoryId,

@@ -6,6 +6,7 @@ import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/CardFlipModel.d
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/GetCompleteParagraphModel.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/GetCompleteWordModel.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/LearningSlideModel.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/UserConversationModel.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_fill_in_the_blanks.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_match_the_pairs.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_rearrange_model.dart';
@@ -37,7 +38,7 @@ class GetAllQuestionsApiController extends GetxController{
   RxList<ImagePuzzleData> imagePuzzleDataList = <ImagePuzzleData>[].obs;
 
   RxList<StoryPhrases> getStoryPhrasesList = <StoryPhrases>[].obs;
-  RxList<PhrasesData> getConversationList = <PhrasesData>[].obs;
+  RxList<UserConversationalData> getConversationList = <UserConversationalData>[].obs;
   RxList<MatchPairs> getMatchPairsList = <MatchPairs>[].obs;
   RxList<CardFlipData> getCardFlipList = <CardFlipData>[].obs;
 
@@ -664,7 +665,7 @@ class GetAllQuestionsApiController extends GetxController{
           // Parse each JSON object into a Data model
           getConversationList.clear();
           getConversationList.value = (responseData["data"] as List)
-              .map((mcqJson) => PhrasesData.fromJson(mcqJson))
+              .map((conversationJson) => UserConversationalData.fromJson(conversationJson))
               .toList();
 
           print("Fetched ${getConversationList.length} conversation");
@@ -834,7 +835,47 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-  Future<void> updateCardFlip({
+
+
+
+  updateConversationalApi(UserConversationalData question, pathsFile) async {
+    isLoading.value = true;
+    try {
+      final response = await http.post(
+        Uri.parse(ApiString.update_conversation),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'learning_slide_id':question.id,
+          'main_category_id':question.mainCategoryId,
+          'sub_category_id':question.subCategoryId,
+          'topic_id': question.topicId,
+          'sub_topic_id':question.subTopicId,
+          'title': question.title,
+          'index': question.index,
+          'points': question.points,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        await getConversation(
+          main_category_id: question.mainCategoryId,
+          sub_category_id: question.subCategoryId,
+          topic_id: question.topicId,
+          sub_topic_id: question.subTopicId,);
+      } else {
+        print('Failed to update question: ${response.body}');
+      }
+    } catch (e) {
+      print('Error updating question: $e');
+    } finally {
+      isLoading.value = false; // Set loading state to false
+    }
+  }
+
+
+  updateCardFlip({
     required CardFlipData question,
     required BuildContext context,
   }) async {
@@ -883,7 +924,8 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-  Future<void> updateCardFlipEntry({
+
+  updateCardFlipEntry({
     required String id,
     required List<td.Uint8List> images,
     required String letters,
@@ -939,7 +981,7 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-  Future<void> updateImagePuzzle({
+   updateImagePuzzle({
     required ImagePuzzleData question,
     required List<td.Uint8List> images,
     required String letters,
@@ -1004,7 +1046,7 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-  Future<void> updateImagePuzzleEntry({
+   updateImagePuzzleEntry({
     required String id,
     required List<td.Uint8List> images,
     required String letters,
@@ -1060,7 +1102,7 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-  Future<void> updateMatchThePairEntry({
+  updateMatchThePairEntry({
     required String id,
     required List<td.Uint8List> qImages,
     required List<td.Uint8List> aImages,

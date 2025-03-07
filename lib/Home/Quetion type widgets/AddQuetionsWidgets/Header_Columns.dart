@@ -28,13 +28,13 @@ List<String> rearrange_headers = ["main_category_id", "sub_category_id", "topic_
 List<String> true_false_headers = ["main_category_id", "sub_category_id", "topic_id", "sub_topic_id",
   "question_type", "question", "q_image_name", "answer",'points',"index"];
 
-List<String> conversation_headers = ["id","main_category_id", "sub_category_id", "topic_id", "sub_topic_id",
+List<String> conversation_headers = ["main_category_id", "sub_category_id", "topic_id", "sub_topic_id",
   "question_type","title","bot_conversation","user_conversation","user_conversation_type","options","answer",'points',"index"];
 
 // List<String> match_pair_headers = ["id","main_category_id", "sub_category_id", "topic_id", "sub_topic_id",
 //   "question_type", "title", "question_format","questions","answer_format","answer","point","index"];
 
-List<String> learning_slide =["id","main_category_id", "sub_category_id", "topic_id", "sub_topic_id",
+List<String> learning_slide =["main_category_id", "sub_category_id", "topic_id", "sub_topic_id",
   "question_type","title","transcription","onscreen_content","examples","index"];
 
 List<String> alphabet_example =["main_category_id", "sub_category_id","topic_name","exg_name","image_name"];
