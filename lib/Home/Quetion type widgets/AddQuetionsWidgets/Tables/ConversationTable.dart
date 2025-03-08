@@ -34,14 +34,14 @@ class _ConversationTableState extends State<ConversationTable> {
   String _selectedQuestionIds = "";
   bool isSelectAll = false;
   List<String> selected_question_ids = [];
-  late QuestionDataSource _dataSource;
+  late ConversationDataSource _dataSource;
   final GetAllQuestionsApiController _getdeleteApiController = Get.find();
 
   @override
   void initState() {
     super.initState();
     _filteredQuestions = widget.questionList;
-    _dataSource = QuestionDataSource(
+    _dataSource = ConversationDataSource(
       _filteredQuestions,
           (selectedIds) {
         setState(() {
@@ -50,6 +50,7 @@ class _ConversationTableState extends State<ConversationTable> {
       },
       context,
     );
+    _filteredQuestions = widget.questionList;
   }
 
   void _filterQuestions(String query) {
@@ -63,7 +64,7 @@ class _ConversationTableState extends State<ConversationTable> {
             question.title!.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
-      _dataSource = QuestionDataSource(
+      _dataSource = ConversationDataSource(
         _filteredQuestions,
             (selectedIds) {
           setState(() {
@@ -184,6 +185,7 @@ class _ConversationTableState extends State<ConversationTable> {
                         DataColumn(label: Text("Title")),
                         DataColumn(label: Text("Bot Conversation")),
                         DataColumn(label: Text("User Conversation")),
+                        DataColumn(label: Text("user_conversation_type")),
                         DataColumn(label: Text("Options")),
                         DataColumn(label: Text("Answer")),
                         DataColumn(label: Text("Points")),
@@ -202,7 +204,7 @@ class _ConversationTableState extends State<ConversationTable> {
   }
 }
 
-class QuestionDataSource extends DataTableSource {
+class ConversationDataSource extends DataTableSource {
   final List<UserConversationalData> questions;
   final Function(String) onSelectionChanged;
   final Set<String> selectedQuestionIds = {};
@@ -216,16 +218,18 @@ class QuestionDataSource extends DataTableSource {
   List<TextEditingController> indexControllers = [];
   List<TextEditingController> pointsControllers = [];
   List<TextEditingController> optionAControllers = [];
+  List<TextEditingController> userConversationTypeControllers = [];
   List<TextEditingController> botConversationControllers = [];
   List<TextEditingController> userConversationControllers = [];
 
   final GetAllQuestionsApiController updateQueApiController = Get.find();
 
-  QuestionDataSource(this.questions, this.onSelectionChanged, this.context) {
+  ConversationDataSource(this.questions, this.onSelectionChanged, this.context) {
     for (var question in questions) {
       questionTypeControllers.add(TextEditingController(text: question.questionType));
       titleControllers.add(TextEditingController(text: question.title));
       answerControllers.add(TextEditingController(text: question.answer));
+      userConversationTypeControllers.add(TextEditingController(text: question.userConversationType));
       optionAControllers.add(TextEditingController(text: question.options));
       indexControllers.add(TextEditingController(text: question.index.toString()));
       pointsControllers.add(TextEditingController(text: question.points.toString()));
@@ -268,14 +272,27 @@ class QuestionDataSource extends DataTableSource {
             },
           ),
         ),
-        DataCell(Text(question.index.toString())),
-        DataCell(Text(question.questionType ?? "")),
-        DataCell(Text(question.title ?? "")),
-        DataCell(Text(question.botConversation ?? "")),
-        DataCell(Text(question.userConversation ?? "")),
-        DataCell(Text(question.options ?? "")),
-        DataCell(Text(question.answer ?? "")),
-        DataCell(Text(question.points.toString())),
+
+        DataCell(_buildEditableField(index, indexControllers)),
+        DataCell(_buildEditableField(index, questionTypeControllers)),
+        DataCell(_buildEditableField(index, titleControllers)),
+        // DataCell(Text(question.index.toString())),
+        // DataCell(Text(question.questionType ?? "")),
+        // DataCell(Text(question.title ?? "")),
+        // DataCell(Text(question.botConversation ?? "")),
+        // DataCell(Text(question.userConversation ?? "")),
+        // DataCell(Text(question.userConversationType ?? "")),
+        // DataCell(Text(question.options ?? "")),
+        // DataCell(Text(question.answer ?? "")),
+        // DataCell(Text(question.points.toString())),
+
+        DataCell(_buildEditableField(index, botConversationControllers)),
+        DataCell(_buildEditableField(index, userConversationControllers)),
+        DataCell(_buildEditableField(index, userConversationTypeControllers)),
+
+        DataCell(_buildEditableField(index, optionAControllers)),
+        DataCell(_buildEditableField(index, answerControllers)),
+        DataCell(_buildEditableField(index, pointsControllers)),
         DataCell(_buildEditButton(index)),
       ],
     );
@@ -357,7 +374,7 @@ class QuestionDataSource extends DataTableSource {
 
     if (selectedQuestionIds.isNotEmpty) {
       try {
-        await deleteApiController.deleteCompleteTheWordAPI(question_id: ids);
+        await deleteApiController.deleteConversation(question_ids: ids);
         await deleteApiController.getConversation(
           main_category_id: questions[0].mainCategoryId.toString(),
           sub_category_id: questions[0].subCategoryId.toString(),
@@ -396,13 +413,13 @@ class QuestionDataSource extends DataTableSource {
     notifyListeners();
   }
 
-  Future<bool> _showConfirmationDialog(BuildContext context) async {
+   _showConfirmationDialog(BuildContext context) async {
     return await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Confirm Deletion'),
-          content: const Text('Do you really want to delete the selected phrases?'),
+          content: const Text('Do you really want to delete the selected conversation?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {

@@ -2019,7 +2019,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                   child: _getAllQuestionsApiController.isLoading.value
                       ? const CircularProgressIndicator()
                       : (_getAllQuestionsApiController
-                      .getFillInTheBlanksList.isEmpty
+                      .getConversationList.isEmpty
                       ? const Center(
                     child: Text(
                       'No data available',

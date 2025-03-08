@@ -366,7 +366,6 @@ class GetAllQuestionsApiController extends GetxController{
       isLoading.value = false;
     }
   }
-
   delete_Mcq({required String question_ids}) async {
     isLoading.value = true;
 
@@ -391,6 +390,40 @@ class GetAllQuestionsApiController extends GetxController{
           showSnackbar(message: "MCQ deleted successfully");
         } else {
           showSnackbar(message: "Failed to delete MCQ");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while delete $e");
+      print(e);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  deleteConversation({required String question_ids}) async {
+    isLoading.value = true;
+
+    try {
+      final Map<String, dynamic> body = {
+        "question_id": question_ids,
+      };
+
+      final response = await http.delete(
+        Uri.parse(ApiString.delete_conversation),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      print('Response url: ${ApiString.delete_mcq}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          showSnackbar(message: "conversation deleted successfully");
+        } else {
+          showSnackbar(message: "Failed to delete conversation");
         }
       }
     } catch (e) {
@@ -847,7 +880,7 @@ class GetAllQuestionsApiController extends GetxController{
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'learning_slide_id':question.id,
+          'conversation_id':question.id,
           'main_category_id':question.mainCategoryId,
           'sub_category_id':question.subCategoryId,
           'topic_id': question.topicId,

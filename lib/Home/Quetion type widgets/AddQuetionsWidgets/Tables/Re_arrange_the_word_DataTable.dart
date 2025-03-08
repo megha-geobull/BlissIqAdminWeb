@@ -577,7 +577,7 @@ class QuestionDataSource extends DataTableSource {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Confirm Deletion'),
-          content: const Text('Do you really want to delete the selected phrases?'),
+          content: const Text('Do you really want to delete the selected re-arrange word?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {

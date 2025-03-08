@@ -99,7 +99,9 @@ class _NotificationPageState extends State<NotificationPage> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8.0, vertical: 16),
-                      child: Column(children: [_buildMainContent(constraints),
+                      child: Column(children: [
+                        _buildMainContent(constraints),
+
                         _NotificationTable(constraints),
                       ],),
                     ),
@@ -113,89 +115,53 @@ class _NotificationPageState extends State<NotificationPage> {
     );
   }
 
-  Widget _buildMainContent(BoxConstraints constraints) {
-    return Center(
-      child: Container(
-        width: constraints.maxWidth * 0.5,
-        height: constraints.maxWidth * 0.32,
-        constraints: const BoxConstraints(
-          maxWidth: 600,
-        ),
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              spreadRadius: 2,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildHeader(BuildContext context,constraints) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.orange.shade100,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
           children: [
             const Text(
-              'Select User',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              'All Send Notifications',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: Colors.black),
             ),
-            boxH08(),
-            DropdownButtonFormField<String>(
-              value: selectedUser,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+            const Spacer(),
+            Tooltip(
+              message: 'Send Notifications',
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  showSendNotificationDialog(context,constraints);
+                },
+                icon: const Icon(Icons.add, color: Colors.white, size: 20),
+                label: const Text("Send Notification",
+                    style: TextStyle(color: Colors.white, fontSize: 16)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepOrange,
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
-                filled: true,
-                fillColor: Colors.grey.shade50,
-              ),
-              hint: const Text('Choose a user'),
-              items: users
-                  .map((user) => DropdownMenuItem(
-                value: user,
-                child: Text(user),
-              ))
-                  .toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedUser = value;
-                });
-              },
-            ),
-            boxH20(),
-            const Text(
-              'Question title:',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            CustomTextField(
-              controller: titleController,
-              labelText: 'Enter question title here...',
-            ),
-            boxH15(),
-            const Text(
-              'Notification Message',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            boxH08(),
-            CustomTextField(
-              controller: notificationController,
-              labelText: "Enter notification message",
-              maxLines: 3,
-            ),
-            boxH20(),
-            Align(
-              alignment: Alignment.centerRight,
-              child: CustomButton(
-                label: "Send Notification",
-                onPressed: _sendNotification,
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildMainContent(BoxConstraints constraints) {
+    return Center(
+      child: _buildHeader(context,constraints),
     );
   }
 
@@ -206,8 +172,8 @@ class _NotificationPageState extends State<NotificationPage> {
         notification.descriptions!.toLowerCase().contains(searchQuery.toLowerCase()))
         .toList();
     return Container(
-        width: constraints.maxWidth,
-        height: constraints.maxWidth * 0.7,
+        width: constraints.maxWidth * 0.6,
+        height: constraints.maxWidth * 0.32,
         constraints: const BoxConstraints(
     ),child:  Column(
         children: [
@@ -283,6 +249,116 @@ class _NotificationPageState extends State<NotificationPage> {
     setState(() {
       controller.notifications.removeWhere((item) => item.id == id);
     });
+  }
+
+ showSendNotificationDialog(BuildContext context,BoxConstraints constraints) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false, // Prevents closing on tap outside
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: const Text(
+            'Send Notification',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blueGrey),
+          ),
+          content: SingleChildScrollView(
+            child: Container(
+              width: constraints.maxWidth * 0.4,
+              height: constraints.maxWidth * 0.24,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Select User Dropdown
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+
+                          children: [
+                            const Text('Select User', style: TextStyle(fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 8),
+                            DropdownButtonFormField<String>(
+                              value: selectedUser,
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                filled: true,
+                                fillColor: Colors.grey.shade50,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              ),
+                              hint: const Text('Choose a user', style: TextStyle(color: Colors.grey)),
+                              items: users
+                                  .map((user) => DropdownMenuItem(value: user, child: Text(user)))
+                                  .toList(),
+                              onChanged: (value) {
+                                selectedUser = value;
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                        ),
+                      ),
+                      // Question Title Input
+                      boxW10(),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Question Title:', style: TextStyle(fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: titleController,
+                              decoration: InputDecoration(
+                                labelText: 'Enter question title here...',
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Notification Message Input
+                  const Text('Notification Message:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: notificationController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      labelText: "Enter notification message",
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context), // Close Dialog
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _sendNotification();
+                print("Sending notification to: $selectedUser");
+                Navigator.pop(context);
+              },
+              child: const Text("Send Notification"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
 }
