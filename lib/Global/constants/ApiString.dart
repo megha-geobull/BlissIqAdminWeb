@@ -57,7 +57,7 @@ class ApiString {
   static const String getProfile = "${baseUrl}get_profile";
 
   /// Leaderboard
-  static const String getLeaderboard = "${baseUrl}get_leaderboard";
+  static const String getLeaderboard = "${student_base_url}get_leaderboard";
 
   /// Attendance
   static const String addTodaysAttendance = "${baseUrl}add_todays_attendance";
