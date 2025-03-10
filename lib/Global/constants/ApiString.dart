@@ -69,7 +69,7 @@ class ApiString {
 
   static const String add_notifications = "${baseUrl}add_notifications";
   static const String get_notifications = "${baseUrl}get_notifications";
-  static const String delete_notification = "${baseUrl}delete_notification";
+  static const String delete_notification = "${baseUrl}delete_notifications";
 
   static const String add_main_category = "${baseUrl}add_main_category";
   static const String get_main_category = "${baseUrl}get_main_category";
@@ -186,7 +186,7 @@ class ApiString {
   //Complaint Apis
   static const String get_enrollment_students = "${baseUrl}get_enrollment_students";
   static const String get_raised_complaint = "${student_base_url}get_raised_complaint";
-  static const String update_complaint_status = "${baseUrl}update_complaint_status";
+  static const String update_complaint_status = "${student_base_url}update_complaint_status";
 
 
 

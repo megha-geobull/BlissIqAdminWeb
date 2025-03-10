@@ -157,11 +157,11 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
       decoration: BoxDecoration(color: Colors.orange[100]),
       children: [
         // 1st column
-        Padding(
-          padding: const EdgeInsets.all(8.0),
+        const Padding(
+          padding: EdgeInsets.all(8.0),
           child: Row(
             children: [
-              const Text(
+              Text(
                 'Main Category Name',
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
