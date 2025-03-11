@@ -230,7 +230,7 @@ class _NotificationPageState extends State<NotificationPage> {
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: DataTable(
-                 columnSpacing: 20.0,
+                 columnSpacing: 55.0,
                 // headingRowHeight: 56.0,
                 columns: const [
                   DataColumn(label: Text('Title')),
