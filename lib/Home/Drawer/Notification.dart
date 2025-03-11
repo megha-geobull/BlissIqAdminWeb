@@ -1,3 +1,4 @@
+
 import 'package:blissiqadmin/Global/Widgets/Button/CustomButton.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
@@ -9,235 +10,113 @@ import '../Controller/DashBoardEntrollmentController.dart';
 import 'models/NotificationModel.dart';
 
 class NotificationPage extends StatefulWidget {
-  const NotificationPage({super.key});
-
   @override
-  State<NotificationPage> createState() => _NotificationPageState();
+  _NotificationPageState createState() => _NotificationPageState();
 }
 
 class _NotificationPageState extends State<NotificationPage> {
   final TextEditingController notificationController = TextEditingController();
   final TextEditingController titleController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
+  Set<String> selectedStudentIds = {};
+
   String? selectedUser;
   String searchQuery = "";
-  final List<String> users = [
-    "Student",
-    "Company",
-    "Mentor",
-    // "Teacher",
-    "School"
-  ];
+  final List<String> users = ["Student", "Company", "Mentor", "School"];
   final DashBoardController controller = Get.put(DashBoardController());
 
-  void _sendNotification() {
+  List<NotificationData> newFilteredNotifications = [];
+  Set<String> selectedNotificationIds = {};
+  late NotificationDataTableSource dataTableSource;
+
+  @override
+  void initState() {
+    super.initState();
+    dataTableSource = NotificationDataTableSource(
+      controller.filteredNotifications,
+      context,
+      deleteNotification,
+      this,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.getNotifications(userType: selectedUser ?? "Student");
+      searchController.clear();
+    });
+    controller.filteredNotifications = controller.notifications;
+  }
+
+  void _sendNotification() async {
     if (selectedUser == null || notificationController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content:
-              Text('Please select a user and enter a notification message.'),
+          content: Text('Please select a user and enter a notification message.'),
           backgroundColor: Colors.red,
         ),
       );
       return;
-    }else{
-      controller.addNotification(title: titleController.text, notification: notificationController.text, userType: selectedUser!);
-      // Add logic to send notification here
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Notification sent to $selectedUser'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      controller.getNotifications(userType: selectedUser!);
+    }
+
+    // Send notification asynchronously
+    await controller.addNotification(
+      title: titleController.text,
+      notification: notificationController.text,
+      userType: selectedUser.toString(),
+    );
+
+    // Fetch the updated notification list
+    await controller.getNotifications(userType: selectedUser.toString());
+
+    // Update the UI
+    setState(() {
+      controller.filteredNotifications = controller.notifications;
       notificationController.clear();
       titleController.clear();
-      setState(() {
-        selectedUser = null;
-      });
-    }
-  }
+      dataTableSource.updateData(controller.filteredNotifications);
+    });
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          // Check screen size for responsiveness
-          bool isWideScreen = constraints.maxWidth > 800;
-          return Row(
-            children: [
-              // Always visible drawer for wide screens
-              if (isWideScreen)
-                Container(
-                  width: 250,
-                  color: Colors.orange.shade100,
-                  child: MyDrawer(),
-                ),
-              Expanded(
-                child: Scaffold(
-                  appBar: isWideScreen
-                      ? null
-                      : AppBar(
-                          title: const Text('Dashboard'),
-                          scrolledUnderElevation: 0,
-                          backgroundColor: Colors.blue.shade100,
-                          actions: [
-                            IconButton(
-                              icon: const Icon(
-                                Icons.person,
-                                color: Colors.grey,
-                              ),
-                              onPressed: () {
-                                // Handle notifications
-                              },
-                            ),
-                          ],
-                        ),
-                  drawer: isWideScreen ? null : Drawer(child: MyDrawer()),
-                  body: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 16),
-                      child: Column(children: [
-                        _buildMainContent(constraints),
-
-                        _NotificationTable(constraints),
-                      ],),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
+    // Show success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Notification sent to $selectedUser'),
+        backgroundColor: Colors.green,
       ),
     );
+
+    Get.back();
   }
 
-  Widget _buildHeader(BuildContext context,constraints) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.orange.shade100,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          children: [
-            const Text(
-              'All Send Notifications',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                  color: Colors.black),
-            ),
-            const Spacer(),
-            Tooltip(
-              message: 'Send Notifications',
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  showSendNotificationDialog(context,constraints);
-                },
-                icon: const Icon(Icons.add, color: Colors.white, size: 20),
-                label: const Text("Send Notification",
-                    style: TextStyle(color: Colors.white, fontSize: 16)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepOrange,
-                  elevation: 3,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  void _filterNotifications(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        controller.filteredNotifications.value = controller.notifications;
+      } else {
+        controller.filteredNotifications.value = controller.notifications
+            .where((student) => student.title.toString()
+            .toLowerCase()
+            .contains(query.toLowerCase()))
+            .toList();
+      }
+    });
   }
 
-  Widget _buildMainContent(BoxConstraints constraints) {
-    return Center(
-      child: _buildHeader(context,constraints),
-    );
-  }
-
-  Widget _NotificationTable(BoxConstraints constraints) {
-    List<NotificationData> filteredNotifications = controller.notifications
-        .where((notification) =>
-    notification.title!.toLowerCase().contains(searchQuery.toLowerCase()) ||
-        notification.descriptions!.toLowerCase().contains(searchQuery.toLowerCase()))
-        .toList();
-    return Container(
-        width: constraints.maxWidth * 0.6,
-        height: constraints.maxWidth * 0.32,
-        constraints: const BoxConstraints(
-    ),child:  Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              decoration: const InputDecoration(
-                hintText: 'Search by title or description...',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.search),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value;
-                });
-              },
-            ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                 columnSpacing: 20.0,
-                // headingRowHeight: 56.0,
-                columns: const [
-                  DataColumn(label: Text('Title')),
-                  DataColumn(label: Text('Description')),
-                  DataColumn(label: Text('Actions')),
-                ],
-                rows: filteredNotifications.map((notification) {
-                  return DataRow(cells: [
-                    DataCell(Text(notification.title ?? '')),
-                    DataCell(Text(notification.descriptions ?? '')),
-                  DataCell(
-                  IconButton(
-                  icon: Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => confirmDeleteNotification(notification.id ?? ''),
-                  ),)
-                  ]);
-                }).toList(),
-              ),
-            ),
-          ),
-        ],
-      ));
-  }
 
   void confirmDeleteNotification(String id) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Confirm Delete"),
-        content: Text("Are you sure you want to delete this notification?"),
+        title: const Text("Confirm Delete"),
+        content: const Text("Are you sure you want to delete this notification?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Cancel"),
+            child: const Text("Cancel"),
           ),
           TextButton(
             onPressed: () {
               deleteNotification(id);
               Navigator.pop(context);
             },
-            child: Text("Yes"),
+            child: const Text("Yes"),
           ),
         ],
       ),
@@ -251,114 +130,297 @@ class _NotificationPageState extends State<NotificationPage> {
     });
   }
 
- showSendNotificationDialog(BuildContext context,BoxConstraints constraints) {
-    return showDialog(
-      context: context,
-      barrierDismissible: false, // Prevents closing on tap outside
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          title: const Text(
-            'Send Notification',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blueGrey),
-          ),
-          content: SingleChildScrollView(
-            child: Container(
-              width: constraints.maxWidth * 0.4,
-              height: constraints.maxWidth * 0.24,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Select User Dropdown
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
+  @override
+  void didUpdateWidget(covariant NotificationPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    setState(() {
+      controller.filteredNotifications = controller.notifications;
+    });
+  }
 
-                          children: [
-                            const Text('Select User', style: TextStyle(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 8),
-                            DropdownButtonFormField<String>(
-                              value: selectedUser,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(color: Colors.grey.shade300),
-                                ),
-                                filled: true,
-                                fillColor: Colors.grey.shade50,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                              ),
-                              hint: const Text('Choose a user', style: TextStyle(color: Colors.grey)),
-                              items: users
-                                  .map((user) => DropdownMenuItem(value: user, child: Text(user)))
-                                  .toList(),
-                              onChanged: (value) {
-                                selectedUser = value;
-                              },
-                            ),
-                            const SizedBox(height: 12),
-                          ],
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                        ),
-                      ),
-                      // Question Title Input
-                      boxW10(),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Question Title:', style: TextStyle(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 8),
-                            TextField(
-                              controller: titleController,
-                              decoration: InputDecoration(
-                                labelText: 'Enter question title here...',
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                          ],
-                        ),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          bool isWideScreen = constraints.maxWidth > 800;
+          return Row(
+            children: [
+              if (isWideScreen)
+                Container(
+                  width: 250,
+                  color: Colors.orange.shade100,
+                  child: MyDrawer(),
+                ),
+              Expanded(
+                child: Scaffold(
+                  appBar: isWideScreen
+                      ? null
+                      : AppBar(
+                    title: const Text('Dashboard'),
+                    backgroundColor: Colors.blue.shade100,
+                    actions: [
+                      IconButton(
+                        icon: const Icon(Icons.person, color: Colors.grey),
+                        onPressed: () {},
                       ),
                     ],
                   ),
-
-                  // Notification Message Input
-                  const Text('Notification Message:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: notificationController,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      labelText: "Enter notification message",
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  drawer: isWideScreen ? null : Drawer(child: MyDrawer()),
+                  body: Center(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: SizedBox(
+                          width: constraints.maxWidth * 0.6,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Align(
+                                  alignment: Alignment.topLeft,
+                                  child: _buildHeader(context, constraints)),
+                              const SizedBox(height: 20),
+                              _buildSearchBar(context, constraints),
+                              const SizedBox(height: 20),
+                              _buildNotificationTable(context, constraints),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ],
+                ),
               ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, BoxConstraints constraints) {
+    return Card(
+      elevation: 0.8,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            const Text(
+              'All Sent Notifications',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const Spacer(),
+            ElevatedButton.icon(
+              onPressed: () => showSendNotificationDialog(context, constraints),
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: const Text("Send Notification",style:  TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepOrange,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchBar(BuildContext context, BoxConstraints constraints) {
+    return SizedBox(
+      width: constraints.maxWidth * 0.4,
+      child: Card(
+        elevation: 0.8,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search by title',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onChanged: _filterNotifications,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotificationTable(BuildContext context, BoxConstraints constraints) {
+    return SizedBox(
+      width: constraints.maxWidth * 0.6,
+      child: Card(
+        elevation: 0.8,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: SingleChildScrollView(
+          child: PaginatedDataTable(
+              columns: const [
+                DataColumn(label: Text('Title')),
+                DataColumn(label: Text('Message')),
+                DataColumn(label: Text('Actions')),
+              ],
+              source: NotificationDataTableSource(
+                controller.filteredNotifications, // Keep only reactive state access
+                context,
+                deleteNotification,
+                this,
+              ),
+              rowsPerPage: 10,
+              showFirstLastButtons: true,
+            ),
+
+        ),
+      ),
+    );
+  }
+
+  void showSendNotificationDialog(BuildContext context, BoxConstraints constraints) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          title: const Text('Send Notification', style: TextStyle(fontSize: 18)),
+          content: SizedBox(
+            width: constraints.maxWidth * 0.4,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<String>(
+                  value: selectedUser,
+                  decoration: InputDecoration(
+                    labelText: 'Select User',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  ), items: users.map((user) => DropdownMenuItem(
+                  value: user,
+                  child: Text(user),
+                )).toList(),onChanged: (value) => setState(() => selectedUser = value),),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: titleController,
+                  decoration: InputDecoration(
+                    labelText: 'Question Title',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: notificationController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    labelText: 'Notification Message',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+              ],
             ),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context), // Close Dialog
-              child: const Text("Cancel"),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () {
-                _sendNotification();
-                print("Sending notification to: $selectedUser");
-                Navigator.pop(context);
-              },
-              child: const Text("Send Notification"),
+              onPressed: _sendNotification,
+              child: const Text('Send'),
             ),
           ],
         );
       },
     );
   }
+}
 
+
+class NotificationDataTableSource extends DataTableSource {
+  final List<NotificationData> filteredNotifications;
+  final BuildContext context;
+  final Function(String) deleteNotification;
+  final _NotificationPageState notificationPageState;
+
+  List<DataRow> dataTableRows = [];
+
+  NotificationDataTableSource(
+      this.filteredNotifications,
+      this.context,
+      this.deleteNotification,
+      this.notificationPageState,
+      ) {
+    buildDataTableRows();
+  }
+
+  void buildDataTableRows() {
+    dataTableRows = filteredNotifications.map<DataRow>((dataRow) {
+      return DataRow(
+        selected: notificationPageState.selectedStudentIds.contains(dataRow.id),
+        onSelectChanged: (isSelected) {
+          if (isSelected == true) {
+            notificationPageState.selectedStudentIds.add(dataRow.id ?? '');
+          } else {
+            notificationPageState.selectedStudentIds.remove(dataRow.id ?? '');
+          }
+          notificationPageState.setState(() {});
+        },
+        cells: [
+          DataCell(
+            Text(dataRow.title ?? 'No title'),
+          ),
+          DataCell(
+            Text(dataRow.descriptions ?? 'No descriptions'),
+          ),
+          DataCell(
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () {
+                deleteNotification(dataRow.id.toString());
+              },
+            ),
+          ),
+        ],
+      );
+    }).toList();
+  }
+
+  /// Method to rebuild the data table when data changes
+  void updateData(List<NotificationData> newNotifications) {
+    filteredNotifications.clear();
+    filteredNotifications.addAll(newNotifications);
+    buildDataTableRows(); // Rebuild the table rows
+    notifyListeners(); // Notify listeners that data has changed
+  }
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= 0 && index < dataTableRows.length) {
+      return dataTableRows[index];
+    }
+    return null; // Avoid index out of range error
+  }
+
+  @override
+  int get rowCount => filteredNotifications.length;
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get selectedRowCount => notificationPageState.selectedStudentIds.length;
 }

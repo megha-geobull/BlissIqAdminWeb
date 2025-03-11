@@ -69,26 +69,6 @@ class _StudentScreenState extends State<StudentScreen> {
     });
   }
 
-  // void onDelete(String title, String student_id) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) => CustomAlertDialog(
-  //       title: 'Are you sure',
-  //       content: title,
-  //       yesText: 'Yes',
-  //       noText: 'No',
-  //       onYesPressed: () {
-  //         studentController.delete_Learners(student_id);
-  //         studentController.getAllLearners();
-  //         selectedStudentIds.clear();
-  //         Navigator.pop(context);
-  //
-  //         setState(() {});
-  //       },
-  //     ),
-  //   );
-  // }
-
   void onDelete(String title, String student_id) {
     showDialog(
       context: context,

@@ -69,7 +69,7 @@ class ApiString {
 
   static const String add_notifications = "${baseUrl}add_notifications";
   static const String get_notifications = "${baseUrl}get_notifications";
-  static const String delete_notification = "${baseUrl}delete_notification";
+  static const String delete_notifications = "${baseUrl}delete_notifications";
 
   static const String add_main_category = "${baseUrl}add_main_category";
   static const String get_main_category = "${baseUrl}get_main_category";
