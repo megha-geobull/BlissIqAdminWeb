@@ -18,6 +18,7 @@ class ApiString {
 
   static const String add_learning_slide = "${baseUrl}add_learning_slide";
 
+  static const String search_student = "${baseUrl}search_student";
 
 
   ///mentor

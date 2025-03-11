@@ -35,7 +35,7 @@ class _NotificationPageState extends State<NotificationPage> {
     dataTableSource = NotificationDataTableSource(
       controller.filteredNotifications,
       context,
-      deleteNotification,
+      confirmDeleteNotification,
       this,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -280,7 +280,7 @@ class _NotificationPageState extends State<NotificationPage> {
               source: NotificationDataTableSource(
                 controller.filteredNotifications, // Keep only reactive state access
                 context,
-                deleteNotification,
+                confirmDeleteNotification,
                 this,
               ),
               rowsPerPage: 10,

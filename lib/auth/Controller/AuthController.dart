@@ -231,10 +231,11 @@ class AuthController extends GetxController{
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(responseData['message'])),
         );
-        getAllMentors();
-        clearControllers();
+        final Map<String, dynamic> userData = responseData['data'];
+        final userId = userData['_id'];
+        final userName = userData['fullName'];
         Functions.setAvailability(
-            name: fullName,
+            name: userName,
             email: email,
             phone: contactNo.toString(),
             isEngaged: "false",
@@ -242,7 +243,9 @@ class AuthController extends GetxController{
             userID: userId.toString(),
             fcmToken: '',
             status: "Offline");
-      //  Get.toNamed(AppRoutes.mentorPage);
+        getAllMentors();
+        clearControllers();
+        //  Get.toNamed(AppRoutes.mentorPage);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(responseData['message'] ?? 'Error occurred')),
@@ -257,6 +260,8 @@ class AuthController extends GetxController{
     }
   }
 
+
+  /// get all mentors
   getAllMentors() async {
     isLoading.value = true;
 
