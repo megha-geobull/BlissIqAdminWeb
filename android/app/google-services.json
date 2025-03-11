@@ -1,0 +1,105 @@
+{
+  "project_info": {
+    "project_number": "913961761802",
+    "project_id": "blissiq-dd736",
+    "storage_bucket": "blissiq-dd736.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:913961761802:android:7d09add5d444ab96c8b3f3",
+        "android_client_info": {
+          "package_name": "com.blissiq.admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjaqDjucwGdPgmrgKvJrStonWv6Y1l-38"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:913961761802:android:019c5922a48fbceac8b3f3",
+        "android_client_info": {
+          "package_name": "com.blissiq.company"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjaqDjucwGdPgmrgKvJrStonWv6Y1l-38"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:913961761802:android:7e1b409111b27b24c8b3f3",
+        "android_client_info": {
+          "package_name": "com.blissiq.mentor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjaqDjucwGdPgmrgKvJrStonWv6Y1l-38"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:913961761802:android:a586ac8d12a0f1f3c8b3f3",
+        "android_client_info": {
+          "package_name": "com.blissiq_app.blissiq_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjaqDjucwGdPgmrgKvJrStonWv6Y1l-38"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:913961761802:android:8dc530684d788a8ac8b3f3",
+        "android_client_info": {
+          "package_name": "com.school_admin.school_admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjaqDjucwGdPgmrgKvJrStonWv6Y1l-38"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

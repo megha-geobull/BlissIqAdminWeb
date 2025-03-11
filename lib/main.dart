@@ -6,6 +6,8 @@ import 'package:blissiqadmin/Home/Quetion%20type%20widgets/controller/GetAllQues
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/question_controller.dart';
 import 'package:blissiqadmin/auth/login/login.dart';
 import 'package:blissiqadmin/profile/ProfileController.dart';
+import 'package:blissiqadmin/push_notification/app_notification.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
@@ -16,8 +18,9 @@ import 'Home/Controller/DashBoardEntrollmentController.dart';
 import 'auth/Controller/AuthController.dart';
 import 'auth/Signup/Splash.dart';
 import 'controller/CategoryController.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   Get.put(CategoryController());
   Get.put(ProfileController());
@@ -27,7 +30,11 @@ void main() {
   Get.put(ComplaintController());
   Get.put(DashBoardController());
   Get.put(LeaderboardController());
-
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,);
+  AppNotificationHandler.firebaseNotificationSetup();
+  AppNotificationHandler.getInitialMsg();
+  AppNotificationHandler.showMsgHandler();
+  AppNotificationHandler.onMsgOpen();
  // debugPaintSizeEnabled = true;
   runApp(const MyApp());
 }
@@ -46,7 +53,6 @@ class _BlissIQAppMyAppState extends State<MyApp> {
     // TODO: implement initState
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {

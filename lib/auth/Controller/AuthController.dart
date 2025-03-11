@@ -19,6 +19,7 @@ import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
 
 import '../../profile/ProfileController.dart';
+import '../../push_notification/functions.dart';
 
 class AuthController extends GetxController{
 
@@ -232,6 +233,15 @@ class AuthController extends GetxController{
         );
         getAllMentors();
         clearControllers();
+        Functions.setAvailability(
+            name: fullName,
+            email: email,
+            phone: contactNo.toString(),
+            isEngaged: "false",
+            userType: userType,
+            userID: userId.toString(),
+            fcmToken: '',
+            status: "Offline");
       //  Get.toNamed(AppRoutes.mentorPage);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

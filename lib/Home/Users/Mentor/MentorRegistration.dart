@@ -18,15 +18,10 @@ class MentorRegistration extends StatefulWidget {
 
 class _MentorRegistrationState extends State<MentorRegistration> {
   final AuthController mentorController = Get.put(AuthController());
-
-
   String? selectedSchool;
-
   List<PlatformFile>? _paths;
   var pathsFile;
   var pathsFileName;
-
-
   final SchoolController schoolController = Get.put(SchoolController());
 
 
@@ -57,8 +52,6 @@ class _MentorRegistrationState extends State<MentorRegistration> {
         print('No file selected');
       }
     }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -418,8 +411,7 @@ class _MentorRegistrationState extends State<MentorRegistration> {
                       obscureText: !mentorController.passwordVisible.value,
                       sufixIcon: IconButton(
                         icon: Icon(mentorController.passwordVisible.value
-                            ? Icons.visibility
-                            : Icons.visibility_off),
+                            ? Icons.visibility : Icons.visibility_off),
                         onPressed: () {
                           setState(() {
                             mentorController.passwordVisible.value =

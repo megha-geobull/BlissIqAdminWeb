@@ -160,15 +160,15 @@ class _MyDrawerState extends State<MyDrawer> {
               },
             )),
 
-        Obx(() => buildDrawerTile(
-          title: 'Feedback',
-          icon: Icons.feedback_outlined,
-          isSelected: controller.selectedPage.value == 'Feedback',
-          onTap: () {
-            controller.changePage('Feedback');
-            Get.to(() =>  const FeedbackPage());
-          },
-        )),
+        // Obx(() => buildDrawerTile(
+        //   title: 'Feedback',
+        //   icon: Icons.feedback_outlined,
+        //   isSelected: controller.selectedPage.value == 'Feedback',
+        //   onTap: () {
+        //     controller.changePage('Feedback');
+        //     Get.to(() =>  const FeedbackPage());
+        //   },
+        // )),
 
         Obx(() => buildDrawerTile(
           title: 'Complaint',
