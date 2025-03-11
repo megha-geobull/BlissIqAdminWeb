@@ -133,12 +133,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildMainContent(BoxConstraints constraints) {
-
     int crossAxisCount = constraints.maxWidth > 900
-        ? 2
-        : constraints.maxWidth > 600
-            ? 3
-            : 2;
+        ? 2 : constraints.maxWidth > 600
+            ? 3 : 2;
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 12.0),
@@ -351,17 +348,30 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title
-              const Text(
-                "Leaderboard",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Title
+                  const Text(
+                    "Leaderboard",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  Spacer(),
+                  IconButton(
+                    onPressed: () => leaderBoardController.clearSearch(), // Show search dialog
+                    icon: const Icon(Icons.cancel),
+                  ),
+                  IconButton(
+                    onPressed: () => _showSearchDialog(context), // Show search dialog
+                    icon: const Icon(Icons.search),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
-
               // Header
               Container(
                 padding: const EdgeInsets.all(8.0),
@@ -372,12 +382,11 @@ class _HomePageState extends State<HomePage> {
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: Text('Ranking',
+                     Text('Ranking',
                           style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.bold)),
-                    ),
+
                     Expanded(
                       child: Center(
                           child: Text('Profile',
@@ -392,6 +401,12 @@ class _HomePageState extends State<HomePage> {
                               fontWeight: FontWeight.bold)),
                     ),
                     Expanded(
+                      child: Text('Class',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold)),
+                    ),
+                    Expanded(
                       child: Text('Points',
                           style: TextStyle(
                               color: Colors.black,
@@ -400,16 +415,14 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 12),
-
               // Body
               Expanded(
                 child: Obx(
                       () => ListView.builder(
-                    itemCount: leaderBoardController.leaderboard.length,
+                    itemCount: leaderBoardController.filteredLeaderboard.length,
                     itemBuilder: (context, index) {
-                      final student = leaderBoardController.leaderboard[index];
+                      final student = leaderBoardController.filteredLeaderboard[index];
 
                       return Card(
                         shape: RoundedRectangleBorder(
@@ -426,15 +439,15 @@ class _HomePageState extends State<HomePage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               // Rank
-                              Expanded(
-                                child: Text(
-                                  student['rank'].toString(), // Convert to String
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 16,
-                                  ),
+                              SizedBox(width: 40,
+                              child:Center(
+                                  child: Text(
+                                student['rank'].toString(), // Convert to String
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16,
                                 ),
-                              ),
+                              ))),
 
                               // Profile Image
                               Expanded(
@@ -473,6 +486,17 @@ class _HomePageState extends State<HomePage> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
+                              //class
+                              Expanded(
+                                child: Text(
+                                  student['std_class'].toString(), // Convert to String
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
 
                               // Score
                               Expanded(
@@ -501,7 +525,70 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-
+  void _showSearchDialog(BuildContext context) {
+    final TextEditingController _searchQueryController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Search Student'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Obx(
+                    () => DropdownButton<String>(
+                  value: leaderBoardController.selectedCriteria.value,
+                  onChanged: (value) {
+                    leaderBoardController.selectedCriteria.value = value!;
+                  },
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'user_name',
+                      child: Text('Student Name'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'std_class',
+                      child: Text('Class Name'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'school',
+                      child: Text('School Name'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _searchQueryController,
+                decoration: const InputDecoration(
+                  hintText: 'Enter search query...',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                final query = _searchQueryController.text.trim();
+                if (query.isNotEmpty) {
+                  leaderBoardController.filterLeaderboard(query: query);
+                }
+                Navigator.pop(context); // Close the dialog
+              },
+              child: const Text('Search'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Widget _buildProfileImage(String profileImage) {
     // Construct the full URL

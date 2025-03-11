@@ -1,4 +1,4 @@
-package com.example.blissiqadmin
+package com.blissiq.admin
 
 import io.flutter.embedding.android.FlutterActivity
 
