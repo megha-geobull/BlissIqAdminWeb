@@ -8,6 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 
 class SchoolRegistration extends StatefulWidget {
   @override
@@ -95,13 +98,16 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                       CustomTextField(
                         controller: schoolController.schoolNameController,
                         labelText: 'School Name',
+                        onChanged: (value) {
+                          openMapBottomSheet(context, schoolController.schoolNameController);
+                        },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter the com.blissiq.school name';
+                            return 'Please enter the school name';
                           }
                           return null;
                         },
-                        prefixIcon: Icon(Icons.school_outlined),
+                        prefixIcon: const Icon(Icons.school_outlined),
                       ),
                       boxH20(),
 
@@ -109,7 +115,7 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                         controller: schoolController.schoolRegNumberController,
                         labelText: 'School Registration Number',
                         inputFormatters: [LengthLimitingTextInputFormatter(12)],
-                        prefixIcon: Icon(Icons.assignment),
+                        prefixIcon: const Icon(Icons.assignment),
                       ),
 
                       boxH20(),
@@ -117,7 +123,7 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                       CustomTextField(
                         controller: schoolController.principalNameController,
                         labelText: 'Principal/Administrator Name',
-                        prefixIcon: Icon(Icons.person_2_outlined),
+                        prefixIcon: const Icon(Icons.person_2_outlined),
                       ),
                       boxH20(),
 
@@ -125,7 +131,7 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                         controller: schoolController.principalEmailController,
                         labelText: 'Principal/Administrator Email',
                         keyboardType: TextInputType.emailAddress,
-                        prefixIcon: Icon(Icons.email_outlined),
+                        prefixIcon: const Icon(Icons.email_outlined),
                       ),
 
                       boxH20(),
@@ -138,7 +144,7 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                               margin: EdgeInsets.only(right: 10),
                               decoration: BoxDecoration(
                                 borderRadius:
-                                BorderRadius.all(Radius.circular(8.0)),
+                                const BorderRadius.all(Radius.circular(8.0)),
                                 border:
                                 Border.all(width: 1, color: Colors.blueAccent),
                               ),
@@ -342,7 +348,7 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                         child: const Text(
                           'Register',
                           style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                       ),
                     ],
@@ -355,4 +361,97 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
       ),
     );
   }
+
+
+
+  void openMapBottomSheet(BuildContext context, TextEditingController schoolNameController) {
+    final TextEditingController searchController = TextEditingController();
+    LatLng? selectedLocation;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      labelText: 'Search for a school',
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.search),
+                        onPressed: () async {
+                          // Perform search and update the map
+                          List<Location> locations = await locationFromAddress(searchController.text);
+                          if (locations.isNotEmpty) {
+                            setState(() {
+                              selectedLocation = LatLng(locations.first.latitude, locations.first.longitude);
+                            });
+                          }
+                        }
+
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: selectedLocation ?? const LatLng(0, 0),
+                        zoom: 14.0,
+                      ),
+                      markers: selectedLocation != null
+                          ? {
+                        Marker(
+                          markerId: const MarkerId('selectedLocation'),
+                          position: selectedLocation!,
+                        ),
+                      }
+                          : {},
+                      onTap: (LatLng location) {
+                        setState(() {
+                          selectedLocation = location;
+                        });
+                      },
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (selectedLocation != null) {
+                        List<Placemark> placemarks = await placemarkFromCoordinates(
+                          selectedLocation!.latitude,
+                          selectedLocation!.longitude,
+                        );
+                        if (placemarks.isNotEmpty) {
+                          Placemark place = placemarks.first;
+                          String schoolName = place.name ?? '';
+                          String address = "${place.street}, ${place.locality}, ${place.country}";
+
+                          // Update the school name controller
+                          schoolNameController.text = schoolName;
+
+                          // Close the bottom sheet
+                          Navigator.pop(context);
+
+                          // You can also save the latitude, longitude, and address if needed
+                          print("Latitude: ${selectedLocation!.latitude}");
+                          print("Longitude: ${selectedLocation!.longitude}");
+                          print("Address: $address");
+                        }
+                      }
+                    },
+                    child: const Text('Select Location'),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
 }

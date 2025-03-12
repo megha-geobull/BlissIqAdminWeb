@@ -464,7 +464,6 @@ class _MentorRegistrationState extends State<MentorRegistration> {
                       prefixIcon: const Icon(Icons.work_outline),
                     ),
                     boxH20(),
-
                     // Qualification TextField
                     CustomTextField(
                       controller: mentorController.qualificationController,
@@ -473,7 +472,6 @@ class _MentorRegistrationState extends State<MentorRegistration> {
                       prefixIcon: Icon(Icons.school_outlined),
                     ),
                     boxH20(),
-
                     // Bio/Introduction TextField
                     CustomTextField(
                       controller: mentorController.introBio,
@@ -622,4 +620,5 @@ class _MentorRegistrationState extends State<MentorRegistration> {
       ),
     ));
   }
+
 }
