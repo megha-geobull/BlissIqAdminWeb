@@ -91,6 +91,9 @@ dependencies:
   loading_animation_widget:
   syncfusion_flutter_datagrid:
   scrollable_table_view:
+  flutter_typeahead:
+
+
 
 dev_dependencies:
   flutter_test:
