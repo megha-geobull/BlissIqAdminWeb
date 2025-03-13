@@ -61,7 +61,6 @@ class _BuildLearningSlideContentState extends State<BuildLearningSlideContent> {
       );
       return;
     }
-
     try {
       await questionApiController.addLearningSlideApi(
         mainCategoryId: widget.main_category_id!,

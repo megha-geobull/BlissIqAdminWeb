@@ -638,13 +638,12 @@ print(questionList);
 
     if (selectedQuestionIds.isNotEmpty) {
       try {
-        await deleteApiController.deleteCompleteTheParagraphAPI(
-
-          question_ids: ids,
+        await deleteApiController.delete_match_pair_question(
+          question_ids: ids, context: context,
         );
 
         // Refresh the list of questions
-        await deleteApiController.getAllRe_Arrange(
+        await deleteApiController.getMatchPairs(
           main_category_id: questions[0].mainCategoryId.toString(),
           sub_category_id: questions[0].subCategoryId.toString(),
           topic_id: questions[0].topicId.toString(),

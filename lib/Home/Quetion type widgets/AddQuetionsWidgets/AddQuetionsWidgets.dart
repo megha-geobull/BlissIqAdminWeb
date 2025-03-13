@@ -13,6 +13,7 @@ import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Ta
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/LearningSlideTable.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/MCQDataTable.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/Re_arrange_the_word_DataTable.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/StoryPhrasesTable.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/TrueFalseDataTable.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/card_flip_question_table.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/guess_the_image_table.dart';
@@ -127,6 +128,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   var pathsFile;
   var pathsFileName;
   late String selectedFormat = "Sound";
+  late String selectedPhraseFormat = "phrase_name";
+
   String? selectedQuestionType = "Multiple Choice Question";
 
   List<String> questionTypes = [
@@ -1169,7 +1172,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       child: Container(
         padding: const EdgeInsets.all(16.0),
         width: MediaQuery.of(context).size.width * 0.8,
-        height: MediaQuery.of(context).size.height * 0.9,
+       // height: MediaQuery.of(context).size.height * 0.9,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1328,7 +1331,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       child: Container(
         padding: const EdgeInsets.all(16.0),
         width: MediaQuery.of(context).size.width * 0.8,
-        height: MediaQuery.of(context).size.height * 0.9,
+     //   height: MediaQuery.of(context).size.height * 0.9,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1849,6 +1852,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     );
   }
 
+
   Widget _buildQuestionsPhrasesTable() {
     return Card(
       elevation: 1.0,
@@ -1898,67 +1902,24 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
             Obx(() {
               return Center(
                 child: _getAllQuestionsApiController.isLoading.value
-                    ? CircularProgressIndicator()
+                    ? const CircularProgressIndicator()
                     : (_getAllQuestionsApiController.getStoryPhrasesList.isEmpty
-                        ? const Center(
-                            child: Text(
-                              'No data available',
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey),
-                            ),
-                          )
-                        : SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            controller: _scrollController,
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                  minWidth: 1200, minHeight: 400),
-                              child: SizedBox(
-                                height: 400,
-                                width: 600,
-                                child: Column(
-                                  children: [
-                                    // Table Header
-                                    Container(
-                                      color: Colors.orange.shade100,
-                                      child: Row(
-                                        children: [
-                                          _buildTableHeader("Index"),
-                                          _buildTableHeader("Phrase"),
-                                          _buildTableHeader("Points"),
-                                        ],
-                                      ),
-                                    ),
-                                    // Table Rows
-                                    Expanded(
-                                      child: ListView.builder(
-                                        scrollDirection: Axis.vertical,
-                                        itemCount: _getAllQuestionsApiController
-                                            .getStoryPhrasesList.length,
-                                        itemBuilder: (context, index) {
-                                          var row =
-                                              _getAllQuestionsApiController
-                                                  .getStoryPhrasesList[index];
-                                          return Row(
-                                            children: [
-                                              _buildTableCell(
-                                                  row.index.toString() ?? ""),
-                                              // _buildTableCell(
-                                              //     row.phraseName ?? ""),
-                                              _buildTableCell(
-                                                  row.points.toString() ?? ""),
-                                            ],
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          )),
+                    ? const Center(
+                  child: Text(
+                    'No data available',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey),
+                  ),
+                )
+                    : StoryPhrasesTable(
+                    main_category_id: mainCategoryId,
+                    sub_category_id: subCategoryId,
+                    topic_id: topicId,
+                    sub_topic_id: subtopicId,
+                    questionList: _getAllQuestionsApiController
+                        .getStoryPhrasesList)),
               );
             })
           ],
@@ -2803,6 +2764,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         topicId: topicId.toString(),
         subTopicId: subtopicId.toString(),
         phraseName: phraseNameController.text,
+        questionFormat: selectedPhraseFormat.toString(),
+        title:titleController.text,
+        questionType: selectedQuestionType.toString(),
         points: pointsValue.toString(),
         index: indexController.text,
       );
@@ -2823,6 +2787,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           points: pointsValue.toString(),
           index: indexController.text);
     } else if (selectedQuestionType == "Learning Slide") {
+
     } else if (selectedQuestionType == "Complete the paragraph") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
 
@@ -3472,6 +3437,39 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
               labelText: "Enter title",
             ),
             boxH10(),
+
+            const Text(
+              'Question Format',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            boxH15(),
+            // Radio button selection for Sound or Native Language
+            Row(
+              children: [
+                Radio(
+                  value: "passage",
+                  groupValue: selectedPhraseFormat,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedPhraseFormat = value!;
+                    });
+                  },
+                ),
+                const Text("Passage"),
+                const SizedBox(width: 16),
+                Radio(
+                  value: "phrase_name",
+                  groupValue: selectedPhraseFormat,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedPhraseFormat = value!;
+                    });
+                  },
+                ),
+                const Text("Phrase"),
+              ],
+            ),
+            boxH10(),
             const Text(
               'Enter Phrase Name',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
@@ -3480,7 +3478,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
             CustomTextField(
               controller: phraseNameController,
               labelText: "Enter Phrase Name",
-              maxLines: 1,
+              maxLines: 4,
             ),
             boxH20(),
             CustomButton(

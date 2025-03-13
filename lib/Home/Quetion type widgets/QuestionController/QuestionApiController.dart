@@ -277,7 +277,10 @@ class QuestionApiController extends GetxController {
     required String mainCategoryId,
     required String subCategoryId,
     required String topicId,
+    required String questionType,
+    required String title,
     required String subTopicId,
+    required String questionFormat,
     required String phraseName,
     required String points,
     required String index,
@@ -290,7 +293,10 @@ class QuestionApiController extends GetxController {
       request.fields['sub_category_id'] = subCategoryId;
       request.fields['topic_id'] = topicId;
       request.fields['sub_topic_id'] = subTopicId;
-      request.fields['phrase_name'] = phraseName;
+      request.fields['question_format'] = questionFormat;
+      request.fields['title'] = title;
+      request.fields['question_type'] = questionType;
+      request.fields['passage'] = phraseName;
       request.fields['points'] = points;
       request.fields['index'] = index;
 
@@ -464,7 +470,6 @@ class QuestionApiController extends GetxController {
     }
   }
 
-
   ///guess the image
   addGuessTheImage({
     required String mainCategoryId,
@@ -538,7 +543,7 @@ class QuestionApiController extends GetxController {
     }
   }
 
-
+  /// add match the pairs
   addMatchThePairs({
     required String main_category_id,
     required String title,
@@ -614,6 +619,7 @@ class QuestionApiController extends GetxController {
     }
   }
 
+  /// add complete the word api
   addCompleteWordApi({
     required String mainCategoryId,
     required String title,
@@ -684,6 +690,7 @@ class QuestionApiController extends GetxController {
     }
   }
 
+  /// add complete the paragraph api
   addCompleteParagraphApi({
     required String mainCategoryId,
     required String title,
@@ -759,11 +766,11 @@ class QuestionApiController extends GetxController {
   }
 
 
-  Future<void> addLearningSlideApi({
+  addLearningSlideApi({
     required String mainCategoryId,
     required String subCategoryId,
     required String topicId,
-    String? subTopicId,
+    required String subTopicId,
     required String title,
     required String questionType,
     required String definition,
