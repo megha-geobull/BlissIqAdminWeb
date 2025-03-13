@@ -18,8 +18,7 @@ import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
 import '../../../Home/Users/Models/GetAllCompanyModel.dart';
 
-class CompanyController extends GetxController{
-
+class CompanyController extends GetxController {
   var ownerNameController = TextEditingController();
   var companyNameController = TextEditingController();
   var emailController = TextEditingController();
@@ -41,17 +40,14 @@ class CompanyController extends GetxController{
   var selectedUserType = 'Mentor'.obs;
 
   RxList<Data> allCompanyData = <Data>[].obs;
-  RxList<AllAssignedSchoolsData> allAssignSchoolData = <AllAssignedSchoolsData>[].obs;
+  RxList<AllAssignedSchoolsData> allAssignSchoolData =
+      <AllAssignedSchoolsData>[].obs;
 
   RxString userId = "".obs;
 
-
-
-
   // Handle country code change
   void onCountryChange(CountryCode countryCode) {
-    currentCountryCode.value =
-    '${countryCode.code}-${countryCode.dialCode}';
+    currentCountryCode.value = '${countryCode.code}-${countryCode.dialCode}';
   }
 
   // Clear all controllers
@@ -68,11 +64,7 @@ class CompanyController extends GetxController{
     passwordController.clear();
     confirmPasswordController.clear();
     contactNumberController.clear();
-
   }
-
-
-
 
   void handleSignUp(BuildContext context) {
     if (formKey.currentState!.validate()) {
@@ -110,7 +102,6 @@ class CompanyController extends GetxController{
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
-
           // Correcting userId access
           final userId = responseData['user']['_id'];
           final userName = responseData['user']['user_name'];
@@ -155,7 +146,6 @@ class CompanyController extends GetxController{
     }
   }
 
-
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email is required';
@@ -172,7 +162,6 @@ class CompanyController extends GetxController{
 
     return null; // Return null if the email is valid
   }
-
 
   /// company Registration API
   companyRegistration({
@@ -211,7 +200,8 @@ class CompanyController extends GetxController{
       // Attach profile image if selected
       if (profileImageBytes != null) {
         final mimeType = lookupMimeType(profileImageName!); // Get MIME type
-        final mimeTypeParts = mimeType?.split('/') ?? ['application', 'octet-stream'];
+        final mimeTypeParts =
+            mimeType?.split('/') ?? ['application', 'octet-stream'];
         final multipartFile = http.MultipartFile.fromBytes(
           'profile_pic',
           profileImageBytes,
@@ -222,7 +212,8 @@ class CompanyController extends GetxController{
       }
       if (pan_card != null) {
         final mimeType = lookupMimeType(panImageName!);
-        final mimeTypeParts = mimeType?.split('/') ?? ['application', 'octet-stream'];
+        final mimeTypeParts =
+            mimeType?.split('/') ?? ['application', 'octet-stream'];
         final multipartFile = http.MultipartFile.fromBytes(
           'pan_card',
           pan_card,
@@ -255,11 +246,89 @@ class CompanyController extends GetxController{
     }
   }
 
+  updateCompanyApi({
+    required String companyID,
+    required String companyName,
+    required String ownerName,
+    required String cinNumber,
+    required String gstNumber,
+    required String email,
+    required String contactNo,
+    List<int>? profileImageBytes,
+    List<int>? pan_card,
+    String? profileImageName,
+    String? panImageName,
+  }) async {
+    isLoading.value = true;
 
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse(ApiString.edit_company_profile),
+      );
+
+      // Prepare the request body
+      // Adding fields
+      request.fields['user_id'] = companyID;
+      request.fields['owner_name'] = ownerName;
+      request.fields['company_name'] = companyName;
+      request.fields['email'] = email;
+      request.fields['cin_number'] = cinNumber;
+      request.fields['gst_number'] = gstNumber;
+      request.fields['contact_no'] = contactNo;
+
+      // Debugging
+      print('Profile Image Bytes: ${profileImageBytes != null ? profileImageBytes.length : "null"}');
+      print('Profile Image Name: $profileImageName');
+      print('PAN Card Bytes: ${pan_card != null ? pan_card.length : "null"}');
+      print('PAN Card Name: $panImageName');
+
+      // Attach profile image if selected
+      if (profileImageBytes != null) {
+        final mimeType = lookupMimeType(profileImageName ?? 'file.png'); // Provide a default name
+        final mimeTypeParts = mimeType?.split('/') ?? ['application', 'octet-stream'];
+        final multipartFile = http.MultipartFile.fromBytes(
+          'profile_pic',
+          profileImageBytes,
+          filename: profileImageName ?? 'file.png', // Provide a default name
+          contentType: MediaType(mimeTypeParts[0], mimeTypeParts[1]),
+        );
+        request.files.add(multipartFile);
+      }
+
+      // Attach PAN card if selected
+      if (pan_card != null) {
+        final mimeType = lookupMimeType(panImageName ?? 'file.png'); // Provide a default name
+        final mimeTypeParts = mimeType?.split('/') ?? ['application', 'octet-stream'];
+        final multipartFile = http.MultipartFile.fromBytes(
+          'pan_card',
+          pan_card,
+          filename: panImageName ?? 'file.png', // Provide a default name
+          contentType: MediaType(mimeTypeParts[0], mimeTypeParts[1]),
+        );
+        request.files.add(multipartFile);
+      }
+
+      final response = await request.send();
+      final responseData = jsonDecode(await response.stream.bytesToString());
+      print(responseData);
+
+      if (response.statusCode == 201 && responseData['status'] == 1) {
+        Fluttertoast.showToast(msg: responseData['message']);
+        clearControllers();
+      } else {
+        Fluttertoast.showToast(msg: responseData['message'] ?? 'Error occurred');
+      }
+    } catch (e) {
+      Fluttertoast.showToast(msg: 'An error occurred: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   getAllCompany() async {
     isLoading.value = true;
-allCompanyData.clear();
+    allCompanyData.clear();
     try {
       final response = await http.get(
         Uri.parse(ApiString.get_all_companies),
@@ -278,10 +347,12 @@ allCompanyData.clear();
               .toList();
           print("Fetched ${allCompanyData.length} company");
         } else {
-          showSnackbar(message: responseData['message'] ?? "Failed to fetch company");
+          showSnackbar(
+              message: responseData['message'] ?? "Failed to fetch company");
         }
       } else {
-        showSnackbar(message: "Failed to fetch company. Status: ${response.statusCode}");
+        showSnackbar(
+            message: "Failed to fetch company. Status: ${response.statusCode}");
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching company: $e");
@@ -291,7 +362,8 @@ allCompanyData.clear();
     }
   }
 
-  approveCompany({required String companyID, required String approvalStatus}) async {
+  approveCompany(
+      {required String companyID, required String approvalStatus}) async {
     isLoading.value = true;
     var body = {
       "company_id": companyID,
@@ -394,10 +466,8 @@ allCompanyData.clear();
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
-
           if (kDebugMode) {
             print("School assigned successfully");
-
           }
         } else {
           Fluttertoast.showToast(
@@ -415,8 +485,6 @@ allCompanyData.clear();
       isLoading.value = false;
     }
   }
-
-
 
   getAssignedSchoolsApi(String companyID) async {
     isLoading.value = true;
@@ -438,7 +506,8 @@ allCompanyData.clear();
       print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        var responseData = GetSchoolsAssignModel.fromJson(jsonDecode(response.body));
+        var responseData =
+            GetSchoolsAssignModel.fromJson(jsonDecode(response.body));
         if (responseData.status == 1) {
           allAssignSchoolData.value = responseData.data;
           print("Fetched ${allAssignSchoolData.value.length} assigned schools");
@@ -446,7 +515,9 @@ allCompanyData.clear();
           showSnackbar(message: "Failed to fetch assigned schools");
         }
       } else {
-        showSnackbar(message: "Failed to fetch assigned schools. Status: ${response.statusCode}");
+        showSnackbar(
+            message:
+                "Failed to fetch assigned schools. Status: ${response.statusCode}");
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching assigned schools: $e");
@@ -455,7 +526,4 @@ allCompanyData.clear();
       isLoading.value = false;
     }
   }
-
-
 }
-

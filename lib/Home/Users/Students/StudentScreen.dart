@@ -229,6 +229,16 @@ class _StudentScreenState extends State<StudentScreen> {
   }
 
   Widget _buildStudentDataTable() {
+    if (filteredStudentData.isEmpty) {
+      return Center(
+        child: Text(
+          searchController.text.isEmpty
+              ? "No students available"
+              : "No students found",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+        ),
+      );
+    }
     return Card(
       elevation: 0.8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

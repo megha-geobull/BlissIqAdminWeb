@@ -26,7 +26,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
   bool isSelectAll = false;
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   final _verticalScrollController = ScrollController();
-  Map<String, bool> editingStates = {}; // Track editing state for each row
+  Map<String, bool> editingStates = {};
   List<Data> filteredCompanyData = [];
 
   @override
@@ -412,7 +412,35 @@ class CompanyTableSource extends DataTableSource {
   List<PlatformFile>? _panPaths;
   var panPathsFile;
   var panPathsFileName;
-  pickFile(String fileType) async {
+
+  // Add TextEditingController for each editable field
+  final Map<String, TextEditingController> _ownerNameControllers = {};
+  final Map<String, TextEditingController> _companyNameControllers = {};
+  final Map<String, TextEditingController> _emailControllers = {};
+  final Map<String, TextEditingController> _contactNoControllers = {};
+  final Map<String, TextEditingController> _gstNumberControllers = {};
+  final Map<String, TextEditingController> _cinNumberControllers = {};
+
+  // Dispose controllers when no longer needed
+  void _disposeControllers(String id) {
+    _ownerNameControllers[id]?.dispose();
+    _companyNameControllers[id]?.dispose();
+    _emailControllers[id]?.dispose();
+    _contactNoControllers[id]?.dispose();
+    _gstNumberControllers[id]?.dispose();
+    _cinNumberControllers[id]?.dispose();
+  }
+  // Initialize controllers for each row
+  void _initializeControllers(Data dataRow) {
+    _ownerNameControllers[dataRow.id!] = TextEditingController(text: dataRow.ownerName);
+    _companyNameControllers[dataRow.id!] = TextEditingController(text: dataRow.companyName);
+    _emailControllers[dataRow.id!] = TextEditingController(text: dataRow.email);
+    _contactNoControllers[dataRow.id!] = TextEditingController(text: dataRow.contactNo);
+    _gstNumberControllers[dataRow.id!] = TextEditingController(text: dataRow.gstNumber);
+    _cinNumberControllers[dataRow.id!] = TextEditingController(text: dataRow.cinNumber);
+  }
+
+  pickFile(String? fileType) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowMultiple: false,
@@ -490,18 +518,16 @@ class CompanyTableSource extends DataTableSource {
     );
 
     if (result != null && result.files.isNotEmpty) {
-      if(fileType == 'profile')
-        {
-          _paths = result.files;
-          pathsFile = _paths!.first.bytes; // Store the bytes
-          pathsFileName = _paths!.first.name; // Store the file name
-          isFilePicked = true;
-          notifyListeners();
-        }
-      else{
+      if (fileType == 'profile') {
+        _paths = result.files;
+        pathsFile = _paths!.first.bytes; // Store the bytes
+        pathsFileName = _paths!.first.name; // Store the file name
+        isFilePicked = true;
+        notifyListeners();
+      } else if (fileType == 'pan') {
         _panPaths = result.files;
-        panPathsFile = _paths!.first.bytes; // Store the bytes
-        panPathsFileName = _paths!.first.name; // Store the file name
+        panPathsFile = _panPaths!.first.bytes; // Corrected: Use _panPaths
+        panPathsFileName = _panPaths!.first.name; // Corrected: Use _panPaths
         isFilePicked = true;
         notifyListeners();
       }
@@ -509,9 +535,16 @@ class CompanyTableSource extends DataTableSource {
       print('No file selected');
     }
   }
+
   void buildDataTableRows() {
     dataTableRows = company.map<DataRow>((dataRow) {
       final isEditing = companyScreenState.editingStates[dataRow.id] ?? false;
+
+      // Initialize controllers for this row if not already done
+      if (!_ownerNameControllers.containsKey(dataRow.id)) {
+        _initializeControllers(dataRow);
+      }
+
       return DataRow(
         selected: companyScreenState.selectedCompanyIds.contains(dataRow.id),
         onSelectChanged: (isSelected) {
@@ -523,21 +556,26 @@ class CompanyTableSource extends DataTableSource {
           companyScreenState.setState(() {});
         },
         cells: [
+          // Profile cell (unchanged)
           DataCell(
-      isEditing ? SizedBox(
-        width: 50,
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: isFilePicked ? Colors.green : Colors.blue, width: 1.5),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: IconButton(
-            icon: Icon(Icons.image, color: isFilePicked ? Colors.green :Colors.blue),
-            onPressed: () => pickFile('profile'),
-          ),
-        ),
-      ) :
-            dataRow.profilePic != null
+            isEditing
+                ? SizedBox(
+              width: 50,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                      color: isFilePicked ? Colors.green : Colors.blue,
+                      width: 1.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.image,
+                      color: isFilePicked ? Colors.green : Colors.blue),
+                  onPressed: () => pickFile('profile'),
+                ),
+              ),
+            )
+                : dataRow.profilePic != null
                 ? SizedBox(
               width: 50,
               child: CachedNetworkImage(
@@ -546,86 +584,80 @@ class CompanyTableSource extends DataTableSource {
                     (context, url, downloadProgress) =>
                     CircularProgressIndicator(
                         value: downloadProgress.progress),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
+                errorWidget: (context, url, error) =>
+                const Icon(Icons.error),
               ),
             )
                 : const SizedBox.shrink(),
           ),
+          // Owner Name cell
           DataCell(
             isEditing
                 ? TextFormField(
-              initialValue: dataRow.ownerName,
-              onChanged: (value) {
-                // dataRow.principalEmail = value;
-              },
+              controller: _ownerNameControllers[dataRow.id],
             )
                 : Text(dataRow.ownerName ?? 'No name'),
           ),
+          // Company Name cell
           DataCell(
             isEditing
                 ? TextFormField(
-              initialValue: dataRow.companyName?.toString(),
-              onChanged: (value) {
-                // dataRow.principalPhone = value;
-              },
+              controller: _companyNameControllers[dataRow.id],
             )
                 : Text(dataRow.companyName?.toString() ?? '-'),
           ),
+          // Email cell
           DataCell(
             isEditing
                 ? TextFormField(
-              initialValue: dataRow.email,
-              onChanged: (value) {
-                // dataRow.address = value;
-              },
+              controller: _emailControllers[dataRow.id],
             )
                 : Text(dataRow.email ?? 'No Address'),
           ),
+          // Contact No cell
           DataCell(
             isEditing
                 ? TextFormField(
-              initialValue: dataRow.contactNo.toString(),
-              onChanged: (value) {
-                // dataRow.schoolRegNumber = value;
-              },
+              controller: _contactNoControllers[dataRow.id],
             )
                 : Text(dataRow.contactNo.toString() ?? 'No school reg.no'),
           ),
+          // GST No cell
           DataCell(
             isEditing
                 ? TextFormField(
-              initialValue: dataRow.gstNumber.toString(),
-              onChanged: (value) {
-                // dataRow.schoolType = value;
-              },
+              controller: _gstNumberControllers[dataRow.id],
             )
                 : Text(dataRow.gstNumber.toString() ?? 'no type'),
           ),
+          // CIN Number cell
           DataCell(
             isEditing
                 ? TextFormField(
-              initialValue: dataRow.cinNumber.toString(),
-              onChanged: (value) {
-                // dataRow.schoolType = value;
-              },
+              controller: _cinNumberControllers[dataRow.id],
             )
                 : Text(dataRow.cinNumber.toString() ?? 'no type'),
           ),
+          // Pan Card cell (unchanged)
           DataCell(
-            isEditing ? SizedBox(
+            isEditing
+                ? SizedBox(
               width: 50,
               child: Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: isFilePicked ? Colors.green : Colors.blue, width: 1.5),
+                  border: Border.all(
+                      color: isFilePicked ? Colors.green : Colors.blue,
+                      width: 1.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: IconButton(
-                  icon: Icon(Icons.image, color: isFilePicked ? Colors.green :Colors.blue),
-                  onPressed: () => pickFile('profile'),
+                  icon: Icon(Icons.image,
+                      color: isFilePicked ? Colors.green : Colors.blue),
+                  onPressed: () => pickFile('pan'),
                 ),
               ),
-            ) :
-            dataRow.panCard != null
+            )
+                : dataRow.panCard != null
                 ? SizedBox(
               width: 50,
               child: CachedNetworkImage(
@@ -634,11 +666,13 @@ class CompanyTableSource extends DataTableSource {
                     (context, url, downloadProgress) =>
                     CircularProgressIndicator(
                         value: downloadProgress.progress),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
+                errorWidget: (context, url, error) =>
+                const Icon(Icons.error),
               ),
             )
                 : const SizedBox.shrink(),
           ),
+          // Status cell (unchanged)
           DataCell(
             ElevatedButton(
               onPressed: () =>
@@ -654,11 +688,11 @@ class CompanyTableSource extends DataTableSource {
               ),
             ),
           ),
+          // View cell (unchanged)
           DataCell(
             ElevatedButton(
               onPressed: () {
-                Get.to(
-                        () => AssignedSchoolPage(companyID: dataRow.id.toString()));
+                Get.to(() => AssignedSchoolPage(companyID: dataRow.id.toString()));
               },
               style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
@@ -669,21 +703,23 @@ class CompanyTableSource extends DataTableSource {
               child: const Text('View', style: TextStyle(color: Colors.white)),
             ),
           ),
+          // Assign cell (unchanged)
           DataCell(
             ElevatedButton(
                 onPressed: () {
                   companyScreenState._showSchoolBottomSheet(
                       Get.context!, dataRow.id);
                 },
-                child:
-                const Text('Assign', style: TextStyle(color: Colors.white)),
+                child: const Text('Assign',
+                    style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8)),
                     backgroundColor: Colors.green,
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8))),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 8))),
           ),
+          // Delete cell (unchanged)
           DataCell(
             IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
@@ -695,14 +731,12 @@ class CompanyTableSource extends DataTableSource {
               },
             ),
           ),
+          // Edit/Update cell
           DataCell(isEditing
               ? ElevatedButton(
             onPressed: () {
               // Save changes and exit edit mode
-              companyScreenState.setState(() {
-                companyScreenState.editingStates[dataRow.id!] = false;
-              });
-              // Call update API here if needed
+              _updateCompany(dataRow);
             },
             style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
@@ -715,14 +749,13 @@ class CompanyTableSource extends DataTableSource {
               companyScreenState.setState(() {
                 companyScreenState.editingStates[dataRow.id!] = true;
               });
-              // Call update API here if needed
             },
             style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8)),
             ),
             child: const Text('Edit'),
-          ))
+          )),
         ],
       );
     }).toList();
@@ -742,6 +775,49 @@ class CompanyTableSource extends DataTableSource {
   }
   @override
   DataRow? getRow(int index) => dataTableRows[index];
+
+  void _updateCompany(Data data) {
+    // Create a new instance of Data with updated values
+    print('PAN Card File: ${panPathsFile != null ? panPathsFile.length : "null"}');
+    print('profile File: ${pathsFile != null ? pathsFile.length : "null"}');
+    final updatedData = Data(
+      id: data.id,
+      ownerName: _ownerNameControllers[data.id!]?.text ?? data.ownerName,
+      companyName: _companyNameControllers[data.id!]?.text ?? data.companyName,
+      email: _emailControllers[data.id!]?.text ?? data.email,
+      contactNo: _contactNoControllers[data.id!]?.text ?? data.contactNo,
+      gstNumber: _gstNumberControllers[data.id!]?.text ?? data.gstNumber,
+      cinNumber: _cinNumberControllers[data.id!]?.text ?? data.cinNumber,
+      profilePic: data.profilePic,
+      panCard: data.panCard,
+      approvalStatus: data.approvalStatus,
+    );
+
+    // Call the API with the updated Data object
+    companyScreenState.companyController.updateCompanyApi(
+      companyID: updatedData.id!,
+      ownerName: updatedData.ownerName ?? '',
+      companyName: updatedData.companyName ?? '',
+      email: updatedData.email ?? '',
+      contactNo: updatedData.contactNo ?? '',
+      gstNumber: updatedData.gstNumber ?? '',
+      cinNumber: updatedData.cinNumber ?? '',
+      profileImageBytes: pathsFile,
+      pan_card: panPathsFile,
+    ).then((_) {
+      companyScreenState.companyController.getAllCompany();
+      companyScreenState.setState(() {
+        companyScreenState.editingStates[data.id!] = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Company updated successfully!')),
+      );
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error updating company: $error')),
+      );
+    });
+  }
 
   @override
   int get rowCount => dataTableRows.length;

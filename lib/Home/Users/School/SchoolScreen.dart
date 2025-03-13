@@ -251,6 +251,16 @@ class _SchoolScreenState extends State<SchoolScreen> {
   }
 
   Widget _buildSchoolDataTable() {
+    if (filteredSchoolData.isEmpty) {
+      return Center(
+        child: Text(
+          searchController.text.isEmpty
+              ? "No schools available"
+              : "No school found",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+        ),
+      );
+    }
     return Card(
       elevation: 0.8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
