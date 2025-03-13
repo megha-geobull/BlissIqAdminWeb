@@ -19,6 +19,11 @@ import 'auth/Controller/AuthController.dart';
 import 'auth/Signup/Splash.dart';
 import 'controller/CategoryController.dart';
 import 'firebase_options.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_flutter_web/google_maps_flutter_web.dart'; // Add this import
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();

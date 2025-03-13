@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:blissiqadmin/Global/Routes/AppRoutes.dart';
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
+import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/common_snackbar.dart';
 import 'package:blissiqadmin/Global/utils/shared_preference/shared_preference_services.dart';
 import 'package:blissiqadmin/Home/HomePage.dart';
@@ -40,6 +41,15 @@ class AuthController extends GetxController{
   RxBool confirmPasswordVisible = false.obs;
   var currentCountryCode = "IN-91".obs;
   var selectedUserType = 'Mentor'.obs;
+
+  final TextEditingController searchController = TextEditingController();
+
+  var selectedSchoolId = ''.obs;
+  var selectedSchoolName = ''.obs;
+  final selectedSchoolAddress = ''.obs;
+  final selectedSchoolLat = "".obs;
+  final selectedSchoolLng = "".obs;
+
 
   RxList<Data> allMentorData = <Data>[].obs;
   RxString userId = "".obs;
@@ -155,6 +165,64 @@ class AuthController extends GetxController{
   }
 
 
+  registerNewSchool({
+    required String name,
+    required String address,
+    String? latitude,
+    String? longitude,
+  }) async {
+    isLoading.value = true;
+    selectedSchoolId.value = '';
+    try {
+      final Map<String, dynamic> body = {
+        "schoolName": name,
+        "address": address,
+        "latitude": latitude ?? '',
+        "longitude": longitude ?? '',
+      };
+
+      final response = await http.post(
+        Uri.parse(ApiString.school_registration),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 201) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          selectedSchoolId.value = responseData['data']['_id'];
+          return true;
+        } else {
+          _showBottomSheet(
+            title: "Error",
+            message: responseData['message'] ?? "Something went wrong!",
+            isSuccess: false,
+          );
+          return false;
+        }
+      } else {
+        _showBottomSheet(
+          title: "Error",
+          message: "Something went wrong!",
+          isSuccess: false,
+        );
+        return false;
+      }
+    } catch (e) {
+      _showBottomSheet(
+        title: "Error",
+        message: "An error occurred: $e",
+        isSuccess: false,
+      );
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email is required';
@@ -187,7 +255,9 @@ class AuthController extends GetxController{
     required String confirmPassword,
     required BuildContext context,
     List<int>? profileImageBytes,
-    String? schoolId,
+    required String schoolId,
+    required String schoolName,
+
   }) async {
     isLoading.value = true;
 
@@ -209,7 +279,8 @@ class AuthController extends GetxController{
         'introBio': introBio,
         'password': password,
         'confirm_password': confirmPassword,
-        if (schoolId != null) 'school_id': schoolId,
+        'school_id':schoolId,
+        'school_name':schoolName
       });
 
       // Attach profile image if selected
@@ -231,10 +302,11 @@ class AuthController extends GetxController{
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(responseData['message'])),
         );
-        getAllMentors();
-        clearControllers();
+        final Map<String, dynamic> userData = responseData['data'];
+        final userId = userData['_id'];
+        final userName = userData['fullName'];
         Functions.setAvailability(
-            name: fullName,
+            name: userName,
             email: email,
             phone: contactNo.toString(),
             isEngaged: "false",
@@ -242,7 +314,9 @@ class AuthController extends GetxController{
             userID: userId.toString(),
             fcmToken: '',
             status: "Offline");
-      //  Get.toNamed(AppRoutes.mentorPage);
+        getAllMentors();
+        clearControllers();
+        //  Get.toNamed(AppRoutes.mentorPage);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(responseData['message'] ?? 'Error occurred')),
@@ -257,6 +331,8 @@ class AuthController extends GetxController{
     }
   }
 
+
+  /// get all mentors
   getAllMentors() async {
     isLoading.value = true;
 
@@ -456,5 +532,61 @@ class AuthController extends GetxController{
     }
   }
 
+  _showBottomSheet({
+    required String title,
+    required String message,
+    required bool isSuccess,
+  }) {
+    Get.bottomSheet(
+      Container(
+        width:  Get.size.width,
+        height: Get.size.width * 0.52,
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Icon with larger size
+            Icon(
+              isSuccess ? Icons.check_circle : Icons.error,
+              color: isSuccess ? Colors.green : Colors.red,
+              size: 34, // Increased size for better visibility
+            ),
+            boxH08(),
+            Flexible(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isSuccess ? Colors.green : Colors.red,
+                ),
+                textAlign: TextAlign.center, overflow: TextOverflow.ellipsis,maxLines: 1,
+              ),
+            ),
+            boxH08(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    Future.delayed(const Duration(seconds: 1), () {
+      Get.back();
+    });
+  }
 }
 

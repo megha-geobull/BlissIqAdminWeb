@@ -20,6 +20,7 @@ class DashBoardController extends GetxController {
   // Parsed JSON data
   late Enrollmentmodel enrollmentData ;
   RxList<NotificationData> notifications =<NotificationData>[].obs;
+  RxList<NotificationData> filteredNotifications = <NotificationData>[].obs;
 
   @override
   void onInit() {
@@ -117,7 +118,6 @@ class DashBoardController extends GetxController {
         final Map<String, dynamic> jsonResponse = jsonDecode(responseData.body);
         if (jsonResponse['status'] == 1) {
           // Successfully updated profile
-          //await getProfile();
           showSnackbar(message: "Notification Send");
         } else {
           // Profile update failed
@@ -178,21 +178,21 @@ class DashBoardController extends GetxController {
 
   delete_notification({required String notificationID}) async {
     isLoading.value = true;
-
+    print("notification ID: $notificationID");
     try {
       final Map<String, dynamic> body = {
         "notification_auto_id": notificationID,
       };
 
       final response = await http.delete(
-        Uri.parse(ApiString.delete_notification),
+        Uri.parse(ApiString.delete_notifications),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(body),
       );
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
-      print('Response url: ${ApiString.delete_notification}');
+      print('Response url: ${ApiString.delete_notifications}');
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);

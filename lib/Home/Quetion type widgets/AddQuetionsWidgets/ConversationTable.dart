@@ -3,25 +3,21 @@ import 'package:get/get.dart';
 import '../../../Global/constants/CustomAlertDialogue.dart';
 import '../controller/GetAllQuestionsApiController.dart';
 import '../model/get_conversation.dart';
-import '../model/get_mcqs.dart';
 import '../question_controller.dart';
 
-typedef OnEditCallback = void Function(int index);
 class ConversationTableScreen extends StatefulWidget {
   final String main_category_id;
   final String sub_category_id;
   final String topic_id;
   final String sub_topic_id;
   final List<Data> questionList;
-  OnEditCallback onEditCallback;
 
   ConversationTableScreen(
       {required this.main_category_id,
         required this.sub_category_id,
         required this.topic_id,
         required this.sub_topic_id,
-        required this.questionList,
-        required this.onEditCallback});
+        required this.questionList,});
 
   @override
   _QuestionTableScreenState createState() => _QuestionTableScreenState();
@@ -49,8 +45,7 @@ class _QuestionTableScreenState extends State<ConversationTableScreen> {
         setState(() {
           _selectedQuestionIds = selectedIds;
         });
-      },
-      widget.onEditCallback,
+      },context
     );
     _filteredQuestions = widget.questionList;
   }
@@ -74,7 +69,7 @@ class _QuestionTableScreenState extends State<ConversationTableScreen> {
             _selectedQuestionIds = selectedIds;
           });
         },
-        widget.onEditCallback,
+        context,
       );
     });
   }
@@ -99,7 +94,7 @@ class _QuestionTableScreenState extends State<ConversationTableScreen> {
               _selectedQuestionIds = selectedIds;
             });
           },
-          widget.onEditCallback,
+         context,
         );
       });
     }
@@ -226,9 +221,9 @@ class QuestionDataSource extends DataTableSource {
   final Function(String) onSelectionChanged; // Callback for selection
   final Set<String> selectedQuestionIds = {}; // Track selected question IDs
   bool isSelectAll = false;
-  final Function(int) onEditCallback;// Track "Select All" state
+  BuildContext context;
 
-  QuestionDataSource(this.questions, this.onSelectionChanged, this.onEditCallback,);
+  QuestionDataSource(this.questions, this.onSelectionChanged, this.context);
   TextEditingController? titleController;
   TextEditingController? botConversationController;
   TextEditingController? userConversationController;
@@ -236,6 +231,7 @@ class QuestionDataSource extends DataTableSource {
   TextEditingController? optionsController;
   TextEditingController? answerController;
   QuestionController addQuestionController = Get.find();
+
   @override
   DataRow? getRow(int index) {
     if (index >= questions.length) return null;
@@ -408,7 +404,6 @@ class QuestionDataSource extends DataTableSource {
                     answer: answerController!.text,
                     index: question.index.toString(),
                     points: question.points.toString());
-                onEditCallback(index);
               }else{
                 question.isEditing=true;
                 notifyListeners();

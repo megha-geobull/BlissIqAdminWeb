@@ -156,7 +156,7 @@ class _MyDrawerState extends State<MyDrawer> {
               isSelected: controller.selectedPage.value == 'Notification',
               onTap: () {
                 controller.changePage('Notification');
-                Get.to(() => const NotificationPage());
+                Get.to(() =>  NotificationPage());
               },
             )),
 

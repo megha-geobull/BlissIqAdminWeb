@@ -589,7 +589,7 @@ class QuestionDataSource extends DataTableSource {
         return AlertDialog(
           title: const Text('Confirm Deletion'),
           content: const Text(
-              'Do you really want to delete the selected phrases?'),
+              'Do you really want to delete the selected image puzzle?'),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),

@@ -18,6 +18,7 @@ class ApiString {
 
   static const String add_learning_slide = "${baseUrl}add_learning_slide";
 
+  static const String search_student = "${baseUrl}search_student";
 
 
   ///mentor
@@ -69,7 +70,7 @@ class ApiString {
 
   static const String add_notifications = "${baseUrl}add_notifications";
   static const String get_notifications = "${baseUrl}get_notifications";
-  static const String delete_notification = "${baseUrl}delete_notifications";
+  static const String delete_notifications = "${baseUrl}delete_notifications";
 
   static const String add_main_category = "${baseUrl}add_main_category";
   static const String get_main_category = "${baseUrl}get_main_category";
@@ -179,6 +180,7 @@ class ApiString {
   static const String studentBaseUrl = "http://65.0.211.122:4444/cust_api/";
   static const String get_my_learning_path = "${studentBaseUrl}get_my_learning_path";
 
+
   static const String add_topic_example = "${baseUrl}add_topic_example";
   static const String delete_topic_example = "${baseUrl}delete_topic_example";
 
@@ -186,8 +188,6 @@ class ApiString {
   static const String get_enrollment_students = "${baseUrl}get_enrollment_students";
   static const String get_raised_complaint = "${student_base_url}get_raised_complaint";
   static const String update_complaint_status = "${student_base_url}update_complaint_status";
-  static const String search_student = "${baseUrl}search_student";
-
 
 
 

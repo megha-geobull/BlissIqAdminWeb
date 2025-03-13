@@ -8,6 +8,7 @@ import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/CompleteParagraphTable.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/CompleteWordTable.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/ConversationTable.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/FillBlanksTable.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/LearningSlideTable.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/Tables/MCQDataTable.dart';
@@ -71,6 +72,8 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   TextEditingController botConversationController = TextEditingController();
   TextEditingController userConversationController = TextEditingController();
 
+  TextEditingController pipeSeparatedController = TextEditingController();
+
   List<String> userConversationTypes = ['Text', 'Question'];
   String? selectedUserConversationType;
 
@@ -132,9 +135,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
     "Re-Arrange Sentence",
     "Complete the Word",
     "Guess The Image",
-    'Image puzzle' ,
+    'Image puzzle',
     "True/False",
-    "Story",
+    //"Story",
     "Phrases",
     "Conversation",
     "Fill in the blanks",
@@ -268,9 +271,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = fill_in_the_blanks_headers;
     } else if (selectedQuestionType == "Re-Arrange the Word") {
       headers = rearrange_headers;
-    }else if (selectedQuestionType == "Re-Arrange Sentence") {
+    } else if (selectedQuestionType == "Re-Arrange Sentence") {
       headers = complete_sentense;
-    }else if (selectedQuestionType == "Guess The Image") {
+    } else if (selectedQuestionType == "Guess The Image") {
       headers = guess_image;
     } else if (selectedQuestionType == "Complete the Word") {
       headers = complete_the_word_headers;
@@ -347,9 +350,9 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
       headers = rearrange_headers;
     } else if (selectedQuestionType == "Complete the Word") {
       headers = complete_the_word_headers;
-    }else if (selectedQuestionType == "Guess The Image") {
+    } else if (selectedQuestionType == "Guess The Image") {
       headers = guess_image;
-    }else if (selectedQuestionType == "Re-Arrange Sentence") {
+    } else if (selectedQuestionType == "Re-Arrange Sentence") {
       headers = complete_sentense;
     } else if (selectedQuestionType == "True/False") {
       headers = true_false_headers;
@@ -404,7 +407,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           sub_category_id: subCategoryId,
           topic_id: topicId,
           sub_topic_id: subtopicId);
-    }  else if (selectedQuestionType == "Complete the Word") {
+    } else if (selectedQuestionType == "Complete the Word") {
       _getAllQuestionsApiController.getCompleteWordApi(
           main_category_id: mainCategoryId,
           sub_category_id: subCategoryId,
@@ -458,21 +461,19 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
           sub_category_id: subCategoryId,
           topic_id: topicId,
           sub_topic_id: subtopicId);
-    }
-    else if (selectedQuestionType == "Complete the paragraph") {
+    } else if (selectedQuestionType == "Complete the paragraph") {
       _getAllQuestionsApiController.getCompleteParaApi(
           main_category_id: mainCategoryId,
           sub_category_id: subCategoryId,
           topic_id: topicId,
           sub_topic_id: subtopicId);
-    }
-else if (selectedQuestionType == "Card Flip") {
+    } else if (selectedQuestionType == "Card Flip") {
       _getAllQuestionsApiController.getCardFlip(
           main_category_id: mainCategoryId,
           sub_category_id: subCategoryId,
           topic_id: topicId,
           sub_topic_id: subtopicId);
-    }else if (selectedQuestionType == "Image puzzle") {
+    } else if (selectedQuestionType == "Image puzzle") {
       _getAllQuestionsApiController.getImagePuzzleList(
           main_category_id: mainCategoryId,
           sub_category_id: subCategoryId,
@@ -775,16 +776,15 @@ else if (selectedQuestionType == "Card Flip") {
                                   if (selectedQuestionType ==
                                       "Multiple Choice Question")
                                     _buildQuestionsTable(),
-                                  if (selectedQuestionType ==
-                                      "Guess The Image")
+                                  if (selectedQuestionType == "Guess The Image")
                                     _buildGuessTheImageTable(),
-      if (selectedQuestionType == "Learning Slide")
-        _buildLearningSlideTable(),
+                                  if (selectedQuestionType == "Learning Slide")
+                                    _buildLearningSlideTable(),
 
                                   if (selectedQuestionType ==
                                       "Re-Arrange the Word")
                                     _buildRearrangeTheWordQuestionsTable(),
-   if (selectedQuestionType ==
+                                  if (selectedQuestionType ==
                                       "Re-Arrange Sentence")
                                     _buildRearrangeTheSentenceQuestionsTable(),
 
@@ -813,21 +813,19 @@ else if (selectedQuestionType == "Card Flip") {
 
                                   if (selectedQuestionType == "Card Flip")
                                     _buildQuestionsFlipTheCardTable(),
-      if (selectedQuestionType == "Image puzzle")
+                                  if (selectedQuestionType == "Image puzzle")
                                     _buildQuestionsImagePuzzleTable(),
 
                                   if (selectedQuestionType ==
                                       "Complete the paragraph")
                                     _buildQuestionsCompleteTheParagraphTable(),
-
                                   // if (selectedQuestionType ==
                                   //         "Alphabets Example" &&
                                   //     selectedTopic != "")
-
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 20),
+                            boxH20(),
                             Expanded(
                               flex: 1,
                               child: Column(
@@ -863,9 +861,8 @@ else if (selectedQuestionType == "Card Flip") {
                                           },
                                         ),
                                       ),
-                                      SizedBox(
-                                        width: 2,
-                                      ),
+                                      boxH02(),
+
                                       Tooltip(
                                         message: 'Export to Excel',
                                         child: CircleAvatar(
@@ -882,7 +879,9 @@ else if (selectedQuestionType == "Card Flip") {
                                           ),
                                         ),
                                       ),
+
                                       const Spacer(),
+
                                       SizedBox(
                                         width:
                                             MediaQuery.of(context).size.width *
@@ -896,7 +895,6 @@ else if (selectedQuestionType == "Card Flip") {
                                     ],
                                   ),
                                   boxH10(),
-                                  // Display the appropriate question type UI based on selection
                                   SizedBox(
                                     width:
                                         MediaQuery.of(context).size.width * 0.4,
@@ -994,7 +992,7 @@ else if (selectedQuestionType == "Card Flip") {
     );
   }
 
-  Future<void> uploadCsvToApi(List<String> requiredHeaders) async {
+   uploadCsvToApi(List<String> requiredHeaders) async {
     try {
       // Pick the .csv file
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -1082,41 +1080,46 @@ else if (selectedQuestionType == "Card Flip") {
               ? ApiString.add_topics
               : selectedQuestionType == "Re-Arrange the Word"
                   ? ApiString.add_rearrange
-          : selectedQuestionType == "Re-Arrange Sentence"
-          ? ApiString.add_complete_sentence
-                  :selectedQuestionType == "Guess The Image"
-          ? ApiString.add_guess_the_image
-                  : selectedQuestionType == "True/False"
-                      ? ApiString.add_true_false
-                      : selectedQuestionType == "Story"
-                          ? ApiString.add_story
-                          : selectedQuestionType == "Fill in the blanks"
-                              ? ApiString.add_fill_blanks
-                              : selectedQuestionType == "Phrases"
-                                  ? ApiString.add_story_phrases
-                                  : selectedQuestionType == "Conversation"
-                                      ? ApiString.add_conversation
-                                      : selectedQuestionType == "Card Flip"
-                                          ?ApiString.add_conversation
-                                      : selectedQuestionType == "Image puzzle"
-                                          ? ApiString.add_puzzle_the_image
+                  : selectedQuestionType == "Re-Arrange Sentence"
+                      ? ApiString.add_complete_sentence
+                      : selectedQuestionType == "Guess The Image"
+                          ? ApiString.add_guess_the_image
+                          : selectedQuestionType == "True/False"
+                              ? ApiString.add_true_false
+                              : selectedQuestionType == "Story"
+                                  ? ApiString.add_story
+                                  : selectedQuestionType == "Fill in the blanks"
+                                      ? ApiString.add_fill_blanks
+                                      : selectedQuestionType == "Phrases"
+                                          ? ApiString.add_story_phrases
                                           : selectedQuestionType ==
-                                                  "Learning Slide"
-                                              ? ApiString.add_learning_slide
+                                                  "Conversation"
+                                              ? ApiString.add_conversation
                                               : selectedQuestionType ==
-                                                      "Complete the Word"
-                                                  ? ApiString
-                                                      .add_complete_the_word
+                                                      "Card Flip"
+                                                  ? ApiString.add_conversation
                                                   : selectedQuestionType ==
-                                                          "Complete the paragraph"
+                                                          "Image puzzle"
                                                       ? ApiString
-                                                          .add_complete_the_paragraph
+                                                          .add_puzzle_the_image
                                                       : selectedQuestionType ==
-                                                              "Match the pairs"
+                                                              "Learning Slide"
                                                           ? ApiString
-                                                              .add_match_pair_question
-                                                          : ApiString
-                                                              .add_fill_blanks;
+                                                              .add_learning_slide
+                                                          : selectedQuestionType ==
+                                                                  "Complete the Word"
+                                                              ? ApiString
+                                                                  .add_complete_the_word
+                                                              : selectedQuestionType ==
+                                                                      "Complete the paragraph"
+                                                                  ? ApiString
+                                                                      .add_complete_the_paragraph
+                                                                  : selectedQuestionType ==
+                                                                          "Match the pairs"
+                                                                      ? ApiString
+                                                                          .add_match_pair_question
+                                                                      : ApiString
+                                                                          .add_fill_blanks;
 
       print(apiUrl);
       for (var map in data) {
@@ -1170,60 +1173,62 @@ else if (selectedQuestionType == "Card Flip") {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-        Row(
-        children: [
-        const Text(
-        'Question Data',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        const Spacer(),
-        Tooltip(
-          message: 'Export to Excel',
-          child: CircleAvatar(
-            backgroundColor: Colors.orange.shade100,
-            child: IconButton(
-              icon: Image.asset('assets/excel.png',
-                  width: 24, height: 24),
-              onPressed: () {
-                print("categoryId " + mainCategoryId!);
-                print("subcategoryId " + subCategoryId!);
-                print("topicId " + topicId!);
-                print("subtopicId " + subtopicId!);
-                if (mainCategoryId!.isNotEmpty &&
-                    subCategoryId!.isNotEmpty &&
-                    topicId!.isNotEmpty)
-                  showImportExportDialog("export");
-                else
-                  showSnackbar(
-                      message:
-                      "Please select category,subcategory,topic,etc");
-              },
+            Row(
+              children: [
+                const Text(
+                  'Question Data',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Tooltip(
+                  message: 'Export to Excel',
+                  child: CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: IconButton(
+                      icon: Image.asset('assets/excel.png',
+                          width: 24, height: 24),
+                      onPressed: () {
+                        print("categoryId " + mainCategoryId!);
+                        print("subcategoryId " + subCategoryId!);
+                        print("topicId " + topicId!);
+                        print("subtopicId " + subtopicId!);
+                        if (mainCategoryId!.isNotEmpty &&
+                            subCategoryId!.isNotEmpty &&
+                            topicId!.isNotEmpty)
+                          showImportExportDialog("export");
+                        else {
+                          showSnackbar(
+                              message:
+                                  "Please select category,subcategory,topic,etc");
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ),
-        ],
-      ),
-            SizedBox(height: 10),
+            boxH10(),
             Obx(() {
               return Center(
-                child: _getAllQuestionsApiController.isLoading.value
-                    ? CircularProgressIndicator()
-                    : (_getAllQuestionsApiController.getMcqslits.isEmpty
-                        ? const Center(
-                            child: Text(
-                              'No data available',
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey),
-                            ),
-                          ):
-                MCQ_QuestionTableScreen(main_category_id: mainCategoryId,
-                            sub_category_id: subCategoryId,
-                            topic_id: topicId,sub_topic_id: subtopicId,
-                            questionList: _getAllQuestionsApiController.getMcqslits)
-                )
-              );
+                  child: _getAllQuestionsApiController.isLoading.value
+                      ? const CircularProgressIndicator()
+                      : (_getAllQuestionsApiController.getMcqslits.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'No data available',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey),
+                              ),
+                            )
+                          : MCQ_QuestionTableScreen(
+                              main_category_id: mainCategoryId,
+                              sub_category_id: subCategoryId,
+                              topic_id: topicId,
+                              sub_topic_id: subtopicId,
+                              questionList:
+                                  _getAllQuestionsApiController.getMcqslits)));
             }),
           ],
         ),
@@ -1231,7 +1236,7 @@ else if (selectedQuestionType == "Card Flip") {
     );
   }
 
- Widget _buildGuessTheImageTable() {
+  Widget _buildGuessTheImageTable() {
     return Card(
       elevation: 1.0,
       color: Colors.white,
@@ -1245,60 +1250,61 @@ else if (selectedQuestionType == "Card Flip") {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-        Row(
-        children: [
-        const Text(
-        'Question Data',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        const Spacer(),
-        Tooltip(
-          message: 'Export to Excel',
-          child: CircleAvatar(
-            backgroundColor: Colors.orange.shade100,
-            child: IconButton(
-              icon: Image.asset('assets/excel.png',
-                  width: 24, height: 24),
-              onPressed: () {
-                print("categoryId " + mainCategoryId!);
-                print("subcategoryId " + subCategoryId!);
-                print("topicId " + topicId!);
-                print("subtopicId " + subtopicId!);
-                if (mainCategoryId!.isNotEmpty &&
-                    subCategoryId!.isNotEmpty &&
-                    topicId!.isNotEmpty)
-                  showImportExportDialog("export");
-                else
-                  showSnackbar(
-                      message:
-                      "Please select category,subcategory,topic,etc");
-              },
+            Row(
+              children: [
+                const Text(
+                  'Question Data',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Tooltip(
+                  message: 'Export to Excel',
+                  child: CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: IconButton(
+                      icon: Image.asset('assets/excel.png',
+                          width: 24, height: 24),
+                      onPressed: () {
+                        print("categoryId " + mainCategoryId!);
+                        print("subcategoryId " + subCategoryId!);
+                        print("topicId " + topicId!);
+                        print("subtopicId " + subtopicId!);
+                        if (mainCategoryId!.isNotEmpty &&
+                            subCategoryId!.isNotEmpty &&
+                            topicId!.isNotEmpty)
+                          showImportExportDialog("export");
+                        else
+                          showSnackbar(
+                              message:
+                                  "Please select category,subcategory,topic,etc");
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ),
-        ],
-      ),
             SizedBox(height: 10),
             Obx(() {
               return Center(
-                child: _getAllQuestionsApiController.isLoading.value
-                    ? CircularProgressIndicator()
-                    : (_getAllQuestionsApiController.guessTheImageList.isEmpty
-                        ? const Center(
-                            child: Text(
-                              'No data available',
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey),
-                            ),
-                          ):
-                GuessTheImageTable(main_category_id: mainCategoryId,
-                            sub_category_id: subCategoryId,
-                            topic_id: topicId,sub_topic_id: subtopicId,
-                            questionList: _getAllQuestionsApiController.guessTheImageList)
-                )
-              );
+                  child: _getAllQuestionsApiController.isLoading.value
+                      ? CircularProgressIndicator()
+                      : (_getAllQuestionsApiController.guessTheImageList.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'No data available',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey),
+                              ),
+                            )
+                          : GuessTheImageTable(
+                              main_category_id: mainCategoryId,
+                              sub_category_id: subCategoryId,
+                              topic_id: topicId,
+                              sub_topic_id: subtopicId,
+                              questionList: _getAllQuestionsApiController
+                                  .guessTheImageList)));
             }),
           ],
         ),
@@ -1308,9 +1314,11 @@ else if (selectedQuestionType == "Card Flip") {
 
   Widget _buildLearningSlideTable() {
     print(_getAllQuestionsApiController.getLearningSlideData.length);
-    _getAllQuestionsApiController.getLearningSlideData.forEach((element) {
-      print(element);
-    },);
+    _getAllQuestionsApiController.getLearningSlideData.forEach(
+      (element) {
+        print(element);
+      },
+    );
     return Card(
       elevation: 1.0,
       color: Colors.white,
@@ -1324,60 +1332,62 @@ else if (selectedQuestionType == "Card Flip") {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-        Row(
-        children: [
-        const Text(
-        'Question Data',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        const Spacer(),
-        Tooltip(
-          message: 'Export to Excel',
-          child: CircleAvatar(
-            backgroundColor: Colors.orange.shade100,
-            child: IconButton(
-              icon: Image.asset('assets/excel.png',
-                  width: 24, height: 24),
-              onPressed: () {
-                print("categoryId " + mainCategoryId!);
-                print("subcategoryId " + subCategoryId!);
-                print("topicId " + topicId!);
-                print("subtopicId " + subtopicId!);
-                if (mainCategoryId!.isNotEmpty &&
-                    subCategoryId!.isNotEmpty &&
-                    topicId!.isNotEmpty)
-                  showImportExportDialog("export");
-                else
-                  showSnackbar(
-                      message:
-                      "Please select category,subcategory,topic,etc");
-              },
+            Row(
+              children: [
+                const Text(
+                  'Question Data',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Tooltip(
+                  message: 'Export to Excel',
+                  child: CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: IconButton(
+                      icon: Image.asset('assets/excel.png',
+                          width: 24, height: 24),
+                      onPressed: () {
+                        print("categoryId " + mainCategoryId!);
+                        print("subcategoryId " + subCategoryId!);
+                        print("topicId " + topicId!);
+                        print("subtopicId " + subtopicId!);
+                        if (mainCategoryId!.isNotEmpty &&
+                            subCategoryId!.isNotEmpty &&
+                            topicId!.isNotEmpty)
+                          showImportExportDialog("export");
+                        else
+                          showSnackbar(
+                              message:
+                                  "Please select category,subcategory,topic,etc");
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ),
-        ],
-      ),
             SizedBox(height: 10),
             Obx(() {
               return Center(
                   child: _getAllQuestionsApiController.isLoading.value
                       ? CircularProgressIndicator()
-                      : (_getAllQuestionsApiController.getLearningSlideData.isEmpty
-                      ? const Center(
-                    child: Text(
-                      'No data available',
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey),
-                    ),
-                  ):
-                  LearningSlideTable(main_category_id: mainCategoryId,
-                      sub_category_id: subCategoryId,
-                      topic_id: topicId,sub_topic_id: subtopicId,
-                      questionList: _getAllQuestionsApiController.getLearningSlideData)
-                  )
-              );
+                      : (_getAllQuestionsApiController
+                              .getLearningSlideData.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'No data available',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey),
+                              ),
+                            )
+                          : LearningSlideTable(
+                              main_category_id: mainCategoryId,
+                              sub_category_id: subCategoryId,
+                              topic_id: topicId,
+                              sub_topic_id: subtopicId,
+                              questionList: _getAllQuestionsApiController
+                                  .getLearningSlideData)));
             }),
           ],
         ),
@@ -1448,7 +1458,7 @@ else if (selectedQuestionType == "Card Flip") {
                         else
                           showSnackbar(
                               message:
-                              "Please select category,subcategory,topic,etc");
+                                  "Please select category,subcategory,topic,etc");
                       },
                     ),
                   ),
@@ -1470,10 +1480,13 @@ else if (selectedQuestionType == "Card Flip") {
                                   color: Colors.grey),
                             ),
                           )
-                        :   Re_Arrange_QuestionTableScreen(main_category_id: mainCategoryId,
-                    sub_category_id: subCategoryId,
-                    topic_id: topicId,sub_topic_id: subtopicId,
-                    questionList: _getAllQuestionsApiController.getReArrangeList)),
+                        : Re_Arrange_QuestionTableScreen(
+                            main_category_id: mainCategoryId,
+                            sub_category_id: subCategoryId,
+                            topic_id: topicId,
+                            sub_topic_id: subtopicId,
+                            questionList: _getAllQuestionsApiController
+                                .getReArrangeList)),
               );
             })
           ],
@@ -1482,7 +1495,7 @@ else if (selectedQuestionType == "Card Flip") {
     );
   }
 
-Widget _buildRearrangeTheSentenceQuestionsTable() {
+  Widget _buildRearrangeTheSentenceQuestionsTable() {
     return Card(
       elevation: 1.0,
       color: Colors.white,
@@ -1520,7 +1533,7 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                         else
                           showSnackbar(
                               message:
-                              "Please select category,subcategory,topic,etc");
+                                  "Please select category,subcategory,topic,etc");
                       },
                     ),
                   ),
@@ -1532,20 +1545,24 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
               return Center(
                 child: _getAllQuestionsApiController.isLoading.value
                     ? const CircularProgressIndicator()
-                    : (_getAllQuestionsApiController.getReArrangeSentenceDataList.isEmpty
-                    ? const Center(
-                  child: Text(
-                    'No data available',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey),
-                  ),
-                )
-                    :   Re_Arrange_Sentence_QuestionTableScreen(main_category_id: mainCategoryId,
-                    sub_category_id: subCategoryId,
-                    topic_id: topicId,sub_topic_id: subtopicId,
-                    questionList: _getAllQuestionsApiController.getReArrangeSentenceDataList)),
+                    : (_getAllQuestionsApiController
+                            .getReArrangeSentenceDataList.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'No data available',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey),
+                            ),
+                          )
+                        : Re_Arrange_Sentence_QuestionTableScreen(
+                            main_category_id: mainCategoryId,
+                            sub_category_id: subCategoryId,
+                            topic_id: topicId,
+                            sub_topic_id: subtopicId,
+                            questionList: _getAllQuestionsApiController
+                                .getReArrangeSentenceDataList)),
               );
             })
           ],
@@ -1607,19 +1624,22 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                 child: _getAllQuestionsApiController.isLoading.value
                     ? const CircularProgressIndicator()
                     : (_getAllQuestionsApiController.getCompleteWordData.isEmpty
-                    ? const Center(
-                  child: Text(
-                    'No data available',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey),
-                  ),
-                )
-                    :   CompleteWordTable(main_category_id: mainCategoryId,
-                    sub_category_id: subCategoryId,
-                    topic_id: topicId,sub_topic_id: subtopicId,
-                    questionList: _getAllQuestionsApiController.getCompleteWordData)),
+                        ? const Center(
+                            child: Text(
+                              'No data available',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey),
+                            ),
+                          )
+                        : CompleteWordTable(
+                            main_category_id: mainCategoryId,
+                            sub_category_id: subCategoryId,
+                            topic_id: topicId,
+                            sub_topic_id: subtopicId,
+                            questionList: _getAllQuestionsApiController
+                                .getCompleteWordData)),
               );
             }),
           ],
@@ -1672,20 +1692,22 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                 child: _getAllQuestionsApiController.isLoading.value
                     ? const CircularProgressIndicator()
                     : (_getAllQuestionsApiController.getTrueOrFalseList.isEmpty
-                    ? const Center(
-                  child: Text(
-                    'No data available',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey),
-                  ),
-                )
-                    :   TrueFalseDataTable(main_category_id: mainCategoryId,
-                    sub_category_id: subCategoryId,
-                    topic_id: topicId,sub_topic_id: subtopicId,
-                    questionList: _getAllQuestionsApiController.getTrueOrFalseList)),
-
+                        ? const Center(
+                            child: Text(
+                              'No data available',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey),
+                            ),
+                          )
+                        : TrueFalseDataTable(
+                            main_category_id: mainCategoryId,
+                            sub_category_id: subCategoryId,
+                            topic_id: topicId,
+                            sub_topic_id: subtopicId,
+                            questionList: _getAllQuestionsApiController
+                                .getTrueOrFalseList)),
               );
             })
           ],
@@ -1992,32 +2014,30 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
               ],
             ),
             SizedBox(height: 10),
-
-
             Obx(() {
               return Center(
                   child: _getAllQuestionsApiController.isLoading.value
-                      ? CircularProgressIndicator()
+                      ? const CircularProgressIndicator()
                       : (_getAllQuestionsApiController
-                              .getStoryPhrasesList.isEmpty
-                          ? const Center(
-                              child: Text(
-                                'No data available',
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.grey),
-                              ),
-                            )
-                          : Container()
-                      // ConversationTableScreen(main_category_id: mainCategoryId,
-                      //     sub_category_id: subCategoryId,
-                      //     topic_id: topicId,
-                      //     sub_topic_id: subtopicId,
-                      //     questionList: _getAllQuestionsApiController.getStoryPhrasesList, ///getConversationList
-                      //     onEditCallback: EditQuestion,)
-                      ));
+                      .getConversationList.isEmpty
+                      ? const Center(
+                    child: Text(
+                      'No data available',
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey),
+                    ),
+                  )
+                      : ConversationTable(
+                      main_category_id: mainCategoryId,
+                      sub_category_id: subCategoryId,
+                      topic_id: topicId,
+                      sub_topic_id: subtopicId,
+                      questionList: _getAllQuestionsApiController
+                          .getConversationList)));
             })
+
           ],
         ),
       ),
@@ -2094,7 +2114,8 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                               sub_category_id: subCategoryId,
                               topic_id: topicId,
                               sub_topic_id: subtopicId,
-                              questionList: _getAllQuestionsApiController.getFillInTheBlanksList)));
+                              questionList: _getAllQuestionsApiController
+                                  .getFillInTheBlanksList)));
             })
           ],
         ),
@@ -2152,24 +2173,25 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
             // Wrap the entire table in a SingleChildScrollView for both vertical and horizontal scrolling
             Obx(() {
               return Center(
-                child: _getAllQuestionsApiController.isLoading.value
-                    ? CircularProgressIndicator()
-                    : (_getAllQuestionsApiController.getMatchPairsList.isEmpty
-                        ? const Center(
-                            child: Text(
-                              'No data available',
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey),
-                            ),
-                          )
-                        : MatchThePairsQuestionTable(
-                    main_category_id: mainCategoryId,
-                    sub_category_id: subCategoryId,
-                    topic_id: topicId,
-                    sub_topic_id: subtopicId,
-                    questionList: _getAllQuestionsApiController.getMatchPairsList)));
+                  child: _getAllQuestionsApiController.isLoading.value
+                      ? CircularProgressIndicator()
+                      : (_getAllQuestionsApiController.getMatchPairsList.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'No data available',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey),
+                              ),
+                            )
+                          : MatchThePairsQuestionTable(
+                              main_category_id: mainCategoryId,
+                              sub_category_id: subCategoryId,
+                              topic_id: topicId,
+                              sub_topic_id: subtopicId,
+                              questionList: _getAllQuestionsApiController
+                                  .getMatchPairsList)));
             })
           ],
         ),
@@ -2229,29 +2251,30 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
               return Center(
                   child: _getAllQuestionsApiController.isLoading.value
                       ? CircularProgressIndicator()
-                      : (_getAllQuestionsApiController
-                      .getCardFlipList.isEmpty
-                      ? const Center(
-                    child: Text(
-                      'No data available',
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey),
-                    ),
-                  )
-                      : CardFlipQuestionTable(
-                      main_category_id: mainCategoryId,
-                      sub_category_id: subCategoryId,
-                      topic_id: topicId,
-                      sub_topic_id: subtopicId,
-                      questionList: _getAllQuestionsApiController.getCardFlipList)));
+                      : (_getAllQuestionsApiController.getCardFlipList.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'No data available',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey),
+                              ),
+                            )
+                          : CardFlipQuestionTable(
+                              main_category_id: mainCategoryId,
+                              sub_category_id: subCategoryId,
+                              topic_id: topicId,
+                              sub_topic_id: subtopicId,
+                              questionList: _getAllQuestionsApiController
+                                  .getCardFlipList)));
             })
           ],
         ),
       ),
     );
   }
+
   Widget _buildQuestionsImagePuzzleTable() {
     return Card(
       elevation: 1.0,
@@ -2305,22 +2328,23 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                   child: _getAllQuestionsApiController.isLoading.value
                       ? CircularProgressIndicator()
                       : (_getAllQuestionsApiController
-                      .imagePuzzleDataList.isEmpty
-                      ? const Center(
-                    child: Text(
-                      'No data available',
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey),
-                    ),
-                  )
-                      : ImagePuzzleQuestionTable(
-                      main_category_id: mainCategoryId,
-                      sub_category_id: subCategoryId,
-                      topic_id: topicId,
-                      sub_topic_id: subtopicId,
-                      questionList: _getAllQuestionsApiController.imagePuzzleDataList)));
+                              .imagePuzzleDataList.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'No data available',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey),
+                              ),
+                            )
+                          : ImagePuzzleQuestionTable(
+                              main_category_id: mainCategoryId,
+                              sub_category_id: subCategoryId,
+                              topic_id: topicId,
+                              sub_topic_id: subtopicId,
+                              questionList: _getAllQuestionsApiController
+                                  .imagePuzzleDataList)));
             })
           ],
         ),
@@ -2381,22 +2405,23 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                   child: _getAllQuestionsApiController.isLoading.value
                       ? CircularProgressIndicator()
                       : (_getAllQuestionsApiController
-                      .getCompleteParaData.isEmpty
-                      ? const Center(
-                    child: Text(
-                      'No data available',
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey),
-                    ),
-                  )
-                      : CompleteParagraphTable(
-                      main_category_id: mainCategoryId,
-                      sub_category_id: subCategoryId,
-                      topic_id: topicId,
-                      sub_topic_id: subtopicId,
-                      questionList: _getAllQuestionsApiController.getCompleteParaData)));
+                              .getCompleteParaData.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'No data available',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey),
+                              ),
+                            )
+                          : CompleteParagraphTable(
+                              main_category_id: mainCategoryId,
+                              sub_category_id: subCategoryId,
+                              topic_id: topicId,
+                              sub_topic_id: subtopicId,
+                              questionList: _getAllQuestionsApiController
+                                  .getCompleteParaData)));
             })
           ],
         ),
@@ -2602,16 +2627,16 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
         return _buildCompleteWordContent();
       case "Re-Arrange the Word":
         return _reArrangeWord();
-        case "Guess The Image":
+      case "Guess The Image":
         return _guessTheImage();
-        case "Re-Arrange Sentence":
+      case "Re-Arrange Sentence":
         return _reArrangeSntence();
-        // case "Image Letter Match":
-        // // return _imageLetterMatch();
+      // case "Image Letter Match":
+      // // return _imageLetterMatch();
       case "True/False":
         return _buildTrueFalseContent();
-      case "Story":
-        return _buildStoryContent();
+      // case "Story":
+      //   return _buildStoryContent();
       case "Phrases":
         return _buildPhrasesContent();
       case "Conversation":
@@ -2645,7 +2670,7 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
           sub_category_id: subCategoryId,
           main_category_id: mainCategoryId,
         );
-        case "Image puzzle":
+      case "Image puzzle":
         return BuildImagePuzzleContent(
           pointsController: pointsController,
           sub_topic_id: subtopicId,
@@ -2722,9 +2747,9 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
           answer: correctAnswerController.text,
           points: pointsValue.toString(),
           question_formate: selectedFormat,
-          options:"||||",
+          options: "||||",
           index: indexController.text);
-    }else if (selectedQuestionType == "Complete the Word") {
+    } else if (selectedQuestionType == "Complete the Word") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
       questionApiController.addCompleteWordApi(
           mainCategoryId: mainCategoryId.toString(),
@@ -2783,7 +2808,8 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
       );
     } else if (selectedQuestionType == "Guess The Image") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
-      questionApiController.addGuessTheImage(mainCategoryId: mainCategoryId,
+      questionApiController.addGuessTheImage(
+          mainCategoryId: mainCategoryId,
           subCategoryId: subCategoryId,
           topicId: topicId,
           subTopicId: subtopicId.toString(),
@@ -2797,7 +2823,6 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
           points: pointsValue.toString(),
           index: indexController.text);
     } else if (selectedQuestionType == "Learning Slide") {
-
     } else if (selectedQuestionType == "Complete the paragraph") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
 
@@ -2821,8 +2846,7 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
         index: indexController.text,
         context: context,
       );
-    }
-    else if (selectedQuestionType == "Fill in the blanks") {
+    } else if (selectedQuestionType == "Fill in the blanks") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
       questionApiController.addFillBlanksApi(
         mainCategoryId: mainCategoryId.toString(),
@@ -2842,7 +2866,30 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
         optionC: optionControllers[2].text,
         optionD: optionControllers[3].text,
       );
-    } else if (selectedQuestionType == "Alphabets Example") {
+    }
+    else if (selectedQuestionType == "Conversation") {
+      int pointsValue = int.tryParse(pointsController.text) ?? 0;
+      String botConversations = botConversationController.text;
+      String userConversations = userConversationController.text;
+      String options = pipeSeparatedController.text;
+      String answers = correctAnswerController.text;
+      // Call the API method
+      questionApiController.addConversationApi(
+        mainCategoryId: mainCategoryId.toString(),
+        subCategoryId: subCategoryId.toString(),
+        topicId: topicId.toString(),
+        subTopicId: subtopicId.toString(),
+        questionType: selectedQuestionType.toString(),
+        title: titleController.text,
+        answers: answers, // Pipe-separated string
+        points: pointsValue.toString(),
+        index: indexController.text,
+        botConversations: botConversations, // Pipe-separated string
+        userConversations: userConversations, // Pipe-separated string
+        userConversationType:selectedUserConversationType.toString(),
+        options: options,
+      );
+    }else if (selectedQuestionType == "Alphabets Example") {
       int pointsValue = int.tryParse(pointsController.text) ?? 0;
       questionApiController.addFillBlanksApi(
         mainCategoryId: mainCategoryId.toString(),
@@ -3540,8 +3587,8 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                             child: CircleAvatar(
                               backgroundColor: Colors.orange,
                               radius: 15,
-                              child:
-                                  Icon(Icons.add, size: 18, color: Colors.black),
+                              child: Icon(Icons.add,
+                                  size: 18, color: Colors.black),
                             ),
                           ),
                         ),
@@ -3558,8 +3605,6 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
       ),
     );
   }
-
-
 
   /// Guess The Image
   Widget _guessTheImage() {
@@ -3614,31 +3659,31 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                   },
                   child: pathsFile != null
                       ? ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.memory(
-                      pathsFile!,
-                      width: 120,
-                      height: 120,
-                      fit: BoxFit.cover,
-                    ),
-                  )
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.memory(
+                            pathsFile!,
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.cover,
+                          ),
+                        )
                       : Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.grey[200],
-                    ),
-                    child: const Align(
-                      alignment: Alignment.bottomRight,
-                      child: CircleAvatar(
-                        backgroundColor: Colors.orange,
-                        radius: 15,
-                        child:
-                        Icon(Icons.add, size: 18, color: Colors.black),
-                      ),
-                    ),
-                  ),
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.grey[200],
+                          ),
+                          child: const Align(
+                            alignment: Alignment.bottomRight,
+                            child: CircleAvatar(
+                              backgroundColor: Colors.orange,
+                              radius: 15,
+                              child: Icon(Icons.add,
+                                  size: 18, color: Colors.black),
+                            ),
+                          ),
+                        ),
                 ),
               ),
               boxH10(),
@@ -3762,7 +3807,8 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                   onChanged: (value) {
                     setState(() {
                       selectedFormat = value!;
-                    });                  },
+                    });
+                  },
                 ),
                 const Text("Native language"),
               ],
@@ -3884,23 +3930,27 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               boxH08(),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10.0,
-                  mainAxisSpacing: 5.0,
-                  childAspectRatio: 2.8,
-                ),
-                itemCount: convo_optionControllers.length,
-                itemBuilder: (context, index) {
-                  return CustomTextField(
-                    controller: convo_optionControllers[index],
-                    labelText: "Option ${index + 1}",
-                  );
-                },
-              ),
+            CustomTextField(
+              controller: pipeSeparatedController,
+              labelText: "Enter options (Pipe separated)",
+            ),
+              // GridView.builder(
+              //   shrinkWrap: true,
+              //   physics: NeverScrollableScrollPhysics(),
+              //   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              //     crossAxisCount: 2,
+              //     crossAxisSpacing: 10.0,
+              //     mainAxisSpacing: 5.0,
+              //     childAspectRatio: 2.8,
+              //   ),
+              //   itemCount: convo_optionControllers.length,
+              //   itemBuilder: (context, index) {
+              //     return CustomTextField(
+              //       controller: convo_optionControllers[index],
+              //       labelText: "Option ${index + 1}",
+              //     );
+              //   },
+              // ),
               boxH20(),
               const Text(
                 'Enter correct answer',
@@ -3987,31 +4037,31 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                   },
                   child: pathsFile != null
                       ? ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.memory(
-                      pathsFile!,
-                      width: 120,
-                      height: 120,
-                      fit: BoxFit.cover,
-                    ),
-                  )
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.memory(
+                            pathsFile!,
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.cover,
+                          ),
+                        )
                       : Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.grey[200],
-                    ),
-                    child: const Align(
-                      alignment: Alignment.bottomRight,
-                      child: CircleAvatar(
-                        backgroundColor: Colors.orange,
-                        radius: 15,
-                        child:
-                        Icon(Icons.add, size: 18, color: Colors.black),
-                      ),
-                    ),
-                  ),
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.grey[200],
+                          ),
+                          child: const Align(
+                            alignment: Alignment.bottomRight,
+                            child: CircleAvatar(
+                              backgroundColor: Colors.orange,
+                              radius: 15,
+                              child: Icon(Icons.add,
+                                  size: 18, color: Colors.black),
+                            ),
+                          ),
+                        ),
                 ),
               ),
               boxH10(),
@@ -4027,7 +4077,8 @@ Widget _buildRearrangeTheSentenceQuestionsTable() {
                   crossAxisCount: 2, // Number of items per row
                   crossAxisSpacing: 10.0, // Spacing between columns
                   mainAxisSpacing: 5.0, // Spacing between rows
-                  childAspectRatio: 2.8, // Adjust height and width of grid items
+                  childAspectRatio:
+                      2.8, // Adjust height and width of grid items
                 ),
                 itemCount: optionControllers.length,
                 itemBuilder: (context, index) {

@@ -3,6 +3,7 @@ import 'package:blissiqadmin/Global/Widgets/Button/CustomButton.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
+import 'package:blissiqadmin/Home/Users/SchoolSearchScreen.dart';
 import 'package:blissiqadmin/auth/Controller/AuthController.dart';
 import 'package:blissiqadmin/auth/Controller/SchoolController/SchoolController.dart';
 import 'package:file_picker/file_picker.dart';
@@ -24,7 +25,6 @@ class _MentorRegistrationState extends State<MentorRegistration> {
   var pathsFileName;
   final SchoolController schoolController = Get.put(SchoolController());
 
-
   @override
   void initState() {
     super.initState();
@@ -42,16 +42,16 @@ class _MentorRegistrationState extends State<MentorRegistration> {
       allowedExtensions: ['png', 'jpg', 'jpeg', 'heic'],
     );
 
-      if (result != null && result.files.isNotEmpty) {
-        setState(() {
-          _paths = result.files;
-          pathsFile = _paths!.first.bytes; // Store the bytes
-          pathsFileName = _paths!.first.name; // Store the file name
-        });
-      } else {
-        print('No file selected');
-      }
+    if (result != null && result.files.isNotEmpty) {
+      setState(() {
+        _paths = result.files;
+        pathsFile = _paths!.first.bytes; // Store the bytes
+        pathsFileName = _paths!.first.name; // Store the file name
+      });
+    } else {
+      print('No file selected');
     }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -229,12 +229,15 @@ class _MentorRegistrationState extends State<MentorRegistration> {
                               fontSize: 18,
                             ),
                             contentPadding: EdgeInsets.symmetric(
-                              horizontal: MediaQuery.of(context).size.width * 0.01,
-                              vertical: MediaQuery.of(context).size.height * 0.01,
+                              horizontal:
+                                  MediaQuery.of(context).size.width * 0.01,
+                              vertical:
+                                  MediaQuery.of(context).size.height * 0.01,
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.0),
-                              borderSide: const BorderSide(color: Colors.blueAccent, width: 0.8),
+                              borderSide: const BorderSide(
+                                  color: Colors.blueAccent, width: 0.8),
                             ),
                             filled: true,
                             fillColor: Colors.white,
@@ -259,14 +262,96 @@ class _MentorRegistrationState extends State<MentorRegistration> {
                           }).toList(),
                           icon: Icon(
                             Icons.arrow_drop_down_circle,
-                            color : Colors.grey.shade600,
+                            color: Colors.grey.shade600,
                             size: 18,
                           ),
                         );
                       }
                     }),
                     boxH20(),
-
+                    boxH05(),
+                    const Center(child: Text("OR")),
+                    boxH05(),
+                    Obx(() => Container(
+                          width: Get.width * 0.9,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey.shade300),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 4,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'School: ',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            mentorController.selectedSchoolName
+                                                .value, // ✅ Will update instantly
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.blue,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                SchoolSearchScreen()),
+                                      );
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.all(6),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.blue,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(Icons.add,
+                                          color: Colors.white, size: 20),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        )),
+                    boxH02(),
+                    const Text(
+                      '*If your school is not found in the dropdown, search and add it here.',
+                      style: TextStyle(fontSize: 13, color: Colors.grey),
+                    ),
+                    boxH20(),
                     // Name TextField
                     CustomTextField(
                       controller: mentorController.nameController,
@@ -379,7 +464,6 @@ class _MentorRegistrationState extends State<MentorRegistration> {
                       prefixIcon: const Icon(Icons.work_outline),
                     ),
                     boxH20(),
-
                     // Qualification TextField
                     CustomTextField(
                       controller: mentorController.qualificationController,
@@ -388,7 +472,6 @@ class _MentorRegistrationState extends State<MentorRegistration> {
                       prefixIcon: Icon(Icons.school_outlined),
                     ),
                     boxH20(),
-
                     // Bio/Introduction TextField
                     CustomTextField(
                       controller: mentorController.introBio,
@@ -411,7 +494,8 @@ class _MentorRegistrationState extends State<MentorRegistration> {
                       obscureText: !mentorController.passwordVisible.value,
                       sufixIcon: IconButton(
                         icon: Icon(mentorController.passwordVisible.value
-                            ? Icons.visibility : Icons.visibility_off),
+                            ? Icons.visibility
+                            : Icons.visibility_off),
                         onPressed: () {
                           setState(() {
                             mentorController.passwordVisible.value =
@@ -456,44 +540,72 @@ class _MentorRegistrationState extends State<MentorRegistration> {
                             ? CircularProgressIndicator()
                             : CustomButton(
                                 label: "Register",
-                                onPressed: () {
-                                  if (mentorController.formKey.currentState!
-                                      .validate()) {
-                                    mentorController.mentorRegistration(
-                                      userType: mentorController
-                                          .selectedUserType.value,
-                                      fullName:
-                                          mentorController.nameController.text,
-                                      email:
-                                          mentorController.emailController.text,
-                                      address: mentorController
-                                          .addressController.text,
-                                      contactNo:
-                                          mentorController.phNoController.text,
-                                      experience: mentorController
-                                          .experienceController.text,
-                                      qualification: mentorController
-                                          .qualificationController.text,
-                                      introBio: mentorController.introBio.text,
-                                      password: mentorController
-                                          .passwordController.text,
-                                      confirmPassword: mentorController
-                                          .confirmPasswordController.text,
-                                      context: context,
-                                      profileImageBytes: pathsFile,
-                                        schoolId : selectedSchool
-                                    ).then((response) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Registration successful!')),
-                                      );
-                                      Navigator.pop(context, true);
-                                    }).
-                                    catchError((error) {
+                                onPressed: () async {
+                                  if (mentorController
+                                      .selectedSchoolAddress.isNotEmpty) {
+                                    await mentorController.registerNewSchool(
+                                        name: mentorController
+                                            .selectedSchoolName.value,
+                                        address: mentorController
+                                            .selectedSchoolAddress.value,
+                                        latitude: mentorController
+                                            .selectedSchoolLat.value,
+                                        longitude: mentorController
+                                            .selectedSchoolLng.value);
+                                    print(
+                                        "School ID: ${mentorController.selectedSchoolId}");
+                                  }
 
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Error occurred: $error')),
-                                      );
-                                    });
+                                  if (mentorController
+                                      .selectedSchoolId.isNotEmpty) {
+                                    if (mentorController.formKey.currentState!
+                                        .validate()) {
+                                      mentorController
+                                          .mentorRegistration(
+                                        userType: mentorController
+                                            .selectedUserType.value,
+                                        fullName: mentorController
+                                            .nameController.text,
+                                        email: mentorController
+                                            .emailController.text,
+                                        address: mentorController
+                                            .addressController.text,
+                                        contactNo: mentorController
+                                            .phNoController.text,
+                                        experience: mentorController
+                                            .experienceController.text,
+                                        qualification: mentorController
+                                            .qualificationController.text,
+                                        introBio:
+                                            mentorController.introBio.text,
+                                        password: mentorController
+                                            .passwordController.text,
+                                        confirmPassword: mentorController
+                                            .confirmPasswordController.text,
+                                        profileImageBytes: pathsFile,
+                                        schoolId: mentorController
+                                            .selectedSchoolId.value,
+                                        schoolName: mentorController
+                                            .selectedSchoolName.value,
+                                        context: context,
+                                      )
+                                          .then((response) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  'Registration successful!')),
+                                        );
+                                        Navigator.pop(context, true);
+                                      }).catchError((error) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                              content: Text(
+                                                  'Error occurred: $error')),
+                                        );
+                                      });
+                                    }
                                   }
                                 },
                               ),
@@ -508,4 +620,5 @@ class _MentorRegistrationState extends State<MentorRegistration> {
       ),
     ));
   }
+
 }

@@ -695,7 +695,7 @@ print(questionList);
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Confirm Deletion'),
-          content: const Text('Do you really want to delete the selected phrases?'),
+          content: const Text('Do you really want to delete the selected match the pair?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {

@@ -1,23 +1,20 @@
-import 'dart:io';
-
-import 'package:blissiqadmin/Global/constants/ApiString.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/controller/GetAllQuestionsApiController.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/GetCompleteWordModel.dart';
+import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/UserConversationModel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
-import '../../../../Global/constants/CustomTextField.dart';
-import '../../controller/GetAllQuestionsApiController.dart';
-import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_rearrange_model.dart';
 
-class Re_Arrange_QuestionTableScreen extends StatefulWidget {
+
+class ConversationTable extends StatefulWidget {
   final String main_category_id;
   final String sub_category_id;
   final String topic_id;
   final String sub_topic_id;
-  final List<ReArrange> questionList;
+  final List<UserConversationalData> questionList;
 
-  Re_Arrange_QuestionTableScreen({
+  ConversationTable({
     required this.main_category_id,
     required this.sub_category_id,
     required this.topic_id,
@@ -26,32 +23,32 @@ class Re_Arrange_QuestionTableScreen extends StatefulWidget {
   });
 
   @override
-  _QuestionTableScreenState createState() => _QuestionTableScreenState();
+  _ConversationTableState createState() => _ConversationTableState();
 }
 
-class _QuestionTableScreenState extends State<Re_Arrange_QuestionTableScreen> {
+class _ConversationTableState extends State<ConversationTable> {
   TextEditingController _searchController = TextEditingController();
-  List<ReArrange> _filteredQuestions = [];
+  List<UserConversationalData> _filteredQuestions = [];
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   final _verticalScrollController = ScrollController();
-  final _horizontalScrollController = ScrollController();
   String _selectedQuestionIds = "";
   bool isSelectAll = false;
   List<String> selected_question_ids = [];
-  late QuestionDataSource _dataSource;
+  late ConversationDataSource _dataSource;
   final GetAllQuestionsApiController _getdeleteApiController = Get.find();
 
   @override
   void initState() {
     super.initState();
-    _dataSource = QuestionDataSource(
-      widget.questionList,
+    _filteredQuestions = widget.questionList;
+    _dataSource = ConversationDataSource(
+      _filteredQuestions,
           (selectedIds) {
         setState(() {
           _selectedQuestionIds = selectedIds;
         });
       },
-      context, // Pass context to the data source
+      context,
     );
     _filteredQuestions = widget.questionList;
   }
@@ -63,45 +60,21 @@ class _QuestionTableScreenState extends State<Re_Arrange_QuestionTableScreen> {
       } else {
         _filteredQuestions = widget.questionList
             .where((question) =>
-        question.question != null &&
-            question.question!.toLowerCase().contains(query.toLowerCase()))
+        question.title != null &&
+            question.title!.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
-
-      _dataSource = QuestionDataSource(
+      _dataSource = ConversationDataSource(
         _filteredQuestions,
             (selectedIds) {
           setState(() {
             _selectedQuestionIds = selectedIds;
           });
         },
-        context, // Pass context to the data source
+        context,
       );
     });
   }
-
-  void _removeSelectedQuestions() {
-    final selectedIdsSet = _selectedQuestionIds.split('|').toSet();
-    if (mounted) {
-      setState(() {
-        _filteredQuestions.removeWhere(
-                (question) => selectedIdsSet.contains(question.id));
-        _selectedQuestionIds = '';
-        _dataSource = QuestionDataSource(
-          _filteredQuestions,
-              (selectedIds) {
-            setState(() {
-              _selectedQuestionIds = selectedIds;
-            });
-          },
-          context, // Pass context to the data source
-        );
-      });
-    }
-  }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -125,19 +98,17 @@ class _QuestionTableScreenState extends State<Re_Arrange_QuestionTableScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child:
-                      CustomTextField(
-                        controller: _searchController,
-                        labelText: "Search by Question",
-                        onChanged: _filterQuestions,
-                      )
+                    padding: const EdgeInsets.only(right: 16.0),
+                    child: CustomTextField(
+                      controller: _searchController,
+                      labelText: "Search by Question",
+                      onChanged: _filterQuestions,
+                    ),
                   ),
                 ),
                 if (_selectedQuestionIds.isNotEmpty)
@@ -158,20 +129,15 @@ class _QuestionTableScreenState extends State<Re_Arrange_QuestionTableScreen> {
                       ),
                     ),
                     onPressed: () async {
-                      print("Selected Ids - $_selectedQuestionIds");
-                      Future.delayed(const Duration(seconds: 1), () async {
-                        //_removeSelectedQuestions();
-                        bool confirmed = await _dataSource._showConfirmationDialog(context);
-                        if(confirmed){
-                          _dataSource._deleteSelectedQuestions(_selectedQuestionIds);
-                        }
-                      });
+                      bool confirmed = await _dataSource._showConfirmationDialog(context);
+                      if (confirmed) {
+                        _dataSource._deleteSelectedQuestions(_selectedQuestionIds);
+                      }
                     },
                   ),
               ],
             ),
             const SizedBox(height: 20),
-            // Paginated DataTable
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
@@ -207,7 +173,7 @@ class _QuestionTableScreenState extends State<Re_Arrange_QuestionTableScreen> {
                                 value: _dataSource.isSelectAll,
                                 onChanged: (bool? value) {
                                   _dataSource.toggleSelectAll(value!);
-                                  setState(() async {});
+                                  setState(() {});
                                 },
                               ),
                               const Text("Select All"),
@@ -217,10 +183,12 @@ class _QuestionTableScreenState extends State<Re_Arrange_QuestionTableScreen> {
                         DataColumn(label: Text("Index")),
                         DataColumn(label: Text("Question Type")),
                         DataColumn(label: Text("Title")),
-                        DataColumn(label: Text("Re_Arrange Word")),
-                        DataColumn(label: Text("Correct Word")),
+                        DataColumn(label: Text("Bot Conversation")),
+                        DataColumn(label: Text("User Conversation")),
+                        DataColumn(label: Text("user_conversation_type")),
+                        DataColumn(label: Text("Options")),
+                        DataColumn(label: Text("Answer")),
                         DataColumn(label: Text("Points")),
-                        DataColumn(label: Text("Question Image")),
                         DataColumn(label: Text("Edit")),
                       ],
                       source: _dataSource,
@@ -234,143 +202,40 @@ class _QuestionTableScreenState extends State<Re_Arrange_QuestionTableScreen> {
       ),
     );
   }
-
 }
 
-class QuestionDataSource extends DataTableSource {
-  final List<ReArrange> questions;
+class ConversationDataSource extends DataTableSource {
+  final List<UserConversationalData> questions;
   final Function(String) onSelectionChanged;
-  //final BuildContext context;
   final Set<String> selectedQuestionIds = {};
   bool isSelectAll = false;
   BuildContext context;
 
-  int? editingRowIndex; // Track which row is being edited
-  List<TextEditingController> indexControllers = [];
+  int? editingRowIndex;
   List<TextEditingController> questionTypeControllers = [];
   List<TextEditingController> titleControllers = [];
-  List<TextEditingController> questionControllers = [];
-  List<TextEditingController> questionImageControllers = [];
+  List<TextEditingController> answerControllers = [];
+  List<TextEditingController> indexControllers = [];
   List<TextEditingController> pointsControllers = [];
-  List<TextEditingController> correctAnswerControllers = [];
-
-  List<PlatformFile>? _paths;
-  var pathsFile;
-  var pathsFileName;
-  bool isFilePicked = false;
-  pickFile() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowMultiple: false,
-      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
-      allowedExtensions: [
-        'bmp',
-        'dib',
-        'gif',
-        'jfif',
-        'jpe',
-        'jpg',
-        'jpeg',
-        'pbm',
-        'pgm',
-        'ppm',
-        'pnm',
-        'pfm',
-        'png',
-        'apng',
-        'blp',
-        'bufr',
-        'cur',
-        'pcx',
-        'dcx',
-        'dds',
-        'ps',
-        'eps',
-        'fit',
-        'fits',
-        'fli',
-        'flc',
-        'ftc',
-        'ftu',
-        'gbr',
-        'grib',
-        'h5',
-        'hdf',
-        'jp2',
-        'j2k',
-        'jpc',
-        'jpf',
-        'jpx',
-        'j2c',
-        'icns',
-        'ico',
-        'im',
-        'iim',
-        'mpg',
-        'mpeg',
-        'tif',
-        'tiff',
-        'mpo',
-        'msp',
-        'palm',
-        'pcd',
-        'pdf',
-        'pxr',
-        'psd',
-        'qoi',
-        'bw',
-        'rgb',
-        'rgba',
-        'sgi',
-        'ras',
-        'tga',
-        'icb',
-        'vda',
-        'vst',
-        'webp',
-        'wmf',
-        'emf',
-        'xbm',
-        'xpm'
-      ],
-    );
-
-    if (result != null && result.files.isNotEmpty) {
-      _paths = result.files;
-      pathsFile = _paths!.first.bytes; // Store the bytes
-      pathsFileName = _paths!.first.name; // Store the file name
-      isFilePicked = true;
-      notifyListeners();
-    } else {
-      print('No file selected');
-    }
-  }
+  List<TextEditingController> optionAControllers = [];
+  List<TextEditingController> userConversationTypeControllers = [];
+  List<TextEditingController> botConversationControllers = [];
+  List<TextEditingController> userConversationControllers = [];
 
   final GetAllQuestionsApiController updateQueApiController = Get.find();
 
-  QuestionDataSource(this.questions, this.onSelectionChanged, this.context) {
-
-    // Initialize controllers for each question
+  ConversationDataSource(this.questions, this.onSelectionChanged, this.context) {
     for (var question in questions) {
-
       questionTypeControllers.add(TextEditingController(text: question.questionType));
-
-      indexControllers.add(TextEditingController(text: question.index.toString()));
-      correctAnswerControllers.add(TextEditingController(text: question.answer.toString()));
-
       titleControllers.add(TextEditingController(text: question.title));
-
-      questionControllers.add(TextEditingController(text: question.question));
-
-      questionImageControllers.add(TextEditingController(text: question.qImage));
-
-      //answerControllers.add(TextEditingController(text: question.answer));
-
-      //indexControllers.add(TextEditingController(text: question.index.toString()));
-
+      answerControllers.add(TextEditingController(text: question.answer));
+      userConversationTypeControllers.add(TextEditingController(text: question.userConversationType));
+      optionAControllers.add(TextEditingController(text: question.options));
+      indexControllers.add(TextEditingController(text: question.index.toString()));
       pointsControllers.add(TextEditingController(text: question.points.toString()));
+      botConversationControllers.add(TextEditingController(text: question.botConversation ?? ""));
+      userConversationControllers.add(TextEditingController(text: question.userConversation ?? ""));
     }
-    // Initialize controllers for each question
   }
 
   @override
@@ -381,6 +246,16 @@ class QuestionDataSource extends DataTableSource {
 
     return DataRow(
       selected: isSelected,
+      onSelectChanged: (bool? value) {
+        if (value == true) {
+          selectedQuestionIds.add(question.id!);
+        } else {
+          selectedQuestionIds.remove(question.id);
+        }
+        isSelectAll = selectedQuestionIds.length == questions.length;
+        onSelectionChanged(selectedQuestionIds.join('|'));
+        notifyListeners();
+      },
       cells: [
         DataCell(
           Checkbox(
@@ -392,20 +267,32 @@ class QuestionDataSource extends DataTableSource {
                 selectedQuestionIds.remove(question.id);
               }
               isSelectAll = selectedQuestionIds.length == questions.length;
-              onSelectionChanged(
-                selectedQuestionIds.join('|'),
-              );
+              onSelectionChanged(selectedQuestionIds.join('|'));
               notifyListeners();
             },
           ),
         ),
+
         DataCell(_buildEditableField(index, indexControllers)),
         DataCell(_buildEditableField(index, questionTypeControllers)),
         DataCell(_buildEditableField(index, titleControllers)),
-        DataCell(_buildEditableField(index, questionControllers)),
-        DataCell(_buildEditableField(index, correctAnswerControllers)),
+        // DataCell(Text(question.index.toString())),
+        // DataCell(Text(question.questionType ?? "")),
+        // DataCell(Text(question.title ?? "")),
+        // DataCell(Text(question.botConversation ?? "")),
+        // DataCell(Text(question.userConversation ?? "")),
+        // DataCell(Text(question.userConversationType ?? "")),
+        // DataCell(Text(question.options ?? "")),
+        // DataCell(Text(question.answer ?? "")),
+        // DataCell(Text(question.points.toString())),
+
+        DataCell(_buildEditableField(index, botConversationControllers)),
+        DataCell(_buildEditableField(index, userConversationControllers)),
+        DataCell(_buildEditableField(index, userConversationTypeControllers)),
+
+        DataCell(_buildEditableField(index, optionAControllers)),
+        DataCell(_buildEditableField(index, answerControllers)),
         DataCell(_buildEditableField(index, pointsControllers)),
-        DataCell(_buildEditableField(index, questionImageControllers)),
         DataCell(_buildEditButton(index)),
       ],
     );
@@ -414,40 +301,8 @@ class QuestionDataSource extends DataTableSource {
   Widget _buildEditableField(int index, List<TextEditingController> controllers) {
     if (index >= controllers.length) return const Text("");
 
-    if (controllers == questionImageControllers) {
-      return editingRowIndex == index
-          ? SizedBox(
-        width: 50,
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: isFilePicked ? Colors.green : Colors.blue, width: 1.5),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: IconButton(
-            icon: Icon(Icons.image, color: isFilePicked ? Colors.green :Colors.blue),
-            onPressed: () => pickFile(),
-          ),
-        ),
-      )
-          : controllers[index].text.isNotEmpty && controllers[index].text != "null"
-          ? SizedBox(
-        width: 50, // Ensure image preview doesn't take excessive space
-        child: CachedNetworkImage(
-          imageUrl: ApiString.ImgBaseUrl + controllers[index].text,
-          progressIndicatorBuilder: (context, url, downloadProgress) =>
-              CircularProgressIndicator(value: downloadProgress.progress),
-          errorWidget: (context, url, error) => Icon(Icons.error),
-        ),
-      )
-          : const Icon(Icons.broken_image, color: Colors.grey);
-    }
-
     return editingRowIndex == index
-        ? controllers == questionTypeControllers ? TextField(
-      controller: controllers[index],
-      enabled: false,
-      decoration: const InputDecoration(border: OutlineInputBorder()),
-    ) : TextField(
+        ? TextField(
       controller: controllers[index],
       decoration: const InputDecoration(border: OutlineInputBorder()),
     )
@@ -481,51 +336,46 @@ class QuestionDataSource extends DataTableSource {
   void _updateQuestion(int index) async {
     if (index >= questions.length || index >= titleControllers.length) return;
 
-    final   updatedQuestion = ReArrange(
+    final updatedQuestion = UserConversationalData(
       id: questions[index].id,
       questionType: questionTypeControllers[index].text,
       index: int.tryParse(indexControllers[index].text) ?? questions[index].index,
       title: titleControllers[index].text,
-      answer: correctAnswerControllers[index].text,
-      question:questionControllers[index].text,
-      qImage:questionImageControllers[index].text,
+      answer: answerControllers[index].text,
       points: int.tryParse(pointsControllers[index].text) ?? questions[index].points,
       mainCategoryId: questions[index].mainCategoryId,
       subCategoryId: questions[index].subCategoryId,
       topicId: questions[index].topicId,
       subTopicId: questions[index].subTopicId,
+      botConversation: botConversationControllers[index].text,
+      userConversation: userConversationControllers[index].text,
+      userConversationType: questions[index].userConversationType,
+      options: optionAControllers[index].text,
     );
 
     try {
-      questions[index] = updatedQuestion;
-      await updateQueApiController.updateRearrangeTheWordApi(updatedQuestion,pathsFile)
-          .whenComplete(() => updateQueApiController.getAllRe_Arrange(
+      await updateQueApiController.updateConversationalApi(updatedQuestion, null)
+          .whenComplete(() => updateQueApiController.getConversation(
         main_category_id: updatedQuestion.mainCategoryId.toString(),
         sub_category_id: updatedQuestion.subCategoryId.toString(),
         topic_id: updatedQuestion.topicId.toString(),
-        sub_topic_id:updatedQuestion.subTopicId.toString(),
-      ),);
+        sub_topic_id: updatedQuestion.subTopicId.toString(),
+      ));
 
+      questions[index] = updatedQuestion;
       notifyListeners();
     } catch (e) {
       print('Error updating question: $e');
     }
   }
 
-
-  /// Delete the story phrases API here
   _deleteSelectedQuestions(String ids) async {
     final deleteApiController = Get.find<GetAllQuestionsApiController>();
 
     if (selectedQuestionIds.isNotEmpty) {
       try {
-        await deleteApiController.deleteReArrangeAPI(
-
-          question_id: ids,
-);
-
-        // Refresh the list of questions
-        await deleteApiController.getAllRe_Arrange(
+        await deleteApiController.deleteConversation(question_ids: ids);
+        await deleteApiController.getConversation(
           main_category_id: questions[0].mainCategoryId.toString(),
           sub_category_id: questions[0].subCategoryId.toString(),
           topic_id: questions[0].topicId.toString(),
@@ -533,14 +383,13 @@ class QuestionDataSource extends DataTableSource {
         );
 
         questions.removeWhere((question) => selectedQuestionIds.contains(question.id));
-        selectedQuestionIds.clear(); // Clear selected IDs
-        notifyListeners(); // Update UI
+        selectedQuestionIds.clear();
+        notifyListeners();
       } catch (e) {
         print('Error deleting questions: $e');
       }
     }
   }
-
 
   @override
   bool get isRowCountApproximate => false;
@@ -551,63 +400,43 @@ class QuestionDataSource extends DataTableSource {
   @override
   int get selectedRowCount => selectedQuestionIds.length;
 
-  toggleSelectAll(bool value) async {
+  void toggleSelectAll(bool value) {
     isSelectAll = value;
 
     if (isSelectAll) {
-      // Select all IDs
-      selectedQuestionIds.addAll(
-        questions.map((question) => question.id!).toList(),
-      );
+      selectedQuestionIds.addAll(questions.map((question) => question.id!).toList());
     } else {
-      bool confirmed = await _showConfirmationDialog(context);
-      if(confirmed){
-        // _deleteSelectedQuestions();
-      }
       selectedQuestionIds.clear();
     }
 
     onSelectionChanged(selectedQuestionIds.join('|'));
-    notifyListeners(); // Update UI
+    notifyListeners();
   }
 
-  _showConfirmationDialog(BuildContext context) async {
+   _showConfirmationDialog(BuildContext context) async {
     return await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Confirm Deletion'),
-          content: const Text('Do you really want to delete the selected re-arrange word?'),
+          content: const Text('Do you really want to delete the selected conversation?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(false); // User pressed "No"
+                Navigator.of(context).pop(false);
               },
               child: const Text('No'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(true); // User pressed "Yes"
+                Navigator.of(context).pop(true);
               },
               child: const Text('Yes'),
             ),
           ],
         );
       },
-    ) ?? false; // Default to false if dialog is dismissed
+    ) ?? false;
   }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
