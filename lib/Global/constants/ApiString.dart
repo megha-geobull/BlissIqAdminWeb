@@ -47,6 +47,7 @@ class ApiString {
   ///company registration
   static const String companyBaseUrl = "http://65.0.211.122:4444/company_api/";
   static const String company_registration = "${companyBaseUrl}company_registration";
+  static const String edit_company_profile = "${companyBaseUrl}edit_profile";
   static const String approve_company = "${baseUrl}approve_company";
   static const String get_all_companies = "${baseUrl}get_all_companies";
   static const String delete_companies = "${baseUrl}delete_companies";

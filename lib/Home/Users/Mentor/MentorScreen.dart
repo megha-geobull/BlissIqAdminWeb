@@ -248,6 +248,16 @@ class _MentorScreenState extends State<MentorScreen> {
   }
 
   Widget _buildMentorDataTable() {
+    if (filteredMentorData.isEmpty) {
+      return Center(
+        child: Text(
+          searchController.text.isEmpty
+              ? "No mentors available"
+              : "No mentors found",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+        ),
+      );
+    }
     return Card(
       elevation: 0.8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

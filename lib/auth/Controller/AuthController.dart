@@ -7,7 +7,8 @@ import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/common_snackbar.dart';
 import 'package:blissiqadmin/Global/utils/shared_preference/shared_preference_services.dart';
 import 'package:blissiqadmin/Home/HomePage.dart';
-import 'package:blissiqadmin/Home/Users/Models/GetAllMentorModel.dart';
+import 'package:blissiqadmin/Home/Users/Models/AllStudentModel.dart' as student;
+import 'package:blissiqadmin/Home/Users/Models/GetAllMentorModel.dart' as mentor;
 import 'package:blissiqadmin/Home/Users/Models/GetMentorsAssignModel.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -51,7 +52,8 @@ class AuthController extends GetxController{
   final selectedSchoolLng = "".obs;
 
 
-  RxList<Data> allMentorData = <Data>[].obs;
+  RxList<mentor.Data> allMentorData = <mentor.Data>[].obs;
+  RxList<student.Data> assignStudentsData = <student.Data>[].obs;
   RxString userId = "".obs;
 
   RxList<AllAssignedMentorsData> allAssignMentorData = <AllAssignedMentorsData>[].obs;
@@ -350,7 +352,7 @@ class AuthController extends GetxController{
         if (responseData['status'] == 1) {
           // Parse each JSON object into a Data model
           allMentorData.value = (responseData["data"] as List)
-              .map((mentorJson) => Data.fromJson(mentorJson))
+              .map((mentorJson) => mentor.Data.fromJson(mentorJson))
               .toList();
 
           print("Fetched ${allMentorData.length} mentors");
@@ -403,12 +405,12 @@ class AuthController extends GetxController{
     }
   }
 
-  getAssignedMentorsApi(String schoolID) async {
+  getAssignedMentorsApi(String mentorId) async {
     isLoading.value = true;
 
     try {
       final body = jsonEncode({
-        "school_id": schoolID,
+        "school_id": mentorId,
       });
 
       final response = await http.post(
@@ -435,6 +437,46 @@ class AuthController extends GetxController{
       }
     } catch (e) {
       showSnackbar(message: "Error while fetching assigned schools: $e");
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  getAssignedStudentsApi(String schoolID) async {
+    isLoading.value = true;
+    assignStudentsData.clear();
+    try {
+      final body = jsonEncode({
+        "school_id": schoolID,
+      });
+
+      final response = await http.post(
+        Uri.parse(ApiString.get_all_learners),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: body,
+      );
+
+      print('request body and api : ${body} ${ApiString.get_all_learners}');
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+
+        if (responseData['status'] == 1) {
+          // Parse each JSON object into a Data model
+          assignStudentsData.value = (responseData["data"] as List)
+              .map((mentorJson) => student.Data.fromJson(mentorJson))
+              .toList();
+        } else {
+          showSnackbar(message: "Failed to fetch Learners");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while fetching assigned students: $e");
       log(e.toString());
     } finally {
       isLoading.value = false;
