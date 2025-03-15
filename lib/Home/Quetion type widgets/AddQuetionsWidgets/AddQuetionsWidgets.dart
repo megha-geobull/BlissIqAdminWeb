@@ -3444,32 +3444,58 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
             ),
             boxH15(),
             // Radio button selection for Sound or Native Language
-            Row(
-              children: [
-                Radio(
-                  value: "passage",
-                  groupValue: selectedPhraseFormat,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedPhraseFormat = value!;
-                    });
-                  },
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.3),
+                  blurRadius: 5,
+                  offset: Offset(0, 3),
                 ),
-                const Text("Passage"),
-                const SizedBox(width: 16),
-                Radio(
-                  value: "phrase_name",
-                  groupValue: selectedPhraseFormat,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedPhraseFormat = value!;
-                    });
-                  },
-                ),
-                const Text("Phrase"),
               ],
             ),
-            boxH10(),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: selectedPhraseFormat,
+                isExpanded: true,
+                icon: Icon(Icons.arrow_drop_down, color: Colors.blueAccent),
+                style: TextStyle(color: Colors.black, fontSize: 16),
+                dropdownColor: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                items: const [
+                  DropdownMenuItem(
+                    value: "passage",
+                    child: Row(
+                      children: [
+                        Icon(Icons.article, color: Colors.blueAccent),
+                        SizedBox(width: 10),
+                        Text("Passage"),
+                      ],
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: "phrase_name",
+                    child: Row(
+                      children: [
+                        Icon(Icons.short_text, color: Colors.green),
+                        SizedBox(width: 10),
+                        Text("Phrase"),
+                      ],
+                    ),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    selectedPhraseFormat = value!;
+                  });
+                },
+              ),
+            ),
+          ),
+          boxH10(),
             const Text(
               'Enter Phrase Name',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),

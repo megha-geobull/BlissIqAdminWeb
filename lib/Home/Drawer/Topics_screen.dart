@@ -1,4 +1,5 @@
 import 'package:blissiqadmin/Global/Widgets/ExampleModel.dart';
+import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomAlertDialogue.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/AddQuetionsWidgets.dart';
@@ -292,7 +293,9 @@ class _TopicsScreenState extends State<TopicsScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               child: Container(
                 padding: const EdgeInsets.all(16.0),
-                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
+                constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.height * 0.6,
+                    maxHeight: MediaQuery.of(context).size.height * 0.8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -304,34 +307,35 @@ class _TopicsScreenState extends State<TopicsScreen> {
                         labelText: 'Enter ${type.capitalizeFirst}',
                       ),
                     ),
-                    SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: () async {
-                        // Open image picker to select multiple images
-                        //final List<XFile>? images = await ImagePicker().pickMultiImage();
-                        List<PlatformFile>? images = (await FilePicker.platform.pickFiles(
-                          type: FileType.custom,
-                          allowMultiple: false,
-                          onFileLoading: (FilePickerStatus status) =>
-                              print("status .... $status"),
-                          allowedExtensions: ['png', 'jpg', 'jpeg'],
-                        ))
-                            ?.files;
-                        if (images != null) {
-                          for (var image in images) {
-                            // Preload bytes for the image
-                            final bytes = await image.bytes;
-                            // Add to tempList with bytes
-                            _controller.tempList.add(
-                              ImageWithText(file: image, path: '', bytes: bytes,imageName:image.name ),
-                            );
-                          }
-                          setState(() {});
-                        }
-                      },
-                      child: Text('Add Examples'),
-                    ),
-                    SizedBox(height: 10),
+
+                    boxH10(),
+                    // ElevatedButton(
+                    //   onPressed: () async {
+                    //     // Open image picker to select multiple images
+                    //     //final List<XFile>? images = await ImagePicker().pickMultiImage();
+                    //     List<PlatformFile>? images = (await FilePicker.platform.pickFiles(
+                    //       type: FileType.custom,
+                    //       allowMultiple: false,
+                    //       onFileLoading: (FilePickerStatus status) =>
+                    //           print("status .... $status"),
+                    //       allowedExtensions: ['png', 'jpg', 'jpeg'],
+                    //     ))
+                    //         ?.files;
+                    //     if (images != null) {
+                    //       for (var image in images) {
+                    //         // Preload bytes for the image
+                    //         final bytes = await image.bytes;
+                    //         // Add to tempList with bytes
+                    //         _controller.tempList.add(
+                    //           ImageWithText(file: image, path: '', bytes: bytes,imageName:image.name ),
+                    //         );
+                    //       }
+                    //       setState(() {});
+                    //     }
+                    //   },
+                    //   child: Text('Add Examples'),
+                    // ),
+                    boxH10(),
                     if (_controller.tempList.isNotEmpty)
                       Expanded(
                         child: ListView.builder(

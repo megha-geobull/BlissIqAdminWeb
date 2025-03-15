@@ -1,10 +1,11 @@
-
+import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/controller/GetAllQuestionsApiController.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/get_story_phrases_model.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 
 class StoryPhrasesTable extends StatefulWidget {
   final String main_category_id;
@@ -15,10 +16,10 @@ class StoryPhrasesTable extends StatefulWidget {
 
   StoryPhrasesTable(
       {required this.main_category_id,
-        required this.sub_category_id,
-        required this.topic_id,
-        required this.sub_topic_id,
-        required this.questionList});
+      required this.sub_category_id,
+      required this.topic_id,
+      required this.sub_topic_id,
+      required this.questionList});
 
   @override
   _StoryPhrasesTableState createState() => _StoryPhrasesTableState();
@@ -31,9 +32,9 @@ class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
   final _verticalScrollController = ScrollController();
   final _horizontalScrollController = ScrollController();
   String _selectedQuestionIds = "";
-  bool isSelectAll=false;
-  List<String> selected_question_ids=[];
-  late QuestionDataSource _dataSource;
+  bool isSelectAll = false;
+  List<String> selected_question_ids = [];
+  late QuestionPhraseDataSource _dataSource;
 
   final GetAllQuestionsApiController _getdeleteApiController = Get.find();
 
@@ -41,13 +42,14 @@ class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
   void initState() {
     super.initState();
     // Initialize with API data
-    _dataSource = QuestionDataSource(
+    _dataSource = QuestionPhraseDataSource(
       widget.questionList,
-          (selectedIds) {
+      (selectedIds) {
         setState(() {
           _selectedQuestionIds = selectedIds;
         });
-      },context,
+      },
+      context,
     );
     //_questions = widget.questionList;
     _filteredQuestions = widget.questionList;
@@ -60,19 +62,20 @@ class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
       } else {
         _filteredQuestions = widget.questionList
             .where((question) =>
-        question.passage != null &&
-            question.passage!.toLowerCase().contains(query.toLowerCase()))
+                question.passage != null &&
+                question.passage!.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
 
       // Update the data source with the filtered questions
-      _dataSource = QuestionDataSource(
+      _dataSource = QuestionPhraseDataSource(
         _filteredQuestions,
-            (selectedIds) {
+        (selectedIds) {
           setState(() {
             _selectedQuestionIds = selectedIds;
           });
-        },context,
+        },
+        context,
       );
     });
   }
@@ -80,28 +83,30 @@ class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
   void _removeSelectedQuestions() {
     // Convert the selected IDs string to a Set for efficient lookup
     final selectedIdsSet = _selectedQuestionIds.split('|').toSet();
-    if(mounted){
+    if (mounted) {
       setState(() {
         // Remove matching items from the main list
 
         // Remove matching items from the filtered list
-        _filteredQuestions.removeWhere((mcq) => selectedIdsSet.contains(mcq.id));
+        _filteredQuestions
+            .removeWhere((mcq) => selectedIdsSet.contains(mcq.id));
 
         // Clear selected IDs after deletion
         _selectedQuestionIds = '';
 
         // Update the data source with the updated filtered list
-        _dataSource = QuestionDataSource(
+        _dataSource = QuestionPhraseDataSource(
           _filteredQuestions,
-              (selectedIds) {
+          (selectedIds) {
             setState(() {
               _selectedQuestionIds = selectedIds;
             });
-          },context,
+          },
+          context,
         );
-      });}
+      });
+    }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -132,19 +137,18 @@ class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
                 Expanded(
                   child: Padding(
                       padding: const EdgeInsets.only(right: 16.0),
-                      child:
-                      CustomTextField(
+                      child: CustomTextField(
                         controller: _searchController,
                         labelText: "Search by Question",
                         onChanged: _filterQuestions,
-                      )
-                  ),
+                      )),
                 ),
                 if (_selectedQuestionIds.isNotEmpty)
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red.shade100,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -161,8 +165,9 @@ class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
                       print("Selected Ids - $_selectedQuestionIds");
                       Future.delayed(const Duration(seconds: 1), () async {
                         //_removeSelectedQuestions();
-                        bool confirmed = await _dataSource._showConfirmationDialog(context);
-                        if(confirmed){
+                        bool confirmed =
+                            await _dataSource._showConfirmationDialog(context);
+                        if (confirmed) {
                           _dataSource._deleteSelectedQuestions();
                         }
                         _getdeleteApiController.getStoryPhrases(
@@ -221,9 +226,15 @@ class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
                           ),
                         ),
                         DataColumn(label: Text("Index")),
+                        DataColumn(label: Text("Title")),
                         DataColumn(label: Text("Phrase name")),
+                        DataColumn(label: Text("Question Type")),
+                        DataColumn(label: Text("Image name")),
+                        DataColumn(label: Text("Question Format")),
+                        DataColumn(label: Text("Image")),
                         DataColumn(label: Text("Points")),
                         DataColumn(label: Text("Edit")),
+
                       ],
                       source: _dataSource,
                     ),
@@ -237,10 +248,11 @@ class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
     );
   }
 
+
+
 }
 
-
-class QuestionDataSource extends DataTableSource {
+class QuestionPhraseDataSource extends DataTableSource {
   final List<StoryPhrases> questions;
   final Function(String) onSelectionChanged; // Callback for selection
   final Set<String> selectedQuestionIds = {}; // Track selected question IDs
@@ -251,15 +263,25 @@ class QuestionDataSource extends DataTableSource {
   List<TextEditingController> phraseNameControllers = [];
   List<TextEditingController> indexControllers = [];
   List<TextEditingController> pointsControllers = [];
+  List<TextEditingController> titleControllers = [];
+  List<TextEditingController> questionTypeControllers = [];
+  List<TextEditingController> imageNameControllers = [];
+  List<TextEditingController> queImageControllers = [];
+  List<TextEditingController> questionFormatControllers = [];
 
   final GetAllQuestionsApiController updateQueApiController = Get.find();
 
-  QuestionDataSource(this.questions, this.onSelectionChanged, this.context) {
+  QuestionPhraseDataSource(this.questions, this.onSelectionChanged, this.context) {
     // Initialize controllers for each question
     for (var question in questions) {
       phraseNameControllers.add(TextEditingController(text: question.passage));
       indexControllers.add(TextEditingController(text: question.index.toString()));
       pointsControllers.add(TextEditingController(text: question.points.toString()));
+      titleControllers.add(TextEditingController(text: question.title));
+      questionTypeControllers.add(TextEditingController(text: question.questionType));
+      imageNameControllers.add(TextEditingController(text: question.imageName));
+      queImageControllers.add(TextEditingController(text: question.imageName));
+      questionFormatControllers.add(TextEditingController(text: question.questionFormat));
     }
   }
 
@@ -275,17 +297,14 @@ class QuestionDataSource extends DataTableSource {
         DataCell(
           Checkbox(
             value: isSelected,
-            onChanged: (bool? value) async{
+            onChanged: (bool? value) {
               if (value == true) {
                 selectedQuestionIds.add(question.id!);
               } else {
                 selectedQuestionIds.remove(question.id);
               }
               isSelectAll = selectedQuestionIds.length == questions.length;
-              onSelectionChanged(
-                selectedQuestionIds.join('|'), // Pipe-separated IDs
-              );
-
+              onSelectionChanged(selectedQuestionIds.join('|')); // Pipe-separated IDs
               notifyListeners();
             },
           ),
@@ -298,11 +317,28 @@ class QuestionDataSource extends DataTableSource {
               border: OutlineInputBorder(),
             ),
             onSubmitted: (value) {
-              _updateQuestion(index, phraseNameControllers[index].text, value, pointsControllers[index].text);
+              _updateQuestion(index);
+              _updateQuestion(
+                index,
+              );
             },
           )
               : Text(question.index.toString() ?? ""),
         ),
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: titleControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(index);
+            },
+          )
+              : Text(question.title ?? ""),
+        ),
+
         DataCell(
           editingRowIndex == index
               ? TextField(
@@ -311,10 +347,64 @@ class QuestionDataSource extends DataTableSource {
               border: OutlineInputBorder(),
             ),
             onSubmitted: (value) {
-              _updateQuestion(index, value, indexControllers[index].text, pointsControllers[index].text);
+              _updateQuestion(index);
             },
           )
               : Text(question.passage ?? ""),
+        ),
+
+
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: questionTypeControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(index);
+            },
+          )
+              : Text(question.questionType ?? ""),
+        ),
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: imageNameControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(index);
+            },
+          )
+              : Text(question.imageName ?? ""),
+        ),
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: questionFormatControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(index);
+            },
+          )
+              : Text(question.questionFormat ?? ""),
+        ),
+        DataCell(
+          editingRowIndex == index
+              ? TextField(
+            controller: queImageControllers[index],
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              _updateQuestion(index);
+            },
+          )
+              : Text(question.image ?? ""),
         ),
         DataCell(
           editingRowIndex == index
@@ -324,7 +414,7 @@ class QuestionDataSource extends DataTableSource {
               border: OutlineInputBorder(),
             ),
             onSubmitted: (value) {
-              _updateQuestion(index, phraseNameControllers[index].text, indexControllers[index].text, value);
+              _updateQuestion(index);
             },
           )
               : Text(question.points.toString() ?? ""),
@@ -333,7 +423,7 @@ class QuestionDataSource extends DataTableSource {
           editingRowIndex == index
               ? ElevatedButton(
             onPressed: () {
-              _updateQuestion(index, phraseNameControllers[index].text, indexControllers[index].text, pointsControllers[index].text);
+              _updateQuestion(index);
               editingRowIndex = null; // Exit edit mode
               notifyListeners(); // Update UI
             },
@@ -360,21 +450,21 @@ class QuestionDataSource extends DataTableSource {
     );
   }
 
-  /// call the update the story phrases api here
-  _updateQuestion(int index, String phraseName, String indexValue, String pointsValue) async {
+  /// Call the update story phrases API here
+  _updateQuestion(int index) async {
     final updatedQuestion = StoryPhrases(
-      id: questions[index].id, // Keep the same ID
-      passage: phraseName,
-      index: int.tryParse(indexValue) ?? questions[index].index, // Update index
-      points: int.tryParse(pointsValue) ?? questions[index].points, // Update points
+      id: questions[index].id,
+      passage: phraseNameControllers[index].text,
+      index: int.tryParse(indexControllers[index].text) ?? questions[index].index,
+      points: int.tryParse(pointsControllers[index].text) ?? questions[index].points,
       mainCategoryId: questions[index].mainCategoryId,
       subCategoryId: questions[index].subCategoryId,
       topicId: questions[index].topicId,
       subTopicId: questions[index].subTopicId,
-      title: '',
-      questionType: '',
-      imageName: '',
-      questionFormat: '',
+      title: titleControllers[index].text,
+      questionType: questionTypeControllers[index].text,
+      imageName: imageNameControllers[index].text,
+      questionFormat: questionFormatControllers[index].text,
     );
 
     questions[index] = updatedQuestion;
@@ -382,8 +472,7 @@ class QuestionDataSource extends DataTableSource {
     notifyListeners();
   }
 
-  /// call delete the story phrases api here
-  /// multiple deletions
+  /// Call delete story phrases API here (multiple deletions)
   _deleteSelectedQuestions() async {
     final deleteApiController = Get.find<GetAllQuestionsApiController>();
 
@@ -424,7 +513,7 @@ class QuestionDataSource extends DataTableSource {
   @override
   int get selectedRowCount => selectedQuestionIds.length;
 
-   toggleSelectAll(bool value) async {
+  void toggleSelectAll(bool value) async {
     isSelectAll = value;
 
     if (isSelectAll) {
@@ -434,7 +523,7 @@ class QuestionDataSource extends DataTableSource {
       );
     } else {
       bool confirmed = await _showConfirmationDialog(context);
-      if(confirmed){
+      if (confirmed) {
         _deleteSelectedQuestions();
       }
       selectedQuestionIds.clear();
@@ -444,7 +533,7 @@ class QuestionDataSource extends DataTableSource {
     notifyListeners(); // Update UI
   }
 
- _showConfirmationDialog(BuildContext context) async {
+  Future<bool> _showConfirmationDialog(BuildContext context) async {
     return await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -467,9 +556,31 @@ class QuestionDataSource extends DataTableSource {
           ],
         );
       },
-    ) ?? false; // Default to false if dialog is dismissed
+    ) ??
+        false; // Default to false if dialog is dismissed
   }
 
-
+  void dispose() {
+    for (var controller in phraseNameControllers) {
+      controller.dispose();
+    }
+    for (var controller in indexControllers) {
+      controller.dispose();
+    }
+    for (var controller in pointsControllers) {
+      controller.dispose();
+    }
+    for (var controller in titleControllers) {
+      controller.dispose();
+    }
+    for (var controller in questionTypeControllers) {
+      controller.dispose();
+    }
+    for (var controller in imageNameControllers) {
+      controller.dispose();
+    }
+    for (var controller in questionFormatControllers) {
+      controller.dispose();
+    }
+  }
 }
-
