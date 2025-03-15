@@ -34,6 +34,11 @@ class SchoolController extends GetxController {
   final affiliatedCompanyController = TextEditingController();
   final approvalStatusController = TextEditingController();
   final statusController = TextEditingController();
+  final  searchController = TextEditingController();
+
+
+  var selectedLatitude = ''.obs;
+  var selectedLongitude = ''.obs;
 
   RxBool isLoading = false.obs;
 
@@ -50,6 +55,15 @@ class SchoolController extends GetxController {
   void onCountryChange(CountryCode countryCode) {
     String code = countryCode.dialCode ?? '+1';
     phNoController.text = '$code ${phNoController.text.replaceAll(RegExp(r'^\+\d+\s?'), '')}';
+  }
+
+
+  void updateLocation(double lat, double long) {
+    selectedLatitude.value = lat.toString();
+    selectedLongitude.value = long.toString();
+
+    print("selectedLatitude: ${selectedLatitude.value}");
+    print("selectedLongitude: ${selectedLongitude.value}");
   }
 
   // Dispose controllers when the screen is removed
@@ -79,6 +93,8 @@ class SchoolController extends GetxController {
     required String schoolType,
     required String affiliatedCompany,
     required String password,
+    required String lat,
+    required String long,
     required String confirmPassword,
     required BuildContext context,
   }) async {
@@ -104,6 +120,8 @@ class SchoolController extends GetxController {
           'token': "",// optional
           'company_id': "",// optional
           'approval_status': "",// optional
+          'latitude': lat,
+          'longitude':long,
           'password': password,
           'confirm_password': confirmPassword,
         }),

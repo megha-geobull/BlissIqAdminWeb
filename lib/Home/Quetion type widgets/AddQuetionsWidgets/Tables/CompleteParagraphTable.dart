@@ -416,20 +416,18 @@ class QuestionDataSource extends DataTableSource {
   }
 
 
-  /// call delete the story phrases api here
-  /// Delete the story phrases API here
+  /// Delete the complete paragraph API here
   _deleteSelectedQuestions(String ids) async {
     final deleteApiController = Get.find<GetAllQuestionsApiController>();
 
     if (selectedQuestionIds.isNotEmpty) {
       try {
         await deleteApiController.deleteCompleteTheParagraphAPI(
-
           question_ids: ids,
         );
 
         // Refresh the list of questions
-        await deleteApiController.getAllRe_Arrange(
+        await deleteApiController.getCompleteParaApi(
           main_category_id: questions[0].mainCategoryId.toString(),
           sub_category_id: questions[0].subCategoryId.toString(),
           topic_id: questions[0].topicId.toString(),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:blissiqadmin/Global/Routes/AppRoutes.dart';
 import 'package:blissiqadmin/Global/Widgets/Button/CustomButton.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
@@ -11,6 +13,7 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_webservice/places.dart';
 
 class SchoolRegistration extends StatefulWidget {
   @override
@@ -20,9 +23,25 @@ class SchoolRegistration extends StatefulWidget {
 class _SchoolRegistrationState extends State<SchoolRegistration> {
   final SchoolController schoolController = Get.put(SchoolController());
 
+  LatLng? selectedLocation;
+  String selectedAddress = '';
+  String selectedPlaceName = '';
+
+  bool isLocationAllowed = false, isLocationPermissionChecked = false;
+  String latitudel1 = '', longitudel2 = '';
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (isLocationAllowed == false && isLocationPermissionChecked == false) {
+      _getCurrentLocation();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold (
+    return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isWideScreen = constraints.maxWidth > 800;
@@ -41,22 +60,23 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                   appBar: isWideScreen
                       ? null
                       : AppBar(
-                    title: const Text('Dashboard'),
-                    scrolledUnderElevation: 0,
-                    backgroundColor: Colors.blue.shade100,
-                    actions: [
-                      IconButton(
-                        icon: const Icon(
-                          Icons.person,
-                          color: Colors.grey,
+                          title: const Text('Dashboard'),
+                          scrolledUnderElevation: 0,
+                          backgroundColor: Colors.blue.shade100,
+                          actions: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.person,
+                                color: Colors.grey,
+                              ),
+                              onPressed: () {},
+                            ),
+                          ],
                         ),
-                        onPressed: () {},
-                      ),
-                    ],
-                  ),
                   drawer: isWideScreen ? null : Drawer(child: MyDrawer()),
                   body: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0, vertical: 16),
                     child: _buildSchoolMainContent(constraints),
                   ),
                 ),
@@ -78,9 +98,7 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
             child: SizedBox(
               width: MediaQuery.of(context).size.width * 0.38,
               child: Builder(builder: (context) {
-                return Form(
-                  key: schoolController.formKey,
-                  child: Column(
+                return  Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Image.asset('assets/business.png', height: 100),
@@ -99,7 +117,10 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                         controller: schoolController.schoolNameController,
                         labelText: 'School Name',
                         onChanged: (value) {
-                          openMapBottomSheet(context, schoolController.schoolNameController);
+                          openMapBottomSheet(
+                              context,
+                              schoolController.schoolNameController,
+                              schoolController.addressController);
                         },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -122,6 +143,7 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
 
                       CustomTextField(
                         controller: schoolController.principalNameController,
+                        keyboardType: TextInputType.text,
                         labelText: 'Principal/Administrator Name',
                         prefixIcon: const Icon(Icons.person_2_outlined),
                       ),
@@ -143,10 +165,10 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                             child: Container(
                               margin: EdgeInsets.only(right: 10),
                               decoration: BoxDecoration(
-                                borderRadius:
-                                const BorderRadius.all(Radius.circular(8.0)),
-                                border:
-                                Border.all(width: 1, color: Colors.blueAccent),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(8.0)),
+                                border: Border.all(
+                                    width: 1, color: Colors.blueAccent),
                               ),
                               height: 50,
                               alignment: Alignment.centerLeft,
@@ -176,7 +198,7 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                                 },
                                 keyboardType: TextInputType.phone,
                                 controller:
-                                schoolController.principalPhoneController,
+                                    schoolController.principalPhoneController,
                                 cursorColor: Colors.black,
                                 decoration: InputDecoration(
                                   border: OutlineInputBorder(),
@@ -185,7 +207,7 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                                   focusedBorder: const OutlineInputBorder(
                                     borderSide: BorderSide(color: Colors.grey),
                                     borderRadius:
-                                    BorderRadius.all(Radius.circular(10)),
+                                        BorderRadius.all(Radius.circular(10)),
                                   ),
                                   hintText: 'Enter mobile number',
                                 ),
@@ -231,7 +253,8 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                       //     )),
                       boxH20(),
                       CustomTextField(
-                        controller: schoolController.affiliatedCompanyController,
+                        controller:
+                            schoolController.affiliatedCompanyController,
                         labelText: 'Affiliated Company',
                         maxLines: 1,
                         prefixIcon: Icon(Icons.location_on_outlined),
@@ -276,7 +299,7 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                           onPressed: () {
                             setState(() {
                               schoolController.isPasswordVisible.value =
-                              !schoolController.isPasswordVisible.value;
+                                  !schoolController.isPasswordVisible.value;
                             });
                           },
                         ),
@@ -286,7 +309,8 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please Confirm your password';
-                          } else if (value != schoolController.confirmPasswordController.text) {
+                          } else if (value !=
+                              schoolController.confirmPasswordController.text) {
                             return 'Passwords do not match';
                           }
                           return null;
@@ -295,44 +319,49 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                         labelText: 'Confirm your password',
                         keyboardType: TextInputType.visiblePassword,
                         prefixIcon: const Icon(Icons.password_rounded),
-                        obscureText: !schoolController.isConfirmPasswordVisible.value,
+                        obscureText:
+                            !schoolController.isConfirmPasswordVisible.value,
                         sufixIcon: IconButton(
-                          icon: Icon(schoolController.isConfirmPasswordVisible.value
-                              ? Icons.visibility
-                              : Icons.visibility_off),
+                          icon: Icon(
+                              schoolController.isConfirmPasswordVisible.value
+                                  ? Icons.visibility
+                                  : Icons.visibility_off),
                           onPressed: () {
                             setState(() {
                               schoolController.isConfirmPasswordVisible.value =
-                              !schoolController.isConfirmPasswordVisible.value;
+                                  !schoolController
+                                      .isConfirmPasswordVisible.value;
                             });
                           },
                         ),
                       ),
                       boxH20(),
 
-
                       ElevatedButton(
                         onPressed: () {
+                          if (schoolController.selectedLatitude.value.isEmpty && schoolController.selectedLongitude.value.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Please select a location')),
+                            );
+                            return;
+                          }
                           schoolController.schoolRegistrationApi(
                             schoolName: schoolController.schoolNameController.text,
                             schoolRegNumber: schoolController.schoolRegNumberController.text,
                             principalName: schoolController.principalNameController.text,
                             principalEmail: schoolController.principalEmailController.text,
                             principalPhone: schoolController.principalPhoneController.text,
-                            address: schoolController.addressController.text,
+                            address: schoolController.addressController.text, // Use the selected address
                             schoolType: schoolController.schoolTypeController.text,
                             affiliatedCompany: schoolController.affiliatedCompanyController.text,
                             password: schoolController.passwordController.text,
                             confirmPassword: schoolController.confirmPasswordController.text,
+                            lat: schoolController.selectedLatitude.value,
+                            long: schoolController.selectedLongitude.value,
                             context: context,
                           ).then((response) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Registration successful!')),
-                            );
                             Navigator.pop(context, true);
-                          }).
-                          catchError((error) {
-
+                          }).catchError((error) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('Error occurred: $error')),
                             );
@@ -347,13 +376,14 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                         ),
                         child: const Text(
                           'Register',
-                          style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
                         ),
-                      ),
+                      )
                     ],
-                  ),
-                );
+                  );
               }),
             ),
           ),
@@ -362,11 +392,18 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
     );
   }
 
-
-
-  void openMapBottomSheet(BuildContext context, TextEditingController schoolNameController) {
-    final TextEditingController searchController = TextEditingController();
+  void openMapBottomSheet(
+      BuildContext context,
+      TextEditingController schoolNameController,
+      TextEditingController addressController) {
+    final places =
+        GoogleMapsPlaces(apiKey: 'AIzaSyCY4i1-nQFNVTSYetMw7aofzBRwGvCH_Ms');
     LatLng? selectedLocation;
+    String selectedAddress = '';
+    String selectedPlaceName = '';
+
+    // Controller to manipulate the Google Map
+    Completer<GoogleMapController> _mapController = Completer();
 
     showModalBottomSheet(
       context: context,
@@ -379,68 +416,161 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
               child: Column(
                 children: [
                   TextField(
-                    controller: searchController,
+                    controller: schoolController.searchController,
                     decoration: InputDecoration(
                       labelText: 'Search for a school',
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.search),
                         onPressed: () async {
-                          // Perform search and update the map
-                          List<Location> locations = await locationFromAddress(searchController.text);
-                          if (locations.isNotEmpty) {
-                            setState(() {
-                              selectedLocation = LatLng(locations.first.latitude, locations.first.longitude);
-                            });
+                          if (schoolController.searchController.text.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text("Please enter a search term.")),
+                            );
+                            return;
                           }
-                        }
+                          if (selectedLocation != null) {
+                            schoolNameController.text = selectedPlaceName;
+                            addressController.text = selectedAddress;
 
+                            schoolController.updateLocation(
+                              selectedLocation!.latitude,
+                              selectedLocation!.longitude,
+                            );
+                            Navigator.pop(context);
+                            // You can store the selectedLocation, selectedPlaceName, and selectedAddress here
+                            print("Latitude: ${selectedLocation!.latitude}");
+                            print("Longitude: ${selectedLocation!.longitude}");
+                            print("Place Name: $selectedPlaceName");
+                            print("Address: $selectedAddress");
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text(
+                                      "Please select a location on the map.")),
+                            );
+                          }
+
+                          // Perform search using Google Places API
+                          try {
+                            PlacesSearchResponse response =
+                                await places.searchByText(
+                                    schoolController.searchController.text);
+                            if (response.results.isNotEmpty) {
+                              var place = response.results.first;
+                              setState(() {
+                                selectedLocation = LatLng(
+                                    place.geometry!.location.lat,
+                                    place.geometry!.location.lng);
+                                schoolController.updateLocation(
+                                  selectedLocation!.latitude,
+                                  selectedLocation!.longitude,
+                                );
+                                selectedPlaceName = place.name;
+                                selectedAddress = place.formattedAddress ?? '';
+                              });
+
+
+                              // Move the camera to the searched location
+                              final GoogleMapController controller =
+                                  await _mapController.future;
+                              controller.animateCamera(
+                                CameraUpdate.newLatLng(selectedLocation!),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("No results found.")),
+                              );
+                            }
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content:
+                                      Text("Error searching for location: $e")),
+                            );
+                          }
+                        },
                       ),
                     ),
                   ),
                   Expanded(
                     child: GoogleMap(
                       initialCameraPosition: CameraPosition(
-                        target: selectedLocation ?? const LatLng(0, 0),
+                        target: selectedLocation ??
+                            LatLng(
+                              double.tryParse(latitudel1) ?? 18.552,
+                              double.tryParse(longitudel2) ?? 73.850,
+                            ),
                         zoom: 14.0,
                       ),
                       markers: selectedLocation != null
                           ? {
-                        Marker(
-                          markerId: const MarkerId('selectedLocation'),
-                          position: selectedLocation!,
-                        ),
-                      }
+                              Marker(
+                                markerId: const MarkerId('selectedLocation'),
+                                position: selectedLocation!,
+                              ),
+                            }
                           : {},
-                      onTap: (LatLng location) {
-                        setState(() {
-                          selectedLocation = location;
-                        });
+                      onTap: (LatLng location) async {
+                        try {
+                          List<Placemark> placemarks =
+                              await placemarkFromCoordinates(
+                                  location.latitude, location.longitude);
+                          if (placemarks.isNotEmpty) {
+                            Placemark place = placemarks.first;
+                            setState(() {
+                              selectedLocation = location;
+                              selectedPlaceName = place.name ?? 'Unknown Place';
+                              selectedAddress =
+                                  "${place.street ?? ''}, ${place.locality ?? ''}, ${place.country ?? ''}";
+                            });
+
+                            // Move the camera to the tapped location
+                            final GoogleMapController controller =
+                                await _mapController.future;
+                            controller.animateCamera(
+                              CameraUpdate.newLatLng(selectedLocation!),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text(
+                                      "Could not fetch address for the selected location.")),
+                            );
+                          }
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text("Error fetching address: $e")),
+                          );
+                        }
+                      },
+                      onMapCreated: (GoogleMapController controller) {
+                        _mapController.complete(controller);
                       },
                     ),
                   ),
+                  if (selectedPlaceName.isNotEmpty)
+                    Text('Selected Place: $selectedPlaceName'),
+                  if (selectedAddress.isNotEmpty)
+                    Text('Address: $selectedAddress'),
                   ElevatedButton(
-                    onPressed: () async {
+                    onPressed: () {
                       if (selectedLocation != null) {
-                        List<Placemark> placemarks = await placemarkFromCoordinates(
-                          selectedLocation!.latitude,
-                          selectedLocation!.longitude,
+                        schoolNameController.text = selectedPlaceName;
+                        addressController.text = selectedAddress;
+                        Navigator.pop(context);
+                        // You can store the selectedLocation, selectedPlaceName, and selectedAddress here
+                        print("Latitude: ${selectedLocation!.latitude}");
+                        print("Longitude: ${selectedLocation!.longitude}");
+                        print("Place Name: $selectedPlaceName");
+                        print("Address: $selectedAddress");
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content:
+                                  Text("Please select a location on the map.")),
                         );
-                        if (placemarks.isNotEmpty) {
-                          Placemark place = placemarks.first;
-                          String schoolName = place.name ?? '';
-                          String address = "${place.street}, ${place.locality}, ${place.country}";
-
-                          // Update the school name controller
-                          schoolNameController.text = schoolName;
-
-                          // Close the bottom sheet
-                          Navigator.pop(context);
-
-                          // You can also save the latitude, longitude, and address if needed
-                          print("Latitude: ${selectedLocation!.latitude}");
-                          print("Longitude: ${selectedLocation!.longitude}");
-                          print("Address: $address");
-                        }
                       }
                     },
                     child: const Text('Select Location'),
@@ -454,4 +584,56 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
     );
   }
 
+  /// Get Current Location API
+  _getCurrentLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        return Future.error('Location services are disabled.');
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        return Future.error(
+            'Location permissions are permanently denied, cannot request permissions.');
+      }
+
+      // Fetch current location
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+
+      if (position == null) {
+        return Future.error('Failed to get current location.');
+      }
+
+      double latitude = position.latitude;
+      double longitude = position.longitude;
+
+      // Handle possible errors with placemark retrieval
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(latitude, longitude)
+              .catchError((error) {
+        print("Error fetching placemark: $error");
+        return [];
+      });
+
+      if (placemarks.isNotEmpty) {
+        latitudel1 = latitude.toString();
+        longitudel2 = longitude.toString();
+        print("Latitude: $latitudel1, Longitude: $longitudel2");
+
+        if (mounted) {
+          setState(() {});
+        }
+      } else {
+        print("No placemarks found.");
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
 }

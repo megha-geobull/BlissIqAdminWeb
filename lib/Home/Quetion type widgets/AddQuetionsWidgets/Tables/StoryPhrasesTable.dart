@@ -60,8 +60,8 @@ class _StoryPhrasesTableState extends State<StoryPhrasesTable> {
       } else {
         _filteredQuestions = widget.questionList
             .where((question) =>
-        question.phraseName != null &&
-            question.phraseName!.toLowerCase().contains(query.toLowerCase()))
+        question.passage != null &&
+            question.passage!.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
 
@@ -257,7 +257,7 @@ class QuestionDataSource extends DataTableSource {
   QuestionDataSource(this.questions, this.onSelectionChanged, this.context) {
     // Initialize controllers for each question
     for (var question in questions) {
-      phraseNameControllers.add(TextEditingController(text: question.phraseName));
+      phraseNameControllers.add(TextEditingController(text: question.passage));
       indexControllers.add(TextEditingController(text: question.index.toString()));
       pointsControllers.add(TextEditingController(text: question.points.toString()));
     }
@@ -314,7 +314,7 @@ class QuestionDataSource extends DataTableSource {
               _updateQuestion(index, value, indexControllers[index].text, pointsControllers[index].text);
             },
           )
-              : Text(question.phraseName ?? ""),
+              : Text(question.passage ?? ""),
         ),
         DataCell(
           editingRowIndex == index
@@ -364,13 +364,17 @@ class QuestionDataSource extends DataTableSource {
   _updateQuestion(int index, String phraseName, String indexValue, String pointsValue) async {
     final updatedQuestion = StoryPhrases(
       id: questions[index].id, // Keep the same ID
-      phraseName: phraseName,
+      passage: phraseName,
       index: int.tryParse(indexValue) ?? questions[index].index, // Update index
       points: int.tryParse(pointsValue) ?? questions[index].points, // Update points
       mainCategoryId: questions[index].mainCategoryId,
       subCategoryId: questions[index].subCategoryId,
       topicId: questions[index].topicId,
       subTopicId: questions[index].subTopicId,
+      title: '',
+      questionType: '',
+      imageName: '',
+      questionFormat: '',
     );
 
     questions[index] = updatedQuestion;

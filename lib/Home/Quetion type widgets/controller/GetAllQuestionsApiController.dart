@@ -17,6 +17,7 @@ import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/guess_the_image
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/image_puzzle_model.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/re_arrange_sentence_model.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:get/get.dart';
@@ -207,10 +208,9 @@ class GetAllQuestionsApiController extends GetxController{
     required String main_category_id ,
     required String sub_category_id,
     required String topic_id,
-    String? sub_topic_id}) async {
+    required String sub_topic_id}) async {
     isLoading.value = true;
     getCompleteParaData.clear();
-    print("Hi Hellow");
     try {
       var body = {
         'main_category_id':main_category_id,
@@ -218,11 +218,6 @@ class GetAllQuestionsApiController extends GetxController{
         'topic_id':topic_id,
         'sub_topic_id':sub_topic_id??''
       };
-      print(main_category_id);
-      print(sub_category_id);
-      print(topic_id);
-      print(sub_topic_id);
-
 
       final response = await http.post(
           Uri.parse(ApiString.get_complete_the_paragraph),
@@ -1287,6 +1282,38 @@ class GetAllQuestionsApiController extends GetxController{
 
 
 
+  delete_match_pair_question({
+    required String question_ids,
+    required BuildContext context,
+  }) async {
+    try {
+      final response = await http.delete(
+        Uri.parse(ApiString.delete_match_pair_question),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'question_id': question_ids,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Question deleted successfully!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Something went wrong. Please try again later.')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: $e')),
+      );
+    }
+  }
+
+
   //Update Story Phrases
   updateStoryPhrasesTableQuestionApi(StoryPhrases question) async {
     isLoading.value = true;
@@ -1302,7 +1329,7 @@ class GetAllQuestionsApiController extends GetxController{
           'sub_category_id':question.subCategoryId,
           'topic_id': question.topicId,
           'sub_topic_id':question.subTopicId,
-          'phrase_name': question.phraseName,
+          'phrase_name': question.passage,
           'index': question.index,
           'points': question.points,
         }),
@@ -1633,6 +1660,7 @@ class GetAllQuestionsApiController extends GetxController{
       throw Exception('Failed to delete phrase: ${response.body}');
     }
   }
+
   //Update Story
   updateStoryTableQuestionApi(StoryData question) async {
     isLoading.value = true;
@@ -1784,6 +1812,7 @@ print('Question update successfully');
   // }
 
   //update complete the word
+
   Future<void> updateCompleteTheWordTableQuestionApi( CompleteWordData question,List<int>? qImage,) async {
     isLoading.value = true;
 
@@ -1935,6 +1964,7 @@ print('question updated successfully');
   deleteCompleteTheParagraphAPI({
     required String question_ids,
   }) async {
+    print("question_ids {$question_ids}");
     if (question_ids.isEmpty) {
       print('Error: No question IDs provided');
       return;

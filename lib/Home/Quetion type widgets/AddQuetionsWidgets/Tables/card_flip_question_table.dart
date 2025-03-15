@@ -620,7 +620,7 @@ class QuestionDataSource extends DataTableSource {
           question_id: selectedQuestionIds.join('|'),
         );
 
-        await deleteApiController.getStoryPhrases(
+        await deleteApiController.getCardFlip(
           main_category_id: questions[0].mainCategoryId.toString(),
           sub_category_id: questions[0].subCategoryId.toString(),
           topic_id: questions[0].topicId.toString(),
