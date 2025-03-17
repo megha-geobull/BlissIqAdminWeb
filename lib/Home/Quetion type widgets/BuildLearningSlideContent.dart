@@ -44,6 +44,14 @@ class _BuildLearningSlideContentState extends State<BuildLearningSlideContent> {
   TextEditingController pptLinkController = TextEditingController();
   TextEditingController imageLinkController = TextEditingController();
 
+
+  String? selectedLinkType; // To store the selected link type
+
+  // List of link types for the dropdown
+  final List<String> linkTypes = ['Video URL', 'PDF URL', 'PPT URL', 'Image URL'];
+
+
+
   // Separate variables for different media types
   String? pdfFileName, pptFileName, imageFileName;
   String? pdfPath, pptPath, imagePath;
@@ -61,7 +69,6 @@ class _BuildLearningSlideContentState extends State<BuildLearningSlideContent> {
       );
       return;
     }
-
     try {
       await questionApiController.addLearningSlideApi(
         mainCategoryId: widget.main_category_id!,
@@ -221,21 +228,75 @@ class _BuildLearningSlideContentState extends State<BuildLearningSlideContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Video URL', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-        boxH08(),
-        CustomTextField(controller: youtubeController, labelText: 'Provide  video URL', maxLines: 1),
+        DropdownButtonFormField<String>(
+          value: selectedLinkType,
+          hint: const Text(
+            'Choose a link type',
+            style: TextStyle(color: Colors.grey, fontSize: 14),
+          ),
+          onChanged: (String? newValue) {
+            setState(() {
+              selectedLinkType = newValue;
+              // Clear all controllers when a new type is selected
+              youtubeController.clear();
+              pdfLinkController.clear();
+              pptLinkController.clear();
+              imageLinkController.clear();
+            });
+          },
+          items: linkTypes.map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                value,
+                style: const TextStyle(fontSize: 14, color: Colors.black),
+              ),
+            );
+          }).toList(),
+          // Customizing the dropdown button
+          isExpanded: true, // Ensures the dropdown takes full width
+          icon: const Icon(Icons.arrow_drop_down, color: Colors.blue), // Custom dropdown icon
+          dropdownColor: Colors.white, // Background color of the dropdown menu
+          elevation: 2, // Adds a slight shadow to the dropdown menu
+          style: const TextStyle(color: Colors.black, fontSize: 14), // Text style for selected item
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.grey[100], // Light grey background for the dropdown
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8), // Rounded corners
+              borderSide: BorderSide(color: Colors.grey[300]!), // Light grey border
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.blue, width: 2), // Blue border when focused
+            ),
+          ),
+        ),
         boxH10(),
-        const Text('PDF URL', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-        boxH08(),
-        CustomTextField(controller: pdfLinkController, labelText: 'Provide PDF URL', maxLines: 1),
-        boxH10(),
-        const Text('PPT URL', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-        boxH08(),
-        CustomTextField(controller: pptLinkController, labelText: 'Provide PPT URL', maxLines: 1),
-        boxH10(),
-        const Text('Image URL', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-        boxH08(),
-        CustomTextField(controller: imageLinkController, labelText: 'Provide image URL', maxLines: 1)
+
+        // Display the corresponding text field based on the selected link type
+        if (selectedLinkType == 'Video URL') ...[
+          const Text('Video URL', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          boxH08(),
+          CustomTextField(controller: youtubeController, labelText: 'Provide video URL', maxLines: 1),
+        ] else if (selectedLinkType == 'PDF URL') ...[
+          const Text('PDF URL', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          boxH08(),
+          CustomTextField(controller: pdfLinkController, labelText: 'Provide PDF URL', maxLines: 1),
+        ] else if (selectedLinkType == 'PPT URL') ...[
+          const Text('PPT URL', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          boxH08(),
+          CustomTextField(controller: pptLinkController, labelText: 'Provide PPT URL', maxLines: 1),
+        ] else if (selectedLinkType == 'Image URL') ...[
+          const Text('Image URL', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          boxH08(),
+          CustomTextField(controller: imageLinkController, labelText: 'Provide image URL', maxLines: 1),
+        ],
       ],
     );
   }

@@ -343,7 +343,7 @@ class _HomePageState extends State<HomePage> {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SizedBox(
-          height: Get.height * 0.5,
+          height: Get.height * 0.52,
           width: Get.width * 0.4,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

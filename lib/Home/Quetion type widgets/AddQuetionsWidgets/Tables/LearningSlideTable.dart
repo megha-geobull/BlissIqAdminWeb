@@ -4,7 +4,6 @@ import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/LearningSlideMo
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-
 class LearningSlideTable extends StatefulWidget {
   final String main_category_id;
   final String sub_category_id;
@@ -14,10 +13,10 @@ class LearningSlideTable extends StatefulWidget {
 
   LearningSlideTable(
       {required this.main_category_id,
-        required this.sub_category_id,
-        required this.topic_id,
-        required this.sub_topic_id,
-        required this.questionList});
+      required this.sub_category_id,
+      required this.topic_id,
+      required this.sub_topic_id,
+      required this.questionList});
 
   @override
   _LearningSlideTableState createState() => _LearningSlideTableState();
@@ -30,8 +29,8 @@ class _LearningSlideTableState extends State<LearningSlideTable> {
   final _verticalScrollController = ScrollController();
   final _horizontalScrollController = ScrollController();
   String _selectedQuestionIds = "";
-  bool isSelectAll=false;
-  List<String> selected_question_ids=[];
+  bool isSelectAll = false;
+  List<String> selected_question_ids = [];
   late QuestionDataSource _dataSource;
   final GetAllQuestionsApiController _getdeleteApiController = Get.find();
 
@@ -41,7 +40,7 @@ class _LearningSlideTableState extends State<LearningSlideTable> {
     // Initialize with API data
     _dataSource = QuestionDataSource(
       widget.questionList,
-          (selectedIds) {
+      (selectedIds) {
         setState(() {
           _selectedQuestionIds = selectedIds;
         });
@@ -58,14 +57,14 @@ class _LearningSlideTableState extends State<LearningSlideTable> {
       } else {
         _filteredQuestions = widget.questionList
             .where((question) =>
-        question.title != null &&
-            question.title!.toLowerCase().contains(query.toLowerCase()))
+                question.title != null &&
+                question.title!.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
       // Update the data source with the filtered questions
       _dataSource = QuestionDataSource(
         _filteredQuestions,
-            (selectedIds) {
+        (selectedIds) {
           setState(() {
             _selectedQuestionIds = selectedIds;
           });
@@ -101,7 +100,6 @@ class _LearningSlideTableState extends State<LearningSlideTable> {
     //   });}
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -131,19 +129,18 @@ class _LearningSlideTableState extends State<LearningSlideTable> {
                 Expanded(
                   child: Padding(
                       padding: const EdgeInsets.only(right: 16.0),
-                      child:
-                      CustomTextField(
+                      child: CustomTextField(
                         controller: _searchController,
                         labelText: "Search by Question",
                         onChanged: _filterQuestions,
-                      )
-                  ),
+                      )),
                 ),
                 if (_selectedQuestionIds.isNotEmpty)
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red.shade100,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -157,9 +154,15 @@ class _LearningSlideTableState extends State<LearningSlideTable> {
                       ),
                     ),
                     onPressed: () async {
-                      print("Selected Ids -$_selectedQuestionIds");
-                      _getdeleteApiController.deleteLearningSlideAPI(learning_ids:_selectedQuestionIds);
-                      Future.delayed(const Duration(seconds: 1), () {
+                      print(
+                          "Learning Slide Selected Ids -$_selectedQuestionIds");
+                      Future.delayed(const Duration(seconds: 1), () async {
+                        bool cofirmed =
+                            await _dataSource._showConfirmationDialog(context);
+                        if (cofirmed) {
+                          _getdeleteApiController.deleteLearningSlideAPI(
+                              learning_ids: _selectedQuestionIds);
+                        }
                         _getdeleteApiController.getAllLearningSlideApi(
                           main_category_id: widget.main_category_id,
                           sub_category_id: widget.sub_category_id,
@@ -236,7 +239,6 @@ class _LearningSlideTableState extends State<LearningSlideTable> {
       ),
     );
   }
-
 }
 
 class QuestionDataSource extends DataTableSource {
@@ -245,10 +247,10 @@ class QuestionDataSource extends DataTableSource {
   final Set<String> selectedQuestionIds = {}; // Track selected question IDs
   bool isSelectAll = false; // Track "Select All" state
   int? editingRowIndex; // Track which row is being edited
-  List<TextEditingController> editingControllers = []; // Controllers for editing text
+  List<TextEditingController> editingControllers =
+      []; // Controllers for editing text
 
   final GetAllQuestionsApiController updateQueApiController = Get.find();
-
 
   QuestionDataSource(this.questions, this.onSelectionChanged) {
     // Initialize controllers for each question
@@ -283,164 +285,158 @@ class QuestionDataSource extends DataTableSource {
             },
           ),
         ),
-
         DataCell(
           editingRowIndex == index
               ? TextField(
-            controller: editingControllers[index],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              // Update the question with the new value
-              question.title = editingControllers[index].text;
-              // Optionally call the API here
-              _updateQuestion(question);
-              editingRowIndex = null; // Exit edit mode
-              notifyListeners(); // Update UI
-            },
-          )
+                  controller: editingControllers[index],
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                  onSubmitted: (value) {
+                    // Update the question with the new value
+                    question.title = editingControllers[index].text;
+                    // Optionally call the API here
+                    _updateQuestion(question);
+                    editingRowIndex = null; // Exit edit mode
+                    notifyListeners(); // Update UI
+                  },
+                )
               : Text(question.title ?? ""),
         ),
-
         DataCell(
           editingRowIndex == index
               ? TextField(
-            controller: TextEditingController(text: question.definition),
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              question.definition = value; // Update definition
-              _updateQuestion(question); // Call API
-              notifyListeners(); // Update UI
-            },
-          )
+                  controller: TextEditingController(text: question.definition),
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                  onSubmitted: (value) {
+                    question.definition = value; // Update definition
+                    _updateQuestion(question); // Call API
+                    notifyListeners(); // Update UI
+                  },
+                )
               : Text(question.definition ?? ""),
         ),
-
         DataCell(
           editingRowIndex == index
               ? TextField(
-            controller: TextEditingController(text: question.videoFile),
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              question.videoFile = value; // Update definition
-              _updateQuestion(question); // Call API
-              notifyListeners(); // Update UI
-            },
-          )
+                  controller: TextEditingController(text: question.videoFile),
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                  onSubmitted: (value) {
+                    question.videoFile = value; // Update definition
+                    _updateQuestion(question); // Call API
+                    notifyListeners(); // Update UI
+                  },
+                )
               : Text(question.videoFile ?? ""),
         ),
-
         DataCell(
           editingRowIndex == index
               ? TextField(
-            controller: TextEditingController(text: question.pdfFile),
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              question.pdfFile = value; // Update definition
-              _updateQuestion(question); // Call API
-              notifyListeners(); // Update UI
-            },
-          )
+                  controller: TextEditingController(text: question.pdfFile),
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                  onSubmitted: (value) {
+                    question.pdfFile = value; // Update definition
+                    _updateQuestion(question); // Call API
+                    notifyListeners(); // Update UI
+                  },
+                )
               : Text(question.pdfFile ?? ""),
         ),
-
         DataCell(
           editingRowIndex == index
               ? TextField(
-            controller: TextEditingController(text: question.pptFile),
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              question.pptFile = value; // Update definition
-              _updateQuestion(question); // Call API
-              notifyListeners(); // Update UI
-            },
-          )
+                  controller: TextEditingController(text: question.pptFile),
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                  onSubmitted: (value) {
+                    question.pptFile = value; // Update definition
+                    _updateQuestion(question); // Call API
+                    notifyListeners(); // Update UI
+                  },
+                )
               : Text(question.pptFile ?? ""),
         ),
-
         DataCell(
           editingRowIndex == index
               ? TextField(
-            controller: TextEditingController(text: question.imageFile),
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              question.imageFile = value; // Update definition
-              _updateQuestion(question); // Call API
-              notifyListeners(); // Update UI
-            },
-          )
+                  controller: TextEditingController(text: question.imageFile),
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                  onSubmitted: (value) {
+                    question.imageFile = value; // Update definition
+                    _updateQuestion(question); // Call API
+                    notifyListeners(); // Update UI
+                  },
+                )
               : Text(question.imageFile ?? ""),
         ),
         DataCell(
           editingRowIndex == index
               ? TextField(
-            controller: TextEditingController(text: question.index.toString()),
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              question.index = int.tryParse(value) ?? 0;
-              _updateQuestion(question); // Call API
-              notifyListeners(); // Update UI
-            },
-          )
+                  controller:
+                      TextEditingController(text: question.index.toString()),
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                  onSubmitted: (value) {
+                    question.index = int.tryParse(value) ?? 0;
+                    _updateQuestion(question); // Call API
+                    notifyListeners(); // Update UI
+                  },
+                )
               : Text(question.index.toString() ?? ""),
         ),
-
         DataCell(
           editingRowIndex == index
               ? TextField(
-            controller: TextEditingController(text: question.points.toString()),
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) {
-              question.points = int.tryParse(value) ?? 0;
-              _updateQuestion(question); // Call API
-              notifyListeners(); // Update UI
-            },
-          )
+                  controller:
+                      TextEditingController(text: question.points.toString()),
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                  onSubmitted: (value) {
+                    question.points = int.tryParse(value) ?? 0;
+                    _updateQuestion(question); // Call API
+                    notifyListeners(); // Update UI
+                  },
+                )
               : Text(question.points.toString() ?? ""),
         ),
-
         DataCell(
           editingRowIndex == index
               ? ElevatedButton(
-            onPressed: () {
-              // Call the API to update the question
-              _updateQuestion(question);
-              editingRowIndex = null; // Exit edit mode
-              notifyListeners(); // Update UI
-            },
-            child: Text("Update"),
-          )
+                  onPressed: () {
+                    // Call the API to update the question
+                    _updateQuestion(question);
+                    editingRowIndex = null; // Exit edit mode
+                    notifyListeners(); // Update UI
+                  },
+                  child: Text("Update"),
+                )
               : GestureDetector(
-            onTap: () {
-              if (editingRowIndex == null) {
-                // Start editing
-                editingRowIndex = index;
-                notifyListeners(); // Update UI
-              }
-            },
-            child: const Text(
-              "Edit",
-              style: TextStyle(
-                color: Colors.blue,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ),
+                  onTap: () {
+                    if (editingRowIndex == null) {
+                      // Start editing
+                      editingRowIndex = index;
+                      notifyListeners(); // Update UI
+                    }
+                  },
+                  child: const Text(
+                    "Edit",
+                    style: TextStyle(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
         ),
       ],
     );
@@ -475,7 +471,59 @@ class QuestionDataSource extends DataTableSource {
     onSelectionChanged(selectedQuestionIds.join('|'));
     notifyListeners(); // Update UI
   }
+
+  _deleteSelectedQuestions(String selectedQuestionIds) async {
+    final deleteApiController = Get.find<GetAllQuestionsApiController>();
+
+    if (selectedQuestionIds.isNotEmpty) {
+      try {
+        await deleteApiController.deleteLearningSlideAPI(
+          learning_ids: selectedQuestionIds,
+        );
+
+        // Refresh the list of questions
+        await deleteApiController.getAllLearningSlideApi(
+          main_category_id: questions[0].mainCategoryId.toString(),
+          sub_category_id: questions[0].subCategoryId.toString(),
+          topic_id: questions[0].topicId.toString(),
+          sub_topic_id: questions[0].subTopicId.toString(),
+        );
+
+        questions.removeWhere(
+            (question) => selectedQuestionIds.contains(question.id));
+        //selectedQuestionIds.clear(); // Clear selected IDs
+        notifyListeners(); // Update UI
+      } catch (e) {
+        print('Error deleting questions: $e');
+      }
+    }
+  }
+
+  _showConfirmationDialog(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Confirm Deletion'),
+              content: const Text(
+                  'Do you really want to delete the selected learning slide?'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false); // User pressed "No"
+                  },
+                  child: const Text('No'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(true); // User pressed "Yes"
+                  },
+                  child: const Text('Yes'),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false; // Default to false if dialog is dismissed
+  }
 }
-
-
-

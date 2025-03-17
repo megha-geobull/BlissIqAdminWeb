@@ -17,6 +17,8 @@ import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/guess_the_image
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/image_puzzle_model.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/re_arrange_sentence_model.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:get/get.dart';
@@ -207,10 +209,9 @@ class GetAllQuestionsApiController extends GetxController{
     required String main_category_id ,
     required String sub_category_id,
     required String topic_id,
-    String? sub_topic_id}) async {
+    required String sub_topic_id}) async {
     isLoading.value = true;
     getCompleteParaData.clear();
-    print("Hi Hellow");
     try {
       var body = {
         'main_category_id':main_category_id,
@@ -218,11 +219,6 @@ class GetAllQuestionsApiController extends GetxController{
         'topic_id':topic_id,
         'sub_topic_id':sub_topic_id??''
       };
-      print(main_category_id);
-      print(sub_category_id);
-      print(topic_id);
-      print(sub_topic_id);
-
 
       final response = await http.post(
           Uri.parse(ApiString.get_complete_the_paragraph),
@@ -366,6 +362,7 @@ class GetAllQuestionsApiController extends GetxController{
       isLoading.value = false;
     }
   }
+
   delete_Mcq({required String question_ids}) async {
     isLoading.value = true;
 
@@ -1252,9 +1249,11 @@ class GetAllQuestionsApiController extends GetxController{
 
     try {
       print(learning_ids);
+
       final Map<String, dynamic> body = {
         "learning_id": learning_ids,
       };
+
       print(body.toString());
       final response = await http.delete(
         Uri.parse(ApiString.delete_learning_slide),
@@ -1262,7 +1261,7 @@ class GetAllQuestionsApiController extends GetxController{
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*"  // Corrected header
         },
-        //body:jsonEncode(body),
+        body:jsonEncode(body),
       );
 
       print('Response status: ${response.statusCode}');
@@ -1287,9 +1286,44 @@ class GetAllQuestionsApiController extends GetxController{
 
 
 
+  delete_match_pair_question({
+    required String question_ids,
+    required BuildContext context,
+  }) async {
+    try {
+      final response = await http.delete(
+        Uri.parse(ApiString.delete_match_pair_question),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'question_id': question_ids,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Question deleted successfully!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Something went wrong. Please try again later.')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: $e')),
+      );
+    }
+  }
+
+
   //Update Story Phrases
   updateStoryPhrasesTableQuestionApi(StoryPhrases question) async {
     isLoading.value = true;
+    if (kDebugMode) {
+      print("Update Story Phrases Table Question Api ");
+    }
     try {
       final response = await http.post(
         Uri.parse(ApiString.update_story_phrases),
@@ -1302,23 +1336,33 @@ class GetAllQuestionsApiController extends GetxController{
           'sub_category_id':question.subCategoryId,
           'topic_id': question.topicId,
           'sub_topic_id':question.subTopicId,
-          'phrase_name': question.phraseName,
+          'passage': question.passage,
           'index': question.index,
           'points': question.points,
+          'question_format': question.questionFormat,
+          'image': question.image,
+          'image_name': question.imageName,
         }),
       );
 
       if (response.statusCode == 200) {
-        await getStoryPhrases(main_category_id: question.mainCategoryId.toString(), sub_category_id: question.subCategoryId.toString(),
-            topic_id: question.topicId.toString(), sub_topic_id: question.subTopicId.toString()
+        await getStoryPhrases(
+            main_category_id: question.mainCategoryId.toString(),
+            sub_category_id: question.subCategoryId.toString(),
+            topic_id: question.topicId.toString(),
+            sub_topic_id: question.subTopicId.toString()
         );
       } else {
-        print('Failed to update question: ${response.body}');
+        if (kDebugMode) {
+          print('Failed to update question: ${response.body}');
+        }
       }
     } catch (e) {
-      print('Error updating question: $e');
+      if (kDebugMode) {
+        print('Error updating question: $e');
+      }
     } finally {
-      isLoading.value = false; // Set loading state to false
+      isLoading.value = false;
     }
   }
 
@@ -1329,7 +1373,6 @@ class GetAllQuestionsApiController extends GetxController{
     required String sub_category_id,
     required String topic_id,
     required String sub_topic_id,
-    //required String true_false_id,
     required String phrase_ids,
 
   }) async {
@@ -1425,6 +1468,7 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
   //delete api
+
   deleteReArrangeAPI({
     required String question_id,
   }) async {
@@ -1450,7 +1494,7 @@ class GetAllQuestionsApiController extends GetxController{
 
   //Update Fill in the blanks API
 
-  Future<void> updateFillInTheBlanksTableQuestionApi(
+  updateFillInTheBlanksTableQuestionApi(
       FillInTheBlanks question, List<int>? qImage) async {
     isLoading.value = true;
     try {
@@ -1633,6 +1677,7 @@ class GetAllQuestionsApiController extends GetxController{
       throw Exception('Failed to delete phrase: ${response.body}');
     }
   }
+
   //Update Story
   updateStoryTableQuestionApi(StoryData question) async {
     isLoading.value = true;
@@ -1784,6 +1829,7 @@ print('Question update successfully');
   // }
 
   //update complete the word
+
   Future<void> updateCompleteTheWordTableQuestionApi( CompleteWordData question,List<int>? qImage,) async {
     isLoading.value = true;
 
@@ -1935,6 +1981,7 @@ print('question updated successfully');
   deleteCompleteTheParagraphAPI({
     required String question_ids,
   }) async {
+    print("question_ids {$question_ids}");
     if (question_ids.isEmpty) {
       print('Error: No question IDs provided');
       return;

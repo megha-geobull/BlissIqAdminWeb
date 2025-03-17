@@ -51,7 +51,7 @@ class _StudentsGraphScreenState extends State<StudentsGraphScreen>{
         borderRadius: BorderRadius.circular(12.0),
       ),
       child: SizedBox(
-        height: Get.height * 0.55,
+        height: Get.height * 0.56,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           child: Column(
