@@ -24,6 +24,7 @@ class ApiString {
   ///mentor
   static const String mentorBaseUrl = "http://65.0.211.122:4444/mentor_api/";
   static const String mentor_registration = "${mentorBaseUrl}mentor_registration";
+  static const String update_mentor_profile = "${mentorBaseUrl}edit_profile";
   static const String get_all_mentors = "${baseUrl}get_all_mentors";
   static const String delete_mentors = "${baseUrl}delete_mentors";
   static const String approve_mentor = "${baseUrl}approve_mentor";
@@ -34,6 +35,7 @@ class ApiString {
   ///school_registration
   static const String schoolBaseUrl = "http://65.0.211.122:4444/school_api/";
   static const String school_registration = "${schoolBaseUrl}school_registration";
+  static const String update_school_profile = "${schoolBaseUrl}edit_profile";
   static const String approve_school = "${baseUrl}approve_school";
   static const String get_all_schools = "${baseUrl}get_all_schools";
   static const String assign_school = "${baseUrl}assign_school";
@@ -80,6 +82,7 @@ class ApiString {
   static const String add_sub_category = "${baseUrl}add_sub_category";
   static const String get_sub_category = "${baseUrl}get_sub_category";
   static const String delete_sub_category = "${baseUrl}delete_sub_category";
+  static const String reorder_sub_category = "${baseUrl}reorder_sub_category";
 
   static const String add_topics = "${baseUrl}add_topics";
   static const String get_topics = "${baseUrl}get_topics";

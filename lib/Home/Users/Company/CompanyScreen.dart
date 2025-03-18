@@ -90,27 +90,6 @@ class _CompanyScreenState extends State<CompanyScreen> {
     }
   }
 
-  // void onDelete(String title, String companyId) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) => CustomAlertDialog(
-  //       title: 'Are you sure',
-  //       content: title,
-  //       yesText: 'Yes',
-  //       noText: 'No',
-  //       onYesPressed: () {
-  //         Navigator.pop(context);
-  //         companyController.delete_company(companyId);
-  //
-  //         setState(() {
-  //
-  //
-  //         });
-  //       },
-  //     ),
-  //   );
-  // }
-
   void onDelete(String title, String companyId) {
     showDialog(
       context: context,
@@ -421,15 +400,7 @@ class CompanyTableSource extends DataTableSource {
   final Map<String, TextEditingController> _gstNumberControllers = {};
   final Map<String, TextEditingController> _cinNumberControllers = {};
 
-  // Dispose controllers when no longer needed
-  void _disposeControllers(String id) {
-    _ownerNameControllers[id]?.dispose();
-    _companyNameControllers[id]?.dispose();
-    _emailControllers[id]?.dispose();
-    _contactNoControllers[id]?.dispose();
-    _gstNumberControllers[id]?.dispose();
-    _cinNumberControllers[id]?.dispose();
-  }
+
   // Initialize controllers for each row
   void _initializeControllers(Data dataRow) {
     _ownerNameControllers[dataRow.id!] = TextEditingController(text: dataRow.ownerName);
@@ -557,7 +528,7 @@ class CompanyTableSource extends DataTableSource {
         },
         cells: [
           // Profile cell (unchanged)
-          DataCell(
+           DataCell(
             isEditing
                 ? SizedBox(
               width: 50,

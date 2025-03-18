@@ -6,6 +6,7 @@ import 'package:blissiqadmin/Home/Users/Mentor/MentorRegistration.dart';
 import 'package:blissiqadmin/Home/Users/Models/GetAllMentorModel.dart';
 import 'package:blissiqadmin/auth/Controller/AuthController.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -69,27 +70,6 @@ class _MentorScreenState extends State<MentorScreen> {
       );
     }
   }
-
-  // void onDelete(String title, String mentor_id) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) => CustomAlertDialog(
-  //       title: 'Are you sure',
-  //       content: title,
-  //       yesText: 'Yes',
-  //       noText: 'No',
-  //       onYesPressed: () {
-  //         mentorController.delete_mentors(mentor_id);
-  //         mentorController.getAllMentors();
-  //         selectedMentorIds.clear();
-  //         Navigator.pop(context);
-  //
-  //         setState(() {});
-  //       },
-  //     ),
-  //   );
-  // }
-
 
   void onDelete(String title, String mentor_id) {
     showDialog(
@@ -361,10 +341,124 @@ class MentorDataTableSource extends DataTableSource {
   final _MentorScreenState mentorScreenState;
 
   List<DataRow> dataTableRows = [];
+  List<PlatformFile>? _paths;
+  var pathsFile;
+  var pathsFileName;
+  bool isFilePicked = false;
+  pickFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: false,
+      onFileLoading: (FilePickerStatus status) => print("status .... $status"),
+      allowedExtensions: [
+        'bmp',
+        'dib',
+        'gif',
+        'jfif',
+        'jpe',
+        'jpg',
+        'jpeg',
+        'pbm',
+        'pgm',
+        'ppm',
+        'pnm',
+        'pfm',
+        'png',
+        'apng',
+        'blp',
+        'bufr',
+        'cur',
+        'pcx',
+        'dcx',
+        'dds',
+        'ps',
+        'eps',
+        'fit',
+        'fits',
+        'fli',
+        'flc',
+        'ftc',
+        'ftu',
+        'gbr',
+        'grib',
+        'h5',
+        'hdf',
+        'jp2',
+        'j2k',
+        'jpc',
+        'jpf',
+        'jpx',
+        'j2c',
+        'icns',
+        'ico',
+        'im',
+        'iim',
+        'mpg',
+        'mpeg',
+        'tif',
+        'tiff',
+        'mpo',
+        'msp',
+        'palm',
+        'pcd',
+        'pdf',
+        'pxr',
+        'psd',
+        'qoi',
+        'bw',
+        'rgb',
+        'rgba',
+        'sgi',
+        'ras',
+        'tga',
+        'icb',
+        'vda',
+        'vst',
+        'webp',
+        'wmf',
+        'emf',
+        'xbm',
+        'xpm'
+      ],
+    );
+    if (result != null && result.files.isNotEmpty) {
+        _paths = result.files;
+        pathsFile = _paths!.first.bytes; // Store the bytes
+        pathsFileName = _paths!.first.name; // Store the file name
+        isFilePicked = true;
+        notifyListeners();
+    }
+  }
+
+  // Add TextEditingController for each editable field
+  final Map<String, TextEditingController> _userNameControllers = {};
+  final Map<String, TextEditingController> _emailControllers = {};
+  final Map<String, TextEditingController> _contactNoControllers = {};
+  final Map<String, TextEditingController> _addressControllers = {};
+  final Map<String, TextEditingController> _expControllers = {};
+  final Map<String, TextEditingController> _qulificationControllers = {};
+
+
+  // Initialize controllers for each row
+  void _initializeControllers(Data dataRow) {
+    _userNameControllers[dataRow.sId!] = TextEditingController(text: dataRow.fullName);
+    _emailControllers[dataRow.sId!] = TextEditingController(text: dataRow.email);
+    _contactNoControllers[dataRow.sId!] = TextEditingController(text: dataRow.contactNo.toString());
+    _addressControllers[dataRow.sId!] = TextEditingController(text: dataRow.address);
+    _expControllers[dataRow.sId!] = TextEditingController(text: dataRow.experience);
+    _qulificationControllers[dataRow.sId!] = TextEditingController(text: dataRow.qualification);
+  }
+
 
   void buildDataTableRows() {
     dataTableRows = mentors.map<DataRow>((dataRow) {
       final isEditing = mentorScreenState.editingStates[dataRow.sId] ?? false;
+
+      // Initialize controllers for this row if not already done
+      if (!_userNameControllers.containsKey(dataRow.sId)) {
+        _initializeControllers(dataRow);
+      }
+
       return DataRow(
         selected: mentorScreenState.selectedMentorIds.contains(dataRow.sId),
         onSelectChanged: (isSelected) {
@@ -377,74 +471,77 @@ class MentorDataTableSource extends DataTableSource {
         },
         cells: [
           DataCell(
-            CircleAvatar(
-              radius: 20,
-              backgroundColor: Colors.white,
-              child: CachedNetworkImage(
-                imageUrl: ApiString.ImgBaseUrl + (dataRow.profileImage ?? ''),
-                placeholder: (context, url) => CircularProgressIndicator(),
-                errorWidget: (context, url, error) => Icon(Icons.error),
-                fit: BoxFit.cover,
+            isEditing
+                ? SizedBox(
+              width: 50,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                      color: isFilePicked ? Colors.green : Colors.blue,
+                      width: 1.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.image,
+                      color: isFilePicked ? Colors.green : Colors.blue),
+                  onPressed: () => pickFile(),
+                ),
               ),
-            ),
+            )
+                : dataRow.profileImage != null
+                ? SizedBox(
+              width: 50,
+              child: CachedNetworkImage(
+                imageUrl: ApiString.ImgBaseUrl + dataRow.profileImage!,
+                progressIndicatorBuilder:
+                    (context, url, downloadProgress) =>
+                    CircularProgressIndicator(
+                        value: downloadProgress.progress),
+                errorWidget: (context, url, error) =>
+                const Icon(Icons.error),
+              ),
+            )
+                : const SizedBox.shrink(),
           ),
           DataCell(
             isEditing
                 ? TextFormField(
-              initialValue: dataRow.fullName,
-              onChanged: (value) {
-                // dataRow.fullName = value;
-              },
+              controller: _userNameControllers[dataRow.sId],
             )
                 : Text(dataRow.fullName ?? 'No Name'),
           ),
           DataCell(
             isEditing
                 ? TextFormField(
-              initialValue: dataRow.email,
-              onChanged: (value) {
-                // dataRow.email = value;
-              },
+              controller: _emailControllers[dataRow.sId],
             )
                 : Text(dataRow.email ?? 'No Email'),
           ),
           DataCell(
             isEditing
                 ? TextFormField(
-              initialValue: dataRow.contactNo?.toString(),
-              onChanged: (value) {
-                // dataRow.contactNo = value;
-              },
+              controller: _contactNoControllers[dataRow.sId],
             )
                 : Text(dataRow.contactNo?.toString() ?? '-'),
           ),
           DataCell(
             isEditing
                 ? TextFormField(
-              initialValue: dataRow.address,
-              onChanged: (value) {
-                // dataRow.address = value;
-              },
+              controller: _addressControllers[dataRow.sId],
             )
                 : Text(dataRow.address ?? 'No Address'),
           ),
           DataCell(
             isEditing
                 ? TextFormField(
-              initialValue: dataRow.experience,
-              onChanged: (value) {
-                // dataRow.experience = value;
-              },
+              controller: _expControllers[dataRow.sId],
             )
                 : Text(dataRow.experience ?? 'No experience'),
           ),
           DataCell(
             isEditing
                 ? TextFormField(
-              initialValue: dataRow.qualification,
-              onChanged: (value) {
-                // dataRow.qualification = value;
-              },
+              controller: _qulificationControllers[dataRow.sId],
             )
                 : Text(dataRow.qualification ?? 'No qualification'),
           ),
@@ -477,11 +574,7 @@ class MentorDataTableSource extends DataTableSource {
           DataCell(isEditing
               ? ElevatedButton(
             onPressed: () {
-              // Save changes and exit edit mode
-              mentorScreenState.setState(() {
-                mentorScreenState.editingStates[dataRow.sId!] = false;
-              });
-              // Call update API here if needed
+              _updateCompany(dataRow);
             },
             style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
@@ -506,6 +599,47 @@ class MentorDataTableSource extends DataTableSource {
         ],
       );
     }).toList();
+  }
+
+  void _updateCompany(Data data) {
+    // Create a new instance of Data with updated values
+    print('profile File: ${pathsFile != null ? pathsFile.length : "null"}');
+
+    final updatedData = Data(
+      sId: data.sId,
+      fullName: _userNameControllers[data.sId!]?.text ?? data.fullName,
+      email: _emailControllers[data.sId!]?.text ?? data.email,
+      contactNo: (_contactNoControllers[data.sId!]?.text?.isNotEmpty ?? false)
+          ? int.tryParse(_contactNoControllers[data.sId!]?.text ?? '') ?? data.contactNo
+          : data.contactNo,
+      address: _addressControllers[data.sId!]?.text ?? data.address,
+      experience: _expControllers[data.sId!]?.text ?? data.experience,
+      qualification: _qulificationControllers[data.sId!]?.text ?? data.qualification,
+    );
+
+    // Call the API with the updated Data object
+    mentorScreenState.mentorController.updateMentorApi(
+        mentorID: updatedData.sId!,
+        fullName: updatedData.fullName ?? '',
+        email: updatedData.email ?? '',
+        address: updatedData.address ?? '',
+        contactNo: updatedData.contactNo.toString() ?? '',
+        experience: updatedData.experience ?? '',
+        qualification: updatedData.qualification ?? '',
+      profileImageBytes: pathsFile
+        ).then((_) {
+      mentorScreenState.mentorController.getAllMentors();
+      mentorScreenState.setState(() {
+        mentorScreenState.editingStates[data.sId!] = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Company updated successfully!')),
+      );
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error updating company: $error')),
+      );
+    });
   }
 
   Color _getButtonColor(String? approvalStatus) {

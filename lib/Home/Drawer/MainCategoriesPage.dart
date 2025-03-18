@@ -17,8 +17,6 @@ import '../../controller/CategoryController.dart';
 import 'Topics_screen.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
-
-
 class MainCategoriesPage extends StatefulWidget {
   const MainCategoriesPage({super.key});
 
@@ -27,7 +25,7 @@ class MainCategoriesPage extends StatefulWidget {
 }
 
 class _MainCategoriesPageState extends State<MainCategoriesPage> {
-  final CategoryController _controller = Get.put(CategoryController());
+  final CategoryController _controller = Get.find();
   List<TableRow> tableRows = [];
 
   @override
@@ -467,7 +465,9 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
     );
   }
 
-  void _showItems(BuildContext context, int mainIndex, String type,RxList subcatList) {
+  void _showItems(BuildContext context, int mainIndex, String type, RxList subcatList) {
+    RxList<dynamic> reorderedList = RxList.of(subcatList); // Copy of subcategory list
+
     showDialog(
       context: context,
       builder: (context) {
@@ -476,34 +476,45 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
           content: SizedBox(
             width: 500,
             child: Obx(() {
-              return ListView.builder(
+              return ReorderableListView.builder(
                 shrinkWrap: true,
-                itemCount: _controller.sub_categories.length,
+                itemCount: reorderedList.length,
+                onReorder: (oldIndex, newIndex) {
+                  if (newIndex > oldIndex) newIndex -= 1; // Adjust for shifting
+                  var movedItem = reorderedList.removeAt(oldIndex);
+                  reorderedList.insert(newIndex, movedItem);
+                },
                 itemBuilder: (context, itemIndex) {
-                  var items = _controller.sub_categories[itemIndex];
+                  var items = reorderedList[itemIndex];
                   return ListTile(
+                    key: ValueKey(items['_id']),
                     title: Text(items['sub_category']),
                     trailing: SizedBox(
                       width: 200,
                       child: Row(
-                        children:[
+                        children: [
                           InkWell(
-                              onTap: (){
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          TopicsScreen( subcategory: items,)),
-                                );
-                              },
-                              child: Text('Topics')),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => TopicsScreen(subcategory: items)),
+                              );
+                            },
+                            child: Text('Topics'),
+                          ),
                           IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            onDelete(_controller.sub_categories[itemIndex]['main_category_id'],itemIndex,"you want to delete this subcategory?","subcategory");
-                          },
-                        ),
-                        ]
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              onDelete(
+                                items['main_category_id'],
+                                itemIndex,
+                                "You want to delete this subcategory?",
+                                "subcategory",
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   );
@@ -515,6 +526,14 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Close'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                String reorderedIds = reorderedList.map((item) => item['_id']).join('|');
+                print(reorderedIds);
+                Get.find<CategoryController>().updateSubCategoriesOrder(subCategoriesID: reorderedIds);
+              },
+              child: const Text('Save'),
             ),
           ],
         );
