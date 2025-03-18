@@ -30,11 +30,11 @@ class _SchoolScreenState extends State<SchoolScreen> {
   @override
   void initState() {
     super.initState();
-    filteredSchoolData = schoolController.allSchoolData;
+    filteredSchoolData = schoolController.allSchoolData ?? [];
     WidgetsBinding.instance.addPostFrameCallback((_) {
       schoolController.getAllSchools();
       searchController.clear();
-      _filterSchools(''); // Clear search on init
+      _filterSchools('');
     });
   }
 
@@ -368,9 +368,33 @@ class SchoolDataTableSource extends DataTableSource {
 
   List<DataRow> dataTableRows = [];
 
+  // Add TextEditingController for each editable field
+  final Map<String, TextEditingController> _schoolNameControllers = {};
+  final Map<String, TextEditingController> _emailControllers = {};
+  final Map<String, TextEditingController> _contactNoControllers = {};
+  final Map<String, TextEditingController> _addressControllers = {};
+  final Map<String, TextEditingController> _schoolRsgNoControllers = {};
+  final Map<String, TextEditingController> _schoolTypeControllers = {};
+
+  // Initialize controllers for each row
+  void _initializeControllers(Data dataRow) {
+    _schoolNameControllers[dataRow.id ?? ''] = TextEditingController(text: dataRow.schoolName ?? '');
+    _emailControllers[dataRow.id ?? ''] = TextEditingController(text: dataRow.principalEmail ?? '');
+    _contactNoControllers[dataRow.id ?? ''] = TextEditingController(text: dataRow.principalPhone.toString() ?? '');
+    _addressControllers[dataRow.id ?? ''] = TextEditingController(text: dataRow.address ?? '');
+    _schoolRsgNoControllers[dataRow.id ?? ''] = TextEditingController(text: dataRow.schoolRegNumber ?? '');
+    _schoolTypeControllers[dataRow.id ?? ''] = TextEditingController(text: dataRow.schoolType ?? '');
+  }
+
   void buildDataTableRows() {
     dataTableRows = schools.map<DataRow>((dataRow) {
       final isEditing = schoolScreenState.editingStates[dataRow.id] ?? false;
+
+      // Initialize controllers for this row if not already done
+      if (!_schoolNameControllers.containsKey(dataRow.id)) {
+        _initializeControllers(dataRow);
+      }
+
       return DataRow(
         selected: schoolScreenState.selectedSchoolIds.contains(dataRow.id),
         onSelectChanged: (isSelected) {
@@ -385,61 +409,43 @@ class SchoolDataTableSource extends DataTableSource {
           DataCell(
             isEditing
                 ? TextFormField(
-                    initialValue: dataRow.schoolName,
-                    onChanged: (value) {
-                      // dataRow.schoolName = value;
-                    },
-                  )
+              controller: _schoolNameControllers[dataRow.id],
+            )
                 : Text(dataRow.schoolName ?? 'No Name'),
           ),
           DataCell(
             isEditing
                 ? TextFormField(
-                    initialValue: dataRow.principalEmail,
-                    onChanged: (value) {
-                      // dataRow.principalEmail = value;
-                    },
-                  )
+              controller: _emailControllers[dataRow.id],
+            )
                 : Text(dataRow.principalEmail ?? 'No Email'),
           ),
           DataCell(
             isEditing
                 ? TextFormField(
-                    initialValue: dataRow.principalPhone?.toString(),
-                    onChanged: (value) {
-                      // dataRow.principalPhone = value;
-                    },
-                  )
+              controller: _contactNoControllers[dataRow.id],
+            )
                 : Text(dataRow.principalPhone?.toString() ?? '-'),
           ),
           DataCell(
             isEditing
                 ? TextFormField(
-                    initialValue: dataRow.address,
-                    onChanged: (value) {
-                      // dataRow.address = value;
-                    },
-                  )
+              controller: _addressControllers[dataRow.id],
+            )
                 : Text(dataRow.address ?? 'No Address'),
           ),
           DataCell(
             isEditing
                 ? TextFormField(
-                    initialValue: dataRow.schoolRegNumber,
-                    onChanged: (value) {
-                      // dataRow.schoolRegNumber = value;
-                    },
-                  )
+              controller: _schoolRsgNoControllers[dataRow.id],
+            )
                 : Text(dataRow.schoolRegNumber ?? 'No school reg.no'),
           ),
           DataCell(
             isEditing
                 ? TextFormField(
-                    initialValue: dataRow.schoolType,
-                    onChanged: (value) {
-                      // dataRow.schoolType = value;
-                    },
-                  )
+              controller: _schoolTypeControllers[dataRow.id],
+            )
                 : Text(dataRow.schoolType ?? 'no type'),
           ),
           DataCell(
@@ -465,7 +471,7 @@ class SchoolDataTableSource extends DataTableSource {
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
-                backgroundColor: _getButtonColor(dataRow.approvalStatus),
+                backgroundColor: _getButtonColor(dataRow.approvalStatus ?? 'Pending'),
               ),
               child: Text(
                 dataRow.approvalStatus ?? 'Pending',
@@ -520,7 +526,7 @@ class SchoolDataTableSource extends DataTableSource {
               onPressed: () {
                 schoolScreenState.onDelete(
                   "You want to delete this school?",
-                  dataRow.id!,
+                  dataRow.id ?? '',
                 );
               },
             ),
@@ -529,10 +535,7 @@ class SchoolDataTableSource extends DataTableSource {
               ? ElevatedButton(
                   onPressed: () {
                     // Save changes and exit edit mode
-                    schoolScreenState.setState(() {
-                      schoolScreenState.editingStates[dataRow.id!] = false;
-                    });
-                    // Call update API here if needed
+                    _updateCompany(dataRow);
                   },
             style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
@@ -544,7 +547,7 @@ class SchoolDataTableSource extends DataTableSource {
                   onPressed: () {
                     // Save changes and exit edit mode
                     schoolScreenState.setState(() {
-                      schoolScreenState.editingStates[dataRow.id!] = true;
+                      schoolScreenState.editingStates[dataRow.id ?? ''] = true;
                     });
                     // Call update API here if needed
                   },
@@ -557,6 +560,46 @@ class SchoolDataTableSource extends DataTableSource {
         ],
       );
     }).toList();
+  }
+
+  void _updateCompany(Data data) {
+
+    final updatedData = Data(
+      id: data.id,
+      schoolName: _schoolNameControllers[data.id!]?.text ?? data.schoolName,
+      principalEmail: _emailControllers[data.id!]?.text ?? data.principalEmail,
+      principalPhone:  (_contactNoControllers[data.id!]?.text?.isNotEmpty ?? false)
+          ? int.tryParse(_contactNoControllers[data.id!]?.text ?? '') ?? data.principalPhone
+          : data.principalPhone,
+      schoolRegNumber: _schoolRsgNoControllers[data.id!]?.text ?? data.schoolRegNumber,
+      schoolType: _schoolTypeControllers[data.id!]?.text ?? data.schoolType,
+      address: _addressControllers[data.id!]?.text ?? data.address,
+      approvalStatus: data.approvalStatus,
+    );
+
+    // Call the API with the updated Data object
+    schoolScreenState.schoolController.updateSchoolApi(
+        schoolID: updatedData.id!,
+        schoolName: updatedData.schoolName ?? '',
+        schoolRegNumber: updatedData.schoolRegNumber ?? '',
+        principalName: updatedData.principalName ?? '',
+        principalEmail: updatedData.principalEmail ?? '',
+        principalPhone: updatedData.principalPhone.toString() ?? '',
+        address: updatedData.address ?? '',
+      schoolType: updatedData.schoolType ?? '',
+    ).then((_) {
+      schoolScreenState.schoolController.getAllSchools();
+      schoolScreenState.setState(() {
+        schoolScreenState.editingStates[data.id!] = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Company updated successfully!')),
+      );
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error updating company: $error')),
+      );
+    });
   }
 
   Color _getButtonColor(String? approvalStatus) {

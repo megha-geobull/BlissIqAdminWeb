@@ -150,6 +150,55 @@ class SchoolController extends GetxController {
     }
   }
 
+  updateSchoolApi({
+    required String schoolID,
+    required String schoolName,
+    required String schoolRegNumber,
+    required String principalName,
+    required String principalEmail,
+    required String principalPhone,
+    required String address,
+    required String schoolType,
+
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final response = await http.post(
+        Uri.parse(ApiString.update_school_profile),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer YOUR_TOKEN",
+        },
+        body: jsonEncode({
+          'user_id': schoolID,
+          'schoolName': schoolName,
+          'schoolRegNumber': schoolRegNumber,
+          'principalName': principalName,
+          'principalEmail': principalEmail,
+          'principalPhone': principalPhone,
+          'address': address,
+          'schoolType': schoolType,
+        }),
+      );
+
+      final responseData = jsonDecode(response.body);
+      print(responseData);
+      if (response.statusCode == 201 && responseData['status'] == 1) {
+     Fluttertoast.showToast(msg: responseData['message']);
+        getAllSchools();
+        // Get.back();
+        clearControllers();
+      } else {
+     Fluttertoast.showToast(msg: responseData['message']);
+      }
+    } catch (e) {
+      Fluttertoast.showToast(msg: 'An error occurred: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
 
   getAllSchools() async {
     isLoading.value = true;

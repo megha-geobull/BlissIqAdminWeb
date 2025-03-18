@@ -162,6 +162,7 @@ class CategoryController extends GetxController {
       isLoading.value = false;
     }
   }
+
  /// with imae add the subcategory add
  //  addSubCategory({
  //    required String subcategory,
@@ -351,6 +352,40 @@ class CategoryController extends GetxController {
       }
     } catch (e) {
       showSnackbar(message: "Error while add $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  updateSubCategoriesOrder({
+    required String subCategoriesID
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final Map<String, dynamic> body = {
+        "sub_category_ids": subCategoriesID,
+      };
+
+      final response = await http.post(
+        Uri.parse(ApiString.reorder_sub_category),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          showSnackbar(message: "Topic deleted successfully");
+        } else {
+          showSnackbar(message: "Failed to delete Topic");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while delete $e");
     } finally {
       isLoading.value = false;
     }
