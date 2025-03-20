@@ -1,4 +1,5 @@
 import 'package:blissiqadmin/Global/Widgets/ExampleModel.dart';
+import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomAlertDialogue.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/AddQuetionsWidgets/AddQuetionsWidgets.dart';
@@ -134,6 +135,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: ExpansionTile(
+                                  key:  ValueKey(topic['_id']),
                                   shape: Border.all(color: Colors.grey.shade200, width: 0.8),
                                   title: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -148,6 +150,12 @@ class _TopicsScreenState extends State<TopicsScreen> {
                                       ),
                                       Row(
                                         children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.edit, color: Colors.green),
+                                            onPressed: () {
+                                              _showEditDialog(context,topic['_id'],topic['topic_name']) ;                                           },
+                                          ),
+
                                           IconButton(
                                             icon: const Icon(Icons.add_circle_outline, color: Colors.green),
                                             onPressed: () {
@@ -181,13 +189,19 @@ class _TopicsScreenState extends State<TopicsScreen> {
                                     ],
                                   ),
                                   onExpansionChanged: (isExpanded) {
-                                    if (isExpanded && !_controller.subtopicsMap.containsKey(topicId)) {
+                                    if (isExpanded) {
                                       // Fetch subtopics only if not already fetched
                                       _controller.get_SubTopic(
                                         categoryId: topic['main_category_id'],
                                         sub_categoryId: topic['sub_category_id'],
-                                        topicId: topicId,
-                                      );
+                                        topicId: topic['_id'],
+                                      ).then((_) {
+                                        setState(() {}); // Force rebuild after fetching subtopics
+                                      });
+                                    } else {
+                                      // Clear subtopics when collapsed
+                                      _controller.subtopicsMap.remove(topic['_id']);
+                                      setState(() {}); // Force rebuild after clearing subtopics
                                     }
                                   },
                                   children: [
@@ -211,17 +225,28 @@ class _TopicsScreenState extends State<TopicsScreen> {
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
-                                                trailing: IconButton(
-                                                  icon: const Icon(Icons.delete, color: Colors.red),
-                                                  onPressed: () {
-                                                    onDelete(
-                                                      subTopic,
-                                                      index,
-                                                      "You want to delete this Subtopic?",
-                                                      'subtopic',
-                                                      subTopic['_id'],
-                                                    );
-                                                  },
+                                                trailing: Wrap(
+                                                    children: [
+                                                      IconButton(
+                                                        icon: const Icon(Icons.edit, color: Colors.green),
+                                                        onPressed: () {
+                                                          _showEditDialogForSubTopic(context, subTopic['_id'], subTopic['sub_topic_name']);
+                                                        },
+                                                      ),
+                                                      boxW15(),
+                                                      IconButton(
+                                                        icon: const Icon(Icons.delete, color: Colors.red),
+                                                        onPressed: () {
+                                                          onDelete(
+                                                            subTopic,
+                                                            index,
+                                                            "You want to delete this Subtopic?",
+                                                            'subtopic',
+                                                            subTopic['_id'],
+                                                          );
+                                                        },
+                                                      ),
+                                                    ]
                                                 ),
                                               ),
                                             ),
@@ -413,6 +438,73 @@ class _TopicsScreenState extends State<TopicsScreen> {
               ),
             );
           },
+        );
+      },
+    );
+  }
+
+  void _showEditDialog(BuildContext context, String topicID , String topicName,) {
+    TextEditingController nameController = TextEditingController(text: topicName);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Subcategory'),
+          content: TextField(
+            controller: nameController,
+            decoration: const InputDecoration(labelText: 'Subcategory Name'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                String updatedName = nameController.text.trim();
+                if (updatedName.isNotEmpty) {
+                  Get.find<CategoryController>().updateTopicName(topicID: topicID, topicName: updatedName);
+                  getData();
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void _showEditDialogForSubTopic(BuildContext context, String subtopicID , String subtopicName,) {
+    TextEditingController nameController = TextEditingController(text: subtopicName);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Subcategory'),
+          content: TextField(
+            controller: nameController,
+            decoration: const InputDecoration(labelText: 'Subcategory Name'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                String updatedName = nameController.text.trim();
+                if (updatedName.isNotEmpty) {
+                  Get.find<CategoryController>().updateSubTopicName( subtopicID: subtopicID, subtopicName: updatedName);
+                  getData();
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
         );
       },
     );

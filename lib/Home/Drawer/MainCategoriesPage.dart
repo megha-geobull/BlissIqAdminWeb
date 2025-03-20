@@ -250,7 +250,7 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                 ),
                 onPressed: () async {
                   await _controller.getSubCategory(categoryId: _controller.categories[index]['_id']);
-                  _showItems(context, index, 'subCategories', _controller.sub_categories);
+                  _showItems(context, index, 'subCategories', _controller.sub_categories,_controller.categories[index]['_id']);
                 },
               ),
             ],
@@ -465,7 +465,7 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
     );
   }
 
-  void _showItems(BuildContext context, int mainIndex, String type, RxList subcatList) {
+  void _showItems(BuildContext context, int mainIndex, String type, RxList subcatList,String categoryID) {
     RxList<dynamic> reorderedList = RxList.of(subcatList); // Copy of subcategory list
 
     showDialog(
@@ -502,6 +502,12 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                               );
                             },
                             child: Text('Topics'),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.green),
+                            onPressed: () {
+                              _showEditDialog(context, items, itemIndex, reorderedList,categoryID);
+                            },
                           ),
                           IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),
@@ -541,6 +547,45 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
     );
   }
 
+  void _showEditDialog(BuildContext context, dynamic subcategory, int index, RxList<dynamic> reorderedList,String categoryId) {
+    TextEditingController nameController = TextEditingController(text: subcategory['sub_category']);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Subcategory'),
+          content: TextField(
+            controller: nameController,
+            decoration: const InputDecoration(labelText: 'Subcategory Name'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                String updatedName = nameController.text.trim();
+                setState(() {
+                  if (updatedName.isNotEmpty) {
+                    reorderedList[index]['sub_category'] = updatedName;
+                    Get.find<CategoryController>().updateSubCategory(
+                      subcategoryID: subcategory['_id'],
+                      subcategoryName: updatedName,
+                    );
+                    Get.find<CategoryController>().getSubCategory(categoryId: categoryId );
+                    Navigator.of(context).pop();
+                  }
+                });
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 
