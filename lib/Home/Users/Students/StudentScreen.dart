@@ -6,6 +6,7 @@ import 'package:blissiqadmin/Home/Users/Mentor/MentorListBottomSheet.dart';
 import 'package:blissiqadmin/Home/Users/Models/AllStudentModel.dart';
 import 'package:blissiqadmin/auth/Controller/StudentController.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -229,6 +230,16 @@ class _StudentScreenState extends State<StudentScreen> {
   }
 
   Widget _buildStudentDataTable() {
+    if (filteredStudentData.isEmpty) {
+      return Center(
+        child: Text(
+          searchController.text.isEmpty
+              ? "No students available"
+              : "No students found",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+        ),
+      );
+    }
     return Card(
       elevation: 0.8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -249,7 +260,7 @@ class _StudentScreenState extends State<StudentScreen> {
             DataColumn(label: Text('Purpose')),
             DataColumn(label: Text('Mentor')),
             DataColumn(label: Text('Actions')),
-            DataColumn(label: Text('Edit')),
+            // DataColumn(label: Text('Edit')),
           ],
           source: StudentDataTableSource(
             filteredStudentData,
@@ -281,26 +292,7 @@ class _StudentScreenState extends State<StudentScreen> {
                   fontSize: 20,
                   color: Colors.black),
             ),
-          //  const Spacer(),
-            // Tooltip(
-            //   message: 'Add a New Student',
-            //   child: ElevatedButton.icon(
-            //     onPressed: () {
-            //       // Navigate to add student screen
-            //     },
-            //     icon: const Icon(Icons.add, color: Colors.white, size: 20),
-            //     label: const Text("Add Student",
-            //         style: TextStyle(color: Colors.white, fontSize: 16)),
-            //     style: ElevatedButton.styleFrom(
-            //       backgroundColor: Colors.deepOrange,
-            //       elevation: 3,
-            //       shape: RoundedRectangleBorder(
-            //           borderRadius: BorderRadius.circular(8)),
-            //       padding:
-            //       const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            //     ),
-            //   ),
-            // ),
+
           ],
         ),
       ),
@@ -318,6 +310,7 @@ class StudentDataTableSource extends DataTableSource {
   final _StudentScreenState studentScreenState;
 
   List<DataRow> dataTableRows = [];
+
 
   void buildDataTableRows() {
     dataTableRows = students.map<DataRow>((dataRow) {
@@ -430,35 +423,35 @@ class StudentDataTableSource extends DataTableSource {
               },
             ),
           ),
-          DataCell(isEditing
-              ? ElevatedButton(
-            onPressed: () {
-              // Save changes and exit edit mode
-              studentScreenState.setState(() {
-                studentScreenState.editingStates[dataRow.id!] = false;
-              });
-              // Call update API here if needed
-            },
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-            ),
-            child: const Text('Update'),
-          )
-              : ElevatedButton(
-            onPressed: () {
-              // Save changes and exit edit mode
-              studentScreenState.setState(() {
-                studentScreenState.editingStates[dataRow.id!] = true;
-              });
-              // Call update API here if needed
-            },
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-            ),
-            child: const Text('Edit'),
-          )),
+          // DataCell(isEditing
+          //     ? ElevatedButton(
+          //   onPressed: () {
+          //     // Save changes and exit edit mode
+          //     studentScreenState.setState(() {
+          //       studentScreenState.editingStates[dataRow.id!] = false;
+          //     });
+          //     // Call update API here if needed
+          //   },
+          //   style: ElevatedButton.styleFrom(
+          //     shape: RoundedRectangleBorder(
+          //         borderRadius: BorderRadius.circular(8)),
+          //   ),
+          //   child: const Text('Update'),
+          // )
+          //     : ElevatedButton(
+          //   onPressed: () {
+          //     // Save changes and exit edit mode
+          //     studentScreenState.setState(() {
+          //       studentScreenState.editingStates[dataRow.id!] = true;
+          //     });
+          //     // Call update API here if needed
+          //   },
+          //   style: ElevatedButton.styleFrom(
+          //     shape: RoundedRectangleBorder(
+          //         borderRadius: BorderRadius.circular(8)),
+          //   ),
+          //   child: const Text('Edit'),
+          // )),
         ],
       );
     }).toList();
