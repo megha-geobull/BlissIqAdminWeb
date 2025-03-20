@@ -402,7 +402,7 @@ class GetAllQuestionsApiController extends GetxController{
 
     try {
       final Map<String, dynamic> body = {
-        "question_id": question_ids,
+        "conversation_id": question_ids,
       };
 
       final response = await http.delete(
@@ -883,6 +883,11 @@ class GetAllQuestionsApiController extends GetxController{
           'topic_id': question.topicId,
           'sub_topic_id':question.subTopicId,
           'title': question.title,
+          'bot_conversation': question.botConversation,
+          'user_conversation': question.userConversation,
+          'user_conversation_type': question.userConversationType,
+          'options': question.options,
+          'answer': question.answer,
           'index': question.index,
           'points': question.points,
         }),
