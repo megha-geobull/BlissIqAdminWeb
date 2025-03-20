@@ -243,17 +243,17 @@ class ConversationDataSource extends DataTableSource {
     final isSelected = selectedQuestionIds.contains(question.id);
 
     return DataRow(
-      selected: isSelected,
-      onSelectChanged: (bool? value) {
-        if (value == true) {
-          selectedQuestionIds.add(question.id!);
-        } else {
-          selectedQuestionIds.remove(question.id);
-        }
-        isSelectAll = selectedQuestionIds.length == questions.length;
-        onSelectionChanged(selectedQuestionIds.join('|'));
-        notifyListeners();
-      },
+      // selected: isSelected,
+      // onSelectChanged: (bool? value) {
+      //   if (value == true) {
+      //     selectedQuestionIds.add(question.id!);
+      //   } else {
+      //     selectedQuestionIds.remove(question.id);
+      //   }
+      //   isSelectAll = selectedQuestionIds.length == questions.length;
+      //   onSelectionChanged(selectedQuestionIds.join('|'));
+      //   notifyListeners();
+      // },?
       cells: [
         DataCell(
           Checkbox(
