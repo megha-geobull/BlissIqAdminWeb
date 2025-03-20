@@ -225,7 +225,8 @@ class _HomePageState extends State<HomePage> {
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) =>
-                                                    VocabularyScreen()),
+                                                    // VocabularyScreen()),
+                                                const MainCategoriesPage()),
                                           );
                                           break;
                                         case 1:
@@ -241,7 +242,8 @@ class _HomePageState extends State<HomePage> {
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) =>
-                                                    const ConversationalScreen()),
+                                                    // const ConversationalScreen()),
+                                                    const MainCategoriesPage()),
                                           );
                                           break;
                                         case 3:
@@ -249,7 +251,8 @@ class _HomePageState extends State<HomePage> {
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) =>
-                                                    const GrammarScreen()),
+                                                    const MainCategoriesPage()),
+                                                    // const GrammarScreen()),
                                           );
                                           break;
                                       }
