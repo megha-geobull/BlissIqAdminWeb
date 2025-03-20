@@ -479,11 +479,7 @@ class QuestionPhraseDataSource extends DataTableSource {
     if (selectedQuestionIds.isNotEmpty) {
       try {
         await deleteApiController.deleteStoryPhraseAPI(
-          main_category_id: questions[0].mainCategoryId.toString(),
-          sub_category_id: questions[0].subCategoryId.toString(),
-          topic_id: questions[0].topicId.toString(),
-          sub_topic_id: questions[0].subTopicId.toString(),
-          phrase_ids: selectedQuestionIds.join('|'), // Pipe-separated IDs
+          phrase_ids: selectedQuestionIds.join('|'),
         );
 
         // Optionally, refresh the list of questions after deletion

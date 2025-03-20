@@ -128,7 +128,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   var pathsFile;
   var pathsFileName;
   late String selectedFormat = "Sound";
-  late String selectedPhraseFormat = "phrase_name";
+  late String selectedPhraseFormat = "Phrase name";
 
   String? selectedQuestionType = "Multiple Choice Question";
 
@@ -3467,7 +3467,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                 borderRadius: BorderRadius.circular(10),
                 items: const [
                   DropdownMenuItem(
-                    value: "passage",
+                    value: "Passage",
                     child: Row(
                       children: [
                         Icon(Icons.article, color: Colors.blueAccent),
@@ -3477,7 +3477,17 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                     ),
                   ),
                   DropdownMenuItem(
-                    value: "phrase_name",
+                    value: "Word",
+                    child: Row(
+                      children: [
+                        Icon(Icons.short_text, color: Colors.green),
+                        SizedBox(width: 10),
+                        Text("Word"),
+                      ],
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: "Phrase name",
                     child: Row(
                       children: [
                         Icon(Icons.short_text, color: Colors.green),

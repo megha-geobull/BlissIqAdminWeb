@@ -228,7 +228,7 @@ class _SchoolScreenState extends State<SchoolScreen> {
                   onPressed: () async {
                     print("Selected Ids - ${selectedSchoolIds.join('|')}");
                     Future.delayed(const Duration(seconds: 1), () async {
-                      onDelete("You want to delete this company?",
+                      onDelete("You want to delete this school?",
                           selectedSchoolIds.join('|'));
                     });
                   },
@@ -357,6 +357,235 @@ class _SchoolScreenState extends State<SchoolScreen> {
   }
 }
 
+// class SchoolDataTableSource extends DataTableSource {
+//   SchoolDataTableSource(this.schools, this.context, this.schoolScreenState) {
+//     buildDataTableRows();
+//   }
+//
+//   final List<Data> schools;
+//   final BuildContext context;
+//   final _SchoolScreenState schoolScreenState;
+//
+//   List<DataRow> dataTableRows = [];
+//
+//   void buildDataTableRows() {
+//     dataTableRows = schools.map<DataRow>((dataRow) {
+//       final isEditing = schoolScreenState.editingStates[dataRow.id] ?? false;
+//
+//       return DataRow(
+//         selected: schoolScreenState.selectedSchoolIds.contains(dataRow.id),
+//         onSelectChanged: (isSelected) {
+//           if (isSelected == true) {
+//             schoolScreenState.selectedSchoolIds.add(dataRow.id ?? '');
+//           } else {
+//             schoolScreenState.selectedSchoolIds.remove(dataRow.id ?? '');
+//           }
+//           schoolScreenState.setState(() {});
+//         },
+//         cells: [
+//           DataCell(
+//             isEditing
+//                 ? TextFormField(
+//               initialValue: dataRow.schoolName ?? '',
+//                     onChanged: (value) {
+//                       // dataRow.schoolName = value;
+//                     },
+//                   )
+//                 : Text(dataRow.schoolName ?? 'No Name'),
+//           ),
+//           DataCell(
+//             isEditing
+//                 ? TextFormField(
+//                     initialValue: dataRow.principalEmail ?? '',
+//                     onChanged: (value) {
+//                       // dataRow.principalEmail = value;
+//                     },
+//                   )
+//                 : Text(dataRow.principalEmail ?? '-'),
+//           ),
+//           DataCell(
+//             isEditing
+//                 ? TextFormField(
+//                     initialValue: dataRow.principalPhone.toString() ?? '',
+//                     onChanged: (value) {
+//                       // dataRow.principalPhone = value;
+//                     },
+//                   )
+//                 : Text(dataRow.principalPhone?.toString() ?? '-'),
+//           ),
+//           DataCell(
+//             isEditing
+//                 ? TextFormField(
+//                     initialValue: dataRow.address ?? '',
+//                     onChanged: (value) {
+//                       // dataRow.address = value;
+//                     },
+//                   )
+//                 : Text(dataRow.address ?? '-'),
+//           ),
+//           DataCell(
+//             isEditing
+//                 ? TextFormField(
+//                     initialValue: dataRow.schoolRegNumber ?? '',
+//                     onChanged: (value) {
+//                       // dataRow.schoolRegNumber = value;
+//                     },
+//                   )
+//                 : Text(dataRow.schoolRegNumber ?? '-'),
+//           ),
+//           DataCell(
+//             isEditing
+//                 ? TextFormField(
+//                     initialValue: dataRow.schoolType ?? '',
+//                     onChanged: (value) {
+//                       // dataRow.schoolType = value;
+//                     },
+//                   )
+//                 : Text(dataRow.schoolType ?? '-'),
+//           ),
+//           DataCell(
+//             dataRow.companyId!.isNotEmpty
+//                 ? ElevatedButton(
+//                     onPressed: () {},
+//                     style: ElevatedButton.styleFrom(
+//                       backgroundColor: Colors.deepOrange,
+//                       shape: RoundedRectangleBorder(
+//                           borderRadius: BorderRadius.circular(8)),
+//                       padding: const EdgeInsets.symmetric(
+//                           horizontal: 8, vertical: 11),
+//                     ),
+//                     child: const Text('Sponsored',
+//                         style: TextStyle(fontSize: 12, color: Colors.white)),
+//                   )
+//                 : const SizedBox.shrink(),
+//           ),
+//           DataCell(
+//             ElevatedButton(
+//               onPressed: () =>
+//                   schoolScreenState._toggleStatus(dataRow.id ?? ''),
+//               style: ElevatedButton.styleFrom(
+//                 shape: RoundedRectangleBorder(
+//                     borderRadius: BorderRadius.circular(8)),
+//                 backgroundColor: _getButtonColor(dataRow.approvalStatus),
+//               ),
+//               child: Text(
+//                 dataRow.approvalStatus ?? 'Pending',
+//                 style: const TextStyle(color: Colors.white, fontSize: 12),
+//               ),
+//             ),
+//           ),
+//           DataCell(
+//             ElevatedButton(
+//               onPressed: () {
+//                 Navigator.push(
+//                   context,
+//                   MaterialPageRoute(
+//                     builder: (context) =>
+//                         AssignedMentorPage(schoolID: dataRow.id ?? ''),
+//                   ),
+//                 );
+//               },
+//               style: ElevatedButton.styleFrom(
+//                   backgroundColor: Colors.blue,
+//                 shape: RoundedRectangleBorder(
+//                     borderRadius: BorderRadius.circular(8)),
+//               ),
+//               child: const Text('View',
+//                   style: TextStyle(color: Colors.white, fontSize: 12)),
+//             ),
+//           ),
+//           DataCell(
+//             ElevatedButton(
+//               onPressed: () {
+//                 Navigator.push(
+//                   context,
+//                   MaterialPageRoute(
+//                     builder: (context) =>
+//                         AssignedStudentPage(schoolID: dataRow.id ?? ''),
+//                   ),
+//                 );
+//               },
+//               style:
+//                   ElevatedButton.styleFrom(
+//                       backgroundColor: Colors.blueAccent,
+//                     shape: RoundedRectangleBorder(
+//                         borderRadius: BorderRadius.circular(8)),
+//                   ),
+//               child: const Text('View',
+//                   style: TextStyle(color: Colors.white, fontSize: 12)),
+//             ),
+//           ),
+//           DataCell(
+//             IconButton(
+//               icon: const Icon(Icons.delete, color: Colors.red),
+//               onPressed: () {
+//                 schoolScreenState.onDelete(
+//                   "You want to delete this school?",
+//                   dataRow.id!,
+//                 );
+//               },
+//             ),
+//           ),
+//           DataCell(isEditing
+//               ? ElevatedButton(
+//                   onPressed: () {
+//                     // Save changes and exit edit mode
+//                     schoolScreenState.setState(() {
+//                       schoolScreenState.editingStates[dataRow.id!] = false;
+//                     });
+//                     // Call update API here if needed
+//                   },
+//             style: ElevatedButton.styleFrom(
+//               shape: RoundedRectangleBorder(
+//                   borderRadius: BorderRadius.circular(8)),
+//             ),
+//                   child: const Text('Update'),
+//                 )
+//               : ElevatedButton(
+//                   onPressed: () {
+//                     // Save changes and exit edit mode
+//                     schoolScreenState.setState(() {
+//                       schoolScreenState.editingStates[dataRow.id!] = true;
+//                     });
+//                     // Call update API here if needed
+//                   },
+//             style: ElevatedButton.styleFrom(
+//               shape: RoundedRectangleBorder(
+//                   borderRadius: BorderRadius.circular(8)),
+//             ),
+//                   child: const Text('Edit'),
+//                 )),
+//         ],
+//       );
+//     }).toList();
+//   }
+//
+//   Color _getButtonColor(String? approvalStatus) {
+//     switch (approvalStatus) {
+//       case "Approved":
+//         return AppColor.green;
+//       case "Disapproved":
+//         return AppColor.red;
+//       case "Pending":
+//         return AppColor.amber;
+//       default:
+//         return AppColor.grey;
+//     }
+//   }
+//
+//   @override
+//   DataRow? getRow(int index) => dataTableRows[index];
+//
+//   @override
+//   int get rowCount => dataTableRows.length;
+//
+//   @override
+//   bool get isRowCountApproximate => false;
+//
+//   @override
+//   int get selectedRowCount => schoolScreenState.selectedSchoolIds.length;
+// }
+
 class SchoolDataTableSource extends DataTableSource {
   SchoolDataTableSource(this.schools, this.context, this.schoolScreenState) {
     buildDataTableRows();
@@ -398,10 +627,11 @@ class SchoolDataTableSource extends DataTableSource {
       return DataRow(
         selected: schoolScreenState.selectedSchoolIds.contains(dataRow.id),
         onSelectChanged: (isSelected) {
+          if (dataRow.id == null) return; // Handle null ID
           if (isSelected == true) {
-            schoolScreenState.selectedSchoolIds.add(dataRow.id ?? '');
+            schoolScreenState.selectedSchoolIds.add(dataRow.id!);
           } else {
-            schoolScreenState.selectedSchoolIds.remove(dataRow.id ?? '');
+            schoolScreenState.selectedSchoolIds.remove(dataRow.id!);
           }
           schoolScreenState.setState(() {});
         },
@@ -409,6 +639,10 @@ class SchoolDataTableSource extends DataTableSource {
           DataCell(
             isEditing
                 ? TextFormField(
+              initialValue: dataRow.schoolName ?? '',
+              onChanged: (value) {
+                // dataRow.schoolName = value;
+              },
               controller: _schoolNameControllers[dataRow.id],
             )
                 : Text(dataRow.schoolName ?? 'No Name'),
@@ -416,6 +650,10 @@ class SchoolDataTableSource extends DataTableSource {
           DataCell(
             isEditing
                 ? TextFormField(
+              initialValue: dataRow.principalEmail ?? '',
+              onChanged: (value) {
+                // dataRow.principalEmail = value;
+              },
               controller: _emailControllers[dataRow.id],
             )
                 : Text(dataRow.principalEmail ?? 'No Email'),
@@ -423,6 +661,10 @@ class SchoolDataTableSource extends DataTableSource {
           DataCell(
             isEditing
                 ? TextFormField(
+              initialValue: dataRow.principalPhone?.toString() ?? '',
+              onChanged: (value) {
+                // dataRow.principalPhone = value;
+              },
               controller: _contactNoControllers[dataRow.id],
             )
                 : Text(dataRow.principalPhone?.toString() ?? '-'),
@@ -430,6 +672,10 @@ class SchoolDataTableSource extends DataTableSource {
           DataCell(
             isEditing
                 ? TextFormField(
+              initialValue: dataRow.address ?? '',
+              onChanged: (value) {
+                // dataRow.address = value;
+              },
               controller: _addressControllers[dataRow.id],
             )
                 : Text(dataRow.address ?? 'No Address'),
@@ -437,6 +683,10 @@ class SchoolDataTableSource extends DataTableSource {
           DataCell(
             isEditing
                 ? TextFormField(
+              initialValue: dataRow.schoolRegNumber ?? '',
+              onChanged: (value) {
+                // dataRow.schoolRegNumber = value;
+              },
               controller: _schoolRsgNoControllers[dataRow.id],
             )
                 : Text(dataRow.schoolRegNumber ?? 'No school reg.no'),
@@ -444,24 +694,28 @@ class SchoolDataTableSource extends DataTableSource {
           DataCell(
             isEditing
                 ? TextFormField(
+              initialValue: dataRow.schoolType ?? '',
+              onChanged: (value) {
+                // dataRow.schoolType = value;
+              },
               controller: _schoolTypeControllers[dataRow.id],
             )
                 : Text(dataRow.schoolType ?? 'no type'),
           ),
           DataCell(
-            dataRow.companyId!.isNotEmpty
+            dataRow.companyId?.isNotEmpty == true
                 ? ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepOrange,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 11),
-                    ),
-                    child: const Text('Sponsored',
-                        style: TextStyle(fontSize: 12, color: Colors.white)),
-                  )
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepOrange,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 8, vertical: 11),
+              ),
+              child: const Text('Sponsored',
+                  style: TextStyle(fontSize: 12, color: Colors.white)),
+            )
                 : const SizedBox.shrink(),
           ),
           DataCell(
@@ -491,7 +745,7 @@ class SchoolDataTableSource extends DataTableSource {
                 );
               },
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                backgroundColor: Colors.blue,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
               ),
@@ -511,11 +765,11 @@ class SchoolDataTableSource extends DataTableSource {
                 );
               },
               style:
-                  ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                  ),
+              ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+              ),
               child: const Text('View',
                   style: TextStyle(color: Colors.white, fontSize: 12)),
             ),
@@ -533,30 +787,30 @@ class SchoolDataTableSource extends DataTableSource {
           ),
           DataCell(isEditing
               ? ElevatedButton(
-                  onPressed: () {
-                    // Save changes and exit edit mode
-                    _updateCompany(dataRow);
-                  },
+            onPressed: () {
+              schoolScreenState.setState(() {
+                schoolScreenState.editingStates[dataRow.id!] = false;
+              });
+            },
+
             style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8)),
             ),
-                  child: const Text('Update'),
-                )
+            child: const Text('Update'),
+          )
               : ElevatedButton(
-                  onPressed: () {
-                    // Save changes and exit edit mode
-                    schoolScreenState.setState(() {
-                      schoolScreenState.editingStates[dataRow.id ?? ''] = true;
-                    });
-                    // Call update API here if needed
-                  },
+            onPressed: () {
+              schoolScreenState.setState(() {
+                schoolScreenState.editingStates[dataRow.id!] = true;
+              });
+            },
             style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8)),
             ),
-                  child: const Text('Edit'),
-                )),
+            child: const Text('Edit'),
+          )),
         ],
       );
     }).toList();
@@ -605,13 +859,13 @@ class SchoolDataTableSource extends DataTableSource {
   Color _getButtonColor(String? approvalStatus) {
     switch (approvalStatus) {
       case "Approved":
-        return AppColor.green;
+        return Colors.green;
       case "Disapproved":
-        return AppColor.red;
+        return Colors.red;
       case "Pending":
-        return AppColor.amber;
+        return Colors.amber;
       default:
-        return AppColor.grey;
+        return Colors.grey;
     }
   }
 
@@ -627,3 +881,6 @@ class SchoolDataTableSource extends DataTableSource {
   @override
   int get selectedRowCount => schoolScreenState.selectedSchoolIds.length;
 }
+
+
+
