@@ -85,56 +85,83 @@ class SchoolController extends GetxController {
 
   schoolRegistrationApi({
     required String schoolName,
-    required String schoolRegNumber,
-    required String principalName,
-    required String principalEmail,
-    required String principalPhone,
+    String? schoolRegNumber,
+    String? principalName,
+    String? principalEmail,
+    String? principalPhone,
     required String address,
-    required String schoolType,
-    required String affiliatedCompany,
-    required String password,
-    required String lat,
-    required String long,
-    required String confirmPassword,
+    String? schoolType,
+    String? affiliatedCompany,
+    String? password,
+    String? lat,
+    String? long,
+    String? confirmPassword,
     required BuildContext context,
   }) async {
     isLoading.value = true;
 
     try {
+      // Dynamically build the request body
+      final Map<String, dynamic> requestBody = {
+        'schoolName': schoolName,
+        'address': address,
+      };
+
+      // Add fields only if they have a value
+      if (schoolRegNumber != null && schoolRegNumber.isNotEmpty) {
+        requestBody['schoolRegNumber'] = schoolRegNumber;
+      }
+      if (principalName != null && principalName.isNotEmpty) {
+        requestBody['principalName'] = principalName;
+      }
+      if (principalEmail != null && principalEmail.isNotEmpty) {
+        requestBody['principalEmail'] = principalEmail;
+      }
+      if (principalPhone != null && principalPhone.isNotEmpty) {
+        requestBody['principalPhone'] = principalPhone;
+      }
+      if (schoolType != null && schoolType.isNotEmpty) {
+        requestBody['schoolType'] = schoolType;
+      }
+      if (affiliatedCompany != null && affiliatedCompany.isNotEmpty) {
+        requestBody['affiliatedCompany'] = affiliatedCompany;
+      }
+      if (lat != null && lat.isNotEmpty) {
+        requestBody['latitude'] = lat;
+      }
+      if (long != null && long.isNotEmpty) {
+        requestBody['longitude'] = long;
+      }
+      if (password != null && password.isNotEmpty) {
+        requestBody['password'] = password;
+      }
+      if (confirmPassword != null && confirmPassword.isNotEmpty) {
+        requestBody['confirm_password'] = confirmPassword;
+      }
+
+      // Optional fields (can be sent as empty strings or omitted)
+      requestBody['status'] = "";
+      requestBody['token'] = "";
+      requestBody['company_id'] = "";
+      requestBody['approval_status'] = "";
+
       final response = await http.post(
         Uri.parse(ApiString.school_registration),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer YOUR_TOKEN",
         },
-        body: jsonEncode({
-          'schoolName': schoolName,
-          'schoolRegNumber': schoolRegNumber,
-          'principalName': principalName,
-          'principalEmail': principalEmail,
-          'principalPhone': principalPhone,
-          'address': address,
-          'schoolType': schoolType,
-          'affiliatedCompany': affiliatedCompany,
-          'status': "",// optional
-          'token': "",// optional
-          'company_id': "",// optional
-          'approval_status': "",// optional
-          'latitude': lat,
-          'longitude':long,
-          'password': password,
-          'confirm_password': confirmPassword,
-        }),
+        body: jsonEncode(requestBody),
       );
 
       final responseData = jsonDecode(response.body);
       print(responseData);
+
       if (response.statusCode == 201 && responseData['status'] == 1) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(responseData['message'])),
         );
         getAllSchools();
-        // Get.back();
         clearControllers();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -1369,10 +1369,6 @@ class GetAllQuestionsApiController extends GetxController{
 
   //delete story phrases
   deleteStoryPhraseAPI({
-    required String main_category_id,
-    required String sub_category_id,
-    required String topic_id,
-    required String sub_topic_id,
     required String phrase_ids,
 
   }) async {
@@ -1382,11 +1378,7 @@ class GetAllQuestionsApiController extends GetxController{
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
-        'main_category_id': main_category_id,
-        'sub_category_id': sub_category_id,
-        'topic_id': topic_id,
-        'sub_topic_id': sub_topic_id,
-        'phrase_ids': phrase_ids,
+        'phrase_id': phrase_ids,
       }),
     );
 
