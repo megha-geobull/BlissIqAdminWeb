@@ -163,6 +163,115 @@ class CategoryController extends GetxController {
     }
   }
 
+  updateSubCategory({
+    required String subcategoryID,
+    required String subcategoryName,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final Map<String, dynamic> body = {
+        "sub_category_id": subcategoryID,
+        "sub_category": subcategoryName,
+      };
+
+      final response = await http.post(
+        Uri.parse(ApiString.update_sub_category),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          getCategory();
+          showSnackbar(message: "Subcategory updated successfully");
+        } else {
+          showSnackbar(message: "Failed to update Subcategory");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while updating $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  updateTopicName({
+    required String topicID,
+    required String topicName,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final Map<String, dynamic> body = {
+        "topic_id": topicID,
+        "topic_name": topicName,
+      };
+
+      final response = await http.post(
+        Uri.parse(ApiString.update_topic),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          showSnackbar(message: "topic updated successfully");
+        } else {
+          showSnackbar(message: "Failed to update topic");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while updating $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  updateSubTopicName({
+    required String subtopicID,
+    required String subtopicName,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final Map<String, dynamic> body = {
+        "subtopic_id": subtopicID,
+        "sub_topic_name": subtopicName,
+      };
+
+      final response = await http.post(
+        Uri.parse(ApiString.update_subtopic),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (responseData['status'] == 1) {
+          showSnackbar(message: "sub topic updated successfully");
+        } else {
+          showSnackbar(message: "Failed to update sub topic");
+        }
+      }
+    } catch (e) {
+      showSnackbar(message: "Error while updating $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
  /// with imae add the subcategory add
  //  addSubCategory({
  //    required String subcategory,
@@ -281,6 +390,7 @@ class CategoryController extends GetxController {
         var responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
           sub_categories.value = responseData["data"];
+          sub_categories.refresh();
         } else {
           showSnackbar(message: "Failed to fetch category");
         }
