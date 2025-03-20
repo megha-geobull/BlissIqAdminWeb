@@ -193,6 +193,10 @@ class ApiString {
   static const String get_raised_complaint = "${student_base_url}get_raised_complaint";
   static const String update_complaint_status = "${student_base_url}update_complaint_status";
 
+  static const String update_sub_category = "${baseUrl}update_sub_category";
+  static const String update_topic = "${baseUrl}update_topic";
+  static const String update_subtopic = "${baseUrl}update_subtopic";
+
 
 
 
