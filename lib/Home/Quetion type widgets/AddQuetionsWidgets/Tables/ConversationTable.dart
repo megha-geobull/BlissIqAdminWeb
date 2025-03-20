@@ -352,7 +352,7 @@ class ConversationDataSource extends DataTableSource {
     );
 
     try {
-      await updateQueApiController.updateConversationalApi(updatedQuestion, null)
+      await updateQueApiController.updateConversationalApi(updatedQuestion,null)
           .whenComplete(() => updateQueApiController.getConversation(
         main_category_id: updatedQuestion.mainCategoryId.toString(),
         sub_category_id: updatedQuestion.subCategoryId.toString(),
