@@ -1,10 +1,8 @@
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Quetion%20type%20widgets/controller/GetAllQuestionsApiController.dart';
-import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/GetCompleteWordModel.dart';
-import 'package:blissiqadmin/Home/Quetion%20type%20widgets/model/UserConversationModel.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../model/UserConversationalModel.dart';
 
 
 class ConversationTable extends StatefulWidget {
@@ -413,7 +411,7 @@ class ConversationDataSource extends DataTableSource {
     notifyListeners();
   }
 
-   _showConfirmationDialog(BuildContext context) async {
+  _showConfirmationDialog(BuildContext context) async {
     return await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -439,4 +437,3 @@ class ConversationDataSource extends DataTableSource {
     ) ?? false;
   }
 }
-
