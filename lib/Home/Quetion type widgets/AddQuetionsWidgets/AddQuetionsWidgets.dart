@@ -58,6 +58,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
   final List<TextEditingController> paragraphOptionControllers =
       List.generate(6, (_) => TextEditingController());
   TextEditingController correctAnswerController = TextEditingController();
+  TextEditingController paragraphContentController = TextEditingController();
   TextEditingController pointsController = TextEditingController();
   TextEditingController storyContentController = TextEditingController();
   TextEditingController storyTitleController = TextEditingController();
@@ -861,6 +862,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
                                             setState(() {
                                               selectedQuestionType = value;
                                             });
+                                            _getAddedQuestion();
                                           },
                                         ),
                                       ),
@@ -2799,7 +2801,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
         questionType: selectedQuestionType.toString(),
         title: titleController.text,
         question: questionController.text,
-        paragraphContent: questionController.text,
+        paragraphContent: paragraphContentController.text,
         answer: correctAnswerController.text,
         optionA: paragraphOptionControllers[0].text,
         optionB: paragraphOptionControllers[1].text,
@@ -2888,6 +2890,7 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
 
       pathsFile = null;
     });
+    _getAddedQuestion();
   }
 
   /// multiple choice question content
@@ -4182,12 +4185,23 @@ class _AddQuestionsWidgetsState extends State<AddQuestionsWidgets> {
               ),
               boxH10(),
               const Text(
-                'Paragraph',
+                'Question',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               boxH08(),
               CustomTextField(
                 controller: questionController,
+                maxLines: 2,
+                labelText: "Enter question",
+              ),
+              boxH10(),
+              const Text(
+                'Paragraph',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              boxH08(),
+              CustomTextField(
+                controller: paragraphContentController,
                 maxLines: 5,
                 labelText: "Enter your paragraph",
               ),
