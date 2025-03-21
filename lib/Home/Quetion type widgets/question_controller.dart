@@ -197,6 +197,7 @@ class QuestionController extends GetxController {
     required String topic_id,
     String? sub_topic_id,
     required String points,
+    // required String questionType,
     required String letters,
     required List<td.Uint8List> images,
     required String index,
@@ -215,7 +216,7 @@ class QuestionController extends GetxController {
       request.fields['topic_id'] = topic_id;
       request.fields['sub_topic_id'] = sub_topic_id ?? '';
       request.fields['title'] = title ?? '';
-      request.fields['question_type'] = 'Image ';
+      request.fields['question_type'] = 'Card Flip';
       request.fields['index'] = index;
       request.fields['points'] = points;
       request.fields['letter'] = letters;
