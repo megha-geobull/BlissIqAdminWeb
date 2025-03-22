@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:blissiqadmin/Global/constants/ApiString.dart';
 import 'package:blissiqadmin/Global/constants/common_snackbar.dart';
 import 'package:blissiqadmin/Home/Users/Models/AllStudentModel.dart';
+import 'package:blissiqadmin/auth/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -73,6 +74,7 @@ class StudentController extends GetxController {
 
         if (responseData['status'] == 1) {
           // Parse each JSON object into a Data model
+          await Functions.deleteUsers( userIds:user_id ); // also delete student from firebase
           showSnackbar(message: "Deleted successfully");
         } else {
           showSnackbar(message: "Failed to delete learner");
