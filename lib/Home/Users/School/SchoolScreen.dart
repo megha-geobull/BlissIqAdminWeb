@@ -64,7 +64,7 @@ class _SchoolScreenState extends State<SchoolScreen> {
 
       schoolController.approveSchool(
         school_id: schoolId,
-        approval_status: (school.approvalStatus == "Disapproved" ||
+        approval_status: (school.approvalStatus == "Disapproved" || school.approvalStatus == "" ||
             school.approvalStatus == "Pending")
             ? "Approved"
             : "Disapproved",
@@ -465,7 +465,7 @@ class SchoolDataTableSource extends DataTableSource {
                 backgroundColor: _getButtonColor(dataRow.approvalStatus),
               ),
               child: Text(
-                dataRow.approvalStatus ?? 'Pending',
+                dataRow.approvalStatus == '' ? 'Pending' : dataRow.approvalStatus ?? '' ,
                 style: const TextStyle(color: Colors.white, fontSize: 12),
               ),
             ),
@@ -594,7 +594,7 @@ class SchoolDataTableSource extends DataTableSource {
         return Colors.green;
       case "Disapproved":
         return Colors.red;
-      case "Pending":
+      case "Pending" || '':
         return Colors.amber;
       default:
         return Colors.grey;

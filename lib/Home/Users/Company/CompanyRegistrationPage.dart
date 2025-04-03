@@ -293,14 +293,26 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
                         labelText: 'Gst Number',
                         keyboardType: TextInputType.text,
                         prefixIcon: Icon(Icons.school_outlined),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please Enter Gst Number';
+                          }
+                          return null;
+                        },
                       ),
                       boxH20(),
 
                       // Bio/Introduction TextField
                       CustomTextField(
                         controller: companyController.cinNumberController,
-                        labelText: 'Cin Numer',
+                        labelText: 'Cin Number',
                         prefixIcon: Icon(Icons.person_outline),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please Enter Cin number';
+                          }
+                          return null;
+                        },
                       ),
                       boxH20(),
                       CustomTextField(
@@ -363,6 +375,17 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
                               : CustomButton(
                             label: "Register",
                             onPressed: () {
+
+                              if (pathsFile == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Please upload a profile image'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                                return;
+                              }
+
                               if (companyController.formKey.currentState!.validate()) {
                                 companyController.companyRegistration(
                                   companyName: companyController.companyNameController.text,
@@ -378,21 +401,15 @@ class _CompanyRegistrationPageState extends State<CompanyRegistrationPage> {
                                   cinNumber: companyController.cinNumberController.text,
                                   gstNumber: companyController.gstNumberController.text,
                                 ).then((response) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Registration successful!')),
-                                  );
-                                  Navigator.pop(context, true);
+                                 // Navigator.pop(context, true);
                                 }).
                                 catchError((error) {
-
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text('Error occurred: $error')),
                                   );
                                 });
                               }
                             },
-
-
                           ),
                         );
                       }),

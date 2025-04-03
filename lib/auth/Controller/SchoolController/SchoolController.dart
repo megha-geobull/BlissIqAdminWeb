@@ -36,7 +36,26 @@ class SchoolController extends GetxController {
   final statusController = TextEditingController();
   final  searchController = TextEditingController();
 
-
+void clearField(){
+  nameController.clear();
+  emailController.clear();
+  passwordController.clear();
+  confirmPasswordController.clear();
+  phNoController.clear();
+  addressController.clear();
+  schoolNameController.clear();
+  schoolRegNumberController.clear();
+  principalNameController.clear();
+  principalEmailController.clear();
+  principalPhoneController.clear();
+  schoolTypeController.clear();
+  affiliatedCompanyController.clear();
+  approvalStatusController.clear();
+  statusController.clear();
+  searchController.clear();
+  selectedLatitude.value = '';
+  selectedLongitude.value = '';
+}
   var selectedLatitude = ''.obs;
   var selectedLongitude = ''.obs;
 

@@ -1249,46 +1249,44 @@ class GetAllQuestionsApiController extends GetxController{
     }
   }
 
-  deleteLearningSlideAPI({required String learning_ids}) async {
+  deleteLearningSlideAPI({required String learning_ids})async {
     isLoading.value = true;
 
     try {
-      print(learning_ids);
-
       final Map<String, dynamic> body = {
         "learning_id": learning_ids,
       };
 
-      print(body.toString());
+      // Add timestamp to prevent caching issues
+      final url = Uri.parse(ApiString.delete_learning_slide)
+          .replace(queryParameters: {'_': DateTime.now().millisecondsSinceEpoch.toString()});
+
       final response = await http.delete(
-        Uri.parse(ApiString.delete_learning_slide),
+        url,
         headers: {
           "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"  // Corrected header
+          // Remove the client-side CORS header - it doesn't help
         },
-        body:jsonEncode(body),
+        body: jsonEncode(body),
       );
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-      print('Response url: ${ApiString.delete_learning_slide}');
-
       if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        final responseData = jsonDecode(response.body);
         if (responseData['status'] == 1) {
           showSnackbar(message: "Learning slide deleted successfully");
         } else {
-          showSnackbar(message: "Failed to delete learning slide");
+          showSnackbar(message: "Failed to delete learning slide: ${responseData['message'] ?? 'Unknown error'}");
         }
+      } else {
+        showSnackbar(message: "Server error: ${response.statusCode}");
       }
     } catch (e) {
-      showSnackbar(message: "Error while deleting: $e");
-      print(e);
+      showSnackbar(message: "Network error: Please check your connection");
+      print("Error: $e");
     } finally {
       isLoading.value = false;
     }
   }
-
 
 
   delete_match_pair_question({

@@ -230,7 +230,7 @@ class CompanyController extends GetxController {
           SnackBar(content: Text(responseData['message'])),
         );
         getAllCompany();
-        //Get.back();
+        Navigator.pop(context, true);
         clearControllers();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
