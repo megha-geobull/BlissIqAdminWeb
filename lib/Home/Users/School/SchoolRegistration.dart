@@ -1,7 +1,4 @@
 import 'dart:async';
-
-import 'package:blissiqadmin/Global/Routes/AppRoutes.dart';
-import 'package:blissiqadmin/Global/Widgets/Button/CustomButton.dart';
 import 'package:blissiqadmin/Global/constants/CommonSizedBox.dart';
 import 'package:blissiqadmin/Global/constants/CustomTextField.dart';
 import 'package:blissiqadmin/Home/Drawer/MyDrawer.dart';
@@ -14,6 +11,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_webservice/places.dart';
+import 'dart:html' as html; // For web geolocation
+import 'package:flutter/foundation.dart'; // For kIsWeb
 
 class SchoolRegistration extends StatefulWidget {
   @override
@@ -38,7 +37,11 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
       _getCurrentLocation();
     }
   }
-
+@override
+  void dispose() {
+    schoolController.clearField();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,7 +120,7 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
                         controller: schoolController.schoolNameController,
                         labelText: 'School Name',
                         onChanged: (value) {
-                          openMapBottomSheet(
+                          openMapDialog(
                               context,
                               schoolController.schoolNameController,
                               schoolController.addressController);
@@ -392,12 +395,12 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
     );
   }
 
-  void openMapBottomSheet(
+  void openMapDialog(
       BuildContext context,
       TextEditingController schoolNameController,
       TextEditingController addressController) {
     final places =
-        GoogleMapsPlaces(apiKey: 'AIzaSyCY4i1-nQFNVTSYetMw7aofzBRwGvCH_Ms');
+    GoogleMapsPlaces(apiKey: 'AIzaSyCY4i1-nQFNVTSYetMw7aofzBRwGvCH_Ms');
     LatLng? selectedLocation;
     String selectedAddress = '';
     String selectedPlaceName = '';
@@ -405,178 +408,191 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
     // Controller to manipulate the Google Map
     Completer<GoogleMapController> _mapController = Completer();
 
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: schoolController.searchController,
-                    decoration: InputDecoration(
-                      labelText: 'Search for a school',
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.search),
-                        onPressed: () async {
-                          if (schoolController.searchController.text.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text("Please enter a search term.")),
-                            );
-                            return;
-                          }
-                          if (selectedLocation != null) {
-                            schoolNameController.text = selectedPlaceName;
-                            addressController.text = selectedAddress;
+            return AlertDialog(
+              title: const Text("Search for a school"),
+              content: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.7,
+                height: MediaQuery.of(context).size.height * 0.7,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: schoolController.searchController,
+                      decoration: InputDecoration(
+                        labelText: 'Enter school name',
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.search),
+                          onPressed: () async {
+                            if (schoolController.searchController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text("Please enter a search term.")),
+                              );
+                              return;
+                            }
+                            if (selectedLocation != null) {
+                              schoolNameController.text = selectedPlaceName;
+                              addressController.text = selectedAddress;
 
-                            schoolController.updateLocation(
-                              selectedLocation!.latitude,
-                              selectedLocation!.longitude,
-                            );
-                            Navigator.pop(context);
-                            // You can store the selectedLocation, selectedPlaceName, and selectedAddress here
-                            print("Latitude: ${selectedLocation!.latitude}");
-                            print("Longitude: ${selectedLocation!.longitude}");
-                            print("Place Name: $selectedPlaceName");
-                            print("Address: $selectedAddress");
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text(
-                                      "Please select a location on the map.")),
-                            );
-                          }
+                              schoolController.updateLocation(
+                                selectedLocation!.latitude,
+                                selectedLocation!.longitude,
+                              );
+                              Navigator.pop(context);
+                              print("Latitude: ${selectedLocation!.latitude}");
+                              print("Longitude: ${selectedLocation!.longitude}");
+                              print("Place Name: $selectedPlaceName");
+                              print("Address: $selectedAddress");
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text(
+                                        "Please select a location on the map.")),
+                              );
+                            }
 
-                          // Perform search using Google Places API
-                          try {
-                            PlacesSearchResponse response =
-                                await places.searchByText(
-                                    schoolController.searchController.text);
-                            if (response.results.isNotEmpty) {
-                              var place = response.results.first;
-                              setState(() {
-                                selectedLocation = LatLng(
-                                    place.geometry!.location.lat,
-                                    place.geometry!.location.lng);
-                                schoolController.updateLocation(
-                                  selectedLocation!.latitude,
-                                  selectedLocation!.longitude,
+                            try {
+                              PlacesSearchResponse response =
+                              await places.searchByText(
+                                  schoolController.searchController.text);
+                              if (response.results.isNotEmpty) {
+                                var place = response.results.first;
+                                setState(() {
+                                  selectedLocation = LatLng(
+                                      place.geometry!.location.lat,
+                                      place.geometry!.location.lng);
+                                  schoolController.updateLocation(
+                                    selectedLocation!.latitude,
+                                    selectedLocation!.longitude,
+                                  );
+                                  selectedPlaceName = place.name;
+                                  selectedAddress = place.formattedAddress ?? '';
+                                });
+
+                                final GoogleMapController controller =
+                                await _mapController.future;
+                                controller.animateCamera(
+                                  CameraUpdate.newLatLng(selectedLocation!),
                                 );
-                                selectedPlaceName = place.name;
-                                selectedAddress = place.formattedAddress ?? '';
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text("No results found.")),
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content:
+                                    Text("Error searching for location: $e")),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Expanded(
+                      child: GoogleMap(
+                        initialCameraPosition: CameraPosition(
+                          target: selectedLocation ??
+                              LatLng(
+                                double.tryParse(latitudel1) ?? 18.552,
+                                double.tryParse(longitudel2) ?? 73.850,
+                              ),
+                          zoom: 14.0,
+                        ),
+                        markers: selectedLocation != null
+                            ? {
+                          Marker(
+                            markerId: const MarkerId('selectedLocation'),
+                            position: selectedLocation!,
+                          ),
+                        }
+                            : {},
+                        onTap: (LatLng location) async {
+                          try {
+                            List<Placemark> placemarks =
+                            await placemarkFromCoordinates(
+                                location.latitude, location.longitude);
+                            if (placemarks.isNotEmpty) {
+                              Placemark place = placemarks.first;
+                              setState(() {
+                                selectedLocation = location;
+                                selectedPlaceName = place.name ?? 'Unknown Place';
+                                selectedAddress =
+                                "${place.street ?? ''}, ${place.locality ?? ''}, ${place.country ?? ''}";
+                                print(selectedAddress);
                               });
 
-
-                              // Move the camera to the searched location
                               final GoogleMapController controller =
-                                  await _mapController.future;
+                              await _mapController.future;
                               controller.animateCamera(
                                 CameraUpdate.newLatLng(selectedLocation!),
                               );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text("No results found.")),
+                                SnackBar(
+                                    content: Text(
+                                        "Could not fetch address for the selected location.")),
                               );
                             }
                           } catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                  content:
-                                      Text("Error searching for location: $e")),
+                                  content: Text("Error fetching address: $e")),
                             );
                           }
                         },
+                        onMapCreated: (GoogleMapController controller) {
+                          _mapController.complete(controller);
+                        },
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: GoogleMap(
-                      initialCameraPosition: CameraPosition(
-                        target: selectedLocation ??
-                            LatLng(
-                              double.tryParse(latitudel1) ?? 18.552,
-                              double.tryParse(longitudel2) ?? 73.850,
-                            ),
-                        zoom: 14.0,
-                      ),
-                      markers: selectedLocation != null
-                          ? {
-                              Marker(
-                                markerId: const MarkerId('selectedLocation'),
-                                position: selectedLocation!,
-                              ),
-                            }
-                          : {},
-                      onTap: (LatLng location) async {
-                        try {
-                          List<Placemark> placemarks =
-                              await placemarkFromCoordinates(
-                                  location.latitude, location.longitude);
-                          if (placemarks.isNotEmpty) {
-                            Placemark place = placemarks.first;
-                            setState(() {
-                              selectedLocation = location;
-                              selectedPlaceName = place.name ?? 'Unknown Place';
-                              selectedAddress =
-                                  "${place.street ?? ''}, ${place.locality ?? ''}, ${place.country ?? ''}";
-                            });
-
-                            // Move the camera to the tapped location
-                            final GoogleMapController controller =
-                                await _mapController.future;
-                            controller.animateCamera(
-                              CameraUpdate.newLatLng(selectedLocation!),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text(
-                                      "Could not fetch address for the selected location.")),
-                            );
-                          }
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text("Error fetching address: $e")),
-                          );
-                        }
-                      },
-                      onMapCreated: (GoogleMapController controller) {
-                        _mapController.complete(controller);
-                      },
-                    ),
-                  ),
-                  if (selectedPlaceName.isNotEmpty)
-                    Text('Selected Place: $selectedPlaceName'),
-                  if (selectedAddress.isNotEmpty)
-                    Text('Address: $selectedAddress'),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (selectedLocation != null) {
-                        schoolNameController.text = selectedPlaceName;
-                        addressController.text = selectedAddress;
-                        Navigator.pop(context);
-                        // You can store the selectedLocation, selectedPlaceName, and selectedAddress here
-                        print("Latitude: ${selectedLocation!.latitude}");
-                        print("Longitude: ${selectedLocation!.longitude}");
-                        print("Place Name: $selectedPlaceName");
-                        print("Address: $selectedAddress");
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content:
-                                  Text("Please select a location on the map.")),
-                        );
-                      }
-                    },
-                    child: const Text('Select Location'),
-                  ),
-                ],
+                    SizedBox(height: 16),
+                    if (selectedPlaceName.isNotEmpty)
+                      Text('Selected Place: $selectedPlaceName'),
+                    if (selectedAddress.isNotEmpty)
+                      Text('Address: $selectedAddress'),
+                  ],
+                ),
               ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (selectedLocation != null) {
+                      schoolNameController.text = selectedPlaceName;
+                      addressController.text = selectedAddress;
+                      schoolController.updateLocation(
+                        selectedLocation!.latitude,
+                        selectedLocation!.longitude,
+                      );
+                      Navigator.pop(context);
+                      print("Latitude: ${selectedLocation!.latitude}");
+                      print("Longitude: ${selectedLocation!.longitude}");
+                      print("Place Name: $selectedPlaceName");
+                      print("Address: $selectedAddress");
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content:
+                            Text("Please select a location on the map.")),
+                      );
+                    }
+                  },
+                  child: Text('Select'),
+                ),
+              ],
             );
           },
         );
@@ -585,55 +601,87 @@ class _SchoolRegistrationState extends State<SchoolRegistration> {
   }
 
   /// Get Current Location API
-  _getCurrentLocation() async {
+  Future<void> _getCurrentLocation() async {
     try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        return Future.error('Location services are disabled.');
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        return Future.error(
-            'Location permissions are permanently denied, cannot request permissions.');
-      }
-
-      // Fetch current location
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-
-      if (position == null) {
-        return Future.error('Failed to get current location.');
-      }
-
-      double latitude = position.latitude;
-      double longitude = position.longitude;
-
-      // Handle possible errors with placemark retrieval
-      List<Placemark> placemarks =
-          await placemarkFromCoordinates(latitude, longitude)
-              .catchError((error) {
-        print("Error fetching placemark: $error");
-        return [];
-      });
-
-      if (placemarks.isNotEmpty) {
-        latitudel1 = latitude.toString();
-        longitudel2 = longitude.toString();
-        print("Latitude: $latitudel1, Longitude: $longitudel2");
-
-        if (mounted) {
-          setState(() {});
-        }
+      if (kIsWeb) {
+        // Web-specific location handling
+        print("Running on web - skipping native location services check");
+        // You might want to use browser geolocation API here
+        await _getWebLocation();
       } else {
-        print("No placemarks found.");
+        // Mobile-specific location handling
+        bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+        if (!serviceEnabled) {
+          return Future.error('Location services are disabled.');
+        }
+
+        LocationPermission permission = await Geolocator.checkPermission();
+        if (permission == LocationPermission.denied) {
+          permission = await Geolocator.requestPermission();
+        }
+
+        if (permission == LocationPermission.deniedForever) {
+          return Future.error(
+              'Location permissions are permanently denied, cannot request permissions.');
+        }
+
+        Position position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high);
+
+        if (position == null) {
+          return Future.error('Failed to get current location.');
+        }
+
+        double latitude = position.latitude;
+        double longitude = position.longitude;
+
+        List<Placemark> placemarks =
+        await placemarkFromCoordinates(latitude, longitude)
+            .catchError((error) {
+          print("Error fetching placemark: $error");
+          return [];
+        });
+
+        if (placemarks.isNotEmpty) {
+          latitudel1 = latitude.toString();
+          longitudel2 = longitude.toString();
+          print("Latitude: $latitudel1, Longitude: $longitudel2");
+
+          if (mounted) {
+            setState(() {});
+          }
+        } else {
+          print("No placemarks found.");
+        }
       }
     } catch (e) {
       print("Error: $e");
+    }
+  }
+
+  Future<void> _getWebLocation() async {
+    // Use browser's geolocation API
+    final geolocation = html.window.navigator.geolocation;
+    if (geolocation == null) {
+      print("Geolocation not supported in this browser");
+      return;
+    }
+
+    try {
+      final position = await geolocation.getCurrentPosition();
+      final latitude = position.coords?.latitude;
+      final longitude = position.coords?.longitude;
+
+      latitudel1 = latitude.toString();
+      longitudel2 = longitude.toString();
+
+      print("Web Location - Latitude: $latitudel1, Longitude: $longitudel2");
+
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      print("Error getting web location: $e");
     }
   }
 }

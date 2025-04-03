@@ -160,15 +160,9 @@ class _LearningSlideTableState extends State<LearningSlideTable> {
                         bool cofirmed =
                             await _dataSource._showConfirmationDialog(context);
                         if (cofirmed) {
-                          _getdeleteApiController.deleteLearningSlideAPI(
-                              learning_ids: _selectedQuestionIds);
+                          _dataSource._deleteSelectedQuestions(_selectedQuestionIds);
+                          _selectedQuestionIds = '';
                         }
-                        _getdeleteApiController.getAllLearningSlideApi(
-                          main_category_id: widget.main_category_id,
-                          sub_category_id: widget.sub_category_id,
-                          topic_id: widget.topic_id,
-                          sub_topic_id: widget.sub_topic_id,
-                        );
                       });
                     },
                   ),
@@ -477,21 +471,19 @@ class QuestionDataSource extends DataTableSource {
 
     if (selectedQuestionIds.isNotEmpty) {
       try {
-        await deleteApiController.deleteLearningSlideAPI(
-          learning_ids: selectedQuestionIds,
-        );
-
-        // Refresh the list of questions
-        await deleteApiController.getAllLearningSlideApi(
-          main_category_id: questions[0].mainCategoryId.toString(),
-          sub_category_id: questions[0].subCategoryId.toString(),
-          topic_id: questions[0].topicId.toString(),
-          sub_topic_id: questions[0].subTopicId.toString(),
-        );
-
+        await deleteApiController
+            .deleteLearningSlideAPI(
+              learning_ids: selectedQuestionIds,
+            );
+        await  deleteApiController.getAllLearningSlideApi(
+                  main_category_id: questions[0].mainCategoryId.toString(),
+                  sub_category_id: questions[0].subCategoryId.toString(),
+                  topic_id: questions[0].topicId.toString(),
+                  sub_topic_id: questions[0].subTopicId.toString(),
+                );
         questions.removeWhere(
             (question) => selectedQuestionIds.contains(question.id));
-        //selectedQuestionIds.clear(); // Clear selected IDs
+
         notifyListeners(); // Update UI
       } catch (e) {
         print('Error deleting questions: $e');
